@@ -5,9 +5,10 @@ const userSubscriptionSchema = new mongoose.Schema({
   child_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Child', required: true },
   plan_id: { type: mongoose.Schema.Types.ObjectId, ref: 'SubscriptionPlan', required: true },
   remaining_visits: { type: Number, required: true },
-  expires_at: { type: Date, required: true },
+  expires_at: { type: Date }, // null until first check-in
+  first_checkin_at: { type: Date }, // when subscription was activated
   payment_id: { type: String },
-  status: { type: String, enum: ['active', 'expired', 'consumed'], default: 'active' },
+  status: { type: String, enum: ['pending', 'active', 'expired', 'consumed'], default: 'pending' },
   created_at: { type: Date, default: Date.now }
 });
 
