@@ -39,8 +39,8 @@ const generateSlotsForDate = async (date, slotType) => {
   return slots;
 };
 
-// Get available slots for a date
-router.get('/available', authMiddleware, async (req, res) => {
+// Get available slots for a date (public - no auth required for viewing)
+router.get('/available', async (req, res) => {
   try {
     const { date, slot_type = 'hourly' } = req.query;
     
