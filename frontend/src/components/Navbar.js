@@ -8,11 +8,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
-import { User, LogOut, Settings, LayoutDashboard, Menu, X } from 'lucide-react';
+import { User, LogOut, Settings, LayoutDashboard, Menu, X, Users } from 'lucide-react';
 import { useState } from 'react';
 
 export const Navbar = () => {
-  const { user, logout, isAdmin, isAuthenticated } = useAuth();
+  const { user, logout, isAdmin, isStaff, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
