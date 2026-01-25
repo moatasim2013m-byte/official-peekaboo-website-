@@ -1,36 +1,46 @@
 const express = require('express');
 const Stripe = require('stripe');
 const PaymentTransaction = require('../models/PaymentTransaction');
-const HourlyBooking = require('../models/HourlyBooking');
-const BirthdayBooking = require('../models/BirthdayBooking');
-const UserSubscription = require('../models/UserSubscription');
 const Settings = require('../models/Settings');
 const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
-const stripe = new Stripe(process.env.STRIPE_API_KEY);
+
+// Initialize Stripe with the API key
+const stripeApiKey = process.env.STRIPE_API_KEY;
+let stripe;
+try {
+  stripe = new Stripe(stripeApiKey);
+} catch (error) {
+  console.error('Stripe initialization error:', error.message);
+}
 
 // Fixed pricing packages (never accept from frontend)
 const getHourlyPrice = async () => {
   const setting = await Settings.findOne({ key: 'hourly_price' });
-  return setting?.value || 10.00; // Default $10
+  return parseFloat(setting?.value) || 10.00; // Default $10
 };
 
 const getBirthdayThemePrice = async (themeId) => {
   const Theme = require('../models/Theme');
   const theme = await Theme.findById(themeId);
-  return theme?.price || 100.00;
+  return parseFloat(theme?.price) || 100.00;
 };
 
 const getSubscriptionPrice = async (planId) => {
   const SubscriptionPlan = require('../models/SubscriptionPlan');
   const plan = await SubscriptionPlan.findById(planId);
-  return plan?.price || 50.00;
+  return parseFloat(plan?.price) || 50.00;
 };
 
 // Create checkout session
 router.post('/create-checkout', authMiddleware, async (req, res) => {
   try {
+    if (!stripe) {
+      console.error('Stripe not initialized. API Key:', stripeApiKey ? 'Present' : 'Missing');
+      return res.status(500).json({ error: 'Payment service not configured' });
+    }
+
     const { type, reference_id, origin_url } = req.body;
     
     if (!type || !origin_url) {
@@ -69,9 +79,17 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       metadata.child_id = req.body.child_id;
     }
 
+    // Ensure amount is a valid float
+    amount = parseFloat(amount);
+    if (isNaN(amount) || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid price configuration' });
+    }
+
     // Build success/cancel URLs from frontend origin
     const successUrl = `${origin_url}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${origin_url}/payment/cancel`;
+
+    console.log('Creating checkout session:', { type, amount, metadata });
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -105,10 +123,14 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
     });
     await transaction.save();
 
+    console.log('Checkout session created:', session.id);
     res.json({ url: session.url, session_id: session.id });
   } catch (error) {
     console.error('Create checkout error:', error);
-    res.status(500).json({ error: 'Failed to create checkout session' });
+    res.status(500).json({ 
+      error: 'Failed to create checkout session',
+      details: error.message 
+    });
   }
 });
 
