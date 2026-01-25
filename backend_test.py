@@ -279,11 +279,10 @@ class PeekabooAPITester:
         old_token = self.token
         self.token = self.parent_token
         
-        # Create child
+        # Create child with required birthday field
         child_data = {
             "name": "Layla Ahmed",
-            "age": 5,
-            "gender": "female"
+            "birthday": "2019-03-15"  # 5 years old
         }
         
         child_success, child_response = self.run_test(
@@ -379,7 +378,7 @@ class PeekabooAPITester:
         return success  # Success means it correctly returned 403
 
     def test_loyalty_points_hourly_only(self):
-        """Test that loyalty points are only awarded on hourly bookings"""
+        """Test that loyalty points system is accessible"""
         if not self.parent_token:
             self.log_test("Loyalty Points Test", False, "No parent token available")
             return False
@@ -387,18 +386,18 @@ class PeekabooAPITester:
         old_token = self.token
         self.token = self.parent_token
         
-        # Get loyalty history
+        # Get loyalty points and history
         success, response = self.run_test(
-            "Get Loyalty History",
+            "Get Loyalty Points",
             "GET",
-            "loyalty/history",
+            "loyalty",
             200
         )
         
         self.token = old_token
         
-        if success and 'history' in response:
-            print(f"   ✓ Loyalty system accessible")
+        if success and 'points' in response:
+            print(f"   ✓ Loyalty system accessible - Points: {response.get('points', 0)}")
             return True
         return False
 
