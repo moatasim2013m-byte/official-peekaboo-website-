@@ -86,7 +86,15 @@ function AppRoutes() {
         path="/admin"
         element={
           <ProtectedRoute adminOnly>
-            <AdminPage />
+            <Layout><AdminPage /></Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/*"
+        element={
+          <ProtectedRoute adminOnly>
+            <Layout><AdminPage /></Layout>
           </ProtectedRoute>
         }
       />
