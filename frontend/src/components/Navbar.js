@@ -46,6 +46,14 @@ export const Navbar = () => {
 
           {/* Auth Buttons / User Menu */}
           <div className="hidden md:flex items-center gap-4">
+            {isAuthenticated && isAdmin && (
+              <Link to="/admin">
+                <Button variant="default" className="rounded-full gap-2 bg-primary" data-testid="nav-admin-btn">
+                  <LayoutDashboard className="h-4 w-4" />
+                  Admin Dashboard
+                </Button>
+              </Link>
+            )}
             {isAuthenticated ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
