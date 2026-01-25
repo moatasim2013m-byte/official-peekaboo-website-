@@ -404,6 +404,115 @@ router.put('/settings', async (req, res) => {
   }
 });
 
+// ==================== PRICING MANAGEMENT ====================
+
+// Get pricing configuration
+router.get('/pricing', async (req, res) => {
+  try {
+    const pricing = await Settings.find({ 
+      key: { $in: ['hourly_1hr', 'hourly_2hr', 'hourly_3hr', 'hourly_extra_hr'] } 
+    });
+    
+    const pricingObj = {
+      hourly_1hr: 7,
+      hourly_2hr: 10,
+      hourly_3hr: 13,
+      hourly_extra_hr: 3
+    };
+    
+    pricing.forEach(p => { pricingObj[p.key] = parseFloat(p.value); });
+    res.json({ pricing: pricingObj });
+  } catch (error) {
+    console.error('Get pricing error:', error);
+    res.status(500).json({ error: 'Failed to get pricing' });
+  }
+});
+
+// Update pricing
+router.put('/pricing', async (req, res) => {
+  try {
+    const { hourly_1hr, hourly_2hr, hourly_3hr, hourly_extra_hr } = req.body;
+    
+    const updates = [
+      { key: 'hourly_1hr', value: parseFloat(hourly_1hr) || 7 },
+      { key: 'hourly_2hr', value: parseFloat(hourly_2hr) || 10 },
+      { key: 'hourly_3hr', value: parseFloat(hourly_3hr) || 13 },
+      { key: 'hourly_extra_hr', value: parseFloat(hourly_extra_hr) || 3 }
+    ];
+    
+    for (const update of updates) {
+      await Settings.findOneAndUpdate(
+        { key: update.key },
+        { key: update.key, value: update.value, updated_at: new Date() },
+        { upsert: true }
+      );
+    }
+    
+    res.json({ message: 'Pricing updated successfully' });
+  } catch (error) {
+    console.error('Update pricing error:', error);
+    res.status(500).json({ error: 'Failed to update pricing' });
+  }
+});
+
+// ==================== THEMES ====================
+
+router.get('/themes', async (req, res) => {
+  try {
+    const themes = await Theme.find().sort({ created_at: -1 });
+    res.json({ themes: themes.map(t => t.toJSON()) });
+  } catch (error) {
+    console.error('Get themes error:', error);
+    res.status(500).json({ error: 'Failed to get themes' });
+  }
+});
+
+router.post('/themes', async (req, res) => {
+  try {
+    const { name, name_ar, description, description_ar, price, image_url } = req.body;
+    const theme = new Theme({ name, name_ar, description, description_ar, price, image_url });
+    await theme.save();
+    res.status(201).json({ theme: theme.toJSON() });
+  } catch (error) {
+    console.error('Create theme error:', error);
+    res.status(500).json({ error: 'Failed to create theme' });
+  }
+});
+
+router.put('/themes/:id', async (req, res) => {
+  try {
+    const { name, name_ar, description, description_ar, price, image_url, is_active } = req.body;
+    const theme = await Theme.findById(req.params.id);
+    if (!theme) {
+      return res.status(404).json({ error: 'Theme not found' });
+    }
+
+    if (name !== undefined) theme.name = name;
+    if (name_ar !== undefined) theme.name_ar = name_ar;
+    if (description !== undefined) theme.description = description;
+    if (description_ar !== undefined) theme.description_ar = description_ar;
+    if (price !== undefined) theme.price = parseFloat(price);
+    if (image_url !== undefined) theme.image_url = image_url;
+    if (is_active !== undefined) theme.is_active = is_active;
+    
+    await theme.save();
+    res.json({ theme: theme.toJSON() });
+  } catch (error) {
+    console.error('Update theme error:', error);
+    res.status(500).json({ error: 'Failed to update theme' });
+  }
+});
+
+router.delete('/themes/:id', async (req, res) => {
+  try {
+    await Theme.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Theme deleted successfully' });
+  } catch (error) {
+    console.error('Delete theme error:', error);
+    res.status(500).json({ error: 'Failed to delete theme' });
+  }
+});
+
 // ==================== SLOTS ====================
 
 router.get('/slots', async (req, res) => {
