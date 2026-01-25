@@ -93,7 +93,7 @@ const emailTemplates = {
   }),
 
   subscriptionConfirmation: (subscription, plan, child) => ({
-    subject: '⭐ Peekaboo - Subscription Activated!',
+    subject: '⭐ Peekaboo - Subscription Purchased!',
     html: `
       <!DOCTYPE html>
       <html>
@@ -103,18 +103,21 @@ const emailTemplates = {
           .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 24px; padding: 32px; }
           .header { text-align: center; color: #FBBF24; }
           .info { background: #FEF3C7; border-radius: 16px; padding: 20px; margin: 20px 0; }
+          .note { background: #F3E8FF; border-radius: 12px; padding: 16px; margin: 16px 0; font-size: 14px; }
           .footer { text-align: center; color: #6B7280; font-size: 14px; margin-top: 24px; }
         </style>
       </head>
       <body>
         <div class="container">
-          <h1 class="header">⭐ Subscription Activated!</h1>
-          <p>Your Peekaboo subscription is now active!</p>
+          <h1 class="header">⭐ Subscription Purchased!</h1>
+          <p>Your Peekaboo subscription is ready to use!</p>
           <div class="info">
             <p><strong>Child:</strong> ${child.name}</p>
             <p><strong>Plan:</strong> ${plan.name}</p>
             <p><strong>Visits:</strong> ${plan.visits}</p>
-            <p><strong>Expires:</strong> ${new Date(subscription.expires_at).toLocaleDateString()}</p>
+          </div>
+          <div class="note">
+            <strong>Important:</strong> Your 30-day validity period starts when you first check in at reception, not from purchase date. So use it whenever you're ready!
           </div>
           <div class="footer">
             <p>Enjoy unlimited fun at Peekaboo! 🌟</p>
