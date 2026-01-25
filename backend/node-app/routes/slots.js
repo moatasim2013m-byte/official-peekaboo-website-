@@ -11,12 +11,12 @@ const TIMEZONE = 'Asia/Amman';
 const BOOKING_CUTOFF_MINUTES = 30;
 
 // HOURLY: 10:00 AM to 12:00 AM (midnight), every 10 minutes, session = 60 min
-// Last entry at 23:50
+// Last entry at 23:00 (session ends at midnight)
 const HOURLY_CONFIG = {
   startHour: 10,
   startMinute: 0,
-  endHour: 24, // midnight
-  endMinute: 0,
+  lastEntryHour: 23, // Last entry at 23:00
+  lastEntryMinute: 0,
   intervalMinutes: 10,
   sessionDurationMinutes: 60,
   maxCapacity: 70 // max kids at any moment
