@@ -57,7 +57,7 @@ const awardLoyaltyPoints = async (userId, paymentId, source) => {
 // Create hourly booking (after payment confirmed)
 router.post('/hourly', authMiddleware, async (req, res) => {
   try {
-    const { slot_id, child_id, payment_id, amount } = req.body;
+    const { slot_id, child_id, payment_id, amount, duration_hours, custom_notes } = req.body;
     
     // Validate slot
     const slot = await TimeSlot.findById(slot_id);
@@ -83,6 +83,8 @@ router.post('/hourly', authMiddleware, async (req, res) => {
       user_id: req.userId,
       child_id,
       slot_id,
+      duration_hours: parseInt(duration_hours) || 2,
+      custom_notes: custom_notes || '',
       qr_code,
       booking_code,
       status: 'confirmed',
