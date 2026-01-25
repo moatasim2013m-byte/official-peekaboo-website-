@@ -101,7 +101,7 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       return res.status(500).json({ error: 'Payment service not configured' });
     }
 
-    const { type, reference_id, origin_url, duration_hours } = req.body;
+    const { type, reference_id, origin_url, duration_hours, custom_notes } = req.body;
     
     if (!type || !origin_url) {
       return res.status(400).json({ error: 'type and origin_url are required' });
@@ -113,8 +113,11 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
     // Get amount from server-side pricing
     switch (type) {
       case 'hourly':
-        amount = await getHourlyPrice();
+        const hours = parseInt(duration_hours) || 2;
+        amount = await getHourlyPrice(hours);
         metadata.slot_id = reference_id;
+        metadata.duration_hours = hours;
+        if (custom_notes) metadata.custom_notes = custom_notes;
         break;
       case 'birthday':
         if (!req.body.theme_id) {
