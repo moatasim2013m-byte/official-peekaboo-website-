@@ -96,6 +96,7 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
     api,
     isAdmin: user?.role === 'admin',
+    isStaff: user?.role === 'staff',
     isAuthenticated: !!user
   };
 
