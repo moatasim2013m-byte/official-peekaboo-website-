@@ -403,39 +403,50 @@ class PeekabooAPITester:
         return False
 
     def run_all_tests(self):
-        """Run all API tests"""
-        print("🚀 Starting Peekaboo API Tests...")
+        """Run all API tests focusing on new pricing and booking features"""
+        print("🚀 Starting Peekaboo API Tests - New Features Focus...")
         print(f"Testing against: {self.base_url}")
-        print("=" * 50)
+        print("=" * 60)
 
-        # Basic API tests
+        # Basic API health check
         self.test_health_check()
         
-        # Public API tests
-        self.test_get_themes()
-        self.test_get_subscription_plans()
-        self.test_get_gallery()
+        # Authentication setup
+        print("\n📋 AUTHENTICATION SETUP")
+        self.test_user_registration()  # Creates parent token
+        self.test_admin_login()        # Creates admin token
         
-        # Authentication tests
-        self.test_user_registration()
-        self.test_user_login()
+        # NEW FEATURE TESTS - Main Focus
+        print("\n🎯 NEW PRICING SYSTEM TESTS")
+        self.test_fetch_hourly_pricing_public()      # Test 1
+        self.test_admin_pricing_access()             # Test 2  
+        self.test_admin_pricing_update()             # Test 3
+        self.test_verify_subscription_plans()        # Test 4
         
-        # Protected route tests
-        if self.token:
-            self.test_protected_route()
-            
-        if self.admin_token:
-            self.test_admin_access()
+        print("\n🎯 NEW BOOKING SYSTEM TESTS")
+        self.test_hourly_booking_with_duration()     # Test 5
+        
+        print("\n🔒 SECURITY & VALIDATION TESTS")
+        self.test_non_admin_pricing_access()
+        self.test_price_calculation_logic()
+        self.test_loyalty_points_hourly_only()
 
         # Print summary
-        print("\n" + "=" * 50)
+        print("\n" + "=" * 60)
         print(f"📊 Test Results: {self.tests_passed}/{self.tests_run} passed")
+        
+        # Detailed results for failed tests
+        failed_tests = [t for t in self.test_results if not t['success']]
+        if failed_tests:
+            print("\n❌ FAILED TESTS:")
+            for test in failed_tests:
+                print(f"   • {test['test']}: {test['details']}")
         
         if self.tests_passed == self.tests_run:
             print("🎉 All tests passed!")
             return 0
         else:
-            print("⚠️  Some tests failed")
+            print("⚠️  Some tests failed - see details above")
             return 1
 
 def main():
