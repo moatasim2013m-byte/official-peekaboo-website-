@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true, lowercase: true },
   password_hash: { type: String, required: true },
   name: { type: String, required: true },
-  role: { type: String, enum: ['parent', 'admin'], default: 'parent' },
+  role: { type: String, enum: ['parent', 'admin', 'staff'], default: 'parent' },
   loyalty_points: { type: Number, default: 0 },
   reset_token: { type: String },
   reset_token_expires: { type: Date },
