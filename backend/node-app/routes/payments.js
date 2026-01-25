@@ -62,16 +62,35 @@ const getSubscriptionPrice = async (planId) => {
 };
 
 // Get hourly pricing info (public endpoint for frontend)
-router.get('/hourly-pricing', (req, res) => {
-  res.json({
-    pricing: [
-      { hours: 1, price: 7, label: '1 Hour', label_ar: 'ساعة واحدة' },
-      { hours: 2, price: 10, label: '2 Hours', label_ar: 'ساعتان', best_value: true },
-      { hours: 3, price: 13, label: '3 Hours', label_ar: '3 ساعات' }
-    ],
-    extra_hour_price: 3,
-    currency: 'JD'
-  });
+router.get('/hourly-pricing', async (req, res) => {
+  try {
+    const pricing = await Settings.find({ 
+      key: { $in: ['hourly_1hr', 'hourly_2hr', 'hourly_3hr', 'hourly_extra_hr'] } 
+    });
+    
+    const prices = {
+      hourly_1hr: 7,
+      hourly_2hr: 10,
+      hourly_3hr: 13,
+      hourly_extra_hr: 3
+    };
+    
+    pricing.forEach(p => { prices[p.key] = parseFloat(p.value); });
+    
+    res.json({
+      pricing: [
+        { hours: 1, price: prices.hourly_1hr, label: '1 Hour', label_ar: 'ساعة واحدة' },
+        { hours: 2, price: prices.hourly_2hr, label: '2 Hours', label_ar: 'ساعتان', best_value: true },
+        { hours: 3, price: prices.hourly_3hr, label: '3 Hours', label_ar: '3 ساعات' }
+      ],
+      extra_hour_price: prices.hourly_extra_hr,
+      extra_hour_text: 'كل ساعة إضافية بعد الساعتين = 3 دنانير فقط',
+      currency: 'JD'
+    });
+  } catch (error) {
+    console.error('Get hourly pricing error:', error);
+    res.status(500).json({ error: 'Failed to get pricing' });
+  }
 });
 
 // Create checkout session
