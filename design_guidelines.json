@@ -1,0 +1,167 @@
+{
+  "identity": {
+    "name": "Peekaboo",
+    "persona": "E1 - The Anti-AI Designer",
+    "tone": "Playful, Energetic, Kid-Friendly, Trustworthy",
+    "theme_strategy": "Light Mode Dominant (Bright, Airy, Colorful). Dark mode reserved for 'Glow Party' specific sections only."
+  },
+  "typography": {
+    "primary_font": "Fredoka",
+    "secondary_font": "Nunito",
+    "import_url": "https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap",
+    "usage": {
+      "headings": "font-family: 'Fredoka', sans-serif; font-weight: 600;",
+      "body": "font-family: 'Nunito', sans-serif;",
+      "buttons": "font-family: 'Fredoka', sans-serif; font-weight: 500;"
+    },
+    "scale": {
+      "h1": "text-4xl md:text-6xl tracking-tight",
+      "h2": "text-3xl md:text-5xl",
+      "h3": "text-2xl md:text-3xl",
+      "body": "text-base md:text-lg leading-relaxed"
+    }
+  },
+  "colors": {
+    "palette": {
+      "primary": {
+        "name": "Peekaboo Purple",
+        "hex": "#8B5CF6",
+        "hsl": "258 70% 60%",
+        "usage": "Primary CTAs, Brand Headers, Active States"
+      },
+      "secondary": {
+        "name": "Sunshine Yellow",
+        "hex": "#FBBF24",
+        "hsl": "43 96% 56%",
+        "usage": "Highlights, Badges, 'Fun' Accents"
+      },
+      "accent": {
+        "name": "Bubblegum Pink",
+        "hex": "#EC4899",
+        "hsl": "330 81% 60%",
+        "usage": "Secondary CTAs, Hearts, Likes"
+      },
+      "background": {
+        "name": "Cloud White",
+        "hex": "#FFFFFF",
+        "hsl": "0 0% 100%",
+        "usage": "Main Background"
+      },
+      "surface": {
+        "name": "Soft Cream",
+        "hex": "#FFFBEB",
+        "hsl": "48 100% 96%",
+        "usage": "Card Backgrounds, Section Alternates"
+      },
+      "text": {
+        "primary": "#1F2937",
+        "secondary": "#4B5563"
+      }
+    },
+    "css_variables": {
+      "root": {
+        "--background": "0 0% 100%",
+        "--foreground": "260 20% 20%",
+        "--card": "0 0% 100%",
+        "--card-foreground": "260 20% 20%",
+        "--popover": "0 0% 100%",
+        "--popover-foreground": "260 20% 20%",
+        "--primary": "258 70% 60%",
+        "--primary-foreground": "0 0% 100%",
+        "--secondary": "43 96% 56%",
+        "--secondary-foreground": "260 20% 20%",
+        "--muted": "260 20% 96%",
+        "--muted-foreground": "260 10% 50%",
+        "--accent": "330 81% 60%",
+        "--accent-foreground": "0 0% 100%",
+        "--destructive": "0 84.2% 60.2%",
+        "--destructive-foreground": "0 0% 98%",
+        "--border": "260 20% 90%",
+        "--input": "260 20% 90%",
+        "--ring": "258 70% 60%",
+        "--radius": "1rem"
+      }
+    }
+  },
+  "layout": {
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "spacing": {
+      "section_padding": "py-12 md:py-24",
+      "element_gap": "gap-6 md:gap-8"
+    },
+    "grid_system": {
+      "marketing": "grid grid-cols-1 md:grid-cols-12 gap-8",
+      "dashboard": "grid grid-cols-1 md:grid-cols-4 gap-6"
+    },
+    "border_radius": {
+      "default": "rounded-2xl",
+      "large": "rounded-3xl",
+      "button": "rounded-full"
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 rounded-full px-8 py-6 text-lg font-bold",
+      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-md hover:shadow-lg transition-all rounded-full px-6 py-4 font-bold",
+      "outline": "border-2 border-primary text-primary hover:bg-primary/10 rounded-full px-6 py-4 font-bold"
+    },
+    "cards": {
+      "style": "bg-card border-2 border-border/50 shadow-sm hover:shadow-md transition-all rounded-3xl overflow-hidden",
+      "interactive": "hover:border-primary/50 hover:scale-[1.02] cursor-pointer"
+    },
+    "inputs": {
+      "style": "rounded-xl border-2 border-input focus:border-primary focus:ring-4 focus:ring-primary/20 h-12 bg-background/50 backdrop-blur-sm"
+    }
+  },
+  "visual_enhancers": {
+    "shadows": "shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
+    "gradients": {
+      "hero": "bg-gradient-to-b from-purple-50 to-white",
+      "accent": "bg-gradient-to-r from-pink-500 to-purple-500"
+    },
+    "decorations": [
+      "Use floating shapes (circles, squiggles) in backgrounds using absolute positioning and low opacity",
+      "Use 'confetti' style patterns for celebration sections"
+    ]
+  },
+  "media": {
+    "image_urls": {
+      "hero_main": "https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg",
+      "birthday_party": "https://images.pexels.com/photos/6148511/pexels-photo-6148511.jpeg",
+      "family_fun": "https://images.pexels.com/photos/3951099/pexels-photo-3951099.png",
+      "gallery_1": "https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg",
+      "gallery_2": "https://images.pexels.com/photos/6148511/pexels-photo-6148511.jpeg",
+      "gallery_3": "https://images.pexels.com/photos/3951099/pexels-photo-3951099.png"
+    },
+    "icons": "Use 'Lucide React' with rounded stroke endings. Prefer filled icons for active states."
+  },
+  "instructions_to_main_agent": [
+    "1. UPDATE index.css: Replace the root variables with the 'css_variables' provided above.",
+    "2. INSTALL FONTS: Add the Google Fonts import to index.css or index.html.",
+    "3. OVERRIDE SHADCN: Update ui/button.jsx and ui/card.jsx to match the 'components' styles defined here (rounded-full, border-2, etc).",
+    "4. MOBILE FIRST: Always design for mobile view first, then expand to md/lg.",
+    "5. DATA-TESTID: Add data-testid to all interactive elements (buttons, inputs, links).",
+    "6. NO CORPORATE VIBES: Avoid sharp corners (rounded-none) and standard grays. Use the 'Soft Cream' or 'Cloud White' backgrounds.",
+    "7. QR CODE: Use a standard library for QR generation, but frame it in a playful container."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
+    "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy",
+    "Use glass-morphism effects with backdrop filters (12-24px blur)",
+    "You MUST NOT apply universal transition. Eg: `transition: all`. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms",
+    "You MUST NOT center align the app container, ie do not add `.App { text-align: center; }` in the css file. This disrupts the human natural reading flow of text",
+    "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style",
+    "NEVER: use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons.",
+    "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap.",
+    "Subtle grain textures, noise overlays, custom cursors, selection states, and loading animations: separates good from extraordinary.",
+    "Main agent relies on these image URLs. Missing categories (especially sponsor logos) = main agent will use placeholder text which is FORBIDDEN",
+    "Prioritize using pre-existing components from src/components/ui when applicable",
+    "Create new components that match the style and conventions of existing components when needed",
+    "Examine existing components to understand the project's component patterns before creating new ones",
+    "Components MUST use named exports (export const ComponentName = ...)",
+    "Pages MUST use default exports (export default function PageName() {...})",
+    "Use `sonner` for toasts. Sonner component are located in `/app/src/components/ui/sonner.tsx`"
+  ]
+}
