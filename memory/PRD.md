@@ -39,25 +39,35 @@ Admins fully manage bookings, content, and operations.
 - No phone OTP, no social login
 
 ### Hourly Tickets
-- 60-minute sessions
-- Operating hours: 10 AM - 10 PM (Asia/Amman timezone)
+- **Entry intervals:** Every 10 minutes (not hourly)
+- **Session duration:** 60 minutes
+- **Operating hours:** 10:00 AM - 12:00 AM midnight (last entry 11:50 PM)
+- **Timezone:** Asia/Amman
+- **Capacity:** Max 70 kids at any moment (across overlapping sessions)
 - Booking cutoff: 30 minutes before slot start
 - QR code for check-in
 - Countdown starts when QR is scanned
 - 5-minute in-app warning
 
 ### Birthday Parties
+- **Duration:** 2 hours
+- **Start times:** Every 2 hours (13:00, 15:00, 17:00, 19:00, 21:00, 23:00)
+- **Operating window:** 1:00 PM - 12:00 AM midnight
 - 10 standard themes (admin managed)
 - Custom theme request form (no automatic pricing)
 - Stripe Checkout payment
+- **NO loyalty points** for birthday bookings
 
 ### Subscriptions
 - Visit-based (3 packages)
-- 30-day expiry from purchase
+- **Expiry:** 30 days from FIRST CHECK-IN (not purchase date)
+- If never checked in, subscription remains pending
 - Usage tied to child profile
+- **NO loyalty points** for subscriptions
 
 ### Loyalty
 - Fixed 10 points per paid order
+- **ONLY for hourly tickets** (not birthday or subscriptions)
 - Idempotent by payment_id
 - Admin can manually adjust
 - No rewards shop in MVP
