@@ -1,0 +1,146 @@
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { Button } from '../components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu';
+import { User, LogOut, Settings, LayoutDashboard, Menu, X } from 'lucide-react';
+import { useState } from 'react';
+
+export const Navbar = () => {
+  const { user, logout, isAdmin, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/');
+  };
+
+  return (
+    <nav className="bg-white border-b border-border sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2" data-testid="nav-logo">
+            <span className="text-3xl">🎪</span>
+            <span className="font-heading text-2xl font-bold text-primary">Peekaboo</span>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-6">
+            <Link to="/tickets" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-tickets">
+              Hourly Tickets
+            </Link>
+            <Link to="/birthday" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-birthday">
+              Birthday Parties
+            </Link>
+            <Link to="/subscriptions" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-subscriptions">
+              Subscriptions
+            </Link>
+          </div>
+
+          {/* Auth Buttons / User Menu */}
+          <div className="hidden md:flex items-center gap-4">
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="rounded-full gap-2" data-testid="user-menu-trigger">
+                    <User className="h-4 w-4" />
+                    <span>{user?.name}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => navigate('/profile')} data-testid="menu-profile">
+                    <User className="h-4 w-4 mr-2" />
+                    My Profile
+                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem onClick={() => navigate('/admin')} data-testid="menu-admin">
+                      <LayoutDashboard className="h-4 w-4 mr-2" />
+                      Admin Panel
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout} data-testid="menu-logout">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="outline" className="rounded-full" data-testid="nav-login">
+                    Login
+                  </Button>
+                </Link>
+                <Link to="/register">
+                  <Button className="rounded-full btn-playful" data-testid="nav-register">
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden p-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            data-testid="mobile-menu-toggle"
+          >
+            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden py-4 border-t border-border">
+            <div className="flex flex-col gap-4">
+              <Link to="/tickets" className="text-foreground hover:text-primary font-medium" onClick={() => setMobileMenuOpen(false)}>
+                Hourly Tickets
+              </Link>
+              <Link to="/birthday" className="text-foreground hover:text-primary font-medium" onClick={() => setMobileMenuOpen(false)}>
+                Birthday Parties
+              </Link>
+              <Link to="/subscriptions" className="text-foreground hover:text-primary font-medium" onClick={() => setMobileMenuOpen(false)}>
+                Subscriptions
+              </Link>
+              <div className="border-t border-border pt-4 flex flex-col gap-2">
+                {isAuthenticated ? (
+                  <>
+                    <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full rounded-full">My Profile</Button>
+                    </Link>
+                    {isAdmin && (
+                      <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="outline" className="w-full rounded-full">Admin Panel</Button>
+                      </Link>
+                    )}
+                    <Button onClick={handleLogout} variant="destructive" className="w-full rounded-full">
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                      <Button variant="outline" className="w-full rounded-full">Login</Button>
+                    </Link>
+                    <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                      <Button className="w-full rounded-full">Sign Up</Button>
+                    </Link>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+};
