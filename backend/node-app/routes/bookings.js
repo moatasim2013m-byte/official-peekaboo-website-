@@ -179,7 +179,8 @@ router.post('/hourly/checkin', authMiddleware, async (req, res) => {
     }
 
     const now = new Date();
-    const sessionEndTime = addMinutes(now, 60);
+    const durationMinutes = (booking.duration_hours || 2) * 60;
+    const sessionEndTime = addMinutes(now, durationMinutes);
 
     booking.status = 'checked_in';
     booking.check_in_time = now;
