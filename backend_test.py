@@ -85,13 +85,14 @@ class PeekabooAPITester:
         """Test user registration"""
         timestamp = datetime.now().strftime('%H%M%S')
         test_user = {
-            "email": f"test_user_{timestamp}@example.com",
-            "password": "TestPass123!",
-            "name": "Test User"
+            "email": f"parent_{timestamp}@peekaboo.com",
+            "password": "ParentPass123!",
+            "name": "Sarah Ahmed",
+            "phone": "+962791234567"
         }
         
         success, response = self.run_test(
-            "User Registration",
+            "Parent Registration",
             "POST",
             "auth/register",
             201,
@@ -99,12 +100,12 @@ class PeekabooAPITester:
         )
         
         if success and 'token' in response:
-            self.token = response['token']
+            self.parent_token = response['token']
             return True
         return False
 
-    def test_user_login(self):
-        """Test user login with admin credentials"""
+    def test_admin_login(self):
+        """Test admin login"""
         admin_creds = {
             "email": "admin@peekaboo.com",
             "password": "admin123"
@@ -120,6 +121,222 @@ class PeekabooAPITester:
         
         if success and 'token' in response:
             self.admin_token = response['token']
+            return True
+        return False
+
+    # ==================== NEW PRICING TESTS ====================
+    
+    def test_fetch_hourly_pricing_public(self):
+        """Test 1: Fetch Hourly Pricing (Public Endpoint)"""
+        success, response = self.run_test(
+            "Fetch Hourly Pricing (Public)",
+            "GET",
+            "payments/hourly-pricing",
+            200,
+            headers={}  # No auth required
+        )
+        
+        if success and 'pricing' in response:
+            pricing = response['pricing']
+            extra_hour_price = response.get('extra_hour_price', 0)
+            
+            # Validate expected pricing structure
+            expected_prices = {1: 7, 2: 10, 3: 13}
+            actual_prices = {p['hours']: p['price'] for p in pricing}
+            
+            pricing_correct = (
+                actual_prices.get(1) == expected_prices[1] and
+                actual_prices.get(2) == expected_prices[2] and
+                actual_prices.get(3) == expected_prices[3] and
+                extra_hour_price == 3
+            )
+            
+            if pricing_correct:
+                print(f"   ✓ Pricing: 1hr={actual_prices.get(1)}JD, 2hr={actual_prices.get(2)}JD, 3hr={actual_prices.get(3)}JD, extra={extra_hour_price}JD")
+                return True
+            else:
+                print(f"   ✗ Incorrect pricing: {actual_prices}, extra: {extra_hour_price}")
+                return False
+        return False
+
+    def test_admin_pricing_access(self):
+        """Test 2: Admin Access to Pricing Management"""
+        if not self.admin_token:
+            self.log_test("Admin Pricing Access", False, "No admin token available")
+            return False
+            
+        # Temporarily use admin token
+        old_token = self.token
+        self.token = self.admin_token
+        
+        success, response = self.run_test(
+            "Admin Get Pricing",
+            "GET",
+            "admin/pricing",
+            200
+        )
+        
+        # Restore original token
+        self.token = old_token
+        
+        if success and 'pricing' in response:
+            pricing = response['pricing']
+            expected_keys = ['hourly_1hr', 'hourly_2hr', 'hourly_3hr', 'hourly_extra_hr']
+            has_all_keys = all(key in pricing for key in expected_keys)
+            
+            if has_all_keys:
+                print(f"   ✓ Admin pricing: 1hr={pricing['hourly_1hr']}, 2hr={pricing['hourly_2hr']}, 3hr={pricing['hourly_3hr']}, extra={pricing['hourly_extra_hr']}")
+                return True
+            else:
+                print(f"   ✗ Missing pricing keys: {pricing}")
+                return False
+        return False
+
+    def test_admin_pricing_update(self):
+        """Test 3: Update Pricing as Admin"""
+        if not self.admin_token:
+            self.log_test("Admin Pricing Update", False, "No admin token available")
+            return False
+            
+        # Temporarily use admin token
+        old_token = self.token
+        self.token = self.admin_token
+        
+        pricing_data = {
+            "hourly_1hr": 7,
+            "hourly_2hr": 10,
+            "hourly_3hr": 13,
+            "hourly_extra_hr": 3
+        }
+        
+        success, response = self.run_test(
+            "Admin Update Pricing",
+            "PUT",
+            "admin/pricing",
+            200,
+            data=pricing_data
+        )
+        
+        # Restore original token
+        self.token = old_token
+        
+        return success and 'message' in response
+
+    def test_verify_subscription_plans(self):
+        """Test 4: Verify Updated Subscription Plans"""
+        if not self.admin_token:
+            self.log_test("Verify Subscription Plans", False, "No admin token available")
+            return False
+            
+        # Temporarily use admin token
+        old_token = self.token
+        self.token = self.admin_token
+        
+        success, response = self.run_test(
+            "Get Subscription Plans",
+            "GET",
+            "admin/plans",
+            200
+        )
+        
+        # Restore original token
+        self.token = old_token
+        
+        if success and 'plans' in response:
+            plans = response['plans']
+            
+            # Check for expected plans: 59 JD/8 visits, 79 JD/12 visits, 120 JD/unlimited daily pass
+            expected_plans = [
+                {"price": 59, "visits": 8},
+                {"price": 79, "visits": 12},
+                {"price": 120, "is_daily_pass": True}
+            ]
+            
+            plans_found = []
+            for plan in plans:
+                for expected in expected_plans:
+                    if (plan.get('price') == expected['price'] and 
+                        (plan.get('visits') == expected.get('visits') or 
+                         plan.get('is_daily_pass') == expected.get('is_daily_pass'))):
+                        plans_found.append(expected)
+                        break
+            
+            if len(plans_found) >= 3:
+                print(f"   ✓ Found {len(plans)} subscription plans including expected ones")
+                return True
+            else:
+                print(f"   ✗ Missing expected plans. Found: {[p.get('price') for p in plans]}")
+                return False
+        return False
+
+    def test_hourly_booking_with_duration(self):
+        """Test 5: Hourly Booking Creation with Duration & Notes"""
+        if not self.parent_token:
+            self.log_test("Hourly Booking with Duration", False, "No parent token available")
+            return False
+            
+        # First create a child for the parent
+        old_token = self.token
+        self.token = self.parent_token
+        
+        # Create child
+        child_data = {
+            "name": "Layla Ahmed",
+            "age": 5,
+            "gender": "female"
+        }
+        
+        child_success, child_response = self.run_test(
+            "Create Child for Booking",
+            "POST",
+            "profile/children",
+            201,
+            data=child_data
+        )
+        
+        if not child_success or 'child' not in child_response:
+            self.token = old_token
+            return False
+            
+        child_id = child_response['child']['id']
+        
+        # Get available slots
+        slots_success, slots_response = self.run_test(
+            "Get Available Slots",
+            "GET",
+            "slots/available?date=2024-12-25&slot_type=hourly",
+            200
+        )
+        
+        if not slots_success or 'slots' not in slots_response or not slots_response['slots']:
+            self.token = old_token
+            return False
+            
+        slot_id = slots_response['slots'][0]['id']
+        
+        # Create checkout with duration and notes
+        checkout_data = {
+            "type": "hourly",
+            "reference_id": slot_id,
+            "child_id": child_id,
+            "duration_hours": 2,
+            "custom_notes": "Please have staff greet my child by name - Layla loves unicorns!",
+            "origin_url": "https://playdate-hub.preview.emergentagent.com"
+        }
+        
+        success, response = self.run_test(
+            "Create Hourly Checkout with Duration",
+            "POST",
+            "payments/create-checkout",
+            200,
+            data=checkout_data
+        )
+        
+        # Restore original token
+        self.token = old_token
+        
+        if success and 'url' in response and 'session_id' in response:
+            print(f"   ✓ Checkout created for 2hr booking with custom notes")
             return True
         return False
 
