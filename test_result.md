@@ -101,3 +101,144 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Comprehensive testing of Peekaboo Indoor Playground app's new features: Dynamic Pricing System, Hourly Booking with Duration Selection, Updated Subscription Plans, and Admin Pricing Panel"
+
+backend:
+  - task: "Dynamic Pricing System - Hourly Prices in Settings Database"
+    implemented: true
+    working: true
+    file: "/app/backend/node-app/routes/payments.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Public endpoint /api/payments/hourly-pricing returns correct pricing: 1hr=7JD, 2hr=10JD, 3hr=13JD, extra_hour_price=3JD. Pricing is dynamically fetched from Settings database with proper fallbacks."
+
+  - task: "Admin Pricing Management Panel"
+    implemented: true
+    working: true
+    file: "/app/backend/node-app/routes/admin.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Admin can access /api/admin/pricing (GET) and update pricing (PUT). Non-admin users correctly receive 403 Forbidden. All pricing keys (hourly_1hr, hourly_2hr, hourly_3hr, hourly_extra_hr) are properly managed."
+
+  - task: "Hourly Booking with Duration Selection and Custom Notes"
+    implemented: true
+    working: true
+    file: "/app/backend/node-app/routes/payments.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Hourly booking creation supports duration_hours and custom_notes fields. Checkout creation works correctly with 2hr duration and custom notes. Price calculation logic implemented for different durations."
+
+  - task: "Updated Subscription Plans"
+    implemented: true
+    working: true
+    file: "/app/backend/node-app/models/SubscriptionPlan.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - All 3 expected subscription plans found: 59 JD for 8 visits, 79 JD for 12 visits, 120 JD Monthly Daily Pass (Sun-Thu only) with is_daily_pass=true and valid_days fields."
+
+  - task: "Price Calculation Logic for Extended Hours"
+    implemented: true
+    working: true
+    file: "/app/backend/node-app/routes/payments.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Price calculation logic implemented: 1hr=7JD, 2hr=10JD, 3hr=13JD, 4hr=16JD (10+2*3), 5hr=19JD (10+3*3). Logic correctly uses 2hr base price plus extra hour pricing for 4+ hours."
+
+  - task: "Authentication and Authorization System"
+    implemented: true
+    working: true
+    file: "/app/backend/node-app/middleware/auth.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Admin login works with admin@peekaboo.com/admin123. Parent registration and authentication working. Admin-only routes properly protected with 403 for non-admin users."
+
+  - task: "Child Profile Management"
+    implemented: true
+    working: true
+    file: "/app/backend/node-app/routes/profile.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Child creation requires name and birthday fields. Child profile creation works correctly for booking flow. Parent can manage children through /api/profile/children endpoints."
+
+  - task: "Loyalty Points System"
+    implemented: true
+    working: true
+    file: "/app/backend/node-app/routes/loyalty.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Loyalty system accessible via /api/loyalty endpoint. Points and history tracking implemented. System ready for hourly booking point awards (10 points per booking as specified)."
+
+  - task: "Time Slot Management"
+    implemented: true
+    working: true
+    file: "/app/backend/node-app/routes/slots.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+        - working: true
+          agent: "testing"
+          comment: "✅ PASSED - Available slots endpoint working. Slots can be queried by date and slot_type (hourly). Integration with booking system functional."
+
+frontend:
+  - task: "Frontend Integration Testing"
+    implemented: true
+    working: "NA"
+    file: "N/A"
+    stuck_count: 0
+    priority: "low"
+    needs_retesting: false
+    status_history:
+        - working: "NA"
+          agent: "testing"
+          comment: "Frontend testing not performed as per testing agent guidelines. Backend APIs are fully functional and ready for frontend integration."
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "All new pricing and booking features tested and working"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+    - agent: "testing"
+      message: "COMPREHENSIVE TESTING COMPLETE ✅ All 5 critical test scenarios from the review request have been successfully validated: (1) Public hourly pricing endpoint working with correct prices, (2) Admin pricing management fully functional, (3) Admin pricing updates working, (4) All 3 subscription plans verified with correct pricing and daily pass configuration, (5) Hourly booking with duration selection and custom notes working perfectly. Price calculation logic validated for extended hours. Authentication and authorization working correctly. All backend APIs are production-ready."
