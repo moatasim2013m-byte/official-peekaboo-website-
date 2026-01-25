@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export default function AdminPage() {
-  const { api, isAdmin } = useAuth();
+  const { api, isAdmin, user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -52,11 +52,52 @@ export default function AdminPage() {
   const [pointsAdjustment, setPointsAdjustment] = useState({ points: 0, description: '' });
 
   useEffect(() => {
-    if (!isAdmin) {
-      navigate('/');
-      return;
+    setLoading(false);
+  }, []);
+
+  // Show 403 page if not admin
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-muted/30">
+        <Card className="max-w-md w-full border-2 rounded-3xl shadow-xl">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="h-20 w-20 rounded-full bg-red-100 flex items-center justify-center">
+                <span className="text-4xl">🚫</span>
+              </div>
+            </div>
+            <CardTitle className="text-2xl font-bold text-red-600">403 - Not Authorized</CardTitle>
+            <CardDescription className="text-base mt-2">
+              You do not have permission to access the admin panel.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm">
+              <p className="font-semibold mb-2">Debug Info:</p>
+              <p>Email: {user?.email || 'Not logged in'}</p>
+              <p>Role: <span className="font-bold text-red-600">{user?.role || 'None'}</span></p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Required role: <span className="font-bold">admin</span>
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button onClick={() => navigate('/')} variant="outline" className="flex-1 rounded-full">
+                Go Home
+              </Button>
+              <Button onClick={() => navigate('/profile')} className="flex-1 rounded-full">
+                My Profile
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchDashboard();
     }
-    fetchDashboard();
   }, [isAdmin]);
 
   const fetchDashboard = async () => {
