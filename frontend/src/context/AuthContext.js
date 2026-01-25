@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext(null);
@@ -10,19 +10,23 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(localStorage.getItem('peekaboo_token'));
 
-  const api = axios.create({
-    baseURL: `${API_URL}/api`,
-    headers: token ? { Authorization: `Bearer ${token}` } : {}
-  });
-
-  // Update axios instance when token changes
-  useEffect(() => {
-    if (token) {
-      api.defaults.headers.Authorization = `Bearer ${token}`;
-    } else {
-      delete api.defaults.headers.Authorization;
-    }
-  }, [token]);
+  // Create api instance that updates when token changes
+  const api = useMemo(() => {
+    const instance = axios.create({
+      baseURL: `${API_URL}/api`,
+    });
+    
+    // Add interceptor to always use latest token
+    instance.interceptors.request.use((config) => {
+      const currentToken = localStorage.getItem('peekaboo_token');
+      if (currentToken) {
+        config.headers.Authorization = `Bearer ${currentToken}`;
+      }
+      return config;
+    });
+    
+    return instance;
+  }, []);
 
   // Check auth on mount
   useEffect(() => {
