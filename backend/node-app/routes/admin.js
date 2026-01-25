@@ -339,8 +339,17 @@ router.get('/plans', async (req, res) => {
 
 router.post('/plans', async (req, res) => {
   try {
-    const { name, description, visits, price } = req.body;
-    const plan = new SubscriptionPlan({ name, description, visits, price });
+    const { name, name_ar, description, description_ar, visits, price, is_daily_pass, valid_days } = req.body;
+    const plan = new SubscriptionPlan({ 
+      name, 
+      name_ar, 
+      description, 
+      description_ar, 
+      visits, 
+      price,
+      is_daily_pass,
+      valid_days
+    });
     await plan.save();
     res.status(201).json({ plan: plan.toJSON() });
   } catch (error) {
