@@ -139,6 +139,44 @@ router.post('/users/admin', async (req, res) => {
   }
 });
 
+// Create staff user
+router.post('/staff', async (req, res) => {
+  try {
+    const { email, password, name } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'email and password are required' });
+    }
+
+    const existing = await User.findOne({ email: email.toLowerCase().trim() });
+    if (existing) {
+      return res.status(400).json({ error: 'User already exists' });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+
+    const staffUser = await User.create({
+      email: email.toLowerCase().trim(),
+      password_hash: hash,
+      name: name || 'Staff',
+      role: 'staff'
+    });
+
+    return res.status(201).json({
+      ok: true,
+      staff: {
+        id: staffUser._id,
+        email: staffUser.email,
+        name: staffUser.name,
+        role: staffUser.role
+      }
+    });
+  } catch (err) {
+    console.error('Create staff error:', err);
+    return res.status(500).json({ error: 'Failed to create staff user' });
+  }
+});
+
 // ==================== BOOKINGS ====================
 
 router.get('/bookings/hourly', async (req, res) => {
