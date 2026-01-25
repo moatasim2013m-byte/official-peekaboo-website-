@@ -103,10 +103,29 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      {/* Staff Routes */}
+      <Route
+        path="/staff"
+        element={
+          <ProtectedRoute staffOnly>
+            <Layout><StaffPage /></Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/staff/*"
+        element={
+          <ProtectedRoute staffOnly>
+            <Layout><StaffPage /></Layout>
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/reception"
         element={
-          <ProtectedRoute adminOnly>
+          <ProtectedRoute staffOnly>
             <Layout><ReceptionPage /></Layout>
           </ProtectedRoute>
         }
