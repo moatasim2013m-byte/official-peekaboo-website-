@@ -5,32 +5,12 @@ const SubscriptionPlan = require('../models/SubscriptionPlan');
 const UserSubscription = require('../models/UserSubscription');
 const Child = require('../models/Child');
 const User = require('../models/User');
-const LoyaltyHistory = require('../models/LoyaltyHistory');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { sendEmail, emailTemplates } = require('../utils/email');
 const { addDays } = require('date-fns');
 
 const router = express.Router();
-const LOYALTY_POINTS_PER_ORDER = 10;
 const SUBSCRIPTION_DAYS = 30;
-
-// Award loyalty points (idempotent by payment_id)
-const awardLoyaltyPoints = async (userId, paymentId, source) => {
-  const existing = await LoyaltyHistory.findOne({ reference: paymentId, type: 'earned' });
-  if (existing) return false;
-
-  const loyaltyEntry = new LoyaltyHistory({
-    user_id: userId,
-    points: LOYALTY_POINTS_PER_ORDER,
-    type: 'earned',
-    reference: paymentId,
-    source,
-    description: `Earned ${LOYALTY_POINTS_PER_ORDER} points from ${source} purchase`
-  });
-  await loyaltyEntry.save();
-  await User.findByIdAndUpdate(userId, { $inc: { loyalty_points: LOYALTY_POINTS_PER_ORDER } });
-  return true;
-};
 
 // Get all subscription plans
 router.get('/plans', async (req, res) => {
@@ -58,6 +38,7 @@ router.get('/plans/:id', async (req, res) => {
 });
 
 // Purchase subscription (after payment confirmed)
+// NOTE: Expiry is set to null - it starts counting from FIRST CHECK-IN
 router.post('/purchase', authMiddleware, async (req, res) => {
   try {
     const { plan_id, child_id, payment_id } = req.body;
@@ -72,24 +53,20 @@ router.post('/purchase', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Invalid child' });
     }
 
-    const expires_at = addDays(new Date(), SUBSCRIPTION_DAYS);
-
+    // expires_at is null until first check-in
     const subscription = new UserSubscription({
       user_id: req.userId,
       child_id,
       plan_id,
       remaining_visits: plan.visits,
-      expires_at,
+      expires_at: null, // Will be set on first check-in
       payment_id,
-      status: 'active'
+      status: 'pending' // Pending until first check-in activates it
     });
 
     await subscription.save();
 
-    // Award loyalty points
-    if (payment_id) {
-      await awardLoyaltyPoints(req.userId, payment_id, 'subscription');
-    }
+    // NO loyalty points for subscriptions (only hourly gets points)
 
     // Send confirmation email
     const user = await User.findById(req.userId);
@@ -111,10 +88,10 @@ router.get('/my', authMiddleware, async (req, res) => {
       .populate('child_id')
       .sort({ created_at: -1 });
 
-    // Update expired subscriptions
+    // Update expired subscriptions (only those that have been activated)
     const now = new Date();
     for (const sub of subscriptions) {
-      if (sub.status === 'active' && sub.expires_at < now) {
+      if (sub.status === 'active' && sub.expires_at && sub.expires_at < now) {
         sub.status = 'expired';
         await sub.save();
       }
@@ -135,11 +112,15 @@ router.get('/child/:childId', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Child not found' });
     }
 
+    // Find subscription that is either pending (not yet activated) or active with visits remaining
     const subscription = await UserSubscription.findOne({
       child_id: req.params.childId,
-      status: 'active',
+      status: { $in: ['pending', 'active'] },
       remaining_visits: { $gt: 0 },
-      expires_at: { $gt: new Date() }
+      $or: [
+        { expires_at: null }, // Pending, not yet activated
+        { expires_at: { $gt: new Date() } } // Active and not expired
+      ]
     }).populate('plan_id');
 
     res.json({ subscription: subscription ? subscription.toJSON() : null });
@@ -150,19 +131,31 @@ router.get('/child/:childId', authMiddleware, async (req, res) => {
 });
 
 // Consume subscription visit (reception scan)
+// This also activates the subscription if it's the first use
 router.post('/consume', authMiddleware, async (req, res) => {
   try {
     const { child_id } = req.body;
     
+    // Find subscription that is pending or active
     const subscription = await UserSubscription.findOne({
       child_id,
-      status: 'active',
+      status: { $in: ['pending', 'active'] },
       remaining_visits: { $gt: 0 },
-      expires_at: { $gt: new Date() }
+      $or: [
+        { expires_at: null }, // Pending, not yet activated
+        { expires_at: { $gt: new Date() } } // Active and not expired
+      ]
     }).populate('plan_id').populate('child_id');
 
     if (!subscription) {
       return res.status(400).json({ error: 'No active subscription found for this child' });
+    }
+
+    // If this is the first check-in (pending status), activate and set expiry
+    if (subscription.status === 'pending') {
+      subscription.status = 'active';
+      subscription.expires_at = addDays(new Date(), SUBSCRIPTION_DAYS);
+      subscription.first_checkin_at = new Date();
     }
 
     subscription.remaining_visits -= 1;
@@ -173,7 +166,8 @@ router.post('/consume', authMiddleware, async (req, res) => {
 
     res.json({
       message: 'Visit consumed successfully',
-      subscription: subscription.toJSON()
+      subscription: subscription.toJSON(),
+      first_activation: subscription.first_checkin_at ? true : false
     });
   } catch (error) {
     console.error('Consume subscription error:', error);
