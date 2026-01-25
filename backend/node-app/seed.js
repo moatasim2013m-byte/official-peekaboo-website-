@@ -86,7 +86,10 @@ const seed = async () => {
     const settingsCount = await Settings.countDocuments();
     if (settingsCount === 0) {
       const settings = [
-        { key: 'hourly_price', value: 10.00 },
+        { key: 'hourly_1hr', value: 7 },
+        { key: 'hourly_2hr', value: 10 },
+        { key: 'hourly_3hr', value: 13 },
+        { key: 'hourly_extra_hr', value: 3 },
         { key: 'hourly_capacity', value: 25 },
         { key: 'birthday_capacity', value: 1 }
       ];
