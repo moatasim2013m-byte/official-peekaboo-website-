@@ -249,10 +249,7 @@ router.post('/birthday', authMiddleware, async (req, res) => {
     // Increment slot booked count
     await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: 1 } });
 
-    // Award loyalty points for paid bookings
-    if (payment_id && !is_custom) {
-      await awardLoyaltyPoints(req.userId, payment_id, 'birthday');
-    }
+    // NO loyalty points for birthday bookings (only hourly gets points)
 
     // Send confirmation email
     const user = await User.findById(req.userId);
