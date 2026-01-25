@@ -44,6 +44,13 @@ export const Navbar = () => {
             </Link>
           </div>
 
+          {/* Debug Info - TEMPORARY */}
+          {isAuthenticated && (
+            <div className="hidden md:block text-xs bg-yellow-100 text-yellow-900 px-3 py-1 rounded-full border border-yellow-300">
+              DEBUG: {user?.email} | role: {user?.role}
+            </div>
+          )}
+
           {/* Auth Buttons / User Menu */}
           <div className="hidden md:flex items-center gap-4">
             {isAuthenticated && isAdmin && (
