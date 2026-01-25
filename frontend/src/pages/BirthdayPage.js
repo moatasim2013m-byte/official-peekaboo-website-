@@ -1,0 +1,431 @@
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
+import { Calendar } from '../components/ui/calendar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
+import { Textarea } from '../components/ui/textarea';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import { toast } from 'sonner';
+import { format, addDays } from 'date-fns';
+import { Cake, Users, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+
+export default function BirthdayPage() {
+  const { isAuthenticated, api } = useAuth();
+  const navigate = useNavigate();
+  const [date, setDate] = useState(addDays(new Date(), 7));
+  const [slots, setSlots] = useState([]);
+  const [themes, setThemes] = useState([]);
+  const [children, setChildren] = useState([]);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [selectedTheme, setSelectedTheme] = useState(null);
+  const [selectedChild, setSelectedChild] = useState('');
+  const [guestCount, setGuestCount] = useState(10);
+  const [specialNotes, setSpecialNotes] = useState('');
+  const [customRequest, setCustomRequest] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [activeTab, setActiveTab] = useState('standard');
+
+  useEffect(() => {
+    fetchThemes();
+    if (isAuthenticated) {
+      fetchChildren();
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    fetchSlots();
+  }, [date]);
+
+  const fetchChildren = async () => {
+    try {
+      const response = await api.get('/profile/children');
+      setChildren(response.data.children || []);
+    } catch (error) {
+      console.error('Failed to fetch children:', error);
+    }
+  };
+
+  const fetchThemes = async () => {
+    try {
+      const response = await api.get('/themes');
+      setThemes(response.data.themes || []);
+    } catch (error) {
+      console.error('Failed to fetch themes:', error);
+    }
+  };
+
+  const fetchSlots = async () => {
+    setLoadingSlots(true);
+    try {
+      const dateStr = format(date, 'yyyy-MM-dd');
+      const response = await api.get(`/slots/available?date=${dateStr}&slot_type=birthday`);
+      setSlots(response.data.slots || []);
+    } catch (error) {
+      console.error('Failed to fetch slots:', error);
+    } finally {
+      setLoadingSlots(false);
+    }
+  };
+
+  const handleStandardBooking = async () => {
+    if (!isAuthenticated) {
+      toast.error('Please login to book');
+      navigate('/login');
+      return;
+    }
+
+    if (!selectedSlot || !selectedTheme || !selectedChild) {
+      toast.error('Please select a slot, theme, and child');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await api.post('/payments/create-checkout', {
+        type: 'birthday',
+        reference_id: selectedSlot.id,
+        theme_id: selectedTheme.id,
+        child_id: selectedChild,
+        origin_url: window.location.origin
+      });
+
+      window.location.href = response.data.url;
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to initiate booking');
+      setLoading(false);
+    }
+  };
+
+  const handleCustomRequest = async () => {
+    if (!isAuthenticated) {
+      toast.error('Please login to submit request');
+      navigate('/login');
+      return;
+    }
+
+    if (!selectedSlot || !selectedChild || !customRequest) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await api.post('/bookings/birthday/custom', {
+        slot_id: selectedSlot.id,
+        child_id: selectedChild,
+        custom_request: customRequest,
+        guest_count: guestCount,
+        special_notes: specialNotes
+      });
+
+      toast.success('Custom party request submitted! Our team will contact you soon.');
+      navigate('/profile');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to submit request');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const minDate = addDays(new Date(), 3);
+  const maxDate = addDays(new Date(), 90);
+
+  return (
+    <div className="min-h-screen bg-hero-gradient py-8 md:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-8">
+          <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="birthday-title">
+            <Cake className="inline-block h-10 w-10 text-accent mr-2" />
+            Birthday Parties
+          </h1>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            Make your child's birthday unforgettable! Choose from our amazing themes or request a custom party.
+          </p>
+        </div>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 rounded-full p-1 bg-muted">
+            <TabsTrigger value="standard" className="rounded-full" data-testid="tab-standard">
+              Standard Themes
+            </TabsTrigger>
+            <TabsTrigger value="custom" className="rounded-full" data-testid="tab-custom">
+              Custom Request
+            </TabsTrigger>
+          </TabsList>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Calendar */}
+            <Card className="border-2 rounded-3xl">
+              <CardHeader>
+                <CardTitle className="font-heading">Select Date</CardTitle>
+                <CardDescription>Book at least 3 days in advance</CardDescription>
+              </CardHeader>
+              <CardContent className="flex justify-center">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(d) => d && setDate(d)}
+                  disabled={(d) => d < minDate || d > maxDate}
+                  className="rounded-xl"
+                  data-testid="birthday-calendar"
+                />
+              </CardContent>
+            </Card>
+
+            {/* Time Slots */}
+            <Card className="border-2 rounded-3xl lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="font-heading">
+                  Party Slots for {format(date, 'MMMM d, yyyy')}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loadingSlots ? (
+                  <div className="flex justify-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : slots.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No party slots available for this date</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {slots.map((slot) => (
+                      <button
+                        key={slot.id}
+                        onClick={() => slot.is_available && setSelectedSlot(slot)}
+                        disabled={!slot.is_available}
+                        className={`p-4 rounded-2xl border-2 transition-all ${
+                          selectedSlot?.id === slot.id
+                            ? 'border-accent bg-accent/10'
+                            : slot.is_available
+                            ? 'border-border hover:border-accent/50 bg-white'
+                            : 'border-border bg-muted opacity-50 cursor-not-allowed'
+                        }`}
+                        data-testid={`party-slot-${slot.start_time}`}
+                      >
+                        <div className="font-heading font-semibold">{slot.start_time}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {slot.is_available ? 'Available' : 'Booked'}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          <TabsContent value="standard" className="space-y-8">
+            {/* Themes Grid */}
+            <div>
+              <h2 className="font-heading text-2xl font-bold mb-6">Choose a Theme</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                {themes.map((theme) => (
+                  <Card
+                    key={theme.id}
+                    onClick={() => setSelectedTheme(theme)}
+                    className={`border-2 rounded-2xl cursor-pointer transition-all card-interactive ${
+                      selectedTheme?.id === theme.id ? 'border-accent ring-2 ring-accent/20' : ''
+                    }`}
+                    data-testid={`theme-${theme.id}`}
+                  >
+                    <CardContent className="p-4">
+                      {theme.image_url && (
+                        <img 
+                          src={theme.image_url} 
+                          alt={theme.name}
+                          className="w-full h-24 object-cover rounded-xl mb-3"
+                        />
+                      )}
+                      <h3 className="font-heading font-semibold">{theme.name}</h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{theme.description}</p>
+                      <p className="text-accent font-bold mt-2">${theme.price}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Booking Form */}
+            {isAuthenticated && (
+              <Card className="border-2 rounded-3xl">
+                <CardHeader>
+                  <CardTitle className="font-heading">Complete Your Booking</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div>
+                      <Label>Birthday Child</Label>
+                      <Select value={selectedChild} onValueChange={setSelectedChild}>
+                        <SelectTrigger className="rounded-xl mt-2" data-testid="birthday-child-select">
+                          <SelectValue placeholder="Select child" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {children.map((child) => (
+                            <SelectItem key={child.id} value={child.id}>
+                              {child.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label>Number of Guests</Label>
+                      <Input
+                        type="number"
+                        min="5"
+                        max="50"
+                        value={guestCount}
+                        onChange={(e) => setGuestCount(parseInt(e.target.value))}
+                        className="rounded-xl mt-2"
+                        data-testid="guest-count"
+                      />
+                    </div>
+
+                    <div>
+                      <Label>Selected Theme</Label>
+                      <div className="p-3 rounded-xl bg-muted mt-2">
+                        {selectedTheme ? (
+                          <span className="font-semibold">{selectedTheme.name} - ${selectedTheme.price}</span>
+                        ) : (
+                          <span className="text-muted-foreground">No theme selected</span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="flex items-end">
+                      <Button
+                        onClick={handleStandardBooking}
+                        disabled={!selectedSlot || !selectedTheme || !selectedChild || loading}
+                        className="w-full rounded-full h-12 btn-playful bg-accent hover:bg-accent/90"
+                        data-testid="book-party-btn"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          'Book & Pay'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
+          <TabsContent value="custom" className="space-y-8">
+            <Card className="border-2 rounded-3xl">
+              <CardHeader>
+                <CardTitle className="font-heading flex items-center gap-2">
+                  <Sparkles className="h-6 w-6 text-accent" />
+                  Custom Theme Request
+                </CardTitle>
+                <CardDescription>
+                  Have a unique idea? Tell us about your dream party and our team will reach out to discuss details and pricing.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label>Birthday Child</Label>
+                    <Select value={selectedChild} onValueChange={setSelectedChild}>
+                      <SelectTrigger className="rounded-xl mt-2">
+                        <SelectValue placeholder="Select child" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {children.map((child) => (
+                          <SelectItem key={child.id} value={child.id}>
+                            {child.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label>Expected Guests</Label>
+                    <Input
+                      type="number"
+                      min="5"
+                      max="100"
+                      value={guestCount}
+                      onChange={(e) => setGuestCount(parseInt(e.target.value))}
+                      className="rounded-xl mt-2"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Describe Your Custom Theme *</Label>
+                  <Textarea
+                    value={customRequest}
+                    onChange={(e) => setCustomRequest(e.target.value)}
+                    placeholder="Tell us about your dream party theme, colors, characters, decorations..."
+                    className="rounded-xl mt-2 min-h-[120px]"
+                    data-testid="custom-request"
+                  />
+                </div>
+
+                <div>
+                  <Label>Special Notes (Optional)</Label>
+                  <Textarea
+                    value={specialNotes}
+                    onChange={(e) => setSpecialNotes(e.target.value)}
+                    placeholder="Any allergies, special requirements, or additional requests..."
+                    className="rounded-xl mt-2"
+                  />
+                </div>
+
+                <Button
+                  onClick={handleCustomRequest}
+                  disabled={!selectedSlot || !selectedChild || !customRequest || loading}
+                  className="rounded-full h-12 btn-playful bg-accent hover:bg-accent/90"
+                  data-testid="submit-custom-btn"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    'Submit Custom Request'
+                  )}
+                </Button>
+                <p className="text-sm text-muted-foreground">
+                  No payment required for custom requests. Our team will contact you with pricing.
+                </p>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+
+        {!isAuthenticated && (
+          <Card className="border-2 rounded-3xl mt-8 bg-accent/5">
+            <CardContent className="py-8 text-center">
+              <p className="text-lg mb-4">Please login or create an account to book a party</p>
+              <div className="flex gap-4 justify-center">
+                <Button onClick={() => navigate('/login')} variant="outline" className="rounded-full">
+                  Login
+                </Button>
+                <Button onClick={() => navigate('/register')} className="rounded-full btn-playful bg-accent">
+                  Sign Up
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}
