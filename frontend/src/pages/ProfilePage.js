@@ -440,21 +440,26 @@ export default function ProfilePage() {
                 ) : (
                   <div className="space-y-4">
                     {subscriptions.map((sub) => (
-                      <Card key={sub.id} className={`border rounded-2xl ${sub.status === 'active' ? 'border-secondary' : ''}`}>
+                      <Card key={sub.id} className={`border rounded-2xl ${sub.status === 'active' || sub.status === 'pending' ? 'border-secondary' : ''}`}>
                         <CardContent className="p-4">
                           <div className="flex justify-between items-start">
                             <div>
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="font-semibold">{sub.plan_id?.name}</span>
                                 <Badge className={getStatusBadge(sub.status)}>
-                                  {sub.status}
+                                  {sub.status === 'pending' ? 'Not activated' : sub.status}
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground">
                                 Child: {sub.child_id?.name}
                               </p>
                               <p className="text-sm text-muted-foreground">
-                                Expires: {format(new Date(sub.expires_at), 'MMM d, yyyy')}
+                                {sub.status === 'pending' 
+                                  ? 'Expires 30 days after first check-in'
+                                  : sub.expires_at 
+                                    ? `Expires: ${format(new Date(sub.expires_at), 'MMM d, yyyy')}`
+                                    : 'No expiry set'
+                                }
                               </p>
                             </div>
                             <div className="text-right">
