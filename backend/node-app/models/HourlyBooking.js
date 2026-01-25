@@ -4,6 +4,8 @@ const hourlyBookingSchema = new mongoose.Schema({
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   child_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Child', required: true },
   slot_id: { type: mongoose.Schema.Types.ObjectId, ref: 'TimeSlot', required: true },
+  duration_hours: { type: Number, required: true, default: 2 },
+  custom_notes: { type: String, default: '' },
   qr_code: { type: String, required: true },
   booking_code: { type: String, required: true, unique: true },
   status: { type: String, enum: ['pending', 'confirmed', 'checked_in', 'completed', 'cancelled'], default: 'pending' },
