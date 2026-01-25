@@ -62,12 +62,13 @@ export default function AdminPage() {
   const fetchDashboard = async () => {
     setLoading(true);
     try {
-      const [dashRes, themesRes, plansRes, galleryRes, settingsRes] = await Promise.all([
+      const [dashRes, themesRes, plansRes, galleryRes, settingsRes, pricingRes] = await Promise.all([
         api.get('/admin/dashboard'),
         api.get('/themes'),
         api.get('/admin/plans'),
         api.get('/gallery'),
-        api.get('/admin/settings')
+        api.get('/admin/settings'),
+        api.get('/admin/pricing')
       ]);
 
       setStats(dashRes.data.stats || {});
@@ -75,6 +76,7 @@ export default function AdminPage() {
       setPlans(plansRes.data.plans || []);
       setGallery(galleryRes.data.media || []);
       setSettings(settingsRes.data.settings || {});
+      setPricing(pricingRes.data.pricing || {});
     } catch (error) {
       console.error('Failed to fetch admin data:', error);
     } finally {
