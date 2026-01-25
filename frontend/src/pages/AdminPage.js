@@ -337,6 +337,136 @@ export default function AdminPage() {
             </div>
           </TabsContent>
 
+          {/* Pricing Management */}
+          <TabsContent value="pricing">
+            <Card className="rounded-2xl">
+              <CardHeader>
+                <CardTitle className="font-heading text-2xl">إدارة الأسعار / Pricing Management</CardTitle>
+                <CardDescription>
+                  تحكم كامل في أسعار التذاكر، الاشتراكات، وثيمات الحفلات
+                  <br />
+                  Full control over hourly tickets, subscriptions, and birthday theme prices
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-8">
+                {/* Hourly Pricing */}
+                <div>
+                  <h3 className="font-heading text-xl font-bold mb-4 flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-primary" />
+                    أسعار التذاكر بالساعة / Hourly Ticket Pricing
+                  </h3>
+                  <form onSubmit={handleUpdatePricing} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div>
+                        <Label htmlFor="hourly_1hr">ساعة واحدة / 1 Hour (JD)</Label>
+                        <Input
+                          id="hourly_1hr"
+                          type="number"
+                          step="0.01"
+                          value={pricing.hourly_1hr}
+                          onChange={(e) => setPricing({ ...pricing, hourly_1hr: parseFloat(e.target.value) })}
+                          className="rounded-xl mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="hourly_2hr">ساعتان / 2 Hours (JD) ⭐</Label>
+                        <Input
+                          id="hourly_2hr"
+                          type="number"
+                          step="0.01"
+                          value={pricing.hourly_2hr}
+                          onChange={(e) => setPricing({ ...pricing, hourly_2hr: parseFloat(e.target.value) })}
+                          className="rounded-xl mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="hourly_3hr">3 ساعات / 3 Hours (JD)</Label>
+                        <Input
+                          id="hourly_3hr"
+                          type="number"
+                          step="0.01"
+                          value={pricing.hourly_3hr}
+                          onChange={(e) => setPricing({ ...pricing, hourly_3hr: parseFloat(e.target.value) })}
+                          className="rounded-xl mt-1"
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="hourly_extra_hr">ساعة إضافية / Extra Hour (JD)</Label>
+                        <Input
+                          id="hourly_extra_hr"
+                          type="number"
+                          step="0.01"
+                          value={pricing.hourly_extra_hr}
+                          onChange={(e) => setPricing({ ...pricing, hourly_extra_hr: parseFloat(e.target.value) })}
+                          className="rounded-xl mt-1"
+                        />
+                      </div>
+                    </div>
+                    <Button type="submit" className="rounded-full px-8">
+                      حفظ الأسعار / Save Pricing
+                    </Button>
+                  </form>
+                </div>
+
+                {/* Subscription Plans */}
+                <div>
+                  <h3 className="font-heading text-xl font-bold mb-4 flex items-center gap-2">
+                    <Star className="h-5 w-5 text-secondary" />
+                    باقات الاشتراكات / Subscription Plans
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {plans.map((plan) => (
+                      <Card key={plan.id} className="rounded-xl">
+                        <CardContent className="p-4">
+                          <h4 className="font-heading font-bold text-lg">{plan.name_ar || plan.name}</h4>
+                          <p className="text-sm text-muted-foreground mb-2">{plan.description_ar || plan.description}</p>
+                          <div className="flex justify-between items-center">
+                            <Badge variant="secondary">{plan.visits} زيارة / visits</Badge>
+                            <span className="font-bold text-primary text-lg">{plan.price} دينار</span>
+                          </div>
+                          {plan.is_daily_pass && (
+                            <Badge className="mt-2 bg-purple-100 text-purple-700">
+                              باقة يومية / Daily Pass
+                            </Badge>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    يمكن تعديل الباقات من تبويب "Subscriptions"
+                    <br />
+                    Edit subscription plans in the "Subscriptions" tab
+                  </p>
+                </div>
+
+                {/* Birthday Themes */}
+                <div>
+                  <h3 className="font-heading text-xl font-bold mb-4 flex items-center gap-2">
+                    <Cake className="h-5 w-5 text-pink-500" />
+                    ثيمات حفلات الأعياد / Birthday Themes
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {themes.slice(0, 6).map((theme) => (
+                      <Card key={theme.id} className="rounded-xl">
+                        <CardContent className="p-4">
+                          <h4 className="font-heading font-bold">{theme.name_ar || theme.name}</h4>
+                          <p className="text-sm text-muted-foreground line-clamp-1">{theme.description_ar || theme.description}</p>
+                          <p className="text-primary font-bold mt-2">{theme.price} دينار / JD</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    يمكن تعديل الثيمات وأسعارها من تبويب "Themes"
+                    <br />
+                    Edit themes and prices in the "Themes" tab
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Users/Parents */}
           <TabsContent value="users">
             <Card className="rounded-2xl">
