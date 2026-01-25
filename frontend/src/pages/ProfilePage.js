@@ -120,7 +120,7 @@ export default function ProfilePage() {
       expired: 'bg-red-100 text-red-700',
       consumed: 'bg-gray-100 text-gray-700'
     };
-    return colors[status] || 'bg-gray-100 text-gray-700';
+    return colors[status] || 'bg-yellow-100 text-yellow-700';
   };
 
   if (loading) {
