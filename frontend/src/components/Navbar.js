@@ -124,6 +124,12 @@ export const Navbar = () => {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
+            {/* Debug Info - TEMPORARY */}
+            {isAuthenticated && (
+              <div className="mb-4 text-xs bg-yellow-100 text-yellow-900 px-3 py-2 rounded border border-yellow-300">
+                DEBUG: {user?.email} | role: {user?.role}
+              </div>
+            )}
             <div className="flex flex-col gap-4">
               <Link to="/tickets" className="text-foreground hover:text-primary font-medium" onClick={() => setMobileMenuOpen(false)}>
                 Hourly Tickets
