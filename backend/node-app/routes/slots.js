@@ -1,32 +1,89 @@
 const express = require('express');
 const TimeSlot = require('../models/TimeSlot');
+const HourlyBooking = require('../models/HourlyBooking');
 const Settings = require('../models/Settings');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
-const { format, addDays, parse, isBefore, subMinutes } = require('date-fns');
-const { toZonedTime, formatInTimeZone } = require('date-fns-tz');
+const { format, addDays, parse, isBefore, subMinutes, addMinutes } = require('date-fns');
+const { toZonedTime } = require('date-fns-tz');
 
 const router = express.Router();
 const TIMEZONE = 'Asia/Amman';
-const OPERATING_HOURS = { start: 10, end: 22 }; // 10 AM - 10 PM
 const BOOKING_CUTOFF_MINUTES = 30;
 
-// Generate slots for a date range
-const generateSlotsForDate = async (date, slotType) => {
+// HOURLY: 10:00 AM to 12:00 AM (midnight), every 10 minutes, session = 60 min
+// Last entry at 23:50
+const HOURLY_CONFIG = {
+  startHour: 10,
+  startMinute: 0,
+  endHour: 24, // midnight
+  endMinute: 0,
+  intervalMinutes: 10,
+  sessionDurationMinutes: 60,
+  maxCapacity: 70 // max kids at any moment
+};
+
+// BIRTHDAY: 1:00 PM to 12:00 AM, every 2 hours, duration = 2 hours
+// Slots: 13:00, 15:00, 17:00, 19:00, 21:00, 23:00
+const BIRTHDAY_CONFIG = {
+  startHour: 13,
+  endHour: 24,
+  intervalHours: 2,
+  durationHours: 2,
+  slots: ['13:00', '15:00', '17:00', '19:00', '21:00', '23:00']
+};
+
+// Generate hourly slots for a date (every 10 minutes from 10:00 to 23:50)
+const generateHourlySlotsForDate = async (date) => {
   const slots = [];
-  for (let hour = OPERATING_HOURS.start; hour < OPERATING_HOURS.end; hour++) {
-    const startTime = `${hour.toString().padStart(2, '0')}:00`;
+  let hour = HOURLY_CONFIG.startHour;
+  let minute = HOURLY_CONFIG.startMinute;
+  
+  while (hour < HOURLY_CONFIG.endHour || (hour === HOURLY_CONFIG.endHour && minute === 0)) {
+    // Last entry is 23:50
+    if (hour === 23 && minute > 50) break;
+    if (hour >= 24) break;
     
-    // Check if slot already exists
-    const existing = await TimeSlot.findOne({ date, start_time: startTime, slot_type: slotType });
+    const startTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    
+    const existing = await TimeSlot.findOne({ date, start_time: startTime, slot_type: 'hourly' });
     if (!existing) {
-      // Get default capacity from settings
-      const capacitySetting = await Settings.findOne({ key: `${slotType}_capacity` });
-      const capacity = capacitySetting?.value || 25;
+      const slot = new TimeSlot({
+        date,
+        start_time: startTime,
+        slot_type: 'hourly',
+        capacity: HOURLY_CONFIG.maxCapacity,
+        booked_count: 0
+      });
+      await slot.save();
+      slots.push(slot);
+    } else {
+      slots.push(existing);
+    }
+    
+    // Increment by 10 minutes
+    minute += HOURLY_CONFIG.intervalMinutes;
+    if (minute >= 60) {
+      minute = 0;
+      hour += 1;
+    }
+  }
+  return slots;
+};
+
+// Generate birthday slots for a date
+const generateBirthdaySlotsForDate = async (date) => {
+  const slots = [];
+  
+  for (const startTime of BIRTHDAY_CONFIG.slots) {
+    const existing = await TimeSlot.findOne({ date, start_time: startTime, slot_type: 'birthday' });
+    if (!existing) {
+      const capacitySetting = await Settings.findOne({ key: 'birthday_capacity' });
+      const capacity = capacitySetting?.value || 1;
       
       const slot = new TimeSlot({
         date,
         start_time: startTime,
-        slot_type: slotType,
+        slot_type: 'birthday',
         capacity,
         booked_count: 0
       });
@@ -39,6 +96,58 @@ const generateSlotsForDate = async (date, slotType) => {
   return slots;
 };
 
+// Calculate active kids count at a specific time for a given date
+// This checks all sessions that would be active at that moment
+const getActiveKidsAtTime = async (date, timeStr) => {
+  const [checkHour, checkMinute] = timeStr.split(':').map(Number);
+  const checkTimeMinutes = checkHour * 60 + checkMinute;
+  
+  // Find all confirmed/checked_in hourly bookings for this date
+  const bookings = await HourlyBooking.find({
+    status: { $in: ['confirmed', 'checked_in'] }
+  }).populate('slot_id');
+  
+  let activeCount = 0;
+  
+  for (const booking of bookings) {
+    if (!booking.slot_id || booking.slot_id.date !== date) continue;
+    
+    const [slotHour, slotMinute] = booking.slot_id.start_time.split(':').map(Number);
+    const slotStartMinutes = slotHour * 60 + slotMinute;
+    const slotEndMinutes = slotStartMinutes + HOURLY_CONFIG.sessionDurationMinutes;
+    
+    // Check if this session overlaps with the check time
+    // A session is active if: slotStart <= checkTime < slotEnd
+    if (slotStartMinutes <= checkTimeMinutes && checkTimeMinutes < slotEndMinutes) {
+      activeCount++;
+    }
+  }
+  
+  return activeCount;
+};
+
+// Calculate available capacity for a new booking at a given slot
+// Must check all 60-minute windows this session would occupy
+const getAvailableCapacityForSlot = async (date, startTimeStr) => {
+  const [startHour, startMinute] = startTimeStr.split(':').map(Number);
+  const startTimeMinutes = startHour * 60 + startMinute;
+  const endTimeMinutes = startTimeMinutes + HOURLY_CONFIG.sessionDurationMinutes;
+  
+  let maxActiveKids = 0;
+  
+  // Check every 10-minute interval during this session
+  for (let t = startTimeMinutes; t < endTimeMinutes; t += 10) {
+    const hour = Math.floor(t / 60);
+    const minute = t % 60;
+    const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    
+    const activeKids = await getActiveKidsAtTime(date, timeStr);
+    maxActiveKids = Math.max(maxActiveKids, activeKids);
+  }
+  
+  return HOURLY_CONFIG.maxCapacity - maxActiveKids;
+};
+
 // Get available slots for a date (public - no auth required for viewing)
 router.get('/available', async (req, res) => {
   try {
@@ -49,11 +158,15 @@ router.get('/available', async (req, res) => {
     }
 
     // Generate slots if they don't exist
-    await generateSlotsForDate(date, slot_type);
+    if (slot_type === 'hourly') {
+      await generateHourlySlotsForDate(date);
+    } else {
+      await generateBirthdaySlotsForDate(date);
+    }
 
     // Get current time in Amman timezone
     const nowInAmman = toZonedTime(new Date(), TIMEZONE);
-    const cutoffTime = subMinutes(nowInAmman, -BOOKING_CUTOFF_MINUTES);
+    const cutoffTime = addMinutes(nowInAmman, BOOKING_CUTOFF_MINUTES);
 
     const slots = await TimeSlot.find({ 
       date, 
@@ -61,21 +174,33 @@ router.get('/available', async (req, res) => {
       is_active: true
     }).sort({ start_time: 1 });
 
-    // Filter slots that are still bookable
-    const availableSlots = slots.map(slot => {
+    // Process slots with availability
+    const availableSlots = await Promise.all(slots.map(async (slot) => {
       const slotDateTime = parse(`${slot.date} ${slot.start_time}`, 'yyyy-MM-dd HH:mm', new Date());
       const slotInAmman = toZonedTime(slotDateTime, TIMEZONE);
       
       const isPast = isBefore(slotInAmman, cutoffTime);
-      const isAvailable = !isPast && slot.booked_count < slot.capacity;
+      
+      let availableSpots;
+      let isAvailable;
+      
+      if (slot_type === 'hourly') {
+        // For hourly, calculate based on overlapping sessions
+        availableSpots = await getAvailableCapacityForSlot(date, slot.start_time);
+        isAvailable = !isPast && availableSpots > 0;
+      } else {
+        // For birthday, simple capacity check
+        availableSpots = slot.capacity - slot.booked_count;
+        isAvailable = !isPast && availableSpots > 0;
+      }
       
       return {
         ...slot.toJSON(),
-        available_spots: slot.capacity - slot.booked_count,
+        available_spots: availableSpots,
         is_available: isAvailable,
         is_past: isPast
       };
-    });
+    }));
 
     res.json({ slots: availableSlots });
   } catch (error) {
@@ -97,6 +222,12 @@ router.get('/:id', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Failed to get slot' });
   }
 });
+
+// Check capacity before booking (internal helper exported for use in bookings.js)
+const checkHourlyCapacity = async (date, startTimeStr) => {
+  const availableCapacity = await getAvailableCapacityForSlot(date, startTimeStr);
+  return availableCapacity > 0;
+};
 
 // Admin: Create slot
 router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
@@ -151,7 +282,9 @@ router.post('/generate', authMiddleware, adminMiddleware, async (req, res) => {
     let current = start;
     while (current <= end) {
       const dateStr = format(current, 'yyyy-MM-dd');
-      const slots = await generateSlotsForDate(dateStr, slot_type);
+      const slots = slot_type === 'hourly' 
+        ? await generateHourlySlotsForDate(dateStr)
+        : await generateBirthdaySlotsForDate(dateStr);
       generatedSlots.push(...slots);
       current = addDays(current, 1);
     }
@@ -167,3 +300,5 @@ router.post('/generate', authMiddleware, adminMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.checkHourlyCapacity = checkHourlyCapacity;
+module.exports.getAvailableCapacityForSlot = getAvailableCapacityForSlot;
