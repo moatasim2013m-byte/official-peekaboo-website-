@@ -15,18 +15,38 @@ try {
   console.error('Stripe initialization error:', error.message);
 }
 
-// Hourly pricing in JD:
-// 1 hour = 7 JD
-// 2 hours = 10 JD (Best Value)
-// 3 hours = 13 JD
-// Extra hour after 2h = +3 JD/hour
-const getHourlyPrice = (duration_hours = 1) => {
-  const hours = parseInt(duration_hours) || 1;
-  if (hours === 1) return 7;
-  if (hours === 2) return 10;
-  if (hours === 3) return 13;
-  // For 4+ hours: 10 JD (2h base) + 3 JD per extra hour
-  return 10 + (hours - 2) * 3;
+// Get hourly price from Settings or use defaults
+const getHourlyPrice = async (duration_hours = 2) => {
+  const hours = parseInt(duration_hours) || 2;
+  
+  try {
+    // Fetch pricing from Settings
+    const pricing = await Settings.find({ 
+      key: { $in: ['hourly_1hr', 'hourly_2hr', 'hourly_3hr', 'hourly_extra_hr'] } 
+    });
+    
+    const prices = {
+      hourly_1hr: 7,
+      hourly_2hr: 10,
+      hourly_3hr: 13,
+      hourly_extra_hr: 3
+    };
+    
+    pricing.forEach(p => { prices[p.key] = parseFloat(p.value); });
+    
+    if (hours === 1) return prices.hourly_1hr;
+    if (hours === 2) return prices.hourly_2hr;
+    if (hours === 3) return prices.hourly_3hr;
+    // For 4+ hours: 2h base price + extra hour price per additional hour
+    return prices.hourly_2hr + (hours - 2) * prices.hourly_extra_hr;
+  } catch (error) {
+    console.error('Error fetching hourly pricing:', error);
+    // Fallback to defaults
+    if (hours === 1) return 7;
+    if (hours === 2) return 10;
+    if (hours === 3) return 13;
+    return 10 + (hours - 2) * 3;
+  }
 };
 
 const getBirthdayThemePrice = async (themeId) => {
