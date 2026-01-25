@@ -31,6 +31,12 @@ export default function AdminPage() {
   const [plans, setPlans] = useState([]);
   const [gallery, setGallery] = useState([]);
   const [settings, setSettings] = useState({});
+  const [pricing, setPricing] = useState({
+    hourly_1hr: 7,
+    hourly_2hr: 10,
+    hourly_3hr: 13,
+    hourly_extra_hr: 3
+  });
 
   // Dialog states
   const [themeDialogOpen, setThemeDialogOpen] = useState(false);
