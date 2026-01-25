@@ -263,6 +263,9 @@ export default function AdminPage() {
             <TabsTrigger value="dashboard" className="rounded-full gap-2">
               <LayoutDashboard className="h-4 w-4" /> Dashboard
             </TabsTrigger>
+            <TabsTrigger value="pricing" className="rounded-full gap-2">
+              <DollarSign className="h-4 w-4" /> Pricing
+            </TabsTrigger>
             <TabsTrigger value="users" className="rounded-full gap-2">
               <Users className="h-4 w-4" /> Parents
             </TabsTrigger>
