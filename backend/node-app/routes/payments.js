@@ -15,10 +15,18 @@ try {
   console.error('Stripe initialization error:', error.message);
 }
 
-// Fixed pricing packages (never accept from frontend)
-const getHourlyPrice = async () => {
-  const setting = await Settings.findOne({ key: 'hourly_price' });
-  return parseFloat(setting?.value) || 10.00; // Default $10
+// Hourly pricing in JD:
+// 1 hour = 7 JD
+// 2 hours = 10 JD (Best Value)
+// 3 hours = 13 JD
+// Extra hour after 2h = +3 JD/hour
+const getHourlyPrice = (duration_hours = 1) => {
+  const hours = parseInt(duration_hours) || 1;
+  if (hours === 1) return 7;
+  if (hours === 2) return 10;
+  if (hours === 3) return 13;
+  // For 4+ hours: 10 JD (2h base) + 3 JD per extra hour
+  return 10 + (hours - 2) * 3;
 };
 
 const getBirthdayThemePrice = async (themeId) => {
@@ -33,6 +41,19 @@ const getSubscriptionPrice = async (planId) => {
   return parseFloat(plan?.price) || 50.00;
 };
 
+// Get hourly pricing info (public endpoint for frontend)
+router.get('/hourly-pricing', (req, res) => {
+  res.json({
+    pricing: [
+      { hours: 1, price: 7, label: '1 Hour', label_ar: 'ساعة واحدة' },
+      { hours: 2, price: 10, label: '2 Hours', label_ar: 'ساعتان', best_value: true },
+      { hours: 3, price: 13, label: '3 Hours', label_ar: '3 ساعات' }
+    ],
+    extra_hour_price: 3,
+    currency: 'JD'
+  });
+});
+
 // Create checkout session
 router.post('/create-checkout', authMiddleware, async (req, res) => {
   try {
@@ -41,7 +62,7 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       return res.status(500).json({ error: 'Payment service not configured' });
     }
 
-    const { type, reference_id, origin_url } = req.body;
+    const { type, reference_id, origin_url, duration_hours } = req.body;
     
     if (!type || !origin_url) {
       return res.status(400).json({ error: 'type and origin_url are required' });
