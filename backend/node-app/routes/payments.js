@@ -137,6 +137,10 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
 // Get checkout status
 router.get('/status/:sessionId', authMiddleware, async (req, res) => {
   try {
+    if (!stripe) {
+      return res.status(500).json({ error: 'Payment service not configured' });
+    }
+
     const { sessionId } = req.params;
     
     // Get session from Stripe
