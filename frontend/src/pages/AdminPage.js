@@ -212,6 +212,17 @@ export default function AdminPage() {
     }
   };
 
+  const handleUpdatePricing = async (e) => {
+    e.preventDefault();
+    try {
+      await api.put('/admin/pricing', pricing);
+      toast.success('تم تحديث الأسعار بنجاح / Pricing updated successfully!');
+      fetchDashboard();
+    } catch (error) {
+      toast.error('Failed to update pricing');
+    }
+  };
+
   const getStatusBadge = (status) => {
     const colors = {
       confirmed: 'bg-green-100 text-green-700',
