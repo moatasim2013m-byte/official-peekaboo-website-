@@ -200,6 +200,30 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   }
 });
 
+// Store transaction (called by Python gateway after Stripe checkout creation)
+router.post('/store-transaction', authMiddleware, async (req, res) => {
+  try {
+    const { session_id, user_id, amount, currency, type, reference_id, metadata } = req.body;
+    
+    const transaction = new PaymentTransaction({
+      session_id,
+      user_id: user_id || req.userId,
+      amount,
+      currency: currency || 'usd',
+      status: 'pending',
+      type,
+      reference_id,
+      metadata
+    });
+    await transaction.save();
+    
+    res.status(201).json({ transaction: transaction.toJSON() });
+  } catch (error) {
+    console.error('Store transaction error:', error);
+    res.status(500).json({ error: 'Failed to store transaction' });
+  }
+});
+
 // Get payment history
 router.get('/history', authMiddleware, async (req, res) => {
   try {
