@@ -360,17 +360,21 @@ router.post('/plans', async (req, res) => {
 
 router.put('/plans/:id', async (req, res) => {
   try {
-    const { name, description, visits, price, is_active } = req.body;
+    const { name, name_ar, description, description_ar, visits, price, is_active, is_daily_pass, valid_days } = req.body;
     const plan = await SubscriptionPlan.findById(req.params.id);
     if (!plan) {
       return res.status(404).json({ error: 'Plan not found' });
     }
 
     if (name !== undefined) plan.name = name;
+    if (name_ar !== undefined) plan.name_ar = name_ar;
     if (description !== undefined) plan.description = description;
+    if (description_ar !== undefined) plan.description_ar = description_ar;
     if (visits !== undefined) plan.visits = visits;
     if (price !== undefined) plan.price = price;
     if (is_active !== undefined) plan.is_active = is_active;
+    if (is_daily_pass !== undefined) plan.is_daily_pass = is_daily_pass;
+    if (valid_days !== undefined) plan.valid_days = valid_days;
     
     await plan.save();
     res.json({ plan: plan.toJSON() });
