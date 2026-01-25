@@ -25,6 +25,8 @@ export default function LoginPage() {
       
       if (user.role === 'admin') {
         navigate('/admin');
+      } else if (user.role === 'staff') {
+        navigate('/staff');
       } else {
         navigate('/profile');
       }
