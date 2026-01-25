@@ -51,9 +51,32 @@ const seed = async () => {
     const plansCount = await SubscriptionPlan.countDocuments();
     if (plansCount === 0) {
       const plans = [
-        { name: 'Starter Pack', description: 'Perfect for occasional visits', visits: 5, price: 40.00 },
-        { name: 'Family Fun Pack', description: 'Great value for regular players', visits: 10, price: 70.00 },
-        { name: 'Ultimate Play Pack', description: 'Best for frequent visitors', visits: 20, price: 120.00 }
+        { 
+          name: 'Visit Package - 8 Visits', 
+          name_ar: 'باقة الزيارات - 8 زيارات',
+          description: 'Perfect for regular visits', 
+          description_ar: 'مثالية للزيارات المنتظمة',
+          visits: 8, 
+          price: 59.00 
+        },
+        { 
+          name: 'Visit Package - 12 Visits', 
+          name_ar: 'باقة الزيارات - 12 زيارة',
+          description: 'Great value for frequent players', 
+          description_ar: 'قيمة رائعة للزوار المتكررين',
+          visits: 12, 
+          price: 79.00 
+        },
+        { 
+          name: 'Monthly Daily Pass (Sun-Thu)', 
+          name_ar: 'باقة يومية شهرية (الأحد-الخميس)',
+          description: 'Unlimited visits Sunday to Thursday', 
+          description_ar: 'زيارات غير محدودة من الأحد إلى الخميس',
+          visits: 999, 
+          price: 120.00,
+          is_daily_pass: true,
+          valid_days: ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday']
+        }
       ];
       await SubscriptionPlan.insertMany(plans);
       console.log('3 Subscription plans created');
