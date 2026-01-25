@@ -19,10 +19,11 @@ import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentCancelPage from "./pages/PaymentCancelPage";
 import ReceptionPage from "./pages/ReceptionPage";
 import AdminPage from "./pages/AdminPage";
+import StaffPage from "./pages/StaffPage";
 
 // Protected Route Component
-const ProtectedRoute = ({ children, adminOnly = false }) => {
-  const { isAuthenticated, isAdmin, loading } = useAuth();
+const ProtectedRoute = ({ children, adminOnly = false, staffOnly = false }) => {
+  const { isAuthenticated, isAdmin, isStaff, loading } = useAuth();
 
   if (loading) {
     return (
@@ -37,6 +38,10 @@ const ProtectedRoute = ({ children, adminOnly = false }) => {
   }
 
   if (adminOnly && !isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (staffOnly && !isStaff && !isAdmin) {
     return <Navigate to="/" replace />;
   }
 
