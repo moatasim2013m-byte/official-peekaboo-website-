@@ -32,17 +32,14 @@ const BIRTHDAY_CONFIG = {
   slots: ['13:00', '15:00', '17:00', '19:00', '21:00', '23:00']
 };
 
-// Generate hourly slots for a date (every 10 minutes from 10:00 to 23:50)
+// Generate hourly slots for a date (every 10 minutes from 10:00 to 23:00)
 const generateHourlySlotsForDate = async (date) => {
   const slots = [];
   let hour = HOURLY_CONFIG.startHour;
   let minute = HOURLY_CONFIG.startMinute;
   
-  while (hour < HOURLY_CONFIG.endHour || (hour === HOURLY_CONFIG.endHour && minute === 0)) {
-    // Last entry is 23:50
-    if (hour === 23 && minute > 50) break;
-    if (hour >= 24) break;
-    
+  while (hour < HOURLY_CONFIG.lastEntryHour || 
+         (hour === HOURLY_CONFIG.lastEntryHour && minute <= HOURLY_CONFIG.lastEntryMinute)) {
     const startTime = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
     
     const existing = await TimeSlot.findOne({ date, start_time: startTime, slot_type: 'hourly' });
