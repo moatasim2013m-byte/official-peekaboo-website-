@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from '../i18n/useT';
 import { Button } from '../components/ui/button';
 import {
   DropdownMenu,
@@ -13,6 +14,7 @@ import { useState } from 'react';
 
 export const Navbar = () => {
   const { user, logout, isAdmin, isStaff, isAuthenticated } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
