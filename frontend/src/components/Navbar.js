@@ -160,10 +160,10 @@ export const Navbar = () => {
                 ) : (
                   <>
                     <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full rounded-full">Login</Button>
+                      <Button variant="outline" className="w-full rounded-full">{t('Login')}</Button>
                     </Link>
                     <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                      <Button className="w-full rounded-full">Sign Up</Button>
+                      <Button className="w-full rounded-full">{t('Sign Up')}</Button>
                     </Link>
                   </>
                 )}
