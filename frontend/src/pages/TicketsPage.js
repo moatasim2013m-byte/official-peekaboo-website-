@@ -36,7 +36,18 @@ export default function TicketsPage() {
 
   useEffect(() => {
     fetchSlots();
+    setSelectedSlot(null); // Reset selection when date changes
   }, [date]);
+
+  useEffect(() => {
+    // Reset selected slot when duration changes (might filter it out)
+    if (selectedSlot) {
+      const filtered = getFilteredSlots();
+      if (!filtered.find(s => s.id === selectedSlot.id)) {
+        setSelectedSlot(null);
+      }
+    }
+  }, [selectedDuration]);
 
   const fetchPricing = async () => {
     try {
