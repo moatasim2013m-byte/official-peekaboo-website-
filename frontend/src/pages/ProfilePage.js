@@ -189,19 +189,19 @@ export default function ProfilePage() {
         <Tabs defaultValue="children" className="space-y-6">
           <TabsList className="bg-white border-2 border-border rounded-full p-1 flex-wrap">
             <TabsTrigger value="children" className="rounded-full gap-2" data-testid="tab-children">
-              <Baby className="h-4 w-4" /> Kids
+              <Baby className="h-4 w-4" /> {t('Kids')}
             </TabsTrigger>
             <TabsTrigger value="hourly" className="rounded-full gap-2" data-testid="tab-hourly">
-              <Clock className="h-4 w-4" /> Hourly
+              <Clock className="h-4 w-4" /> {t('Hourly')}
             </TabsTrigger>
             <TabsTrigger value="birthday" className="rounded-full gap-2" data-testid="tab-birthday">
-              <Cake className="h-4 w-4" /> Birthday
+              <Cake className="h-4 w-4" /> {t('Birthday')}
             </TabsTrigger>
             <TabsTrigger value="subscriptions" className="rounded-full gap-2" data-testid="tab-subscriptions">
-              <Star className="h-4 w-4" /> Subscriptions
+              <Star className="h-4 w-4" /> {t('Subscriptions')}
             </TabsTrigger>
             <TabsTrigger value="loyalty" className="rounded-full gap-2" data-testid="tab-loyalty">
-              <Gift className="h-4 w-4" /> Loyalty
+              <Gift className="h-4 w-4" /> {t('Loyalty')}
             </TabsTrigger>
           </TabsList>
 
