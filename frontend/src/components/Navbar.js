@@ -59,7 +59,7 @@ export const Navbar = () => {
               <Link to="/admin">
                 <Button variant="default" className="rounded-full gap-2 bg-primary" data-testid="nav-admin-btn">
                   <LayoutDashboard className="h-4 w-4" />
-                  Admin Dashboard
+                  {t('Admin Dashboard')}
                 </Button>
               </Link>
             )}
@@ -67,7 +67,7 @@ export const Navbar = () => {
               <Link to="/staff">
                 <Button variant="default" className="rounded-full gap-2 bg-secondary text-secondary-foreground" data-testid="nav-staff-btn">
                   <Users className="h-4 w-4" />
-                  Staff Panel
+                  {t('Staff Panel')}
                 </Button>
               </Link>
             )}
