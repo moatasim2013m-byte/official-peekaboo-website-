@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from '../i18n/useT';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Input } from '../components/ui/input';
@@ -17,6 +18,7 @@ import {
 
 export default function ProfilePage() {
   const { user, api, logout } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [children, setChildren] = useState([]);
   const [hourlyBookings, setHourlyBookings] = useState([]);
