@@ -71,6 +71,26 @@ export default function TicketsPage() {
     }
   };
 
+  // Filter slots based on selected duration - must not pass midnight (00:00)
+  const getFilteredSlots = () => {
+    return slots.filter(slot => {
+      const [hours, minutes] = slot.start_time.split(':').map(Number);
+      const startMinutes = hours * 60 + minutes;
+      const endMinutes = startMinutes + (selectedDuration * 60);
+      // Midnight is 24:00 (1440 minutes)
+      return endMinutes <= 1440;
+    });
+  };
+
+  // Calculate end time for a slot based on duration
+  const getEndTime = (startTime, duration) => {
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes + (duration * 60);
+    const endHours = Math.floor(totalMinutes / 60);
+    const endMinutes = totalMinutes % 60;
+    return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+  };
+
   const handleBooking = async () => {
     if (!isAuthenticated) {
       toast.error('الرجاء تسجيل الدخول للحجز');
