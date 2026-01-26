@@ -373,16 +373,16 @@ export default function ProfilePage() {
           <TabsContent value="birthday">
             <Card className="border-2 rounded-3xl">
               <CardHeader>
-                <CardTitle className="font-heading">Birthday Bookings</CardTitle>
-                <CardDescription>Your party reservations</CardDescription>
+                <CardTitle className="font-heading">{t('Birthday Bookings')}</CardTitle>
+                <CardDescription>{t('Your party bookings')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {birthdayBookings.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Cake className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No parties booked yet</p>
+                    <p>{t('No party bookings yet')}</p>
                     <Button onClick={() => navigate('/birthday')} className="rounded-full mt-4 bg-accent">
-                      Plan a Party
+                      {t('Book a Party')}
                     </Button>
                   </div>
                 ) : (
