@@ -216,12 +216,12 @@ export default function ProfilePage() {
                 <Dialog open={addChildOpen} onOpenChange={setAddChildOpen}>
                   <DialogTrigger asChild>
                     <Button className="rounded-full gap-2" data-testid="add-child-btn">
-                      <Plus className="h-4 w-4" /> Add Child
+                      <Plus className="h-4 w-4" /> {t('Add Child')}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="rounded-3xl">
                     <DialogHeader>
-                      <DialogTitle className="font-heading">Add a Child</DialogTitle>
+                      <DialogTitle className="font-heading">{t('Add Child')}</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleAddChild} className="space-y-4">
                       <div>
@@ -247,7 +247,7 @@ export default function ProfilePage() {
                         />
                       </div>
                       <Button type="submit" className="w-full rounded-full" data-testid="save-child-btn">
-                        Add Child
+                        {t('Add Child')}
                       </Button>
                     </form>
                   </DialogContent>
@@ -257,7 +257,8 @@ export default function ProfilePage() {
                 {children.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Baby className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No children added yet</p>
+                    <p>{t('No children added yet')}</p>
+                    <p className="text-sm mt-2">{t('Add your first child to start booking')}</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
