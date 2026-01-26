@@ -215,29 +215,34 @@ export default function TicketsPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {slots.map((slot) => (
-                    <button
-                      key={slot.id}
-                      onClick={() => slot.is_available && setSelectedSlot(slot)}
-                      disabled={!slot.is_available}
-                      className={`p-4 rounded-2xl border-2 transition-all ${
-                        selectedSlot?.id === slot.id
-                          ? 'border-primary bg-primary/10'
-                          : slot.is_available
-                          ? 'border-border hover:border-primary/50 bg-white'
-                          : 'border-border bg-muted opacity-50 cursor-not-allowed'
-                      }`}
-                    >
-                      <div className="font-heading font-semibold text-lg">{slot.start_time}</div>
-                      <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground mt-1">
-                        <Users className="h-4 w-4" />
-                        {slot.available_spots} متاح
-                      </div>
-                      {slot.is_past && (
-                        <div className="text-xs text-destructive mt-1">منتهي</div>
-                      )}
-                    </button>
-                  ))}
+                  {getFilteredSlots().map((slot) => {
+                    const endTime = getEndTime(slot.start_time, selectedDuration);
+                    return (
+                      <button
+                        key={slot.id}
+                        onClick={() => slot.is_available && setSelectedSlot(slot)}
+                        disabled={!slot.is_available}
+                        className={`p-4 rounded-2xl border-2 transition-all ${
+                          selectedSlot?.id === slot.id
+                            ? 'border-primary bg-primary/10'
+                            : slot.is_available
+                            ? 'border-border hover:border-primary/50 bg-white'
+                            : 'border-border bg-muted opacity-50 cursor-not-allowed'
+                        }`}
+                      >
+                        <div className="font-heading font-semibold text-lg">
+                          {slot.start_time} → {endTime}
+                        </div>
+                        <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground mt-1">
+                          <Users className="h-4 w-4" />
+                          {slot.available_spots} متاح
+                        </div>
+                        {slot.is_past && (
+                          <div className="text-xs text-destructive mt-1">منتهي</div>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </CardContent>
