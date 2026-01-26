@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
+import { useTranslation } from "./i18n/useT";
 
 // Pages
 import HomePage from "./pages/HomePage";
