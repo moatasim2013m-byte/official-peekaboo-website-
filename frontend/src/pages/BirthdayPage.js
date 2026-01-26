@@ -201,7 +201,10 @@ export default function BirthdayPage() {
             <Card className="border-2 rounded-3xl lg:col-span-2">
               <CardHeader>
                 <CardTitle className="font-heading">
-                  Party Slots for {format(date, 'MMMM d, yyyy')}
+                  أوقات الحفلات - {format(date, 'MMMM d, yyyy')}
+                  <div className="text-sm font-normal text-muted-foreground mt-1">
+                    كل حفلة مدتها ساعتان
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -209,28 +212,39 @@ export default function BirthdayPage() {
                   <div className="flex justify-center py-12">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
-                ) : slots.length === 0 ? (
+                ) : getFilteredBirthdaySlots().length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No party slots available for this date</p>
+                    <p>لا توجد أوقات متاحة للحفلات في هذا التاريخ</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {slots.map((slot) => (
-                      <button
-                        key={slot.id}
-                        onClick={() => slot.is_available && setSelectedSlot(slot)}
-                        disabled={!slot.is_available}
-                        className={`p-4 rounded-2xl border-2 transition-all ${
-                          selectedSlot?.id === slot.id
-                            ? 'border-accent bg-accent/10'
-                            : slot.is_available
-                            ? 'border-border hover:border-accent/50 bg-white'
-                            : 'border-border bg-muted opacity-50 cursor-not-allowed'
-                        }`}
-                        data-testid={`party-slot-${slot.start_time}`}
-                      >
-                        <div className="font-heading font-semibold">{slot.start_time}</div>
+                    {getFilteredBirthdaySlots().map((slot) => {
+                      const endTime = getPartyEndTime(slot.start_time);
+                      return (
+                        <button
+                          key={slot.id}
+                          onClick={() => slot.is_available && setSelectedSlot(slot)}
+                          disabled={!slot.is_available}
+                          className={`p-4 rounded-2xl border-2 transition-all ${
+                            selectedSlot?.id === slot.id
+                              ? 'border-accent bg-accent/10'
+                              : slot.is_available
+                              ? 'border-border hover:border-accent/50 bg-white'
+                              : 'border-border bg-muted opacity-50 cursor-not-allowed'
+                          }`}
+                          data-testid={`party-slot-${slot.start_time}`}
+                        >
+                          <div className="font-heading font-semibold text-lg">
+                            {slot.start_time} → {endTime}
+                          </div>
+                          <div className="text-xs text-muted-foreground mt-1">ساعتان</div>
+                          {!slot.is_available && (
+                            <div className="text-xs text-destructive mt-1">محجوز</div>
+                          )}
+                        </button>
+                      );
+                    })}
                         <div className="text-sm text-muted-foreground">
                           {slot.is_available ? 'Available' : 'Booked'}
                         </div>
