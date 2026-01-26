@@ -72,6 +72,26 @@ export default function BirthdayPage() {
     }
   };
 
+  // Filter birthday slots - must end by 23:00 (2 hour parties)
+  const getFilteredBirthdaySlots = () => {
+    return slots.filter(slot => {
+      const [hours, minutes] = slot.start_time.split(':').map(Number);
+      const startMinutes = hours * 60 + minutes;
+      const endMinutes = startMinutes + 120; // 2 hour party
+      // Must end by 23:00 (1380 minutes)
+      return endMinutes <= 1380;
+    });
+  };
+
+  // Calculate end time for birthday party (always 2 hours)
+  const getPartyEndTime = (startTime) => {
+    const [hours, minutes] = startTime.split(':').map(Number);
+    const totalMinutes = hours * 60 + minutes + 120;
+    const endHours = Math.floor(totalMinutes / 60);
+    const endMinutes = totalMinutes % 60;
+    return `${String(endHours).padStart(2, '0')}:${String(endMinutes).padStart(2, '0')}`;
+  };
+
   const handleStandardBooking = async () => {
     if (!isAuthenticated) {
       toast.error('Please login to book');
