@@ -297,16 +297,16 @@ export default function ProfilePage() {
           <TabsContent value="hourly">
             <Card className="border-2 rounded-3xl">
               <CardHeader>
-                <CardTitle className="font-heading">Hourly Bookings</CardTitle>
-                <CardDescription>Your play session history</CardDescription>
+                <CardTitle className="font-heading">{t('Hourly Bookings')}</CardTitle>
+                <CardDescription>{t('Your play session history')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {hourlyBookings.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No bookings yet</p>
+                    <p>{t('No bookings yet')}</p>
                     <Button onClick={() => navigate('/tickets')} className="rounded-full mt-4">
-                      Book a Session
+                      {t('Book a Session')}
                     </Button>
                   </div>
                 ) : (
