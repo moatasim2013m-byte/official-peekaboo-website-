@@ -82,18 +82,18 @@ export const Navbar = () => {
                 <DropdownMenuContent align="end" className="w-48">
                   <DropdownMenuItem onClick={() => navigate('/profile')} data-testid="menu-profile">
                     <User className="h-4 w-4 mr-2" />
-                    My Profile
+                    {t('Profile')}
                   </DropdownMenuItem>
                   {isAdmin && (
                     <DropdownMenuItem onClick={() => navigate('/admin')} data-testid="menu-admin">
                       <LayoutDashboard className="h-4 w-4 mr-2" />
-                      Admin Panel
+                      {t('Admin Dashboard')}
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} data-testid="menu-logout">
                     <LogOut className="h-4 w-4 mr-2" />
-                    Logout
+                    {t('Logout')}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -101,12 +101,12 @@ export const Navbar = () => {
               <>
                 <Link to="/login">
                   <Button variant="outline" className="rounded-full" data-testid="nav-login">
-                    Login
+                    {t('Login')}
                   </Button>
                 </Link>
                 <Link to="/register">
                   <Button className="rounded-full btn-playful" data-testid="nav-register">
-                    Sign Up
+                    {t('Sign Up')}
                   </Button>
                 </Link>
               </>
