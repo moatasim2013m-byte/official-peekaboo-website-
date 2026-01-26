@@ -61,6 +61,9 @@ const Layout = ({ children }) => {
 };
 
 function AppRoutes() {
+  // Initialize translation at app root to set lang/dir
+  useTranslation();
+  
   return (
     <Routes>
       {/* Public Routes */}
