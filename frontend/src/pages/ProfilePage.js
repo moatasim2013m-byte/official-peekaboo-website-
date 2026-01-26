@@ -428,16 +428,16 @@ export default function ProfilePage() {
           <TabsContent value="subscriptions">
             <Card className="border-2 rounded-3xl">
               <CardHeader>
-                <CardTitle className="font-heading">My Subscriptions</CardTitle>
-                <CardDescription>Your active and past subscriptions</CardDescription>
+                <CardTitle className="font-heading">{t('Subscription History')}</CardTitle>
+                <CardDescription>{t('Your subscription packages')}</CardDescription>
               </CardHeader>
               <CardContent>
                 {subscriptions.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Star className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No subscriptions yet</p>
+                    <p>{t('No subscriptions yet')}</p>
                     <Button onClick={() => navigate('/subscriptions')} className="rounded-full mt-4 bg-secondary text-secondary-foreground">
-                      View Plans
+                      {t('Browse Plans')}
                     </Button>
                   </div>
                 ) : (
