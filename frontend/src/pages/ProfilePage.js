@@ -487,10 +487,10 @@ export default function ProfilePage() {
               <CardHeader>
                 <CardTitle className="font-heading flex items-center gap-2">
                   <Gift className="h-6 w-6 text-secondary" />
-                  Loyalty Points
+                  {t('Loyalty Program')}
                 </CardTitle>
                 <CardDescription>
-                  Current balance: <span className="font-bold text-secondary">{user?.loyalty_points || 0} points</span>
+                  {t('Your Points')}: <span className="font-bold text-secondary">{user?.loyalty_points || 0} {t('points')}</span>
                 </CardDescription>
               </CardHeader>
               <CardContent>
