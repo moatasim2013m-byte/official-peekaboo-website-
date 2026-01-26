@@ -36,13 +36,13 @@ export const Navbar = () => {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-6">
             <Link to="/tickets" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-tickets">
-              Hourly Tickets
+              {t('Hourly Tickets')}
             </Link>
             <Link to="/birthday" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-birthday">
-              Birthday Parties
+              {t('Birthday Parties')}
             </Link>
             <Link to="/subscriptions" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-subscriptions">
-              Subscriptions
+              {t('Subscriptions')}
             </Link>
           </div>
 
