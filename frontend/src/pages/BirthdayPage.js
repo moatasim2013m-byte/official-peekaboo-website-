@@ -245,11 +245,6 @@ export default function BirthdayPage() {
                         </button>
                       );
                     })}
-                        <div className="text-sm text-muted-foreground">
-                          {slot.is_available ? 'Available' : 'Booked'}
-                        </div>
-                      </button>
-                    ))}
                   </div>
                 )}
               </CardContent>
