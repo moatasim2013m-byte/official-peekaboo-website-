@@ -33,18 +33,20 @@ export const Navbar = () => {
             <span className="font-heading text-2xl font-bold text-primary">Peekaboo</span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-6">
-            <Link to="/tickets" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-tickets">
-              {t('Hourly Tickets')}
-            </Link>
-            <Link to="/birthday" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-birthday">
-              {t('Birthday Parties')}
-            </Link>
-            <Link to="/subscriptions" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-subscriptions">
-              {t('Subscriptions')}
-            </Link>
-          </div>
+          {/* Desktop Navigation - Show only for non-admin users */}
+          {!isAdmin && (
+            <div className="hidden md:flex items-center gap-6">
+              <Link to="/tickets" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-tickets">
+                {t('Hourly Tickets')}
+              </Link>
+              <Link to="/birthday" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-birthday">
+                {t('Birthday Parties')}
+              </Link>
+              <Link to="/subscriptions" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-subscriptions">
+                {t('Subscriptions')}
+              </Link>
+            </div>
+          )}
 
           {/* Debug Info - TEMPORARY */}
           {isAuthenticated && (
