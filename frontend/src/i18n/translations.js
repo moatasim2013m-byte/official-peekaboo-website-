@@ -75,6 +75,15 @@ export const translations = {
     'VIP treatment': 'معاملة كبار الزوار',
     'Select Plan': 'اختيار الباقة',
     'visits': 'زيارات',
+    
+    // Home Page Hero
+    'Where Kids Play & Celebrate': 'حيث يلعب الأطفال ويحتفلون',
+    'The ultimate indoor playground experience! Book play sessions, throw unforgettable birthday parties, and save with our subscription packages': 'تجربة ملعب داخلي ممتعة! احجز جلسات لعب، وأقم حفلات عيد ميلاد لا تُنسى، ووفر مع باقات الاشتراك.',
+    'Book a Session': 'احجز جلسة',
+    'Sign Up Free': 'أنشئ حساب مجانًا',
+    'Fun Moments at Peekaboo': 'لحظات ممتعة في بيكابوو',
+    'See what makes us special!': 'شاهد ما يميزنا!',
+    'Gallery image': 'صورة من المعرض',
   },
   
   en: {
@@ -148,5 +157,14 @@ export const translations = {
     'VIP treatment': 'VIP treatment',
     'Select Plan': 'Select Plan',
     'visits': 'visits',
+    
+    // Home Page Hero
+    'Where Kids Play & Celebrate': 'Where Kids Play & Celebrate',
+    'The ultimate indoor playground experience! Book play sessions, throw unforgettable birthday parties, and save with our subscription packages': 'The ultimate indoor playground experience! Book play sessions, throw unforgettable birthday parties, and save with our subscription packages',
+    'Book a Session': 'Book a Session',
+    'Sign Up Free': 'Sign Up Free',
+    'Fun Moments at Peekaboo': 'Fun Moments at Peekaboo',
+    'See what makes us special!': 'See what makes us special!',
+    'Gallery image': 'Gallery image',
   }
 };
