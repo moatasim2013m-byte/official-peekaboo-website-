@@ -163,20 +163,20 @@ export default function BirthdayPage() {
         <div className="text-center mb-8">
           <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="birthday-title">
             <Cake className="inline-block h-10 w-10 text-accent mr-2" />
-            Birthday Parties
+            {t('Birthday Parties')}
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Make your child's birthday unforgettable! Choose from our amazing themes or request a custom party.
+            {t('Make your child\'s birthday unforgettable! Choose from our amazing themes or request a custom party.')}
           </p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 rounded-full p-1 bg-muted">
             <TabsTrigger value="standard" className="rounded-full" data-testid="tab-standard">
-              Standard Themes
+              {t('Standard Themes')}
             </TabsTrigger>
             <TabsTrigger value="custom" className="rounded-full" data-testid="tab-custom">
-              Custom Request
+              {t('Custom Request')}
             </TabsTrigger>
           </TabsList>
 
