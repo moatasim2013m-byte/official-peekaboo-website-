@@ -89,7 +89,7 @@ export default function HomePage() {
                 data-testid="hero-image"
               />
               <div className="absolute -bottom-4 -left-4 bg-secondary text-secondary-foreground px-6 py-3 rounded-full font-heading font-bold shadow-lg">
-                Open 10AM - 10PM
+                {t('Open Daily')} 10:00 ص - 12:00 ص
               </div>
             </div>
           </div>
