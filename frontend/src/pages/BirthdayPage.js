@@ -184,8 +184,8 @@ export default function BirthdayPage() {
             {/* Calendar */}
             <Card className="border-2 rounded-3xl">
               <CardHeader>
-                <CardTitle className="font-heading">Select Date</CardTitle>
-                <CardDescription>Book at least 3 days in advance</CardDescription>
+                <CardTitle className="font-heading">{t('Select Date')}</CardTitle>
+                <CardDescription>{t('Book at least 3 days in advance')}</CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center">
                 <Calendar
