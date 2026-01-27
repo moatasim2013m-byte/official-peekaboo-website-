@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from '../i18n/useT';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Calendar } from '../components/ui/calendar';
@@ -15,6 +16,7 @@ import { Cake, Users, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 
 export default function BirthdayPage() {
   const { isAuthenticated, api } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [date, setDate] = useState(addDays(new Date(), 7));
   const [slots, setSlots] = useState([]);
