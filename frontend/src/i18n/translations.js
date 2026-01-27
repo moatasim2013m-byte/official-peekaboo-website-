@@ -37,6 +37,28 @@ export const translations = {
     'Loyalty Program': 'برنامج الولاء',
     'Your Points': 'نقاطك',
     'points': 'نقطة',
+    
+    // Profile Page
+    'Welcome, {name}': 'أهلًا، {name}',
+    'My Children': 'أطفالي',
+    'Manage your children\'s profiles': 'إدارة ملفات الأطفال',
+    'Born {date}': 'تاريخ الميلاد: {date}',
+    
+    // Home Page
+    'Hourly Play': 'لعب بالساعة',
+    'Subscribe': 'اشترك',
+    'Plan Party': 'رتّب حفلتك',
+    'Book Now': 'احجز الآن',
+    'Hours': 'ساعات العمل',
+    'Open Daily': 'مفتوح يوميًا',
+    
+    // Birthday Page
+    'Birthday Parties': 'حفلات أعياد الميلاد',
+    'Make your child\'s birthday unforgettable! Choose from our amazing themes or request a custom party.': 'اجعل عيد ميلاد طفلك لا يُنسى! اختر من ثيماتنا المميزة أو اطلب حفلة مخصصة.',
+    'Standard Themes': 'ثيمات جاهزة',
+    'Custom Request': 'طلب مخصص',
+    'Select Date': 'اختر التاريخ',
+    'Book at least 3 days in advance': 'احجز قبل 3 أيام على الأقل',
   },
   
   en: {
