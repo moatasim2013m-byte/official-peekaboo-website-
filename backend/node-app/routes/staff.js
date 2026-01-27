@@ -321,7 +321,7 @@ router.post('/redeem-visit', async (req, res) => {
 });
 
 // End session
-router.post('/end-session', authMiddleware, staffOrAdminMiddleware, async (req, res) => {
+router.post('/end-session', async (req, res) => {
   try {
     // Placeholder for session end logic
     res.json({ message: 'Session ended' });
