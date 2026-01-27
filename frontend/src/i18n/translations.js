@@ -59,6 +59,22 @@ export const translations = {
     'Custom Request': 'طلب مخصص',
     'Select Date': 'اختر التاريخ',
     'Book at least 3 days in advance': 'احجز قبل 3 أيام على الأقل',
+    
+    // Subscriptions Page
+    'Monthly Daily Pass (Sun–Thu)': 'باقة يومية شهرية (الأحد – الخميس)',
+    'Visit Package - 12 Visits': 'باقة الزيارات – 12 زيارة',
+    'Visit Package - 8 Visits': 'باقة الزيارات – 8 زيارات',
+    'Most Popular': 'الأكثر شيوعًا',
+    'Unlimited visits Sunday to Thursday': 'زيارات غير محدودة من الأحد إلى الخميس',
+    'Great value for frequent players': 'قيمة رائعة للزوار المتكررين',
+    'Perfect for regular visits': 'مثالية للزيارات المنتظمة',
+    'Best for frequent visitors': 'الأفضل للزوار الدائمين',
+    'day validity': 'صلاحية 30 يومًا',
+    'Full playground access': 'دخول كامل لمنطقة الألعاب',
+    'Priority booking': 'أولوية في الحجز',
+    'VIP treatment': 'معاملة كبار الزوار',
+    'Select Plan': 'اختيار الباقة',
+    'visits': 'زيارات',
   },
   
   en: {
