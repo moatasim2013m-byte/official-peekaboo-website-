@@ -140,14 +140,14 @@ export default function ProfilePage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1 className="font-heading text-4xl font-bold text-foreground" data-testid="profile-title">
-              Welcome, {user?.name}!
+              {t('Welcome, {name}').replace('{name}', user?.name || '')}
             </h1>
             <p className="text-muted-foreground">{user?.email}</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="bg-secondary/10 px-4 py-2 rounded-full flex items-center gap-2">
               <Star className="h-5 w-5 text-secondary" />
-              <span className="font-bold text-secondary">{user?.loyalty_points || 0} points</span>
+              <span className="font-bold text-secondary">{user?.loyalty_points || 0} {t('points')}</span>
             </div>
           </div>
         </div>
