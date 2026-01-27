@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export default function ProfilePage() {
-  const { user, api, logout } = useAuth();
+  const { user, api, logout, isAdmin } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [children, setChildren] = useState([]);
@@ -30,6 +30,13 @@ export default function ProfilePage() {
   const [addChildOpen, setAddChildOpen] = useState(false);
   const [newChildName, setNewChildName] = useState('');
   const [newChildBirthday, setNewChildBirthday] = useState('');
+
+  // Defense in depth: Redirect admin users
+  useEffect(() => {
+    if (isAdmin) {
+      navigate('/admin', { replace: true });
+    }
+  }, [isAdmin, navigate]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
