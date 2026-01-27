@@ -26,27 +26,27 @@ export default function HomePage() {
   const features = [
     {
       icon: Clock,
-      title: 'Hourly Play',
+      title: t('Hourly Play'),
       description: 'Book 1-hour play sessions for your kids. Pick your perfect time slot!',
       link: '/tickets',
       color: 'bg-primary',
-      buttonText: 'Book Now'
+      buttonText: t('Book Now')
     },
     {
       icon: Cake,
-      title: 'Birthday Parties',
+      title: t('Birthday Parties'),
       description: 'Celebrate with 10 amazing themes! Custom parties available too.',
       link: '/birthday',
       color: 'bg-accent',
-      buttonText: 'Plan Party'
+      buttonText: t('Plan Party')
     },
     {
       icon: Star,
-      title: 'Subscriptions',
+      title: t('Subscriptions'),
       description: 'Save big with visit packages. 30-day validity, unlimited fun!',
       link: '/subscriptions',
       color: 'bg-secondary',
-      buttonText: 'Subscribe'
+      buttonText: t('Subscribe')
     }
   ];
 
