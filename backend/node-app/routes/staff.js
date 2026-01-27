@@ -294,7 +294,7 @@ router.get('/parent-lookup', async (req, res) => {
 });
 
 // Redeem visit
-router.post('/redeem-visit', authMiddleware, staffOrAdminMiddleware, async (req, res) => {
+router.post('/redeem-visit', async (req, res) => {
   try {
     const { child_id } = req.body;
     const child = await Child.findById(child_id);
