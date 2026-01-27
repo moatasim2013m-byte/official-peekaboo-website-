@@ -258,4 +258,75 @@ router.get('/search-child', async (req, res) => {
   }
 });
 
+// Reception: Parent lookup
+router.get('/parent-lookup', authMiddleware, staffOrAdminMiddleware, async (req, res) => {
+  try {
+    const { q } = req.query;
+    const parent = await User.findOne({ 
+      $or: [{ email: q }, { mobile: q }],
+      role: 'parent'
+    });
+    if (!parent) return res.status(404).json({ error: 'Not found' });
+
+    const children = await Child.find({ parent_id: parent._id });
+    const subscription = await UserSubscription.findOne({ 
+      user_id: parent._id,
+      expires_at: { $gte: new Date() }
+    }).sort({ created_at: -1 });
+
+    // Check active sessions (pseudo-implementation)
+    const activeSessions = {}; // Could expand to real sessions table
+
+    res.json({
+      name: parent.name,
+      email: parent.email,
+      subscription: subscription ? { remaining_visits: subscription.remaining_visits } : null,
+      children: children.map(c => ({
+        id: c._id.toString(),
+        name: c.name,
+        active_session: activeSessions[c._id.toString()] || null
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Lookup failed' });
+  }
+});
+
+// Redeem visit
+router.post('/redeem-visit', authMiddleware, staffOrAdminMiddleware, async (req, res) => {
+  try {
+    const { child_id } = req.body;
+    const child = await Child.findById(child_id);
+    if (!child) return res.status(404).json({ error: 'Child not found' });
+
+    const subscription = await UserSubscription.findOne({
+      user_id: child.parent_id,
+      expires_at: { $gte: new Date() }
+    }).sort({ created_at: -1 });
+
+    if (!subscription || subscription.remaining_visits <= 0) {
+      return res.status(400).json({ error: 'No visits remaining' });
+    }
+
+    subscription.remaining_visits -= 1;
+    if (!subscription.first_checkin_at) subscription.first_checkin_at = new Date();
+    await subscription.save();
+
+    // Create session placeholder (expand as needed)
+    res.json({ message: 'Session started', remaining: subscription.remaining_visits });
+  } catch (error) {
+    res.status(500).json({ error: 'Redeem failed' });
+  }
+});
+
+// End session
+router.post('/end-session', authMiddleware, staffOrAdminMiddleware, async (req, res) => {
+  try {
+    // Placeholder for session end logic
+    res.json({ message: 'Session ended' });
+  } catch (error) {
+    res.status(500).json({ error: 'End failed' });
+  }
+});
+
 module.exports = router;

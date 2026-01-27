@@ -125,6 +125,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/reception"
+        element={
+          <ProtectedRoute staffOnly>
+            <Layout><ReceptionPage /></Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/staff/*"
         element={
           <ProtectedRoute staffOnly>

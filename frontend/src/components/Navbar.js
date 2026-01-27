@@ -65,13 +65,22 @@ export const Navbar = () => {
                 </Button>
               </Link>
             )}
-            {isAuthenticated && isStaff && !isAdmin && (
-              <Link to="/staff">
-                <Button variant="default" className="rounded-full gap-2 bg-secondary text-secondary-foreground" data-testid="nav-staff-btn">
-                  <Users className="h-4 w-4" />
-                  {t('Staff Panel')}
-                </Button>
-              </Link>
+            {isAuthenticated && (isStaff || isAdmin) && (
+              <>
+                <Link to="/reception">
+                  <Button variant="outline" className="rounded-full gap-2">
+                    Reception
+                  </Button>
+                </Link>
+                {isStaff && !isAdmin && (
+                  <Link to="/staff">
+                    <Button variant="default" className="rounded-full gap-2 bg-secondary text-secondary-foreground" data-testid="nav-staff-btn">
+                      <Users className="h-4 w-4" />
+                      {t('Staff Panel')}
+                    </Button>
+                  </Link>
+                )}
+              </>
             )}
             {isAuthenticated ? (
               <DropdownMenu>
