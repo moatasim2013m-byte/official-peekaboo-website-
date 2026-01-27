@@ -271,3 +271,8 @@ async def proxy_to_node(request: Request, path: str):
 @app.get("/")
 async def root():
     return {"message": "Peekaboo API Gateway"}
+
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint for connectivity testing"""
+    return {"ok": True, "service": "peekaboo-api"}
