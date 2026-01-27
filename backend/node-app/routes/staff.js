@@ -260,7 +260,7 @@ router.get('/search-child', async (req, res) => {
 });
 
 // Reception: Parent lookup
-router.get('/parent-lookup', authMiddleware, staffOrAdminMiddleware, async (req, res) => {
+router.get('/parent-lookup', async (req, res) => {
   try {
     const { q } = req.query;
     const parent = await User.findOne({ 
