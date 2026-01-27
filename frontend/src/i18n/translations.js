@@ -94,5 +94,27 @@ export const translations = {
     'Loyalty Program': 'Loyalty Program',
     'Your Points': 'Your Points',
     'points': 'points',
+    
+    // Profile Page
+    'Welcome, {name}': 'Welcome, {name}',
+    'My Children': 'My Children',
+    'Manage your children\'s profiles': 'Manage your children\'s profiles',
+    'Born {date}': 'Born {date}',
+    
+    // Home Page
+    'Hourly Play': 'Hourly Play',
+    'Subscribe': 'Subscribe',
+    'Plan Party': 'Plan Party',
+    'Book Now': 'Book Now',
+    'Hours': 'Hours',
+    'Open Daily': 'Open Daily',
+    
+    // Birthday Page
+    'Birthday Parties': 'Birthday Parties',
+    'Make your child\'s birthday unforgettable! Choose from our amazing themes or request a custom party.': 'Make your child\'s birthday unforgettable! Choose from our amazing themes or request a custom party.',
+    'Standard Themes': 'Standard Themes',
+    'Custom Request': 'Custom Request',
+    'Select Date': 'Select Date',
+    'Book at least 3 days in advance': 'Book at least 3 days in advance',
   }
 };
