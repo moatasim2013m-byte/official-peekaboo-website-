@@ -82,10 +82,12 @@ export const Navbar = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48">
-                  <DropdownMenuItem onClick={() => navigate('/profile')} data-testid="menu-profile">
-                    <User className="h-4 w-4 mr-2" />
-                    {t('Profile')}
-                  </DropdownMenuItem>
+                  {!isAdmin && (
+                    <DropdownMenuItem onClick={() => navigate('/profile')} data-testid="menu-profile">
+                      <User className="h-4 w-4 mr-2" />
+                      {t('Profile')}
+                    </DropdownMenuItem>
+                  )}
                   {isAdmin && (
                     <DropdownMenuItem onClick={() => navigate('/admin')} data-testid="menu-admin">
                       <LayoutDashboard className="h-4 w-4 mr-2" />
