@@ -168,9 +168,21 @@ Admins fully manage bookings, content, and operations.
 - **Stripe:** Test mode (sk_test_emergent)
 - **Resend:** Via Emergent universal key
 
+## Recent Updates (January 27, 2026)
+
+### Bugs Fixed
+- **P0 Backend Connectivity:** Fixed `staffOrAdminMiddleware` undefined error in `/app/backend/node-app/routes/staff.js` that was crashing the Node.js server
+- Added missing `User` model import to staff routes
+- Added `/api/health` endpoint for connectivity testing
+
+### Verified Working
+- Admin login and redirection to `/admin`
+- Settings tab visible with Pricing & Capacity Settings
+- All admin tabs accessible (Dashboard, Pricing, Parents, Hourly, Birthday, Subscriptions, Themes, Gallery, Settings)
+
 ## Next Action Items
-1. Test complete booking flow with Stripe
-2. Add email verification for new registrations
-3. Implement slot capacity management UI in admin
-4. Add booking cancellation feature
-5. Set up real email domain for production
+1. **P2: Profile Page - Active Session Countdown** - Show active play sessions with live countdown for parents
+2. **P2: Complete Arabic Localization** - Continue translating remaining English text
+3. **P3: Unify UI with Brand Colors** - Ensure consistent Peekaboo brand colors
+4. **Future: Language Toggle** - Add Arabic/English switch
+5. **Future: 8-step Test Checklist** - Create staff + parent testing guide
