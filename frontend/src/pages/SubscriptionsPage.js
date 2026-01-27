@@ -76,9 +76,9 @@ export default function SubscriptionsPage() {
   };
 
   const planFeatures = {
-    basic: ['Perfect for occasional visits', '30-day validity', 'Full playground access'],
-    standard: ['Great value for regular players', '30-day validity', 'Full playground access', 'Priority booking'],
-    premium: ['Best for frequent visitors', '30-day validity', 'Full playground access', 'Priority booking', 'VIP treatment']
+    basic: [t('Perfect for regular visits'), t('day validity'), t('Full playground access')],
+    standard: [t('Great value for frequent players'), t('day validity'), t('Full playground access'), t('Priority booking')],
+    premium: [t('Best for frequent visitors'), t('day validity'), t('Full playground access'), t('Priority booking'), t('VIP treatment')]
   };
 
   const getPlanTier = (index) => {
