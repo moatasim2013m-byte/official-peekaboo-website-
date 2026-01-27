@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from '../i18n/useT';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -10,6 +11,7 @@ import { Star, Check, Loader2 } from 'lucide-react';
 
 export default function SubscriptionsPage() {
   const { isAuthenticated, api } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
   const [children, setChildren] = useState([]);
