@@ -132,5 +132,21 @@ export const translations = {
     'Custom Request': 'Custom Request',
     'Select Date': 'Select Date',
     'Book at least 3 days in advance': 'Book at least 3 days in advance',
+    
+    // Subscriptions Page
+    'Monthly Daily Pass (Sun–Thu)': 'Monthly Daily Pass (Sun–Thu)',
+    'Visit Package - 12 Visits': 'Visit Package - 12 Visits',
+    'Visit Package - 8 Visits': 'Visit Package - 8 Visits',
+    'Most Popular': 'Most Popular',
+    'Unlimited visits Sunday to Thursday': 'Unlimited visits Sunday to Thursday',
+    'Great value for frequent players': 'Great value for frequent players',
+    'Perfect for regular visits': 'Perfect for regular visits',
+    'Best for frequent visitors': 'Best for frequent visitors',
+    'day validity': '30-day validity',
+    'Full playground access': 'Full playground access',
+    'Priority booking': 'Priority booking',
+    'VIP treatment': 'VIP treatment',
+    'Select Plan': 'Select Plan',
+    'visits': 'visits',
   }
 };
