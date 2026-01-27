@@ -4,12 +4,13 @@ const BirthdayBooking = require('../models/BirthdayBooking');
 const UserSubscription = require('../models/UserSubscription');
 const Child = require('../models/Child');
 const TimeSlot = require('../models/TimeSlot');
+const User = require('../models/User');
 const { authMiddleware, staffMiddleware } = require('../middleware/auth');
 const { addMinutes, format } = require('date-fns');
 
 const router = express.Router();
 
-// Apply staff middleware to all routes
+// Apply staff middleware to all routes (staffMiddleware allows both staff and admin)
 router.use(authMiddleware, staffMiddleware);
 
 // Get today's active sessions (checked-in hourly bookings)
