@@ -210,8 +210,8 @@ export default function ProfilePage() {
             <Card className="border-2 rounded-3xl">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="font-heading">My Children</CardTitle>
-                  <CardDescription>Manage your children's profiles</CardDescription>
+                  <CardTitle className="font-heading">{t('My Children')}</CardTitle>
+                  <CardDescription>{t('Manage your children\'s profiles')}</CardDescription>
                 </div>
                 <Dialog open={addChildOpen} onOpenChange={setAddChildOpen}>
                   <DialogTrigger asChild>
