@@ -543,4 +543,100 @@ router.get('/slots', async (req, res) => {
   }
 });
 
+// ==================== BUSINESS HOURS SETTINGS ====================
+
+// Get business hours
+router.get('/business-hours', async (req, res) => {
+  try {
+    const settings = await Settings.find({ 
+      key: { $in: ['opening_time', 'closing_time'] } 
+    });
+    
+    const hours = {
+      opening_time: '10:00',
+      closing_time: '23:00'
+    };
+    settings.forEach(s => { hours[s.key] = s.value; });
+    
+    res.json(hours);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get hours' });
+  }
+});
+
+// Update business hours
+router.put('/business-hours', async (req, res) => {
+  try {
+    const { opening_time, closing_time } = req.body;
+    
+    await Settings.findOneAndUpdate(
+      { key: 'opening_time' },
+      { key: 'opening_time', value: opening_time },
+      { upsert: true }
+    );
+    
+    await Settings.findOneAndUpdate(
+      { key: 'closing_time' },
+      { key: 'closing_time', value: closing_time },
+      { upsert: true }
+    );
+    
+    res.json({ message: 'Hours updated' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update hours' });
+  }
+});
+
+// Get blackout times
+router.get('/blackouts', async (req, res) => {
+  try {
+    const blackouts = await Settings.findOne({ key: 'blackout_ranges' });
+    res.json({ blackouts: blackouts?.value ? JSON.parse(blackouts.value) : [] });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to get blackouts' });
+  }
+});
+
+// Add blackout
+router.post('/blackouts', async (req, res) => {
+  try {
+    const { date, day_of_week, start_time, end_time, reason } = req.body;
+    
+    const setting = await Settings.findOne({ key: 'blackout_ranges' });
+    const blackouts = setting?.value ? JSON.parse(setting.value) : [];
+    
+    blackouts.push({ date, day_of_week, start_time, end_time, reason, id: Date.now().toString() });
+    
+    await Settings.findOneAndUpdate(
+      { key: 'blackout_ranges' },
+      { key: 'blackout_ranges', value: JSON.stringify(blackouts) },
+      { upsert: true }
+    );
+    
+    res.json({ message: 'Blackout added' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to add blackout' });
+  }
+});
+
+// Delete blackout
+router.delete('/blackouts/:id', async (req, res) => {
+  try {
+    const setting = await Settings.findOne({ key: 'blackout_ranges' });
+    let blackouts = setting?.value ? JSON.parse(setting.value) : [];
+    
+    blackouts = blackouts.filter(b => b.id !== req.params.id);
+    
+    await Settings.findOneAndUpdate(
+      { key: 'blackout_ranges' },
+      { key: 'blackout_ranges', value: JSON.stringify(blackouts) },
+      { upsert: true }
+    );
+    
+    res.json({ message: 'Blackout deleted' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete blackout' });
+  }
+});
+
 module.exports = router;
