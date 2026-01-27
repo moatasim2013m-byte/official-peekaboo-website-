@@ -3,10 +3,12 @@ import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useAuth } from '../context/AuthContext';
+import { useTranslation } from '../i18n/useT';
 import { Clock, Cake, Star, ChevronRight, Play } from 'lucide-react';
 
 export default function HomePage() {
   const { isAuthenticated, api } = useAuth();
+  const { t } = useTranslation();
   const [gallery, setGallery] = useState([]);
 
   useEffect(() => {
