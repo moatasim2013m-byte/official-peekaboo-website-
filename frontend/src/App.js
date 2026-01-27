@@ -18,11 +18,9 @@ import SubscriptionsPage from "./pages/SubscriptionsPage";
 import ProfilePage from "./pages/ProfilePage";
 import PaymentSuccessPage from "./pages/PaymentSuccessPage";
 import PaymentCancelPage from "./pages/PaymentCancelPage";
-import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import ResetPasswordPage from "./pages/ResetPasswordPage";
-import ReceptionPage from "./pages/ReceptionPage";
 import AdminPage from "./pages/AdminPage";
 import StaffPage from "./pages/StaffPage";
+import ReceptionPage from "./pages/ReceptionPage";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false, staffOnly = false, parentOnly = false }) => {
