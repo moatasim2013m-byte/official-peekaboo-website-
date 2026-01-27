@@ -135,21 +135,28 @@ export const Navbar = () => {
               </div>
             )}
             <div className="flex flex-col gap-4">
-              <Link to="/tickets" className="text-foreground hover:text-primary font-medium" onClick={() => setMobileMenuOpen(false)}>
-                {t('Hourly Tickets')}
-              </Link>
-              <Link to="/birthday" className="text-foreground hover:text-primary font-medium" onClick={() => setMobileMenuOpen(false)}>
-                {t('Birthday Parties')}
-              </Link>
-              <Link to="/subscriptions" className="text-foreground hover:text-primary font-medium" onClick={() => setMobileMenuOpen(false)}>
-                {t('Subscriptions')}
-              </Link>
+              {/* Parent navigation - hide for admin */}
+              {!isAdmin && (
+                <>
+                  <Link to="/tickets" className="text-foreground hover:text-primary font-medium" onClick={() => setMobileMenuOpen(false)}>
+                    {t('Hourly Tickets')}
+                  </Link>
+                  <Link to="/birthday" className="text-foreground hover:text-primary font-medium" onClick={() => setMobileMenuOpen(false)}>
+                    {t('Birthday Parties')}
+                  </Link>
+                  <Link to="/subscriptions" className="text-foreground hover:text-primary font-medium" onClick={() => setMobileMenuOpen(false)}>
+                    {t('Subscriptions')}
+                  </Link>
+                </>
+              )}
               <div className="border-t border-border pt-4 flex flex-col gap-2">
                 {isAuthenticated ? (
                   <>
-                    <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full rounded-full">{t('Profile')}</Button>
-                    </Link>
+                    {!isAdmin && (
+                      <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
+                        <Button variant="outline" className="w-full rounded-full">{t('Profile')}</Button>
+                      </Link>
+                    )}
                     {isAdmin && (
                       <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
                         <Button variant="outline" className="w-full rounded-full">{t('Admin Dashboard')}</Button>
