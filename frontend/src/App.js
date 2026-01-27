@@ -23,8 +23,8 @@ import AdminPage from "./pages/AdminPage";
 import StaffPage from "./pages/StaffPage";
 
 // Protected Route Component
-const ProtectedRoute = ({ children, adminOnly = false, staffOnly = false }) => {
-  const { isAuthenticated, isAdmin, isStaff, loading } = useAuth();
+const ProtectedRoute = ({ children, adminOnly = false, staffOnly = false, parentOnly = false }) => {
+  const { isAuthenticated, isAdmin, isStaff, loading, user } = useAuth();
 
   if (loading) {
     return (
@@ -38,10 +38,17 @@ const ProtectedRoute = ({ children, adminOnly = false, staffOnly = false }) => {
     return <Navigate to="/login" replace />;
   }
 
+  // Admin trying to access parent-only routes → redirect to /admin
+  if (parentOnly && isAdmin) {
+    return <Navigate to="/admin" replace />;
+  }
+
+  // Non-admin trying to access admin-only routes → redirect to home
   if (adminOnly && !isAdmin) {
     return <Navigate to="/" replace />;
   }
 
+  // Non-staff trying to access staff-only routes → redirect to home
   if (staffOnly && !isStaff && !isAdmin) {
     return <Navigate to="/" replace />;
   }
