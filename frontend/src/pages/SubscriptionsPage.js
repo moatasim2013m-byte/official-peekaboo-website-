@@ -124,12 +124,16 @@ export default function SubscriptionsPage() {
                   >
                     {isPopular && (
                       <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-secondary text-secondary-foreground rounded-full px-4">
-                        Most Popular
+                        {t('Most Popular')}
                       </Badge>
                     )}
                     <CardHeader className="text-center pb-4">
-                      <CardTitle className="font-heading text-2xl">{plan.name}</CardTitle>
-                      <CardDescription>{plan.description}</CardDescription>
+                      <CardTitle className="font-heading text-2xl">
+                        {plan.name_ar || t(plan.name) || plan.name}
+                      </CardTitle>
+                      <CardDescription>
+                        {plan.description_ar || t(plan.description) || plan.description}
+                      </CardDescription>
                     </CardHeader>
                     <CardContent className="text-center">
                       <div className="mb-6">
@@ -138,7 +142,7 @@ export default function SubscriptionsPage() {
                       
                       <div className="bg-secondary/10 rounded-2xl p-4 mb-6">
                         <span className="text-3xl font-heading font-bold text-secondary">{plan.visits}</span>
-                        <span className="text-muted-foreground ml-2">visits</span>
+                        <span className="text-muted-foreground ml-2">{t('visits')}</span>
                       </div>
 
                       <ul className="space-y-3 text-left">
@@ -156,7 +160,7 @@ export default function SubscriptionsPage() {
                           selectedPlan?.id === plan.id ? 'bg-secondary hover:bg-secondary/90' : ''
                         }`}
                       >
-                        {selectedPlan?.id === plan.id ? 'Selected' : 'Select Plan'}
+                        {t('Select Plan')}
                       </Button>
                     </CardContent>
                   </Card>
