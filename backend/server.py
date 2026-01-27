@@ -72,6 +72,11 @@ class CheckoutRequest(BaseModel):
     child_id: Optional[str] = None
     origin_url: str
 
+@app.get("/api/health")
+async def health_check():
+    """Health check endpoint for connectivity testing"""
+    return {"ok": True, "service": "peekaboo-api"}
+
 @app.post("/api/payments/create-checkout")
 async def create_checkout(request: Request, checkout_req: CheckoutRequest):
     """Handle Stripe checkout via emergentintegrations"""
