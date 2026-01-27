@@ -87,11 +87,11 @@ function AppRoutes() {
       <Route path="/payment/success" element={<Layout><PaymentSuccessPage /></Layout>} />
       <Route path="/payment/cancel" element={<Layout><PaymentCancelPage /></Layout>} />
 
-      {/* Protected Routes */}
+      {/* Protected Routes - Parent Only */}
       <Route
         path="/profile"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute parentOnly>
             <Layout><ProfilePage /></Layout>
           </ProtectedRoute>
         }
