@@ -272,7 +272,7 @@ export default function ProfilePage() {
                             <div>
                               <p className="font-semibold">{child.name}</p>
                               <p className="text-sm text-muted-foreground">
-                                Born {format(new Date(child.birthday), 'MMM d, yyyy')}
+                                {t('Born {date}').replace('{date}', format(new Date(child.birthday), 'MMM d, yyyy'))}
                               </p>
                             </div>
                           </div>
