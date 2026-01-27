@@ -58,24 +58,23 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="font-heading text-4xl md:text-6xl font-bold text-foreground mb-6" data-testid="hero-title">
-                Where Kids <span className="text-primary">Play</span> & 
-                <span className="text-accent"> Celebrate!</span>
+                {t('Where Kids Play & Celebrate')} <span className="text-primary"></span> 
+                <span className="text-accent"></span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-                The ultimate indoor playground experience! Book play sessions, throw unforgettable birthday parties, 
-                and save with our subscription packages.
+                {t('The ultimate indoor playground experience! Book play sessions, throw unforgettable birthday parties, and save with our subscription packages')}
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link to="/tickets">
                   <Button size="lg" className="rounded-full btn-playful text-lg px-8" data-testid="hero-book-btn">
-                    Book a Session
+                    {t('Book a Session')}
                     <ChevronRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 {!isAuthenticated && (
                   <Link to="/register">
                     <Button size="lg" variant="outline" className="rounded-full text-lg px-8" data-testid="hero-signup-btn">
-                      Sign Up Free
+                      {t('Sign Up Free')}
                     </Button>
                   </Link>
                 )}
@@ -164,7 +163,7 @@ export default function HomePage() {
                   ) : (
                     <img 
                       src={item.url} 
-                      alt={item.title || 'Gallery image'} 
+                      alt={item.title || t('Gallery image')} 
                       className={`w-full object-cover ${index === 0 ? 'aspect-square' : 'aspect-square'}`}
                     />
                   )}
