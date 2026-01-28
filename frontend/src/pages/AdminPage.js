@@ -621,11 +621,11 @@ export default function AdminPage() {
           <TabsContent value="birthday">
             <Card className="rounded-2xl">
               <CardHeader>
-                <CardTitle>Birthday Bookings</CardTitle>
+                <CardTitle>Birthday Bookings {activeFilter === 'today' && <Badge className="ml-2 bg-pink-500">Today</Badge>}{activeFilter === 'custom_pending' && <Badge className="ml-2 bg-purple-500">Custom Pending</Badge>}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {birthdayBookings.map((booking) => (
+                  {getFilteredBirthdayBookings().map((booking) => (
                     <div key={booking.id} className="flex justify-between items-center p-3 rounded-xl bg-muted/50">
                       <div>
                         <div className="flex items-center gap-2">
