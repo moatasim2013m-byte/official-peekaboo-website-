@@ -48,6 +48,7 @@ export default function AdminPage() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [editingPlan, setEditingPlan] = useState(null);
   const [editingTheme, setEditingTheme] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Form states
   const [newTheme, setNewTheme] = useState({ name: '', name_ar: '', description: '', description_ar: '', price: '', image_url: '' });
