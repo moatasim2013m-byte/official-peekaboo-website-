@@ -11,6 +11,8 @@ import {
 } from '../components/ui/dropdown-menu';
 import { User, LogOut, Settings, LayoutDashboard, Menu, X, Users } from 'lucide-react';
 import { useState } from 'react';
+import logoImg from '../assets/logo.png';
+import mascotImg from '../assets/mascot.png';
 
 export const Navbar = () => {
   const { user, logout, isAdmin, isStaff, isAuthenticated } = useAuth();
@@ -27,10 +29,9 @@ export const Navbar = () => {
     <nav className="bg-white border-b border-border sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo */}
+          {/* Logo with Mascot */}
           <Link to="/" className="flex items-center gap-2" data-testid="nav-logo">
-            <span className="text-3xl">🎪</span>
-            <span className="font-heading text-2xl font-bold text-primary">Peekaboo</span>
+            <img src={logoImg} alt="Peekaboo" className="h-10" />
           </Link>
 
           {/* Desktop Navigation - Show only for non-admin users */}
@@ -48,10 +49,11 @@ export const Navbar = () => {
             </div>
           )}
 
-          {/* Debug Info - TEMPORARY */}
-          {isAuthenticated && (
-            <div className="hidden md:block text-xs bg-yellow-100 text-yellow-900 px-3 py-1 rounded-full border border-yellow-300">
-              DEBUG: {user?.email} | role: {user?.role}
+          {/* Admin/Staff Role Badge - Only for staff */}
+          {isAuthenticated && (isAdmin || isStaff) && (
+            <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--peekaboo-green)]/10 border border-[var(--peekaboo-green)]">
+              <img src={mascotImg} alt="" className="h-6 w-6 rounded-full" />
+              <span className="text-xs font-medium text-[#2d6a4f]">{isAdmin ? 'Admin' : 'Staff'}</span>
             </div>
           )}
 
