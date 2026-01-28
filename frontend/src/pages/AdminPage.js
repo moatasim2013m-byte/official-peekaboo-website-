@@ -404,11 +404,14 @@ export default function AdminPage() {
     <div className="min-h-screen bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="font-heading text-3xl font-bold" data-testid="admin-title">
-            <LayoutDashboard className="inline-block h-8 w-8 text-primary mr-2" />
-            Admin Panel
-          </h1>
-          <Button onClick={() => navigate('/reception')} className="rounded-full gap-2">
+          <div className="flex items-center gap-3">
+            <img src={mascotImg} alt="" className="h-12 w-12 rounded-full border-2 border-[var(--peekaboo-green)] shadow" />
+            <h1 className="font-heading text-3xl font-bold" data-testid="admin-title">
+              <LayoutDashboard className="inline-block h-8 w-8 text-primary mr-2" />
+              Admin Panel
+            </h1>
+          </div>
+          <Button onClick={() => navigate('/reception')} className="rounded-full gap-2 bg-[var(--peekaboo-green)] hover:bg-[var(--peekaboo-green)]/90">
             Reception Scanner
           </Button>
         </div>
