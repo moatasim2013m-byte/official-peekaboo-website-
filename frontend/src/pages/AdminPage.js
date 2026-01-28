@@ -16,6 +16,7 @@ import {
   LayoutDashboard, Users, Clock, Cake, Star, Settings, Image, 
   Plus, Edit, Trash2, Loader2, Gift, Calendar, DollarSign
 } from 'lucide-react';
+import mascotImg from '../assets/mascot.png';
 
 export default function AdminPage() {
   const { api, isAdmin, user } = useAuth();
