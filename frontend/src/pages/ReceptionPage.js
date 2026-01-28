@@ -5,7 +5,7 @@ import { Input } from '../components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
-import { Search, User, Clock } from 'lucide-react';
+import { Search, User, Clock, ShieldCheck } from 'lucide-react';
 
 export default function ReceptionPage() {
   const { api } = useAuth();
@@ -20,7 +20,7 @@ export default function ReceptionPage() {
       const res = await api.get(`/staff/parent-lookup?q=${encodeURIComponent(search)}`);
       setParent(res.data);
     } catch (error) {
-      toast.error('Parent not found');
+      toast.error('لم يتم العثور على ولي الأمر');
       setParent(null);
     } finally {
       setLoading(false);
@@ -30,39 +30,48 @@ export default function ReceptionPage() {
   const handleRedeem = async (childId) => {
     try {
       await api.post('/staff/redeem-visit', { child_id: childId });
-      toast.success('Session started');
+      toast.success('تم بدء الجلسة');
       handleSearch();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed');
+      toast.error(error.response?.data?.error || 'فشلت العملية');
     }
   };
 
   const handleEnd = async (sessionId) => {
     try {
       await api.post('/staff/end-session', { session_id: sessionId });
-      toast.success('Session ended');
+      toast.success('تم إنهاء الجلسة');
       handleSearch();
     } catch (error) {
-      toast.error('Failed to end session');
+      toast.error('فشل إنهاء الجلسة');
     }
   };
 
   return (
-    <div className="min-h-screen bg-muted/30 p-8">
+    <div className="min-h-screen bg-muted/30 p-8" dir="rtl">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6">Reception</h1>
+        {/* Staff Badge Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-bold">الاستقبال</h1>
+          <Badge className="bg-emerald-600 text-white px-4 py-2 text-sm">
+            <ShieldCheck className="h-4 w-4 ml-2" />
+            وضع الموظف – الاستقبال
+          </Badge>
+        </div>
         
         <Card className="mb-6">
           <CardContent className="pt-6">
             <div className="flex gap-2">
               <Input
-                placeholder="Email or mobile"
+                placeholder="البريد الإلكتروني أو رقم الهاتف"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                className="text-right"
               />
               <Button onClick={handleSearch} disabled={loading}>
-                <Search className="h-4 w-4" />
+                <Search className="h-4 w-4 ml-1" />
+                بحث
               </Button>
             </div>
           </CardContent>
@@ -78,8 +87,8 @@ export default function ReceptionPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p>Email: {parent.email}</p>
-                <p>Subscription: {parent.subscription?.remaining_visits || 0} visits left</p>
+                <p>البريد: {parent.email}</p>
+                <p>الاشتراك: {parent.subscription?.remaining_visits || 0} زيارات متبقية</p>
               </CardContent>
             </Card>
 
@@ -91,22 +100,22 @@ export default function ReceptionPage() {
                       <div>
                         <p className="font-bold">{child.name}</p>
                         {child.active_session ? (
-                          <Badge className="mt-2">
-                            <Clock className="h-3 w-3 mr-1" />
-                            Active ({new Date(child.active_session.end_time).toLocaleTimeString()})
+                          <Badge className="mt-2 bg-blue-500">
+                            <Clock className="h-3 w-3 ml-1" />
+                            نشط ({new Date(child.active_session.end_time).toLocaleTimeString('ar-EG')})
                           </Badge>
                         ) : (
-                          <p className="text-sm text-muted-foreground">No active session</p>
+                          <p className="text-sm text-muted-foreground">لا توجد جلسة نشطة</p>
                         )}
                       </div>
                       <div className="flex gap-2">
                         {child.active_session ? (
                           <Button variant="destructive" onClick={() => handleEnd(child.active_session.id)}>
-                            End
+                            إنهاء
                           </Button>
                         ) : (
                           <Button onClick={() => handleRedeem(child.id)} disabled={!parent.subscription?.remaining_visits}>
-                            Start (1h)
+                            بدء (ساعة)
                           </Button>
                         )}
                       </div>
