@@ -164,10 +164,53 @@ export default function AdminPage() {
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
+    setActiveFilter(null); // Reset filter when manually changing tabs
     if (tab === 'users') fetchUsers();
     if (tab === 'hourly') fetchHourlyBookings();
     if (tab === 'birthday') fetchBirthdayBookings();
     if (tab === 'subscriptions') fetchSubscriptions();
+  };
+
+  // Dashboard card click handlers
+  const handleDashboardCardClick = (tab, filter = null) => {
+    setActiveTab(tab);
+    setActiveFilter(filter);
+    if (tab === 'users') fetchUsers();
+    if (tab === 'hourly') fetchHourlyBookings();
+    if (tab === 'birthday') fetchBirthdayBookings();
+    if (tab === 'subscriptions') fetchSubscriptions();
+  };
+
+  // Filter helpers
+  const isToday = (dateStr) => {
+    if (!dateStr) return false;
+    const date = new Date(dateStr);
+    const today = new Date();
+    return date.toDateString() === today.toDateString();
+  };
+
+  const getFilteredHourlyBookings = () => {
+    if (activeFilter === 'today') {
+      return hourlyBookings.filter(b => isToday(b.booking_date || b.created_at));
+    }
+    return hourlyBookings;
+  };
+
+  const getFilteredBirthdayBookings = () => {
+    if (activeFilter === 'today') {
+      return birthdayBookings.filter(b => isToday(b.party_date || b.created_at));
+    }
+    if (activeFilter === 'custom_pending') {
+      return birthdayBookings.filter(b => b.is_custom && b.status === 'custom_pending');
+    }
+    return birthdayBookings;
+  };
+
+  const getFilteredSubscriptions = () => {
+    if (activeFilter === 'active') {
+      return subscriptions.filter(s => s.status === 'active' && s.remaining_visits > 0);
+    }
+    return subscriptions;
   };
 
   const handleCreateTheme = async (e) => {
