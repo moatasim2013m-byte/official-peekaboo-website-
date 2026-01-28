@@ -722,7 +722,7 @@ export default function AdminPage() {
             <Card className="rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Subscription Plans</CardTitle>
-                <Dialog open={planDialogOpen} onOpenChange={setPlanDialogOpen}>
+                <Dialog open={planDialogOpen} onOpenChange={(open) => { setPlanDialogOpen(open); if (!open) { setEditingPlan(null); setNewPlan({ name: '', name_ar: '', description: '', description_ar: '', visits: '', price: '' }); } }}>
                   <DialogTrigger asChild>
                     <Button className="rounded-full gap-2">
                       <Plus className="h-4 w-4" /> Add Plan
@@ -730,16 +730,28 @@ export default function AdminPage() {
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Create Subscription Plan</DialogTitle>
+                      <DialogTitle>{editingPlan ? 'Edit Plan' : 'Create Plan'}</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleCreatePlan} className="space-y-4">
-                      <div>
-                        <Label>Name</Label>
-                        <Input value={newPlan.name} onChange={(e) => setNewPlan({...newPlan, name: e.target.value})} className="rounded-xl mt-1" />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Name (EN)</Label>
+                          <Input value={newPlan.name} onChange={(e) => setNewPlan({...newPlan, name: e.target.value})} className="rounded-xl mt-1" />
+                        </div>
+                        <div>
+                          <Label>Name (AR)</Label>
+                          <Input value={newPlan.name_ar} onChange={(e) => setNewPlan({...newPlan, name_ar: e.target.value})} className="rounded-xl mt-1" dir="rtl" />
+                        </div>
                       </div>
-                      <div>
-                        <Label>Description</Label>
-                        <Textarea value={newPlan.description} onChange={(e) => setNewPlan({...newPlan, description: e.target.value})} className="rounded-xl mt-1" />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Description (EN)</Label>
+                          <Textarea value={newPlan.description} onChange={(e) => setNewPlan({...newPlan, description: e.target.value})} className="rounded-xl mt-1" />
+                        </div>
+                        <div>
+                          <Label>Description (AR)</Label>
+                          <Textarea value={newPlan.description_ar} onChange={(e) => setNewPlan({...newPlan, description_ar: e.target.value})} className="rounded-xl mt-1" dir="rtl" />
+                        </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -747,11 +759,11 @@ export default function AdminPage() {
                           <Input type="number" value={newPlan.visits} onChange={(e) => setNewPlan({...newPlan, visits: e.target.value})} className="rounded-xl mt-1" />
                         </div>
                         <div>
-                          <Label>Price ($)</Label>
+                          <Label>Price (JD)</Label>
                           <Input type="number" step="0.01" value={newPlan.price} onChange={(e) => setNewPlan({...newPlan, price: e.target.value})} className="rounded-xl mt-1" />
                         </div>
                       </div>
-                      <Button type="submit" className="w-full rounded-full">Create Plan</Button>
+                      <Button type="submit" className="w-full rounded-full">{editingPlan ? 'Update Plan' : 'Create Plan'}</Button>
                     </form>
                   </DialogContent>
                 </Dialog>
@@ -761,11 +773,22 @@ export default function AdminPage() {
                   {plans.map((plan) => (
                     <Card key={plan.id} className="rounded-xl">
                       <CardContent className="p-4">
-                        <h3 className="font-heading font-bold">{plan.name}</h3>
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="font-heading font-bold">{plan.name}</h3>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditPlan(plan)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeletePlan(plan.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        {plan.name_ar && <p className="text-sm text-muted-foreground" dir="rtl">{plan.name_ar}</p>}
                         <p className="text-sm text-muted-foreground">{plan.description}</p>
                         <div className="mt-2 flex justify-between">
                           <span className="text-secondary font-bold">{plan.visits} visits</span>
-                          <span className="font-bold">${plan.price}</span>
+                          <span className="font-bold">{plan.price} JD</span>
                         </div>
                       </CardContent>
                     </Card>
