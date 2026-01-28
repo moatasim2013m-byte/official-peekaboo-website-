@@ -45,10 +45,12 @@ export default function AdminPage() {
   const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
   const [adjustPointsDialogOpen, setAdjustPointsDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [editingPlan, setEditingPlan] = useState(null);
+  const [editingTheme, setEditingTheme] = useState(null);
 
   // Form states
-  const [newTheme, setNewTheme] = useState({ name: '', description: '', price: '', image_url: '' });
-  const [newPlan, setNewPlan] = useState({ name: '', description: '', visits: '', price: '' });
+  const [newTheme, setNewTheme] = useState({ name: '', name_ar: '', description: '', description_ar: '', price: '', image_url: '' });
+  const [newPlan, setNewPlan] = useState({ name: '', name_ar: '', description: '', description_ar: '', visits: '', price: '' });
   const [newMedia, setNewMedia] = useState({ url: '', type: 'photo', title: '' });
   const [pointsAdjustment, setPointsAdjustment] = useState({ points: 0, description: '' });
 
