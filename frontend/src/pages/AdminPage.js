@@ -22,6 +22,7 @@ export default function AdminPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeFilter, setActiveFilter] = useState(null); // 'today', 'active', 'custom_pending'
   const [stats, setStats] = useState({});
   const [users, setUsers] = useState([]);
   const [hourlyBookings, setHourlyBookings] = useState([]);
