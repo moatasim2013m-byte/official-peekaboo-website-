@@ -1063,7 +1063,7 @@ export default function AdminPage() {
             <Card className="rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Homepage Gallery</CardTitle>
-                <Dialog open={mediaDialogOpen} onOpenChange={setMediaDialogOpen}>
+                <Dialog open={mediaDialogOpen} onOpenChange={(open) => { setMediaDialogOpen(open); if (!open) { setGalleryPreview(null); setNewMedia({ url: '', type: 'photo', title: '', file: null }); } }}>
                   <DialogTrigger asChild>
                     <Button className="rounded-full gap-2">
                       <Plus className="h-4 w-4" /> Add Media
@@ -1071,30 +1071,47 @@ export default function AdminPage() {
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Add Gallery Media</DialogTitle>
+                      <DialogTitle>إضافة صورة / Add Gallery Media</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleAddMedia} className="space-y-4">
                       <div>
-                        <Label>URL</Label>
-                        <Input value={newMedia.url} onChange={(e) => setNewMedia({...newMedia, url: e.target.value})} className="rounded-xl mt-1" placeholder="https://..." />
+                        <Label>رفع صورة / Upload Image</Label>
+                        <Input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={handleGalleryFileChange}
+                          className="rounded-xl mt-1"
+                          disabled={uploadingImage}
+                        />
+                        {galleryPreview && (
+                          <img src={galleryPreview} alt="Preview" className="mt-2 h-32 w-full object-cover rounded-lg" />
+                        )}
+                      </div>
+                      <div className="text-center text-sm text-muted-foreground">- أو / OR -</div>
+                      <div>
+                        <Label>رابط الصورة / URL (اختياري)</Label>
+                        <Input value={newMedia.url} onChange={(e) => setNewMedia({...newMedia, url: e.target.value})} className="rounded-xl mt-1" placeholder="https://..." disabled={!!newMedia.file} />
                       </div>
                       <div>
-                        <Label>Type</Label>
+                        <Label>النوع / Type</Label>
                         <Select value={newMedia.type} onValueChange={(v) => setNewMedia({...newMedia, type: v})}>
                           <SelectTrigger className="rounded-xl mt-1">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="photo">Photo</SelectItem>
-                            <SelectItem value="video">Video</SelectItem>
+                            <SelectItem value="photo">صورة / Photo</SelectItem>
+                            <SelectItem value="video">فيديو / Video</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div>
-                        <Label>Title (Optional)</Label>
+                        <Label>العنوان / Title (اختياري)</Label>
                         <Input value={newMedia.title} onChange={(e) => setNewMedia({...newMedia, title: e.target.value})} className="rounded-xl mt-1" />
                       </div>
-                      <Button type="submit" className="w-full rounded-full">Add Media</Button>
+                      <Button type="submit" className="w-full rounded-full" disabled={uploadingImage}>
+                        {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                        إضافة / Add Media
+                      </Button>
                     </form>
                   </DialogContent>
                 </Dialog>
