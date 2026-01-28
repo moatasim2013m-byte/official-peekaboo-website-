@@ -5,6 +5,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../i18n/useT';
 import { Clock, Cake, Star, ChevronRight, Play } from 'lucide-react';
+import mascotImg from '../assets/mascot.png';
 
 export default function HomePage() {
   const { isAuthenticated, api } = useAuth();
