@@ -901,11 +901,23 @@ export default function AdminPage() {
                           <Input type="number" step="0.01" value={newTheme.price} onChange={(e) => setNewTheme({...newTheme, price: e.target.value})} className="rounded-xl mt-1" />
                         </div>
                         <div>
-                          <Label>Image URL</Label>
-                          <Input value={newTheme.image_url} onChange={(e) => setNewTheme({...newTheme, image_url: e.target.value})} className="rounded-xl mt-1" />
+                          <Label>صورة الثيم</Label>
+                          <Input 
+                            type="file" 
+                            accept="image/png,image/jpeg,image/webp"
+                            onChange={(e) => handleImageUpload(e, setNewTheme)}
+                            className="rounded-xl mt-1"
+                            disabled={uploadingImage}
+                          />
+                          {newTheme.image_url && (
+                            <img src={newTheme.image_url} alt="Preview" className="mt-2 h-20 w-20 object-cover rounded-lg" />
+                          )}
                         </div>
                       </div>
-                      <Button type="submit" className="w-full rounded-full">{editingTheme ? 'Update Theme' : 'Create Theme'}</Button>
+                      <Button type="submit" className="w-full rounded-full" disabled={uploadingImage}>
+                        {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                        {editingTheme ? 'Update Theme' : 'Create Theme'}
+                      </Button>
                     </form>
                   </DialogContent>
                 </Dialog>
