@@ -1,5 +1,9 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const multer = require('multer');
+const sharp = require('sharp');
+const path = require('path');
+const fs = require('fs');
 const User = require('../models/User');
 const Child = require('../models/Child');
 const TimeSlot = require('../models/TimeSlot');
@@ -13,8 +17,46 @@ const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
 
+// Configure multer for image uploads
+const uploadDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  fileFilter: (req, file, cb) => {
+    const allowed = ['image/png', 'image/jpeg', 'image/webp'];
+    cb(null, allowed.includes(file.mimetype));
+  }
+});
+
 // Apply auth middleware to all admin routes
 router.use(authMiddleware, adminMiddleware);
+
+// ==================== IMAGE UPLOAD ====================
+router.post('/upload-image', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No image provided' });
+    }
+
+    const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
+    const filepath = path.join(uploadDir, filename);
+
+    // Resize to max 1200px width and convert to webp
+    await sharp(req.file.buffer)
+      .resize({ width: 1200, withoutEnlargement: true })
+      .webp({ quality: 80 })
+      .toFile(filepath);
+
+    const imageUrl = `/api/uploads/${filename}`;
+    res.json({ image_url: imageUrl });
+  } catch (error) {
+    console.error('Upload error:', error);
+    res.status(500).json({ error: 'Failed to upload image' });
+  }
+});
 
 // ==================== DASHBOARD ====================
 
