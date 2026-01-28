@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
 import { Search, User, Clock, ShieldCheck } from 'lucide-react';
+import mascotImg from '../assets/mascot.png';
 
 export default function ReceptionPage() {
   const { api } = useAuth();
@@ -52,8 +53,11 @@ export default function ReceptionPage() {
       <div className="max-w-4xl mx-auto">
         {/* Staff Badge Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">الاستقبال</h1>
-          <Badge className="bg-emerald-600 text-white px-4 py-2 text-sm">
+          <div className="flex items-center gap-3">
+            <img src={mascotImg} alt="" className="h-12 w-12 rounded-full border-2 border-[var(--peekaboo-green)] shadow" />
+            <h1 className="text-3xl font-bold">الاستقبال</h1>
+          </div>
+          <Badge className="bg-[var(--peekaboo-green)] text-white px-4 py-2 text-sm">
             <ShieldCheck className="h-4 w-4 ml-2" />
             وضع الموظف – الاستقبال
           </Badge>
