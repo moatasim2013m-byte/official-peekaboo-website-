@@ -55,9 +55,12 @@ export default function ReceptionPage() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <img src={mascotImg} alt="" className="h-12 w-12 rounded-full border-2 border-[var(--peekaboo-green)] shadow" />
-            <h1 className="text-3xl font-bold">الاستقبال</h1>
+            <div>
+              <h1 className="text-3xl font-bold">الاستقبال</h1>
+              <p className="text-sm text-muted-foreground">هذا الوضع مخصص لموظفي الاستقبال فقط</p>
+            </div>
           </div>
-          <Badge className="bg-[var(--peekaboo-green)] text-white px-4 py-2 text-sm">
+          <Badge className="bg-[var(--peekaboo-green)] text-white px-4 py-2 text-sm" title="وضع تشغيلي للموظفين فقط">
             <ShieldCheck className="h-4 w-4 ml-2" />
             وضع الموظف – الاستقبال
           </Badge>
