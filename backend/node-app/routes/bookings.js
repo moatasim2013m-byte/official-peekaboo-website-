@@ -216,19 +216,29 @@ router.post('/birthday', authMiddleware, async (req, res) => {
   try {
     const { slot_id, child_id, theme_id, is_custom, custom_request, guest_count, special_notes, payment_id, amount } = req.body;
     
-    // Validate slot
-    const slot = await TimeSlot.findById(slot_id);
-    if (!slot || slot.slot_type !== 'birthday') {
-      return res.status(400).json({ error: 'Invalid birthday slot' });
-    }
+    // ATOMIC capacity check for birthday slots
+    const slot = await TimeSlot.findOneAndUpdate(
+      { 
+        _id: slot_id, 
+        slot_type: 'birthday',
+        $expr: { $lt: ['$booked_count', '$capacity'] }
+      },
+      { $inc: { booked_count: 1 } },
+      { new: true }
+    );
     
-    if (slot.booked_count >= slot.capacity) {
-      return res.status(400).json({ error: 'Slot is full' });
+    if (!slot) {
+      const existingSlot = await TimeSlot.findById(slot_id);
+      if (!existingSlot) {
+        return res.status(400).json({ error: 'Invalid birthday slot' });
+      }
+      return res.status(400).json({ error: 'عذراً، هذا الموعد محجوز. يرجى اختيار موعد آخر.' }); // Slot full (Arabic)
     }
 
     // Validate child
     const child = await Child.findOne({ _id: child_id, parent_id: req.userId });
     if (!child) {
+      await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: -1 } });
       return res.status(400).json({ error: 'Invalid child' });
     }
 
@@ -237,6 +247,7 @@ router.post('/birthday', authMiddleware, async (req, res) => {
     if (!is_custom && theme_id) {
       theme = await Theme.findById(theme_id);
       if (!theme) {
+        await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: -1 } });
         return res.status(400).json({ error: 'Invalid theme' });
       }
     }
@@ -260,10 +271,7 @@ router.post('/birthday', authMiddleware, async (req, res) => {
 
     await booking.save();
     
-    // Increment slot booked count
-    await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: 1 } });
-
-    // NO loyalty points for birthday bookings (only hourly gets points)
+    // Capacity already incremented atomically
 
     // Send confirmation email
     const user = await User.findById(req.userId);
