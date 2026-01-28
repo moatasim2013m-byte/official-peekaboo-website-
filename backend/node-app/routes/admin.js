@@ -384,6 +384,16 @@ router.put('/plans/:id', async (req, res) => {
   }
 });
 
+router.delete('/plans/:id', async (req, res) => {
+  try {
+    await SubscriptionPlan.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Plan deleted successfully' });
+  } catch (error) {
+    console.error('Delete plan error:', error);
+    res.status(500).json({ error: 'Failed to delete plan' });
+  }
+});
+
 // ==================== SETTINGS ====================
 
 router.get('/settings', async (req, res) => {
