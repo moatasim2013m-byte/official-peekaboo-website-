@@ -356,16 +356,74 @@ export default function AdminPage() {
     }
   };
 
+  // Fetch parent details with kids
+  const handleExpandParent = async (userId) => {
+    if (expandedParent === userId) {
+      setExpandedParent(null);
+      setParentDetails(null);
+      return;
+    }
+    setExpandedParent(userId);
+    setLoadingParent(true);
+    try {
+      const res = await api.get(`/admin/users/${userId}`);
+      setParentDetails(res.data);
+    } catch (error) {
+      toast.error('Failed to load details');
+    } finally {
+      setLoadingParent(false);
+    }
+  };
+
+  // Gallery image upload handler
+  const handleGalleryFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    if (!file.type.startsWith('image/')) {
+      toast.error('يجب اختيار صورة');
+      return;
+    }
+    
+    // Show preview
+    const reader = new FileReader();
+    reader.onload = (ev) => setGalleryPreview(ev.target.result);
+    reader.readAsDataURL(file);
+    
+    setNewMedia(prev => ({ ...prev, file }));
+  };
+
   const handleAddMedia = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/gallery', newMedia);
-      toast.success('Media added!');
+      let mediaUrl = newMedia.url;
+      
+      // If file selected, upload first
+      if (newMedia.file) {
+        setUploadingImage(true);
+        const formData = new FormData();
+        formData.append('image', newMedia.file);
+        const uploadRes = await api.post('/admin/upload-image', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        mediaUrl = uploadRes.data.image_url;
+      }
+      
+      if (!mediaUrl) {
+        toast.error('يرجى اختيار صورة أو إدخال رابط');
+        return;
+      }
+      
+      await api.post('/gallery', { url: mediaUrl, type: newMedia.type, title: newMedia.title });
+      toast.success('تمت الإضافة!');
       setMediaDialogOpen(false);
-      setNewMedia({ url: '', type: 'photo', title: '' });
+      setNewMedia({ url: '', type: 'photo', title: '', file: null });
+      setGalleryPreview(null);
       fetchDashboard();
     } catch (error) {
-      toast.error('Failed to add media');
+      toast.error('فشلت الإضافة');
+    } finally {
+      setUploadingImage(false);
     }
   };
 
