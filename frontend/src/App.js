@@ -77,6 +77,7 @@ function AppRoutes() {
       {/* Public Routes */}
       <Route path="/" element={<Layout><HomePage /></Layout>} />
       <Route path="/login" element={<Layout><LoginPage /></Layout>} />
+      <Route path="/staff/login" element={<StaffLoginPage />} />
       <Route path="/register" element={<Layout><RegisterPage /></Layout>} />
       <Route path="/forgot-password" element={<Layout><ForgotPasswordPage /></Layout>} />
       <Route path="/reset-password" element={<Layout><ResetPasswordPage /></Layout>} />
