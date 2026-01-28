@@ -32,25 +32,32 @@ code {
         --card-foreground: 260 20% 20%;
         --popover: 0 0% 100%;
         --popover-foreground: 260 20% 20%;
-        --primary: 258 70% 60%;
+        /* Peekaboo Brand Colors */
+        --primary: 354 100% 67%; /* Red #FF595E */
         --primary-foreground: 0 0% 100%;
-        --secondary: 43 96% 56%;
+        --secondary: 48 100% 61%; /* Yellow #FFD93B */
         --secondary-foreground: 260 20% 20%;
         --muted: 260 20% 96%;
         --muted-foreground: 260 10% 50%;
-        --accent: 330 81% 60%;
+        --accent: 25 100% 65%; /* Orange #FF924C */
         --accent-foreground: 0 0% 100%;
         --destructive: 0 84.2% 60.2%;
         --destructive-foreground: 0 0% 98%;
         --border: 260 20% 90%;
         --input: 260 20% 90%;
-        --ring: 258 70% 60%;
+        --ring: 354 100% 67%;
         --radius: 1rem;
-        --chart-1: 258 70% 60%;
-        --chart-2: 43 96% 56%;
-        --chart-3: 330 81% 60%;
-        --chart-4: 173 58% 39%;
-        --chart-5: 27 87% 67%;
+        /* Peekaboo accent palette */
+        --peekaboo-yellow: #FFD93B;
+        --peekaboo-red: #FF595E;
+        --peekaboo-orange: #FF924C;
+        --peekaboo-green: #8AC926;
+        --peekaboo-blue: #00BBF9;
+        --chart-1: 354 100% 67%;
+        --chart-2: 48 100% 61%;
+        --chart-3: 25 100% 65%;
+        --chart-4: 84 69% 47%;
+        --chart-5: 195 100% 49%;
     }
 }
 
