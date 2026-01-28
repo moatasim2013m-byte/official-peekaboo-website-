@@ -218,33 +218,100 @@ export default function AdminPage() {
   const handleCreateTheme = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/themes', {
-        ...newTheme,
-        price: parseFloat(newTheme.price)
-      });
-      toast.success('Theme created!');
+      if (editingTheme) {
+        await api.put(`/admin/themes/${editingTheme.id}`, {
+          ...newTheme,
+          price: parseFloat(newTheme.price)
+        });
+        toast.success('Theme updated!');
+        setEditingTheme(null);
+      } else {
+        await api.post('/admin/themes', {
+          ...newTheme,
+          price: parseFloat(newTheme.price)
+        });
+        toast.success('Theme created!');
+      }
       setThemeDialogOpen(false);
-      setNewTheme({ name: '', description: '', price: '', image_url: '' });
+      setNewTheme({ name: '', name_ar: '', description: '', description_ar: '', price: '', image_url: '' });
       fetchDashboard();
     } catch (error) {
-      toast.error('Failed to create theme');
+      toast.error('Failed to save theme');
+    }
+  };
+
+  const handleEditTheme = (theme) => {
+    setEditingTheme(theme);
+    setNewTheme({
+      name: theme.name || '',
+      name_ar: theme.name_ar || '',
+      description: theme.description || '',
+      description_ar: theme.description_ar || '',
+      price: theme.price?.toString() || '',
+      image_url: theme.image_url || ''
+    });
+    setThemeDialogOpen(true);
+  };
+
+  const handleDeleteTheme = async (id) => {
+    if (!window.confirm('Delete this theme?')) return;
+    try {
+      await api.delete(`/admin/themes/${id}`);
+      toast.success('Theme deleted');
+      fetchDashboard();
+    } catch (error) {
+      toast.error('Failed to delete theme');
     }
   };
 
   const handleCreatePlan = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/admin/plans', {
-        ...newPlan,
-        visits: parseInt(newPlan.visits),
-        price: parseFloat(newPlan.price)
-      });
-      toast.success('Plan created!');
+      if (editingPlan) {
+        await api.put(`/admin/plans/${editingPlan.id}`, {
+          ...newPlan,
+          visits: parseInt(newPlan.visits),
+          price: parseFloat(newPlan.price)
+        });
+        toast.success('Plan updated!');
+        setEditingPlan(null);
+      } else {
+        await api.post('/admin/plans', {
+          ...newPlan,
+          visits: parseInt(newPlan.visits),
+          price: parseFloat(newPlan.price)
+        });
+        toast.success('Plan created!');
+      }
       setPlanDialogOpen(false);
-      setNewPlan({ name: '', description: '', visits: '', price: '' });
+      setNewPlan({ name: '', name_ar: '', description: '', description_ar: '', visits: '', price: '' });
       fetchDashboard();
     } catch (error) {
-      toast.error('Failed to create plan');
+      toast.error('Failed to save plan');
+    }
+  };
+
+  const handleEditPlan = (plan) => {
+    setEditingPlan(plan);
+    setNewPlan({
+      name: plan.name || '',
+      name_ar: plan.name_ar || '',
+      description: plan.description || '',
+      description_ar: plan.description_ar || '',
+      visits: plan.visits?.toString() || '',
+      price: plan.price?.toString() || ''
+    });
+    setPlanDialogOpen(true);
+  };
+
+  const handleDeletePlan = async (id) => {
+    if (!window.confirm('Delete this plan?')) return;
+    try {
+      await api.delete(`/admin/plans/${id}`);
+      toast.success('Plan deleted');
+      fetchDashboard();
+    } catch (error) {
+      toast.error('Failed to delete plan');
     }
   };
 
