@@ -56,6 +56,12 @@ export default function AdminPage() {
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    if (isAdmin) {
+      fetchDashboard();
+    }
+  }, [isAdmin]);
+
   // Show 403 page if not admin
   if (!isAdmin) {
     return (
@@ -94,12 +100,6 @@ export default function AdminPage() {
       </div>
     );
   }
-
-  useEffect(() => {
-    if (isAdmin) {
-      fetchDashboard();
-    }
-  }, [isAdmin]);
 
   const fetchDashboard = async () => {
     setLoading(true);
