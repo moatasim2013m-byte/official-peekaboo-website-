@@ -266,6 +266,41 @@ export default function AdminPage() {
     }
   };
 
+  // Image upload handler
+  const handleImageUpload = async (e, setter, field = 'image_url') => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Validate file type
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      toast.error('يجب أن تكون الصورة PNG أو JPG أو WebP');
+      return;
+    }
+    
+    // Validate file size (10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('حجم الصورة يجب أن يكون أقل من 10MB');
+      return;
+    }
+    
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      
+      const response = await api.post('/admin/upload-image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      setter(prev => ({ ...prev, [field]: response.data.image_url }));
+      toast.success('تم رفع الصورة');
+    } catch (error) {
+      toast.error('فشل رفع الصورة');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const handleCreatePlan = async (e) => {
     e.preventDefault();
     try {
