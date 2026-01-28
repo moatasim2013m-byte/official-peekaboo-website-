@@ -703,9 +703,9 @@ export default function AdminPage() {
                   ))}
                 </div>
 
-                <h3 className="font-heading font-bold mb-4">Active Subscriptions</h3>
+                <h3 className="font-heading font-bold mb-4">Active Subscriptions {activeFilter === 'active' && <Badge className="ml-2 bg-green-500">Active Only</Badge>}</h3>
                 <div className="space-y-3">
-                  {subscriptions.map((sub) => (
+                  {getFilteredSubscriptions().map((sub) => (
                     <div key={sub.id} className="flex justify-between items-center p-3 rounded-xl bg-muted/50">
                       <div>
                         <div className="flex items-center gap-2">
