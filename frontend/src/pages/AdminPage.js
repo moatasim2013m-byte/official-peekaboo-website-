@@ -39,6 +39,9 @@ export default function AdminPage() {
     hourly_3hr: 13,
     hourly_extra_hr: 3
   });
+  const [expandedParent, setExpandedParent] = useState(null);
+  const [parentDetails, setParentDetails] = useState(null);
+  const [loadingParent, setLoadingParent] = useState(false);
 
   // Dialog states
   const [themeDialogOpen, setThemeDialogOpen] = useState(false);
@@ -49,11 +52,12 @@ export default function AdminPage() {
   const [editingPlan, setEditingPlan] = useState(null);
   const [editingTheme, setEditingTheme] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [galleryPreview, setGalleryPreview] = useState(null);
 
   // Form states
   const [newTheme, setNewTheme] = useState({ name: '', name_ar: '', description: '', description_ar: '', price: '', image_url: '' });
   const [newPlan, setNewPlan] = useState({ name: '', name_ar: '', description: '', description_ar: '', visits: '', price: '' });
-  const [newMedia, setNewMedia] = useState({ url: '', type: 'photo', title: '' });
+  const [newMedia, setNewMedia] = useState({ url: '', type: 'photo', title: '', file: null });
   const [pointsAdjustment, setPointsAdjustment] = useState({ points: 0, description: '' });
 
   useEffect(() => {
