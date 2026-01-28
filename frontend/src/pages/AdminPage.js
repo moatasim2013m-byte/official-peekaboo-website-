@@ -377,42 +377,42 @@ export default function AdminPage() {
           {/* Dashboard */}
           <TabsContent value="dashboard">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-              <Card className="rounded-2xl">
+              <Card className="rounded-2xl cursor-pointer hover:shadow-lg hover:border-primary transition-all" onClick={() => handleDashboardCardClick('users')}>
                 <CardContent className="p-4 text-center">
                   <Users className="h-8 w-8 text-primary mx-auto mb-2" />
                   <p className="text-2xl font-bold">{stats.total_parents || 0}</p>
                   <p className="text-sm text-muted-foreground">Parents</p>
                 </CardContent>
               </Card>
-              <Card className="rounded-2xl">
+              <Card className="rounded-2xl cursor-pointer hover:shadow-lg hover:border-primary transition-all" onClick={() => handleDashboardCardClick('users')}>
                 <CardContent className="p-4 text-center">
                   <Users className="h-8 w-8 text-accent mx-auto mb-2" />
                   <p className="text-2xl font-bold">{stats.total_children || 0}</p>
                   <p className="text-sm text-muted-foreground">Children</p>
                 </CardContent>
               </Card>
-              <Card className="rounded-2xl">
+              <Card className="rounded-2xl cursor-pointer hover:shadow-lg hover:border-primary transition-all" onClick={() => handleDashboardCardClick('hourly', 'today')}>
                 <CardContent className="p-4 text-center">
                   <Clock className="h-8 w-8 text-blue-500 mx-auto mb-2" />
                   <p className="text-2xl font-bold">{stats.today_hourly_bookings || 0}</p>
                   <p className="text-sm text-muted-foreground">Today Hourly</p>
                 </CardContent>
               </Card>
-              <Card className="rounded-2xl">
+              <Card className="rounded-2xl cursor-pointer hover:shadow-lg hover:border-primary transition-all" onClick={() => handleDashboardCardClick('birthday', 'today')}>
                 <CardContent className="p-4 text-center">
                   <Cake className="h-8 w-8 text-pink-500 mx-auto mb-2" />
                   <p className="text-2xl font-bold">{stats.today_birthday_bookings || 0}</p>
                   <p className="text-sm text-muted-foreground">Today Birthday</p>
                 </CardContent>
               </Card>
-              <Card className="rounded-2xl">
+              <Card className="rounded-2xl cursor-pointer hover:shadow-lg hover:border-primary transition-all" onClick={() => handleDashboardCardClick('subscriptions', 'active')}>
                 <CardContent className="p-4 text-center">
                   <Star className="h-8 w-8 text-secondary mx-auto mb-2" />
                   <p className="text-2xl font-bold">{stats.active_subscriptions || 0}</p>
                   <p className="text-sm text-muted-foreground">Active Subs</p>
                 </CardContent>
               </Card>
-              <Card className="rounded-2xl">
+              <Card className="rounded-2xl cursor-pointer hover:shadow-lg hover:border-primary transition-all" onClick={() => handleDashboardCardClick('birthday', 'custom_pending')}>
                 <CardContent className="p-4 text-center">
                   <Cake className="h-8 w-8 text-purple-500 mx-auto mb-2" />
                   <p className="text-2xl font-bold">{stats.pending_custom_parties || 0}</p>
