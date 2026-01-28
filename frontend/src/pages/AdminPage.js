@@ -824,7 +824,7 @@ export default function AdminPage() {
             <Card className="rounded-2xl">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle>Birthday Themes</CardTitle>
-                <Dialog open={themeDialogOpen} onOpenChange={setThemeDialogOpen}>
+                <Dialog open={themeDialogOpen} onOpenChange={(open) => { setThemeDialogOpen(open); if (!open) { setEditingTheme(null); setNewTheme({ name: '', name_ar: '', description: '', description_ar: '', price: '', image_url: '' }); } }}>
                   <DialogTrigger asChild>
                     <Button className="rounded-full gap-2">
                       <Plus className="h-4 w-4" /> Add Theme
@@ -832,26 +832,40 @@ export default function AdminPage() {
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Create Theme</DialogTitle>
+                      <DialogTitle>{editingTheme ? 'Edit Theme' : 'Create Theme'}</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleCreateTheme} className="space-y-4">
-                      <div>
-                        <Label>Name</Label>
-                        <Input value={newTheme.name} onChange={(e) => setNewTheme({...newTheme, name: e.target.value})} className="rounded-xl mt-1" />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Name (EN)</Label>
+                          <Input value={newTheme.name} onChange={(e) => setNewTheme({...newTheme, name: e.target.value})} className="rounded-xl mt-1" />
+                        </div>
+                        <div>
+                          <Label>Name (AR)</Label>
+                          <Input value={newTheme.name_ar} onChange={(e) => setNewTheme({...newTheme, name_ar: e.target.value})} className="rounded-xl mt-1" dir="rtl" />
+                        </div>
                       </div>
-                      <div>
-                        <Label>Description</Label>
-                        <Textarea value={newTheme.description} onChange={(e) => setNewTheme({...newTheme, description: e.target.value})} className="rounded-xl mt-1" />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Description (EN)</Label>
+                          <Textarea value={newTheme.description} onChange={(e) => setNewTheme({...newTheme, description: e.target.value})} className="rounded-xl mt-1" />
+                        </div>
+                        <div>
+                          <Label>Description (AR)</Label>
+                          <Textarea value={newTheme.description_ar} onChange={(e) => setNewTheme({...newTheme, description_ar: e.target.value})} className="rounded-xl mt-1" dir="rtl" />
+                        </div>
                       </div>
-                      <div>
-                        <Label>Price ($)</Label>
-                        <Input type="number" step="0.01" value={newTheme.price} onChange={(e) => setNewTheme({...newTheme, price: e.target.value})} className="rounded-xl mt-1" />
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label>Price (JD)</Label>
+                          <Input type="number" step="0.01" value={newTheme.price} onChange={(e) => setNewTheme({...newTheme, price: e.target.value})} className="rounded-xl mt-1" />
+                        </div>
+                        <div>
+                          <Label>Image URL</Label>
+                          <Input value={newTheme.image_url} onChange={(e) => setNewTheme({...newTheme, image_url: e.target.value})} className="rounded-xl mt-1" />
+                        </div>
                       </div>
-                      <div>
-                        <Label>Image URL</Label>
-                        <Input value={newTheme.image_url} onChange={(e) => setNewTheme({...newTheme, image_url: e.target.value})} className="rounded-xl mt-1" />
-                      </div>
-                      <Button type="submit" className="w-full rounded-full">Create Theme</Button>
+                      <Button type="submit" className="w-full rounded-full">{editingTheme ? 'Update Theme' : 'Create Theme'}</Button>
                     </form>
                   </DialogContent>
                 </Dialog>
@@ -864,9 +878,20 @@ export default function AdminPage() {
                         <img src={theme.image_url} alt={theme.name} className="w-full h-32 object-cover" />
                       )}
                       <CardContent className="p-4">
-                        <h3 className="font-heading font-bold">{theme.name}</h3>
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="font-heading font-bold">{theme.name}</h3>
+                          <div className="flex gap-1">
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditTheme(theme)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteTheme(theme.id)}>
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                        {theme.name_ar && <p className="text-sm text-muted-foreground" dir="rtl">{theme.name_ar}</p>}
                         <p className="text-sm text-muted-foreground line-clamp-2">{theme.description}</p>
-                        <p className="text-accent font-bold mt-2">${theme.price}</p>
+                        <p className="text-accent font-bold mt-2">{theme.price} JD</p>
                       </CardContent>
                     </Card>
                   ))}
