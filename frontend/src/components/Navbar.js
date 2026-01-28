@@ -141,10 +141,11 @@ export const Navbar = () => {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
-            {/* Debug Info - TEMPORARY */}
-            {isAuthenticated && (
-              <div className="mb-4 text-xs bg-yellow-100 text-yellow-900 px-3 py-2 rounded border border-yellow-300">
-                DEBUG: {user?.email} | role: {user?.role}
+            {/* Staff Badge - Mobile */}
+            {isAuthenticated && (isAdmin || isStaff) && (
+              <div className="mb-4 flex items-center gap-2 px-3 py-2 rounded bg-[var(--peekaboo-green)]/10 border border-[var(--peekaboo-green)]">
+                <img src={mascotImg} alt="" className="h-6 w-6 rounded-full" />
+                <span className="text-xs font-medium text-[#2d6a4f]">{isAdmin ? 'Admin Mode' : 'Staff Mode'}</span>
               </div>
             )}
             <div className="flex flex-col gap-4">
