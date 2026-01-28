@@ -593,11 +593,11 @@ export default function AdminPage() {
           <TabsContent value="hourly">
             <Card className="rounded-2xl">
               <CardHeader>
-                <CardTitle>Hourly Bookings</CardTitle>
+                <CardTitle>Hourly Bookings {activeFilter === 'today' && <Badge className="ml-2 bg-blue-500">Today</Badge>}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {hourlyBookings.map((booking) => (
+                  {getFilteredHourlyBookings().map((booking) => (
                     <div key={booking.id} className="flex justify-between items-center p-3 rounded-xl bg-muted/50">
                       <div>
                         <div className="flex items-center gap-2">
