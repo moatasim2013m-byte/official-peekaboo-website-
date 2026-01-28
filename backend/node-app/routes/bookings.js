@@ -59,19 +59,31 @@ router.post('/hourly', authMiddleware, async (req, res) => {
   try {
     const { slot_id, child_id, payment_id, amount, duration_hours, custom_notes } = req.body;
     
-    // Validate slot
-    const slot = await TimeSlot.findById(slot_id);
-    if (!slot || slot.slot_type !== 'hourly') {
-      return res.status(400).json({ error: 'Invalid slot' });
-    }
+    // ATOMIC capacity check - use findOneAndUpdate to prevent race conditions
+    const slot = await TimeSlot.findOneAndUpdate(
+      { 
+        _id: slot_id, 
+        slot_type: 'hourly',
+        $expr: { $lt: ['$booked_count', '$capacity'] } // Only if capacity available
+      },
+      { $inc: { booked_count: 1 } },
+      { new: true }
+    );
     
-    if (slot.booked_count >= slot.capacity) {
-      return res.status(400).json({ error: 'Slot is full' });
+    if (!slot) {
+      // Check if slot exists but is full
+      const existingSlot = await TimeSlot.findById(slot_id);
+      if (!existingSlot) {
+        return res.status(400).json({ error: 'Invalid slot' });
+      }
+      return res.status(400).json({ error: 'عذراً، الوقت محجوز بالكامل. يرجى اختيار وقت آخر.' }); // Slot is full (Arabic)
     }
 
     // Validate child belongs to user
     const child = await Child.findOne({ _id: child_id, parent_id: req.userId });
     if (!child) {
+      // Rollback capacity increment
+      await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: -1 } });
       return res.status(400).json({ error: 'Invalid child' });
     }
 
@@ -94,8 +106,7 @@ router.post('/hourly', authMiddleware, async (req, res) => {
 
     await booking.save();
     
-    // Increment slot booked count
-    await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: 1 } });
+    // Capacity already incremented atomically above
 
     // Award loyalty points
     if (payment_id) {
