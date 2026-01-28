@@ -88,7 +88,13 @@ export default function HomePage() {
                 className="rounded-3xl shadow-2xl w-full object-cover aspect-[4/3]"
                 data-testid="hero-image"
               />
-              <div className="absolute -bottom-4 -left-4 bg-secondary text-secondary-foreground px-6 py-3 rounded-full font-heading font-bold shadow-lg">
+              {/* Mascot peeking */}
+              <img 
+                src={mascotImg}
+                alt="Peekaboo Mascot"
+                className="absolute -bottom-6 -right-4 w-28 h-28 rounded-full border-4 border-white shadow-lg object-cover"
+              />
+              <div className="absolute -bottom-4 -left-4 bg-[var(--peekaboo-yellow)] text-foreground px-6 py-3 rounded-full font-heading font-bold shadow-lg">
                 {t('Open Daily')} 10:00 ص - 12:00 ص
               </div>
             </div>
