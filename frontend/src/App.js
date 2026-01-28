@@ -9,6 +9,7 @@ import { useTranslation } from "./i18n/useT";
 // Pages
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import StaffLoginPage from "./pages/StaffLoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
