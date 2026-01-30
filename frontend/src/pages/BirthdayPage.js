@@ -158,25 +158,25 @@ export default function BirthdayPage() {
   const maxDate = addDays(new Date(), 90);
 
   return (
-    <div className="min-h-screen bg-hero-gradient py-8 md:py-12">
+    <div className="min-h-screen bg-hero-gradient py-8 md:py-12" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="birthday-title">
-            <Cake className="inline-block h-10 w-10 text-accent mr-2" />
-            {t('Birthday Parties')}
+            <Cake className="inline-block h-10 w-10 text-accent ml-2" />
+            حفلات أعياد الميلاد
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            {t('Make your child\'s birthday unforgettable! Choose from our amazing themes or request a custom party.')}
+            اجعل عيد ميلاد طفلك لا يُنسى! اختر من ثيماتنا الرائعة أو اطلب حفلة مخصصة.
           </p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 rounded-full p-1 bg-muted">
             <TabsTrigger value="standard" className="rounded-full" data-testid="tab-standard">
-              {t('Standard Themes')}
+              الثيمات الجاهزة
             </TabsTrigger>
             <TabsTrigger value="custom" className="rounded-full" data-testid="tab-custom">
-              {t('Custom Request')}
+              طلب مخصص
             </TabsTrigger>
           </TabsList>
 
@@ -184,8 +184,8 @@ export default function BirthdayPage() {
             {/* Calendar */}
             <Card className="border-2 rounded-3xl">
               <CardHeader>
-                <CardTitle className="font-heading">{t('Select Date')}</CardTitle>
-                <CardDescription>{t('Book at least 3 days in advance')}</CardDescription>
+                <CardTitle className="font-heading">اختر التاريخ</CardTitle>
+                <CardDescription>احجز قبل 3 أيام على الأقل</CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center">
                 <Calendar
@@ -256,7 +256,7 @@ export default function BirthdayPage() {
           <TabsContent value="standard" className="space-y-8">
             {/* Themes Grid */}
             <div>
-              <h2 className="font-heading text-2xl font-bold mb-6">Choose a Theme</h2>
+              <h2 className="font-heading text-2xl font-bold mb-6">اختر الثيم</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                 {themes.map((theme) => (
                   <Card
@@ -267,17 +267,17 @@ export default function BirthdayPage() {
                     }`}
                     data-testid={`theme-${theme.id}`}
                   >
-                    <CardContent className="p-4">
+                    <CardContent className="p-4 text-center">
                       {theme.image_url && (
                         <img 
                           src={theme.image_url} 
-                          alt={theme.name}
+                          alt={theme.name_ar || theme.name}
                           className="w-full h-24 object-cover rounded-xl mb-3"
                         />
                       )}
-                      <h3 className="font-heading font-semibold">{theme.name}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{theme.description}</p>
-                      <p className="text-accent font-bold mt-2">${theme.price}</p>
+                      <h3 className="font-heading font-semibold">{theme.name_ar || theme.name}</h3>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{theme.description_ar || theme.description}</p>
+                      <p className="text-accent font-bold mt-2">{theme.price} دينار</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -288,15 +288,15 @@ export default function BirthdayPage() {
             {isAuthenticated && (
               <Card className="border-2 rounded-3xl">
                 <CardHeader>
-                  <CardTitle className="font-heading">Complete Your Booking</CardTitle>
+                  <CardTitle className="font-heading">أكمل حجزك</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div>
-                      <Label>Birthday Child</Label>
+                      <Label>طفل عيد الميلاد</Label>
                       <Select value={selectedChild} onValueChange={setSelectedChild}>
                         <SelectTrigger className="rounded-xl mt-2" data-testid="birthday-child-select">
-                          <SelectValue placeholder="Select child" />
+                          <SelectValue placeholder="اختر الطفل" />
                         </SelectTrigger>
                         <SelectContent>
                           {children.map((child) => (
@@ -309,7 +309,7 @@ export default function BirthdayPage() {
                     </div>
 
                     <div>
-                      <Label>Number of Guests</Label>
+                      <Label>عدد الضيوف</Label>
                       <Input
                         type="number"
                         min="5"
@@ -322,12 +322,12 @@ export default function BirthdayPage() {
                     </div>
 
                     <div>
-                      <Label>Selected Theme</Label>
+                      <Label>الثيم المختار</Label>
                       <div className="p-3 rounded-xl bg-muted mt-2">
                         {selectedTheme ? (
-                          <span className="font-semibold">{selectedTheme.name} - ${selectedTheme.price}</span>
+                          <span className="font-semibold">{selectedTheme.name_ar || selectedTheme.name} - {selectedTheme.price} دينار</span>
                         ) : (
-                          <span className="text-muted-foreground">No theme selected</span>
+                          <span className="text-muted-foreground">لم يتم اختيار ثيم</span>
                         )}
                       </div>
                     </div>
@@ -341,11 +341,11 @@ export default function BirthdayPage() {
                       >
                         {loading ? (
                           <>
-                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                            Processing...
+                            <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                            جاري المعالجة...
                           </>
                         ) : (
-                          'Book & Pay'
+                          'احجز وادفع'
                         )}
                       </Button>
                     </div>
@@ -360,19 +360,19 @@ export default function BirthdayPage() {
               <CardHeader>
                 <CardTitle className="font-heading flex items-center gap-2">
                   <Sparkles className="h-6 w-6 text-accent" />
-                  Custom Theme Request
+                  طلب ثيم مخصص
                 </CardTitle>
                 <CardDescription>
-                  Have a unique idea? Tell us about your dream party and our team will reach out to discuss details and pricing.
+                  لديك فكرة فريدة؟ أخبرنا عن حفلة أحلامك وسيتواصل فريقنا معك لمناقشة التفاصيل والأسعار.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label>Birthday Child</Label>
+                    <Label>طفل عيد الميلاد</Label>
                     <Select value={selectedChild} onValueChange={setSelectedChild}>
                       <SelectTrigger className="rounded-xl mt-2">
-                        <SelectValue placeholder="Select child" />
+                        <SelectValue placeholder="اختر الطفل" />
                       </SelectTrigger>
                       <SelectContent>
                         {children.map((child) => (
@@ -385,7 +385,7 @@ export default function BirthdayPage() {
                   </div>
 
                   <div>
-                    <Label>Expected Guests</Label>
+                    <Label>عدد الضيوف المتوقع</Label>
                     <Input
                       type="number"
                       min="5"
@@ -398,22 +398,22 @@ export default function BirthdayPage() {
                 </div>
 
                 <div>
-                  <Label>Describe Your Custom Theme *</Label>
+                  <Label>صِف الثيم المخصص *</Label>
                   <Textarea
                     value={customRequest}
                     onChange={(e) => setCustomRequest(e.target.value)}
-                    placeholder="Tell us about your dream party theme, colors, characters, decorations..."
+                    placeholder="أخبرنا عن ثيم حفلة أحلامك، الألوان، الشخصيات، الديكورات..."
                     className="rounded-xl mt-2 min-h-[120px]"
                     data-testid="custom-request"
                   />
                 </div>
 
                 <div>
-                  <Label>Special Notes (Optional)</Label>
+                  <Label>ملاحظات خاصة (اختياري)</Label>
                   <Textarea
                     value={specialNotes}
                     onChange={(e) => setSpecialNotes(e.target.value)}
-                    placeholder="Any allergies, special requirements, or additional requests..."
+                    placeholder="أي حساسية، متطلبات خاصة، أو طلبات إضافية..."
                     className="rounded-xl mt-2"
                   />
                 </div>
@@ -426,15 +426,15 @@ export default function BirthdayPage() {
                 >
                   {loading ? (
                     <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Submitting...
+                      <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                      جاري الإرسال...
                     </>
                   ) : (
-                    'Submit Custom Request'
+                    'إرسال الطلب المخصص'
                   )}
                 </Button>
                 <p className="text-sm text-muted-foreground">
-                  No payment required for custom requests. Our team will contact you with pricing.
+                  لا يلزم الدفع للطلبات المخصصة. سيتواصل فريقنا معك بالأسعار.
                 </p>
               </CardContent>
             </Card>
@@ -444,13 +444,13 @@ export default function BirthdayPage() {
         {!isAuthenticated && (
           <Card className="border-2 rounded-3xl mt-8 bg-accent/5">
             <CardContent className="py-8 text-center">
-              <p className="text-lg mb-4">Please login or create an account to book a party</p>
+              <p className="text-lg mb-4">الرجاء تسجيل الدخول أو إنشاء حساب لحجز حفلة</p>
               <div className="flex gap-4 justify-center">
                 <Button onClick={() => navigate('/login')} variant="outline" className="rounded-full">
-                  Login
+                  تسجيل الدخول
                 </Button>
                 <Button onClick={() => navigate('/register')} className="rounded-full btn-playful bg-accent">
-                  Sign Up
+                  إنشاء حساب
                 </Button>
               </div>
             </CardContent>
