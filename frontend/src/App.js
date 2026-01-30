@@ -59,9 +59,20 @@ const ProtectedRoute = ({ children, adminOnly = false, staffOnly = false, parent
 };
 
 // Layout Component
-const Layout = ({ children }) => {
+const Layout = ({ children, isCustomerPage = true }) => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className={`flex flex-col min-h-screen ${isCustomerPage ? 'sky-theme' : ''}`}>
+      <Navbar />
+      <main className="flex-1">{children}</main>
+      <Footer />
+    </div>
+  );
+};
+
+// Admin Layout (no sky theme)
+const AdminLayout = ({ children }) => {
+  return (
+    <div className="flex flex-col min-h-screen bg-light">
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />
