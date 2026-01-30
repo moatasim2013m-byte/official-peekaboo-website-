@@ -27,75 +27,74 @@ export default function HomePage() {
   const features = [
     {
       icon: Clock,
-      title: t('Hourly Play'),
-      description: 'Book 1-hour play sessions for your kids. Pick your perfect time slot!',
+      title: 'اللعب بالساعة',
+      description: 'احجز جلسات لعب لأطفالك. اختر الوقت المثالي!',
       link: '/tickets',
       color: 'bg-primary',
-      buttonText: t('Book Now')
+      buttonText: 'احجز الآن'
     },
     {
       icon: Cake,
-      title: t('Birthday Parties'),
-      description: 'Celebrate with 10 amazing themes! Custom parties available too.',
+      title: 'حفلات أعياد الميلاد',
+      description: 'احتفل مع 10 ثيمات رائعة! حفلات مخصصة متاحة أيضاً.',
       link: '/birthday',
       color: 'bg-accent',
-      buttonText: t('Plan Party')
+      buttonText: 'خطط لحفلتك'
     },
     {
       icon: Star,
-      title: t('Subscriptions'),
-      description: 'Save big with visit packages. 30-day validity, unlimited fun!',
+      title: 'الاشتراكات',
+      description: 'وفّر مع باقات الزيارات. صلاحية 30 يوم، متعة بلا حدود!',
       link: '/subscriptions',
       color: 'bg-secondary',
-      buttonText: t('Subscribe')
+      buttonText: 'اشترك الآن'
     }
   ];
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen" dir="rtl">
       {/* Hero Section */}
       <section className="bg-hero-gradient py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div>
+            <div className="order-2 md:order-1">
               <h1 className="font-heading text-4xl md:text-6xl font-bold text-foreground mb-6" data-testid="hero-title">
-                {t('Where Kids Play & Celebrate')} <span className="text-primary"></span> 
-                <span className="text-accent"></span>
+                حيث يلعب الأطفال ويحتفلون <span className="text-primary">🎈</span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-                {t('The ultimate indoor playground experience! Book play sessions, throw unforgettable birthday parties, and save with our subscription packages')}
+                أفضل تجربة ملعب داخلي! احجز جلسات اللعب، أقم حفلات أعياد ميلاد لا تُنسى، ووفّر مع باقات الاشتراك
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link to="/tickets">
                   <Button size="lg" className="rounded-full btn-playful text-lg px-8" data-testid="hero-book-btn">
-                    {t('Book a Session')}
-                    <ChevronRight className="ml-2 h-5 w-5" />
+                    احجز جلسة
+                    <ChevronRight className="mr-2 h-5 w-5 rotate-180" />
                   </Button>
                 </Link>
                 {!isAuthenticated && (
                   <Link to="/register">
                     <Button size="lg" variant="outline" className="rounded-full text-lg px-8" data-testid="hero-signup-btn">
-                      {t('Sign Up Free')}
+                      سجّل مجاناً
                     </Button>
                   </Link>
                 )}
               </div>
             </div>
-            <div className="relative">
+            <div className="relative order-1 md:order-2">
               <img 
                 src="https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg"
-                alt="Kids playing at Peekaboo"
+                alt="أطفال يلعبون في بيكابو"
                 className="rounded-3xl shadow-2xl w-full object-cover aspect-[4/3]"
                 data-testid="hero-image"
               />
               {/* Mascot peeking */}
               <img 
                 src={mascotImg}
-                alt="Peekaboo Mascot"
-                className="absolute -bottom-6 -right-4 w-28 h-28 rounded-full border-4 border-white shadow-lg object-cover"
+                alt="تميمة بيكابو"
+                className="absolute -bottom-6 -left-4 w-28 h-28 rounded-full border-4 border-white shadow-lg object-cover"
               />
-              <div className="absolute -bottom-4 -left-4 bg-[var(--peekaboo-yellow)] text-foreground px-6 py-3 rounded-full font-heading font-bold shadow-lg">
-                {t('Open Daily')} 10:00 ص - 12:00 ص
+              <div className="absolute -bottom-4 -right-4 bg-[var(--peekaboo-yellow)] text-foreground px-6 py-3 rounded-full font-heading font-bold shadow-lg">
+                مفتوح يومياً 10:00 ص - 12:00 ص
               </div>
             </div>
           </div>
@@ -107,10 +106,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="font-heading text-3xl md:text-5xl font-bold text-foreground mb-4" data-testid="features-title">
-              What We Offer
+              ماذا نقدم
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Everything you need for the perfect play day!
+              كل ما تحتاجه ليوم لعب مثالي!
             </p>
           </div>
 
@@ -121,8 +120,8 @@ export default function HomePage() {
                 className="border-2 rounded-3xl card-interactive overflow-hidden"
                 data-testid={`feature-card-${index}`}
               >
-                <CardContent className="p-8">
-                  <div className={`${feature.color} w-16 h-16 rounded-2xl flex items-center justify-center mb-6`}>
+                <CardContent className="p-8 text-center">
+                  <div className={`${feature.color} w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto`}>
                     <feature.icon className="h-8 w-8 text-white" />
                   </div>
                   <h3 className="font-heading text-2xl font-bold mb-3">{feature.title}</h3>
@@ -130,7 +129,7 @@ export default function HomePage() {
                   <Link to={feature.link}>
                     <Button className="rounded-full btn-playful w-full" data-testid={`feature-btn-${index}`}>
                       {feature.buttonText}
-                      <ChevronRight className="ml-2 h-4 w-4" />
+                      <ChevronRight className="mr-2 h-4 w-4 rotate-180" />
                     </Button>
                   </Link>
                 </CardContent>
@@ -145,10 +144,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="font-heading text-3xl md:text-5xl font-bold text-foreground mb-4" data-testid="gallery-title">
-              Fun Moments at Peekaboo
+              لحظات ممتعة في بيكابو
             </h2>
             <p className="text-muted-foreground text-lg">
-              See what makes us special!
+              شاهد ما يجعلنا مميزين!
             </p>
           </div>
 
@@ -170,7 +169,7 @@ export default function HomePage() {
                   ) : (
                     <img 
                       src={item.url} 
-                      alt={item.title || t('Gallery image')} 
+                      alt={item.title || 'صورة من المعرض'} 
                       className={`w-full object-cover ${index === 0 ? 'aspect-square' : 'aspect-square'}`}
                     />
                   )}
@@ -182,21 +181,21 @@ export default function HomePage() {
                 <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden">
                   <img 
                     src="https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg"
-                    alt="Kids playing"
+                    alt="أطفال يلعبون"
                     className="w-full h-full object-cover aspect-square"
                   />
                 </div>
                 <div className="rounded-2xl overflow-hidden">
                   <img 
                     src="https://images.pexels.com/photos/6148511/pexels-photo-6148511.jpeg"
-                    alt="Birthday party"
+                    alt="حفلة عيد ميلاد"
                     className="w-full object-cover aspect-square"
                   />
                 </div>
                 <div className="rounded-2xl overflow-hidden">
                   <img 
                     src="https://images.pexels.com/photos/3951099/pexels-photo-3951099.png"
-                    alt="Family fun"
+                    alt="متعة عائلية"
                     className="w-full object-cover aspect-square"
                   />
                 </div>
@@ -211,10 +210,10 @@ export default function HomePage() {
         <section className="py-16 md:py-24 bg-primary">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="font-heading text-3xl md:text-5xl font-bold text-white mb-6" data-testid="cta-title">
-              Ready to Join the Fun?
+              هل أنت مستعد للمتعة؟
             </h2>
             <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
-              Create your free account to book sessions, track loyalty points, and get exclusive offers!
+              أنشئ حسابك المجاني لحجز الجلسات، تتبع نقاط الولاء، والحصول على عروض حصرية!
             </p>
             <Link to="/register">
               <Button 
@@ -223,8 +222,8 @@ export default function HomePage() {
                 className="rounded-full text-lg px-10 btn-playful"
                 data-testid="cta-signup-btn"
               >
-                Sign Up Now
-                <ChevronRight className="ml-2 h-5 w-5" />
+                سجّل الآن
+                <ChevronRight className="mr-2 h-5 w-5 rotate-180" />
               </Button>
             </Link>
           </div>
