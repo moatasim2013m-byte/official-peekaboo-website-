@@ -26,24 +26,24 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white border-b border-border sticky top-0 z-50" dir="rtl">
+    <nav className="bg-white border-b border-border sticky top-0 z-50 shadow-sm" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-18 py-2">
           {/* Logo with Mascot */}
           <Link to="/" className="flex items-center gap-2" data-testid="nav-logo">
-            <img src={logoImg} alt="بيكابو" className="h-10" />
+            <img src={logoImg} alt="بيكابو" className="h-12 md:h-14" />
           </Link>
 
           {/* Desktop Navigation - Show only for non-admin users */}
           {!isAdmin && (
-            <div className="hidden md:flex items-center gap-6">
-              <Link to="/tickets" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-tickets">
+            <div className="hidden md:flex items-center gap-2">
+              <Link to="/tickets" className="nav-link" data-testid="nav-tickets">
                 تذاكر بالساعة
               </Link>
-              <Link to="/birthday" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-birthday">
+              <Link to="/birthday" className="nav-link" data-testid="nav-birthday">
                 حفلات أعياد الميلاد
               </Link>
-              <Link to="/subscriptions" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-subscriptions">
+              <Link to="/subscriptions" className="nav-link" data-testid="nav-subscriptions">
                 الاشتراكات
               </Link>
             </div>
