@@ -285,7 +285,7 @@ export default function TicketsPage() {
               <div className="grid grid-cols-1 gap-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <Label className="block text-sm font-medium mb-2">اختر الطفل</Label>
+                    <Label className="block text-sm font-medium mb-2">اختر الأطفال</Label>
                     {children.length === 0 ? (
                       <div className="text-muted-foreground">
                         <p className="mb-2">لم يتم إضافة أطفال بعد</p>
@@ -299,18 +299,31 @@ export default function TicketsPage() {
                         </Button>
                       </div>
                     ) : (
-                      <Select value={selectedChild} onValueChange={setSelectedChild}>
-                        <SelectTrigger className="rounded-xl">
-                          <SelectValue placeholder="اختر طفلاً" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {children.map((child) => (
-                            <SelectItem key={child.id} value={child.id}>
-                              {child.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <div className="space-y-2">
+                        {children.map((child) => (
+                          <label 
+                            key={child.id} 
+                            className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
+                              selectedChildren.includes(child.id) 
+                                ? 'border-primary bg-primary/10' 
+                                : 'border-border hover:border-primary/50'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedChildren.includes(child.id)}
+                              onChange={() => toggleChildSelection(child.id)}
+                              className="w-5 h-5 rounded accent-primary"
+                            />
+                            <span className="font-medium">{child.name}</span>
+                          </label>
+                        ))}
+                        {selectedChildren.length > 0 && (
+                          <p className="text-sm text-muted-foreground mt-2">
+                            تم اختيار {selectedChildren.length} طفل
+                          </p>
+                        )}
+                      </div>
                     )}
                   </div>
 
@@ -354,7 +367,7 @@ export default function TicketsPage() {
                 <div className="flex justify-end">
                   <Button
                     onClick={handleBooking}
-                    disabled={!selectedSlot || !selectedChild || loading}
+                    disabled={!selectedSlot || selectedChildren.length === 0 || loading}
                     className="w-full md:w-auto px-8 rounded-full h-12 btn-playful text-lg"
                   >
                     {loading ? (
