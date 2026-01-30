@@ -64,10 +64,14 @@ Applied RTL Arabic localization and design tokens to all customer-facing pages:
 
 ## Upcoming Tasks (P1)
 
-### Multi-Child Booking
+### Multi-Child Booking ✅ COMPLETED
 Allow parents to book tickets for multiple children in a single transaction.
-- **Files:** `/app/frontend/src/pages/TicketsPage.js`, backend routes
-- **Scope:** UI changes for multi-select, backend array handling
+- **Files:** `/app/frontend/src/pages/TicketsPage.js`, `/app/backend/node-app/routes/bookings.js`, `/app/backend/node-app/routes/payments.js`
+- **Implementation:**
+  - Checkbox-based multi-select for children
+  - Atomic capacity check for all children
+  - Price multiplied by child count
+  - Each child gets separate booking record with QR code
 
 ### Profile Page - Active Session Countdown
 Display live countdown timer for children's play sessions.
