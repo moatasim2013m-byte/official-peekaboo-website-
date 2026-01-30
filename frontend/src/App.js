@@ -85,6 +85,7 @@ function AppRoutes() {
       <Route path="/tickets" element={<Layout><TicketsPage /></Layout>} />
       <Route path="/birthday" element={<Layout><BirthdayPage /></Layout>} />
       <Route path="/subscriptions" element={<Layout><SubscriptionsPage /></Layout>} />
+      <Route path="/terms" element={<Layout><TermsPage /></Layout>} />
       
       {/* Payment Routes */}
       <Route path="/payment/success" element={<Layout><PaymentSuccessPage /></Layout>} />
