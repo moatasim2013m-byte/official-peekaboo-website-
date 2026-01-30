@@ -106,7 +106,7 @@ export default function SubscriptionsPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-12">
               {plans.map((plan, index) => {
                 const tier = getPlanTier(index);
                 const isPopular = index === 1;
@@ -115,49 +115,52 @@ export default function SubscriptionsPage() {
                   <Card
                     key={plan.id}
                     onClick={() => setSelectedPlan(plan)}
-                    className={`border-2 rounded-3xl cursor-pointer transition-all card-interactive relative ${
+                    className={`border-2 rounded-3xl cursor-pointer transition-all relative overflow-hidden ${
                       selectedPlan?.id === plan.id 
-                        ? 'border-secondary ring-2 ring-secondary/20' 
-                        : ''
-                    } ${isPopular ? 'md:-mt-4 md:mb-4' : ''}`}
+                        ? 'border-[#FFD93B] ring-4 ring-[#FFD93B]/20 shadow-lg' 
+                        : 'border-slate-200 hover:border-[#FFD93B]/50 hover:shadow-md'
+                    } ${isPopular ? 'md:-mt-6 md:mb-6 shadow-xl border-[#FFD93B]' : ''}`}
                     data-testid={`plan-${plan.id}`}
                   >
                     {isPopular && (
-                      <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-secondary text-secondary-foreground rounded-full px-4">
-                        {t('Most Popular')}
-                      </Badge>
+                      <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-[#FFD93B] to-[#FF924C] text-white text-center py-2 text-sm font-bold">
+                        ⭐ الأكثر شعبية / Most Popular
+                      </div>
                     )}
-                    <CardHeader className="text-center pb-4">
-                      <CardTitle className="font-heading text-2xl">
+                    <CardHeader className={`text-center pb-4 ${isPopular ? 'pt-12' : ''}`}>
+                      <CardTitle className="font-heading text-2xl text-slate-800">
                         {plan.name_ar || t(plan.name) || plan.name}
                       </CardTitle>
-                      <CardDescription>
+                      <CardDescription className="text-slate-500">
                         {plan.description_ar || t(plan.description) || plan.description}
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="text-center">
                       <div className="mb-6">
-                        <span className="text-5xl font-heading font-bold text-foreground">${plan.price}</span>
+                        <span className="text-4xl md:text-5xl font-heading font-bold text-slate-800">{plan.price}</span>
+                        <span className="text-lg text-slate-500 mr-1">JD</span>
                       </div>
                       
-                      <div className="bg-secondary/10 rounded-2xl p-4 mb-6">
-                        <span className="text-3xl font-heading font-bold text-secondary">{plan.visits}</span>
-                        <span className="text-muted-foreground ml-2">{t('visits')}</span>
+                      <div className="bg-gradient-to-r from-[#FFD93B]/20 to-[#FF924C]/20 rounded-2xl p-4 mb-6">
+                        <span className="text-3xl font-heading font-bold text-[#FF924C]">{plan.visits}</span>
+                        <span className="text-slate-600 mr-2">{t('visits')}</span>
                       </div>
 
-                      <ul className="space-y-3 text-left">
+                      <ul className="space-y-3 text-right" dir="rtl">
                         {planFeatures[tier]?.map((feature, i) => (
                           <li key={i} className="flex items-center gap-2">
-                            <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                            <span className="text-sm">{feature}</span>
+                            <Check className="h-5 w-5 text-[#8AC926] flex-shrink-0" />
+                            <span className="text-sm text-slate-600">{feature}</span>
                           </li>
                         ))}
                       </ul>
 
                       <Button
                         variant={selectedPlan?.id === plan.id ? 'default' : 'outline'}
-                        className={`w-full rounded-full mt-6 ${
-                          selectedPlan?.id === plan.id ? 'bg-secondary hover:bg-secondary/90' : ''
+                        className={`w-full rounded-full mt-6 h-12 text-base font-semibold ${
+                          selectedPlan?.id === plan.id 
+                            ? 'bg-[#FFD93B] hover:bg-[#FFD93B]/90 text-slate-800' 
+                            : 'border-2 hover:border-[#FFD93B] hover:bg-[#FFD93B]/10'
                         }`}
                       >
                         {t('Select Plan')}
