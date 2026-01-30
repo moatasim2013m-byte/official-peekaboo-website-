@@ -79,15 +79,15 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="order-2 md:order-1">
               <h1 className="font-heading text-4xl md:text-6xl font-bold text-foreground mb-6" data-testid="hero-title">
-                حيث يلعب الأطفال ويحتفلون <span className="text-primary">🎈</span>
+                {heroConfig.title}
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-                أفضل تجربة ملعب داخلي! احجز جلسات اللعب، أقم حفلات أعياد ميلاد لا تُنسى، ووفّر مع باقات الاشتراك
+                {heroConfig.subtitle}
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link to="/tickets">
+                <Link to={heroConfig.ctaRoute}>
                   <Button size="lg" className="rounded-full btn-playful text-lg px-8" data-testid="hero-book-btn">
-                    احجز جلسة
+                    {heroConfig.ctaText}
                     <ChevronRight className="mr-2 h-5 w-5 rotate-180" />
                   </Button>
                 </Link>
@@ -102,7 +102,7 @@ export default function HomePage() {
             </div>
             <div className="relative order-1 md:order-2">
               <img 
-                src="https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg"
+                src={heroConfig.image || "https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg"}
                 alt="أطفال يلعبون في بيكابو"
                 className="rounded-3xl shadow-2xl w-full object-cover aspect-[4/3]"
                 data-testid="hero-image"
