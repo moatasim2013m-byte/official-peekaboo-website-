@@ -609,6 +609,9 @@ export default function AdminPage() {
             <TabsTrigger value="gallery" className="rounded-full gap-2">
               <Image className="h-4 w-4" /> Gallery
             </TabsTrigger>
+            <TabsTrigger value="homepage" className="rounded-full gap-2">
+              <Home className="h-4 w-4" /> الصفحة الرئيسية
+            </TabsTrigger>
             <TabsTrigger value="settings" className="rounded-full gap-2">
               <Settings className="h-4 w-4" /> Settings
             </TabsTrigger>
