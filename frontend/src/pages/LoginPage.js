@@ -21,7 +21,7 @@ export default function LoginPage() {
 
     try {
       const user = await login(email, password);
-      toast.success('Welcome back!');
+      toast.success('أهلًا بعودتك!');
       
       if (user.role === 'admin') {
         navigate('/admin');
@@ -31,34 +31,34 @@ export default function LoginPage() {
         navigate('/profile');
       }
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Login failed');
+      toast.error(error.response?.data?.error || 'فشل تسجيل الدخول');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-hero-gradient py-12 px-4">
+    <div className="min-h-[80vh] flex items-center justify-center bg-hero-gradient py-12 px-4" dir="rtl">
       <Card className="w-full max-w-md border-2 rounded-3xl shadow-xl">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-4">
             <span className="text-5xl">🎪</span>
           </div>
-          <CardTitle className="font-heading text-3xl" data-testid="login-title">Welcome Back!</CardTitle>
+          <CardTitle className="font-heading text-3xl" data-testid="login-title">أهلًا بعودتك!</CardTitle>
           <CardDescription className="text-base">
-            Sign in to your Peekaboo account
+            سجّل دخولك إلى حساب بيكابو
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">البريد الإلكتروني</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="your@email.com"
+                  placeholder="example@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10 rounded-xl h-12"
@@ -70,13 +70,13 @@ export default function LoginPage() {
 
             <div className="space-y-2">
               <div className="flex justify-between items-center">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">كلمة المرور</Label>
                 <Link 
                   to="/forgot-password" 
                   className="text-sm text-primary hover:underline"
                   data-testid="forgot-password-link"
                 >
-                  Forgot password?
+                  نسيت كلمة المرور؟
                 </Link>
               </div>
               <div className="relative">
@@ -84,7 +84,7 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder="أدخل كلمة المرور"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10 rounded-xl h-12"
@@ -102,20 +102,20 @@ export default function LoginPage() {
             >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Signing in...
+                  <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                  جاري تسجيل الدخول...
                 </>
               ) : (
-                'Sign In'
+                'تسجيل الدخول'
               )}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-muted-foreground">
-              Don't have an account?{' '}
+              ليس لديك حساب؟{' '}
               <Link to="/register" className="text-primary font-semibold hover:underline" data-testid="register-link">
-                Sign up
+                أنشئ حسابًا
               </Link>
             </p>
           </div>
