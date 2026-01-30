@@ -22,6 +22,7 @@ import PaymentCancelPage from "./pages/PaymentCancelPage";
 import AdminPage from "./pages/AdminPage";
 import StaffPage from "./pages/StaffPage";
 import ReceptionPage from "./pages/ReceptionPage";
+import TermsPage from "./pages/TermsPage";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false, staffOnly = false, parentOnly = false }) => {
