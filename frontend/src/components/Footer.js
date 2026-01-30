@@ -8,13 +8,22 @@ export const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <img src={logoImg} alt="Peekaboo" className="h-10" />
-            </div>
-            <p className="text-muted-foreground max-w-md">
+            <Link to="/" className="inline-block mb-4">
+              <img src={logoImg} alt="بيكابو" className="h-12" />
+            </Link>
+            <p className="text-muted-foreground max-w-md mb-4">
               أفضل ملعب داخلي للأطفال! احجز جلسات اللعب بالساعة، احتفل بأعياد الميلاد، 
               ووفّر مع باقات الاشتراك.
             </p>
+            {/* Contact Info */}
+            <div className="space-y-2 text-muted-foreground">
+              <p>ابو راشد مجمع السيف التجاري, Wasfi At-Tal St., Irbid 11225</p>
+              <p>
+                <a href="tel:0777775652" className="hover:text-primary transition-colors">
+                  07 7777 5652
+                </a>
+              </p>
+            </div>
           </div>
 
           {/* Quick Links */}
@@ -36,16 +45,24 @@ export const Footer = () => {
                   الاشتراكات
                 </Link>
               </li>
+              <li>
+                <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">
+                  الشروط والأحكام
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Contact */}
+          {/* Hours & Admin */}
           <div>
             <h4 className="font-heading font-semibold text-lg mb-4">ساعات العمل</h4>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground mb-4">
               مفتوح يومياً<br />
               10:00 صباحاً - 12:00 منتصف الليل
             </p>
+            <Link to="/staff/login" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+              تسجيل دخول الإدارة
+            </Link>
           </div>
         </div>
 
