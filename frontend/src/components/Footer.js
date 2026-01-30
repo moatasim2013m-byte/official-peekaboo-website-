@@ -19,7 +19,7 @@ export const Footer = () => {
             <div className="space-y-2 text-muted-foreground">
               <p>ابو راشد مجمع السيف التجاري, Wasfi At-Tal St., Irbid 11225</p>
               <p>
-                <a href="tel:0777775652" className="hover:text-primary transition-colors">
+                <a href="tel:0777775652" className="hover:text-primary transition-colors ltr-text">
                   07 7777 5652
                 </a>
               </p>
