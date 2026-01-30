@@ -117,7 +117,7 @@ function AppRoutes() {
         path="/admin"
         element={
           <ProtectedRoute adminOnly>
-            <Layout><AdminPage /></Layout>
+            <AdminLayout><AdminPage /></AdminLayout>
           </ProtectedRoute>
         }
       />
@@ -125,7 +125,7 @@ function AppRoutes() {
         path="/admin/*"
         element={
           <ProtectedRoute adminOnly>
-            <Layout><AdminPage /></Layout>
+            <AdminLayout><AdminPage /></AdminLayout>
           </ProtectedRoute>
         }
       />
@@ -135,7 +135,7 @@ function AppRoutes() {
         path="/staff"
         element={
           <ProtectedRoute staffOnly>
-            <Layout><StaffPage /></Layout>
+            <AdminLayout><StaffPage /></AdminLayout>
           </ProtectedRoute>
         }
       />
@@ -143,7 +143,7 @@ function AppRoutes() {
         path="/reception"
         element={
           <ProtectedRoute staffOnly>
-            <Layout><ReceptionPage /></Layout>
+            <AdminLayout><ReceptionPage /></AdminLayout>
           </ProtectedRoute>
         }
       />
@@ -151,7 +151,7 @@ function AppRoutes() {
         path="/staff/*"
         element={
           <ProtectedRoute staffOnly>
-            <Layout><StaffPage /></Layout>
+            <AdminLayout><StaffPage /></AdminLayout>
           </ProtectedRoute>
         }
       />
