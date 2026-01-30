@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700&family=Tajawal:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -9,15 +9,50 @@
     display: none !important;
 }
 
+:root {
+    /* Brand Colors */
+    --color-red: #FF595E;
+    --color-yellow: #FFD93B;
+    --color-orange: #FF924C;
+    --color-blue: #00BBF9;
+    --color-green: #8AC926;
+    
+    /* Background Colors */
+    --color-cream: #FFF9E6;
+    --color-light-gray: #F8FAFC;
+    --color-slate: #334155;
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-full: 9999px;
+    
+    /* Shadows */
+    --shadow-soft: 0 4px 12px rgba(0,0,0,0.08);
+    --shadow-hover: 0 8px 24px rgba(0,0,0,0.12);
+    --shadow-elevated: 0 12px 32px rgba(0,0,0,0.15);
+    
+    /* Touch targets */
+    --touch-min: 44px;
+}
+
 body {
     margin: 0;
-    font-family: 'Nunito', sans-serif;
+    font-family: 'Tajawal', 'Nunito', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    line-height: 1.7;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: 'Fredoka', sans-serif;
+    font-family: 'Fredoka', 'Tajawal', sans-serif;
+    line-height: 1.3;
+}
+
+/* Arabic text improvements */
+[dir="rtl"], .rtl {
+    font-family: 'Tajawal', 'Noto Kufi Arabic', sans-serif;
 }
 
 code {
