@@ -19,7 +19,7 @@ export default function TicketsPage() {
   const [slots, setSlots] = useState([]);
   const [children, setChildren] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
-  const [selectedChild, setSelectedChild] = useState('');
+  const [selectedChildren, setSelectedChildren] = useState([]);
   const [selectedDuration, setSelectedDuration] = useState(2); // Default 2 hours
   const [customNotes, setCustomNotes] = useState('');
   const [loading, setLoading] = useState(false);
@@ -109,18 +109,24 @@ export default function TicketsPage() {
       return;
     }
 
-    if (!selectedSlot || !selectedChild || !selectedDuration) {
+    if (!selectedSlot || selectedChildren.length === 0 || !selectedDuration) {
       toast.error('الرجاء اختيار الوقت والطفل والمدة');
+      return;
+    }
+
+    // Check if enough capacity for all children
+    if (selectedSlot.available_spots < selectedChildren.length) {
+      toast.error(`عذراً، المتاح ${selectedSlot.available_spots} مكان فقط. اخترت ${selectedChildren.length} أطفال.`);
       return;
     }
 
     setLoading(true);
     try {
-      // Create checkout session
+      // Create checkout session with multiple children
       const response = await api.post('/payments/create-checkout', {
         type: 'hourly',
         reference_id: selectedSlot.id,
-        child_id: selectedChild,
+        child_ids: selectedChildren,
         duration_hours: selectedDuration,
         custom_notes: customNotes.trim(),
         origin_url: window.location.origin
@@ -136,7 +142,16 @@ export default function TicketsPage() {
 
   const getSelectedPrice = () => {
     const selected = pricing.find(p => p.hours === selectedDuration);
-    return selected ? selected.price : 0;
+    const basePrice = selected ? selected.price : 0;
+    return basePrice * Math.max(1, selectedChildren.length);
+  };
+
+  const toggleChildSelection = (childId) => {
+    setSelectedChildren(prev => 
+      prev.includes(childId) 
+        ? prev.filter(id => id !== childId)
+        : [...prev, childId]
+    );
   };
 
   const minDate = new Date();
