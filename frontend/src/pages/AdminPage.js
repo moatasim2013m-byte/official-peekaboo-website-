@@ -1071,62 +1071,11 @@ export default function AdminPage() {
           {/* Gallery */}
           <TabsContent value="gallery">
             <Card className="rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Homepage Gallery</CardTitle>
-                <Dialog open={mediaDialogOpen} onOpenChange={(open) => { setMediaDialogOpen(open); if (!open) { setGalleryPreview(null); setNewMedia({ url: '', type: 'photo', title: '', file: null }); } }}>
-                  <DialogTrigger asChild>
-                    <Button className="rounded-full gap-2">
-                      <Plus className="h-4 w-4" /> Add Media
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>إضافة صورة / Add Gallery Media</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleAddMedia} className="space-y-4">
-                      <div>
-                        <Label>رفع صورة / Upload Image</Label>
-                        <Input 
-                          type="file" 
-                          accept="image/*"
-                          onChange={handleGalleryFileChange}
-                          className="rounded-xl mt-1"
-                          disabled={uploadingImage}
-                        />
-                        {galleryPreview && (
-                          <img src={galleryPreview} alt="Preview" className="mt-2 h-32 w-full object-cover rounded-lg" />
-                        )}
-                      </div>
-                      <div className="text-center text-sm text-muted-foreground">- أو / OR -</div>
-                      <div>
-                        <Label>رابط الصورة / URL (اختياري)</Label>
-                        <Input value={newMedia.url} onChange={(e) => setNewMedia({...newMedia, url: e.target.value})} className="rounded-xl mt-1" placeholder="https://..." disabled={!!newMedia.file} />
-                      </div>
-                      <div>
-                        <Label>النوع / Type</Label>
-                        <Select value={newMedia.type} onValueChange={(v) => setNewMedia({...newMedia, type: v})}>
-                          <SelectTrigger className="rounded-xl mt-1">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="photo">صورة / Photo</SelectItem>
-                            <SelectItem value="video">فيديو / Video</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label>العنوان / Title (اختياري)</Label>
-                        <Input value={newMedia.title} onChange={(e) => setNewMedia({...newMedia, title: e.target.value})} className="rounded-xl mt-1" />
-                      </div>
-                      <Button type="submit" className="w-full rounded-full" disabled={uploadingImage}>
-                        {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                        إضافة / Add Media
-                      </Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">معرض الصور / Homepage Gallery</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">صور تظهر في الصفحة الرئيسية للعملاء</p>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {gallery.map((item) => (
                     <div key={item.id} className="relative rounded-xl overflow-hidden group">
@@ -1143,6 +1092,62 @@ export default function AdminPage() {
                     </div>
                   ))}
                 </div>
+                
+                {/* Bottom Action Bar */}
+                <div className="pt-6 border-t flex justify-end">
+                  <Dialog open={mediaDialogOpen} onOpenChange={(open) => { setMediaDialogOpen(open); if (!open) { setGalleryPreview(null); setNewMedia({ url: '', type: 'photo', title: '', file: null }); } }}>
+                    <DialogTrigger asChild>
+                      <Button className="rounded-full gap-2 px-6">
+                        <Plus className="h-4 w-4" /> إضافة صورة / Add Media
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>إضافة صورة / Add Gallery Media</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleAddMedia} className="space-y-4">
+                        <div>
+                          <Label>رفع صورة / Upload Image</Label>
+                          <Input 
+                            type="file" 
+                            accept="image/*"
+                            onChange={handleGalleryFileChange}
+                            className="rounded-xl mt-1"
+                            disabled={uploadingImage}
+                          />
+                          {galleryPreview && (
+                            <img src={galleryPreview} alt="Preview" className="mt-2 h-32 w-full object-cover rounded-lg" />
+                          )}
+                        </div>
+                        <div className="text-center text-sm text-muted-foreground">- أو / OR -</div>
+                        <div>
+                          <Label>رابط الصورة / URL (اختياري)</Label>
+                          <Input value={newMedia.url} onChange={(e) => setNewMedia({...newMedia, url: e.target.value})} className="rounded-xl mt-1" placeholder="https://..." disabled={!!newMedia.file} />
+                        </div>
+                        <div>
+                          <Label>النوع / Type</Label>
+                          <Select value={newMedia.type} onValueChange={(v) => setNewMedia({...newMedia, type: v})}>
+                            <SelectTrigger className="rounded-xl mt-1">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="photo">صورة / Photo</SelectItem>
+                              <SelectItem value="video">فيديو / Video</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>العنوان / Title (اختياري)</Label>
+                          <Input value={newMedia.title} onChange={(e) => setNewMedia({...newMedia, title: e.target.value})} className="rounded-xl mt-1" />
+                        </div>
+                        <Button type="submit" className="w-full rounded-full" disabled={uploadingImage}>
+                          {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                          إضافة / Add Media
+                        </Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -1150,13 +1155,14 @@ export default function AdminPage() {
           {/* Settings */}
           <TabsContent value="settings">
             <Card className="rounded-2xl">
-              <CardHeader>
-                <CardTitle>Pricing & Capacity Settings</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">الإعدادات / Pricing & Capacity Settings</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">إعدادات الأسعار والسعة</p>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label>Hourly Ticket Price ($)</Label>
+                    <Label>سعر التذكرة بالساعة (JD)</Label>
                     <Input 
                       type="number" 
                       step="0.01"
@@ -1166,7 +1172,7 @@ export default function AdminPage() {
                     />
                   </div>
                   <div>
-                    <Label>Default Slot Capacity</Label>
+                    <Label>السعة الافتراضية</Label>
                     <Input 
                       type="number"
                       defaultValue={settings.hourly_capacity || 25}
