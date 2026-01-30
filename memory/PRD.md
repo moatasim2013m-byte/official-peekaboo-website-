@@ -1,188 +1,98 @@
-# Peekaboo - Indoor Playground Web App PRD
+# Peekaboo Indoor Playground - Product Requirements Document
 
-## Project Overview
-**Name:** Peekaboo  
-**Type:** Indoor Playground Booking System  
-**Created:** January 2026  
+## Overview
+A launch-ready web app for an indoor playground named "Peekaboo" in Jordan. The app allows parents to buy hourly tickets, book birthday parties, and purchase subscriptions. Admins and staff manage operations through dedicated panels.
 
-## Original Problem Statement
-Web app for parents to:
-1. Buy hourly tickets for specific time slots
-2. Book birthday parties with themes
-3. Buy subscriptions for savings
-
-Admins fully manage bookings, content, and operations.
-
-## User Personas
-
-### Parent (Customer)
-- Books hourly play sessions for children
-- Plans birthday parties
-- Purchases subscription packages
-- Tracks loyalty points
-- Views booking history and active sessions
-
-### Admin
-- Manages slots and capacity
-- Manages pricing (hourly, themes, subscriptions)
-- Manages 10 birthday themes
-- Views and manages all bookings
-- Adjusts loyalty points
-- Manages homepage gallery
-
-## Core Requirements (Locked)
-
-### Authentication
-- Email + password login
-- Password reset via email (Resend)
-- Persistent login sessions
-- No phone OTP, no social login
-
-### Hourly Tickets
-- **Entry intervals:** Every 10 minutes (not hourly)
-- **Session duration:** 60 minutes
-- **Operating hours:** 10:00 AM - 12:00 AM midnight (last entry 11:50 PM)
-- **Timezone:** Asia/Amman
-- **Capacity:** Max 70 kids at any moment (across overlapping sessions)
-- Booking cutoff: 30 minutes before slot start
-- QR code for check-in
-- Countdown starts when QR is scanned
-- 5-minute in-app warning
-
-### Birthday Parties
-- **Duration:** 2 hours
-- **Start times:** Every 2 hours (13:00, 15:00, 17:00, 19:00, 21:00, 23:00)
-- **Operating window:** 1:00 PM - 12:00 AM midnight
-- 10 standard themes (admin managed)
-- Custom theme request form (no automatic pricing)
-- Stripe Checkout payment
-- **NO loyalty points** for birthday bookings
-
-### Subscriptions
-- Visit-based (3 packages)
-- **Expiry:** 30 days from FIRST CHECK-IN (not purchase date)
-- If never checked in, subscription remains pending
-- Usage tied to child profile
-- **NO loyalty points** for subscriptions
-
-### Loyalty
-- Fixed 10 points per paid order
-- **ONLY for hourly tickets** (not birthday or subscriptions)
-- Idempotent by payment_id
-- Admin can manually adjust
-- No rewards shop in MVP
+## User Roles
+- **Parent (Customer):** Books play sessions, parties, and subscriptions
+- **Admin:** Full control over pricing, themes, subscriptions, and business rules
+- **Staff:** Reception operations and check-in management
 
 ## Tech Stack
-- **Frontend:** React + Tailwind CSS + Shadcn UI
-- **Backend:** Node.js/Express (via Python wrapper for uvicorn compatibility)
+- **Frontend:** React with Tailwind CSS, Shadcn/UI components
+- **Backend:** Node.js/Express (managed by Python wrapper)
 - **Database:** MongoDB
-- **Payments:** Stripe Checkout (test mode)
+- **Payments:** Stripe
 - **Emails:** Resend
 
-## What's Been Implemented ✅
+## Core Features (MVP)
+1. **Hourly Tickets:** Parents select duration and time slot, QR code for check-in
+2. **Birthday Parties:** Theme selection with admin-managed options, custom requests
+3. **Subscriptions:** Visit-based packages with 30-day validity
+4. **Loyalty Program:** Points awarded for purchases
+5. **Admin Panel:** Full CRUD for themes, plans, pricing, gallery
+6. **Staff Panel:** Reception with QR scanning for check-in
 
-### Backend (Node.js/Express)
-- [x] Auth routes (register, login, forgot-password, reset-password)
-- [x] Unified TimeSlot model with slot_type (hourly/birthday)
-- [x] Hourly booking with QR generation
-- [x] Birthday booking with themes + custom requests
-- [x] Subscription plans and purchases
-- [x] Loyalty points (10 per order, idempotent)
-- [x] Admin panel APIs
-- [x] Stripe Checkout integration
-- [x] Gallery management
-- [x] Profile/children management
+## Localization
+- **Primary Language:** Arabic (RTL)
+- **Direction:** Right-to-Left throughout the application
 
-### Frontend (React)
-- [x] Homepage with hero, features, gallery
-- [x] Auth pages (login, register, forgot/reset password)
-- [x] Tickets page with calendar and slot selection
-- [x] Birthday page with themes and custom request tab
-- [x] Subscriptions page with 3 packages
-- [x] Parent profile with kids, bookings, sessions, loyalty
-- [x] Reception scanner page
-- [x] Admin panel (dashboard, bookings, themes, plans, gallery, settings)
-- [x] Payment success/cancel pages
+---
 
-### Database Seed
-- [x] Admin user (admin@peekaboo.com / admin123)
-- [x] 10 birthday themes
-- [x] 3 subscription plans
-- [x] Default settings
-- [x] Gallery media
+## Completed Work
 
-## Prioritized Backlog
+### January 30, 2026 - UI/UX Polish (RTL Arabic)
+**STATUS: COMPLETED**
 
-### P0 - Not Implemented (Out of Scope)
-- WhatsApp messaging
-- SMS OTP
-- Automated refunds
-- Loyalty rewards shop
-- Multi-branch logic
-- Mobile apps
-- Analytics dashboards
+Applied RTL Arabic localization and design tokens to all customer-facing pages:
 
-### P1 - Future Enhancements
-- Live payment mode (switch Stripe keys)
-- Real email domain for Resend
-- Multiple children per booking
-- Birthday party deposit payments
-- Custom theme pricing automation
+**Files Changed:**
+- `/app/frontend/src/pages/HomePage.js` - Full Arabic translation, RTL layout
+- `/app/frontend/src/pages/TicketsPage.js` - RTL direction added
+- `/app/frontend/src/pages/BirthdayPage.js` - Full Arabic translation, RTL layout
+- `/app/frontend/src/pages/ProfilePage.js` - Full Arabic translation, RTL layout
+- `/app/frontend/src/components/Navbar.js` - Arabic navigation, RTL direction
+- `/app/frontend/src/components/Footer.js` - Arabic content, RTL layout, logo integration
 
-### P2 - Nice to Have
-- Email notifications for session ending
-- Birthday reminders
-- Referral program
-- Gift cards
+**Key Changes:**
+- All English text converted to Arabic
+- RTL (`dir="rtl"`) applied to all page containers
+- Icon positioning adjusted for RTL (ChevronRight rotated 180°)
+- Navbar dropdown alignment changed from `align="end"` to `align="start"`
+- Footer uses logo image instead of emoji
 
-## API Endpoints
+### Previous Completions
+- Backend stability fixes
+- Admin CRUD for Birthday Themes and Subscription Plans
+- Image upload system (multer + sharp)
+- Concurrent booking safety (atomic MongoDB checks)
+- Separate staff/admin login page (`/staff/login`)
+- Design token system in `index.css`
+- Subscriptions and Reception page UI polish
 
-### Public
-- GET /api/ - Health check
-- GET /api/themes - Get all themes
-- GET /api/subscriptions/plans - Get all plans
-- GET /api/gallery - Get gallery media
-- GET /api/slots/available - Get available slots
+---
 
-### Auth Required
-- POST /api/auth/register, /login, /forgot-password, /reset-password
-- GET /api/auth/me
-- GET/POST /api/profile, /api/profile/children
-- POST /api/bookings/hourly, /birthday, /birthday/custom
-- GET /api/bookings/hourly, /birthday, /hourly/active
-- POST /api/bookings/hourly/checkin
-- POST /api/subscriptions/purchase, /consume
-- GET /api/subscriptions/my
-- GET /api/loyalty
-- POST /api/payments/create-checkout
-- GET /api/payments/status/:sessionId
+## Upcoming Tasks (P1)
 
-### Admin Only
-- GET /api/admin/dashboard, /users, /bookings/*, /subscriptions, /slots
-- POST /api/admin/plans, /api/themes
-- PUT /api/admin/settings, /plans/:id
-- POST /api/loyalty/adjust
+### Multi-Child Booking
+Allow parents to book tickets for multiple children in a single transaction.
+- **Files:** `/app/frontend/src/pages/TicketsPage.js`, backend routes
+- **Scope:** UI changes for multi-select, backend array handling
 
-## Credentials
-- **Admin:** admin@peekaboo.com / admin123
-- **Stripe:** Test mode (sk_test_emergent)
-- **Resend:** Via Emergent universal key
+### Profile Page - Active Session Countdown
+Display live countdown timer for children's play sessions.
+- **File:** `/app/frontend/src/pages/ProfilePage.js`
+- **Scope:** UI timer component with real-time updates
 
-## Recent Updates (January 27, 2026)
+---
 
-### Bugs Fixed
-- **P0 Backend Connectivity:** Fixed `staffOrAdminMiddleware` undefined error in `/app/backend/node-app/routes/staff.js` that was crashing the Node.js server
-- Added missing `User` model import to staff routes
-- Added `/api/health` endpoint for connectivity testing
+## Future Tasks (P2)
 
-### Verified Working
-- Admin login and redirection to `/admin`
-- Settings tab visible with Pricing & Capacity Settings
-- All admin tabs accessible (Dashboard, Pricing, Parents, Hourly, Birthday, Subscriptions, Themes, Gallery, Settings)
+1. **Complete Global Arabic Localization** - Remaining admin panel text
+2. **Add Language Toggle** - UI switch for Arabic/English
+3. **Create Staff Test Checklist** - 8-step verification guide
 
-## Next Action Items
-1. **P2: Profile Page - Active Session Countdown** - Show active play sessions with live countdown for parents
-2. **P2: Complete Arabic Localization** - Continue translating remaining English text
-3. **P3: Unify UI with Brand Colors** - Ensure consistent Peekaboo brand colors
-4. **Future: Language Toggle** - Add Arabic/English switch
-5. **Future: 8-step Test Checklist** - Create staff + parent testing guide
+---
+
+## Test Credentials
+- **Admin:** `admin@peekaboo.com` / `admin123` (via `/staff/login`)
+- **Staff:** `staff@peekaboo.com` / `staff123` (via `/staff/login`)
+- **Parent:** Register new user via signup page
+
+---
+
+## Architecture Notes
+- Admin panel intentionally kept in bilingual English/Arabic for staff usability
+- Design tokens defined in `/app/frontend/src/index.css`
+- Image uploads stored in `/app/backend/node-app/uploads/`
+- Atomic MongoDB updates prevent race conditions in booking
