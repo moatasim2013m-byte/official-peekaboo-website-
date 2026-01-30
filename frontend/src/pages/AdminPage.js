@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { 
   LayoutDashboard, Users, Clock, Cake, Star, Settings, Image, 
-  Plus, Edit, Trash2, Loader2, Gift, Calendar, DollarSign
+  Plus, Edit, Trash2, Loader2, Gift, Calendar, DollarSign, Home, Upload
 } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 
