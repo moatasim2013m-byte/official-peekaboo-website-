@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../i18n/useT';
 import { Button } from '../components/ui/button';
@@ -18,7 +18,10 @@ export const Navbar = () => {
   const { user, logout, isAdmin, isStaff, isAuthenticated } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const isActive = (path) => location.pathname === path;
 
   const handleLogout = () => {
     logout();
