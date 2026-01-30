@@ -49,13 +49,13 @@ export default function SubscriptionsPage() {
 
   const handlePurchase = async () => {
     if (!isAuthenticated) {
-      toast.error('Please login to purchase');
+      toast.error('الرجاء تسجيل الدخول للشراء');
       navigate('/login');
       return;
     }
 
     if (!selectedPlan || !selectedChild) {
-      toast.error('Please select a plan and child');
+      toast.error('الرجاء اختيار باقة وطفل');
       return;
     }
 
@@ -70,15 +70,15 @@ export default function SubscriptionsPage() {
 
       window.location.href = response.data.url;
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to initiate purchase');
+      toast.error(error.response?.data?.error || 'فشل بدء عملية الشراء');
       setLoading(false);
     }
   };
 
   const planFeatures = {
-    basic: [t('Perfect for regular visits'), t('day validity'), t('Full playground access')],
-    standard: [t('Great value for frequent players'), t('day validity'), t('Full playground access'), t('Priority booking')],
-    premium: [t('Best for frequent visitors'), t('day validity'), t('Full playground access'), t('Priority booking'), t('VIP treatment')]
+    basic: ['مثالية للزيارات المنتظمة', 'صلاحية 30 يوم', 'دخول كامل للملعب'],
+    standard: ['قيمة رائعة للزوار الدائمين', 'صلاحية 30 يوم', 'دخول كامل للملعب', 'أولوية الحجز'],
+    premium: ['الأفضل للزوار المتكررين', 'صلاحية 30 يوم', 'دخول كامل للملعب', 'أولوية الحجز', 'معاملة VIP']
   };
 
   const getPlanTier = (index) => {
@@ -88,15 +88,15 @@ export default function SubscriptionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-hero-gradient py-8 md:py-12">
+    <div className="min-h-screen bg-hero-gradient py-8 md:py-12" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="subscriptions-title">
-            <Star className="inline-block h-10 w-10 text-secondary mr-2" />
-            Subscription Packages
+            <Star className="inline-block h-10 w-10 text-secondary ml-2" />
+            باقات الاشتراك
           </h1>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Save big with our visit-based packages! Each subscription is valid for 30 days and can be used for any child.
+            وفّر أكثر مع باقات الزيارات. كل باقة صالحة لمدة 30 يومًا ويمكن استخدامها لأي طفل.
           </p>
         </div>
 
@@ -124,7 +124,7 @@ export default function SubscriptionsPage() {
                   >
                     {isPopular && (
                       <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-[#FFD93B] to-[#FF924C] text-white text-center py-2 text-sm font-bold">
-                        ⭐ الأكثر شعبية / Most Popular
+                        ⭐ الأكثر شعبية
                       </div>
                     )}
                     <CardHeader className={`text-center pb-4 ${isPopular ? 'pt-12' : ''}`}>
@@ -143,7 +143,7 @@ export default function SubscriptionsPage() {
                       
                       <div className="bg-gradient-to-r from-[#FFD93B]/20 to-[#FF924C]/20 rounded-2xl p-4 mb-6">
                         <span className="text-3xl font-heading font-bold text-[#FF924C]">{plan.visits}</span>
-                        <span className="text-slate-600 mr-2">{t('visits')}</span>
+                        <span className="text-slate-600 mr-2">زيارة</span>
                       </div>
 
                       <ul className="space-y-3 text-right" dir="rtl">
@@ -163,7 +163,7 @@ export default function SubscriptionsPage() {
                             : 'border-2 hover:border-[#FFD93B] hover:bg-[#FFD93B]/10'
                         }`}
                       >
-                        {t('Select Plan')}
+                        اختر الباقة
                       </Button>
                     </CardContent>
                   </Card>
@@ -175,28 +175,28 @@ export default function SubscriptionsPage() {
             {isAuthenticated ? (
               <Card className="border-2 rounded-3xl max-w-2xl mx-auto">
                 <CardHeader>
-                  <CardTitle className="font-heading">Complete Your Purchase</CardTitle>
+                  <CardTitle className="font-heading">أكمل عملية الشراء</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium mb-2">Select Child</label>
+                      <label className="block text-sm font-medium mb-2">اختر الطفل</label>
                       {children.length === 0 ? (
                         <div className="text-muted-foreground">
-                          <p className="mb-2">No children added yet</p>
+                          <p className="mb-2">لم يتم إضافة أطفال بعد</p>
                           <Button 
                             variant="outline" 
                             size="sm" 
                             onClick={() => navigate('/profile')}
                             className="rounded-full"
                           >
-                            Add Child
+                            إضافة طفل
                           </Button>
                         </div>
                       ) : (
                         <Select value={selectedChild} onValueChange={setSelectedChild}>
                           <SelectTrigger className="rounded-xl" data-testid="subscription-child-select">
-                            <SelectValue placeholder="Choose a child" />
+                            <SelectValue placeholder="اختر طفلاً" />
                           </SelectTrigger>
                           <SelectContent>
                             {children.map((child) => (
@@ -218,13 +218,13 @@ export default function SubscriptionsPage() {
                       >
                         {loading ? (
                           <>
-                            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                            Processing...
+                            <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                            جاري المعالجة...
                           </>
                         ) : selectedPlan ? (
-                          `Purchase ${selectedPlan.name} - $${selectedPlan.price}`
+                          `شراء ${selectedPlan.name_ar || selectedPlan.name} - ${selectedPlan.price} دينار`
                         ) : (
-                          'Select a Plan'
+                          'اختر باقة'
                         )}
                       </Button>
                     </div>
@@ -234,13 +234,13 @@ export default function SubscriptionsPage() {
             ) : (
               <Card className="border-2 rounded-3xl max-w-2xl mx-auto bg-secondary/5">
                 <CardContent className="py-8 text-center">
-                  <p className="text-lg mb-4">Please login or create an account to purchase</p>
+                  <p className="text-lg mb-4">الرجاء تسجيل الدخول أو إنشاء حساب لإتمام الشراء</p>
                   <div className="flex gap-4 justify-center">
                     <Button onClick={() => navigate('/login')} variant="outline" className="rounded-full">
-                      Login
+                      تسجيل الدخول
                     </Button>
                     <Button onClick={() => navigate('/register')} className="rounded-full btn-playful bg-secondary text-secondary-foreground">
-                      Sign Up
+                      إنشاء حساب
                     </Button>
                   </div>
                 </CardContent>
