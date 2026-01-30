@@ -1224,6 +1224,125 @@ export default function AdminPage() {
             </Card>
           </TabsContent>
 
+          {/* Homepage Hero Settings */}
+          <TabsContent value="homepage">
+            <Card className="rounded-2xl">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <Home className="h-5 w-5" />
+                  الصفحة الرئيسية / Homepage Hero
+                </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">تعديل محتوى وصورة البانر الرئيسي</p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Hero Image Upload */}
+                <div className="space-y-3">
+                  <Label className="text-base font-semibold">صورة البانر / Hero Image</Label>
+                  <div className="flex items-start gap-4">
+                    <div className="w-64 h-40 rounded-xl border-2 border-dashed border-border overflow-hidden bg-muted flex items-center justify-center">
+                      {heroImagePreview || heroSettings.hero_image ? (
+                        <img 
+                          src={heroImagePreview || heroSettings.hero_image} 
+                          alt="Hero preview" 
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="text-center text-muted-foreground">
+                          <Image className="h-10 w-10 mx-auto mb-2 opacity-50" />
+                          <p className="text-sm">لا توجد صورة</p>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleHeroImageChange}
+                        className="rounded-xl"
+                        disabled={uploadingImage}
+                      />
+                      <p className="text-xs text-muted-foreground mt-2">يُفضل صورة بحجم 1200×800 بكسل</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Hero Text Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label>العنوان الرئيسي / Hero Title</Label>
+                    <Input
+                      value={heroSettings.hero_title}
+                      onChange={(e) => setHeroSettings({...heroSettings, hero_title: e.target.value})}
+                      className="rounded-xl"
+                      dir="rtl"
+                      placeholder="حيث يلعب الأطفال ويحتفلون"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>نص الزر / CTA Button Text</Label>
+                    <Input
+                      value={heroSettings.hero_cta_text}
+                      onChange={(e) => setHeroSettings({...heroSettings, hero_cta_text: e.target.value})}
+                      className="rounded-xl"
+                      dir="rtl"
+                      placeholder="احجز جلسة"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>الوصف / Hero Subtitle</Label>
+                  <Textarea
+                    value={heroSettings.hero_subtitle}
+                    onChange={(e) => setHeroSettings({...heroSettings, hero_subtitle: e.target.value})}
+                    className="rounded-xl min-h-[80px]"
+                    dir="rtl"
+                    placeholder="أفضل تجربة ملعب داخلي..."
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>رابط الزر / CTA Route</Label>
+                  <Select 
+                    value={heroSettings.hero_cta_route} 
+                    onValueChange={(v) => setHeroSettings({...heroSettings, hero_cta_route: v})}
+                  >
+                    <SelectTrigger className="rounded-xl w-full md:w-64">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="/tickets">تذاكر بالساعة (/tickets)</SelectItem>
+                      <SelectItem value="/birthday">حفلات أعياد الميلاد (/birthday)</SelectItem>
+                      <SelectItem value="/subscriptions">الاشتراكات (/subscriptions)</SelectItem>
+                      <SelectItem value="/register">إنشاء حساب (/register)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Save Button */}
+                <div className="pt-4 border-t">
+                  <Button 
+                    onClick={handleSaveHero}
+                    disabled={savingHero}
+                    className="rounded-full gap-2 bg-primary"
+                  >
+                    {savingHero ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        جاري الحفظ...
+                      </>
+                    ) : (
+                      <>
+                        <Edit className="h-4 w-4" />
+                        حفظ التغييرات / Save Changes
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Settings */}
           <TabsContent value="settings">
             <Card className="rounded-2xl">
