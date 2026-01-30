@@ -215,6 +215,10 @@ code {
     background-color: var(--bg-light);
 }
 
+.bg-light {
+    background-color: var(--bg-light);
+}
+
 /* Professional admin/staff background */
 .bg-professional {
     background-color: var(--bg-light);
