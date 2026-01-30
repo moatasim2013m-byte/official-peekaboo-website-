@@ -499,6 +499,52 @@ export default function AdminPage() {
     }
   };
 
+  // Hero settings handlers
+  const handleHeroImageChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Preview
+    const reader = new FileReader();
+    reader.onload = (ev) => setHeroImagePreview(ev.target.result);
+    reader.readAsDataURL(file);
+
+    // Upload
+    const formData = new FormData();
+    formData.append('image', file);
+    
+    try {
+      setUploadingImage(true);
+      const uploadRes = await api.post('/admin/upload-image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setHeroSettings({ ...heroSettings, hero_image: uploadRes.data.url });
+      toast.success('تم رفع الصورة');
+    } catch (error) {
+      toast.error('فشل رفع الصورة');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const handleSaveHero = async () => {
+    setSavingHero(true);
+    try {
+      await api.put('/admin/settings', {
+        hero_title: heroSettings.hero_title,
+        hero_subtitle: heroSettings.hero_subtitle,
+        hero_cta_text: heroSettings.hero_cta_text,
+        hero_cta_route: heroSettings.hero_cta_route,
+        hero_image: heroSettings.hero_image
+      });
+      toast.success('تم حفظ إعدادات الصفحة الرئيسية');
+    } catch (error) {
+      toast.error('فشل حفظ الإعدادات');
+    } finally {
+      setSavingHero(false);
+    }
+  };
+
   const getStatusBadge = (status) => {
     const colors = {
       confirmed: 'bg-green-100 text-green-700',
