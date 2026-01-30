@@ -11,17 +11,37 @@ export default function HomePage() {
   const { isAuthenticated, api } = useAuth();
   const { t } = useTranslation();
   const [gallery, setGallery] = useState([]);
+  const [heroConfig, setHeroConfig] = useState({
+    title: 'حيث يلعب الأطفال ويحتفلون 🎈',
+    subtitle: 'أفضل تجربة ملعب داخلي! احجز جلسات اللعب، أقم حفلات أعياد ميلاد لا تُنسى، ووفّر مع باقات الاشتراك',
+    ctaText: 'احجز جلسة',
+    ctaRoute: '/tickets',
+    image: ''
+  });
 
   useEffect(() => {
-    const fetchGallery = async () => {
+    const fetchData = async () => {
       try {
-        const response = await api.get('/gallery');
-        setGallery(response.data.media || []);
+        const [galleryRes, settingsRes] = await Promise.all([
+          api.get('/gallery'),
+          api.get('/settings')
+        ]);
+        setGallery(galleryRes.data.media || []);
+        
+        // Load hero config from settings
+        const s = settingsRes.data.settings || {};
+        setHeroConfig({
+          title: s.hero_title || heroConfig.title,
+          subtitle: s.hero_subtitle || heroConfig.subtitle,
+          ctaText: s.hero_cta_text || heroConfig.ctaText,
+          ctaRoute: s.hero_cta_route || heroConfig.ctaRoute,
+          image: s.hero_image || ''
+        });
       } catch (error) {
-        console.error('Failed to fetch gallery:', error);
+        console.error('Failed to fetch data:', error);
       }
     };
-    fetchGallery();
+    fetchData();
   }, []);
 
   const features = [
