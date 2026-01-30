@@ -43,6 +43,17 @@ export default function AdminPage() {
   const [parentDetails, setParentDetails] = useState(null);
   const [loadingParent, setLoadingParent] = useState(false);
 
+  // Hero settings state
+  const [heroSettings, setHeroSettings] = useState({
+    hero_title: 'حيث يلعب الأطفال ويحتفلون 🎈',
+    hero_subtitle: 'أفضل تجربة ملعب داخلي! احجز جلسات اللعب، أقم حفلات أعياد ميلاد لا تُنسى، ووفّر مع باقات الاشتراك',
+    hero_cta_text: 'احجز جلسة',
+    hero_cta_route: '/tickets',
+    hero_image: ''
+  });
+  const [heroImagePreview, setHeroImagePreview] = useState(null);
+  const [savingHero, setSavingHero] = useState(false);
+
   // Dialog states
   const [themeDialogOpen, setThemeDialogOpen] = useState(false);
   const [planDialogOpen, setPlanDialogOpen] = useState(false);
