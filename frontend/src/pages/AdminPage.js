@@ -896,8 +896,57 @@ export default function AdminPage() {
                     </Card>
                   ))}
                 </div>
+                
+                {/* Bottom Action Bar */}
+                <div className="pt-6 border-t mt-6 flex justify-end">
+                  <Dialog open={planDialogOpen} onOpenChange={(open) => { setPlanDialogOpen(open); if (!open) { setEditingPlan(null); setNewPlan({ name: '', name_ar: '', description: '', description_ar: '', visits: '', price: '' }); } }}>
+                    <DialogTrigger asChild>
+                      <Button className="rounded-full gap-2 px-6">
+                        <Plus className="h-4 w-4" /> إضافة باقة / Add Plan
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{editingPlan ? 'تعديل الباقة / Edit Plan' : 'إنشاء باقة / Create Plan'}</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleCreatePlan} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>الاسم (EN)</Label>
+                            <Input value={newPlan.name} onChange={(e) => setNewPlan({...newPlan, name: e.target.value})} className="rounded-xl mt-1" />
+                          </div>
+                          <div>
+                            <Label>الاسم (AR)</Label>
+                            <Input value={newPlan.name_ar} onChange={(e) => setNewPlan({...newPlan, name_ar: e.target.value})} className="rounded-xl mt-1" dir="rtl" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>الوصف (EN)</Label>
+                            <Textarea value={newPlan.description} onChange={(e) => setNewPlan({...newPlan, description: e.target.value})} className="rounded-xl mt-1" />
+                          </div>
+                          <div>
+                            <Label>الوصف (AR)</Label>
+                            <Textarea value={newPlan.description_ar} onChange={(e) => setNewPlan({...newPlan, description_ar: e.target.value})} className="rounded-xl mt-1" dir="rtl" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>عدد الزيارات</Label>
+                            <Input type="number" value={newPlan.visits} onChange={(e) => setNewPlan({...newPlan, visits: e.target.value})} className="rounded-xl mt-1" />
+                          </div>
+                          <div>
+                            <Label>السعر (JD)</Label>
+                            <Input type="number" step="0.01" value={newPlan.price} onChange={(e) => setNewPlan({...newPlan, price: e.target.value})} className="rounded-xl mt-1" />
+                          </div>
+                        </div>
+                        <Button type="submit" className="w-full rounded-full">{editingPlan ? 'تحديث / Update' : 'إنشاء / Create'}</Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
 
-                <h3 className="font-heading font-bold mb-4">Active Subscriptions {activeFilter === 'active' && <Badge className="ml-2 bg-green-500">Active Only</Badge>}</h3>
+                <h3 className="font-heading font-bold mb-4 mt-8">الاشتراكات النشطة / Active Subscriptions {activeFilter === 'active' && <Badge className="ml-2 bg-green-500">Active Only</Badge>}</h3>
                 <div className="space-y-3">
                   {getFilteredSubscriptions().map((sub) => (
                     <div key={sub.id} className="flex justify-between items-center p-3 rounded-xl bg-muted/50">
@@ -924,67 +973,11 @@ export default function AdminPage() {
           {/* Themes */}
           <TabsContent value="themes">
             <Card className="rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Birthday Themes</CardTitle>
-                <Dialog open={themeDialogOpen} onOpenChange={(open) => { setThemeDialogOpen(open); if (!open) { setEditingTheme(null); setNewTheme({ name: '', name_ar: '', description: '', description_ar: '', price: '', image_url: '' }); } }}>
-                  <DialogTrigger asChild>
-                    <Button className="rounded-full gap-2">
-                      <Plus className="h-4 w-4" /> Add Theme
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>{editingTheme ? 'Edit Theme' : 'Create Theme'}</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleCreateTheme} className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label>Name (EN)</Label>
-                          <Input value={newTheme.name} onChange={(e) => setNewTheme({...newTheme, name: e.target.value})} className="rounded-xl mt-1" />
-                        </div>
-                        <div>
-                          <Label>Name (AR)</Label>
-                          <Input value={newTheme.name_ar} onChange={(e) => setNewTheme({...newTheme, name_ar: e.target.value})} className="rounded-xl mt-1" dir="rtl" />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label>Description (EN)</Label>
-                          <Textarea value={newTheme.description} onChange={(e) => setNewTheme({...newTheme, description: e.target.value})} className="rounded-xl mt-1" />
-                        </div>
-                        <div>
-                          <Label>Description (AR)</Label>
-                          <Textarea value={newTheme.description_ar} onChange={(e) => setNewTheme({...newTheme, description_ar: e.target.value})} className="rounded-xl mt-1" dir="rtl" />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label>Price (JD)</Label>
-                          <Input type="number" step="0.01" value={newTheme.price} onChange={(e) => setNewTheme({...newTheme, price: e.target.value})} className="rounded-xl mt-1" />
-                        </div>
-                        <div>
-                          <Label>صورة الثيم</Label>
-                          <Input 
-                            type="file" 
-                            accept="image/png,image/jpeg,image/webp"
-                            onChange={(e) => handleImageUpload(e, setNewTheme)}
-                            className="rounded-xl mt-1"
-                            disabled={uploadingImage}
-                          />
-                          {newTheme.image_url && (
-                            <img src={newTheme.image_url} alt="Preview" className="mt-2 h-20 w-20 object-cover rounded-lg" />
-                          )}
-                        </div>
-                      </div>
-                      <Button type="submit" className="w-full rounded-full" disabled={uploadingImage}>
-                        {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                        {editingTheme ? 'Update Theme' : 'Create Theme'}
-                      </Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">ثيمات أعياد الميلاد / Birthday Themes</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">إدارة ثيمات الحفلات المتاحة للعملاء</p>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {themes.map((theme) => (
                     <Card key={theme.id} className="rounded-xl overflow-hidden">
@@ -1009,6 +1002,67 @@ export default function AdminPage() {
                       </CardContent>
                     </Card>
                   ))}
+                </div>
+                
+                {/* Bottom Action Bar */}
+                <div className="pt-6 border-t flex justify-end">
+                  <Dialog open={themeDialogOpen} onOpenChange={(open) => { setThemeDialogOpen(open); if (!open) { setEditingTheme(null); setNewTheme({ name: '', name_ar: '', description: '', description_ar: '', price: '', image_url: '' }); } }}>
+                    <DialogTrigger asChild>
+                      <Button className="rounded-full gap-2 px-6">
+                        <Plus className="h-4 w-4" /> إضافة ثيم / Add Theme
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>{editingTheme ? 'تعديل الثيم / Edit Theme' : 'إنشاء ثيم / Create Theme'}</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleCreateTheme} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>الاسم (EN)</Label>
+                            <Input value={newTheme.name} onChange={(e) => setNewTheme({...newTheme, name: e.target.value})} className="rounded-xl mt-1" />
+                          </div>
+                          <div>
+                            <Label>الاسم (AR)</Label>
+                            <Input value={newTheme.name_ar} onChange={(e) => setNewTheme({...newTheme, name_ar: e.target.value})} className="rounded-xl mt-1" dir="rtl" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>الوصف (EN)</Label>
+                            <Textarea value={newTheme.description} onChange={(e) => setNewTheme({...newTheme, description: e.target.value})} className="rounded-xl mt-1" />
+                          </div>
+                          <div>
+                            <Label>الوصف (AR)</Label>
+                            <Textarea value={newTheme.description_ar} onChange={(e) => setNewTheme({...newTheme, description_ar: e.target.value})} className="rounded-xl mt-1" dir="rtl" />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>السعر (JD)</Label>
+                            <Input type="number" step="0.01" value={newTheme.price} onChange={(e) => setNewTheme({...newTheme, price: e.target.value})} className="rounded-xl mt-1" />
+                          </div>
+                          <div>
+                            <Label>صورة الثيم</Label>
+                            <Input 
+                              type="file" 
+                              accept="image/png,image/jpeg,image/webp"
+                              onChange={(e) => handleImageUpload(e, setNewTheme)}
+                              className="rounded-xl mt-1"
+                              disabled={uploadingImage}
+                            />
+                            {newTheme.image_url && (
+                              <img src={newTheme.image_url} alt="Preview" className="mt-2 h-20 w-20 object-cover rounded-lg" />
+                            )}
+                          </div>
+                        </div>
+                        <Button type="submit" className="w-full rounded-full" disabled={uploadingImage}>
+                          {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                          {editingTheme ? 'تحديث / Update' : 'إنشاء / Create'}
+                        </Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </CardContent>
             </Card>
