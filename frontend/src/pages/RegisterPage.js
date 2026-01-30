@@ -21,12 +21,12 @@ export default function RegisterPage() {
     e.preventDefault();
     
     if (password !== confirmPassword) {
-      toast.error('Passwords do not match');
+      toast.error('كلمتا المرور غير متطابقتين');
       return;
     }
 
     if (password.length < 6) {
-      toast.error('Password must be at least 6 characters');
+      toast.error('يجب أن تكون كلمة المرور 6 أحرف على الأقل');
       return;
     }
 
@@ -34,37 +34,37 @@ export default function RegisterPage() {
 
     try {
       await register(name, email, password);
-      toast.success('Account created successfully!');
+      toast.success('تم إنشاء الحساب بنجاح!');
       navigate('/profile');
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Registration failed');
+      toast.error(error.response?.data?.error || 'فشل إنشاء الحساب');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-hero-gradient py-12 px-4">
+    <div className="min-h-[80vh] flex items-center justify-center bg-hero-gradient py-12 px-4" dir="rtl">
       <Card className="w-full max-w-md border-2 rounded-3xl shadow-xl">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-4">
             <span className="text-5xl">🎪</span>
           </div>
-          <CardTitle className="font-heading text-3xl" data-testid="register-title">Join Peekaboo!</CardTitle>
+          <CardTitle className="font-heading text-3xl" data-testid="register-title">انضم إلى بيكابو!</CardTitle>
           <CardDescription className="text-base">
-            Create your account to start booking
+            أنشئ حسابك لبدء الحجز
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
+              <Label htmlFor="name">الاسم الكامل</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="name"
                   type="text"
-                  placeholder="John Doe"
+                  placeholder="أدخل اسمك الكامل"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="pl-10 rounded-xl h-12"
@@ -75,13 +75,13 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">البريد الإلكتروني</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="email"
                   type="email"
-                  placeholder="your@email.com"
+                  placeholder="example@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10 rounded-xl h-12"
@@ -92,13 +92,13 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">كلمة المرور</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="password"
                   type="password"
-                  placeholder="At least 6 characters"
+                  placeholder="6 أحرف على الأقل"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-10 rounded-xl h-12"
@@ -109,13 +109,13 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <Input
                   id="confirmPassword"
                   type="password"
-                  placeholder="Confirm your password"
+                  placeholder="أعد إدخال كلمة المرور"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   className="pl-10 rounded-xl h-12"
@@ -133,20 +133,20 @@ export default function RegisterPage() {
             >
               {loading ? (
                 <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Creating account...
+                  <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                  جاري إنشاء الحساب...
                 </>
               ) : (
-                'Create Account'
+                'إنشاء حساب'
               )}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-muted-foreground">
-              Already have an account?{' '}
+              لديك حساب بالفعل؟{' '}
               <Link to="/login" className="text-primary font-semibold hover:underline" data-testid="login-link">
-                Sign in
+                تسجيل الدخول
               </Link>
             </p>
           </div>
