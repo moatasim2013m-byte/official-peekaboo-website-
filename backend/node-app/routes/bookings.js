@@ -54,74 +54,87 @@ const awardLoyaltyPoints = async (userId, paymentId, source) => {
 
 // ==================== HOURLY BOOKINGS ====================
 
-// Create hourly booking (after payment confirmed)
+// Create hourly booking (after payment confirmed) - supports multiple children
 router.post('/hourly', authMiddleware, async (req, res) => {
   try {
-    const { slot_id, child_id, payment_id, amount, duration_hours, custom_notes } = req.body;
+    const { slot_id, child_ids, child_id, payment_id, amount, duration_hours, custom_notes } = req.body;
     
-    // ATOMIC capacity check - use findOneAndUpdate to prevent race conditions
+    // Support both child_ids array and legacy child_id
+    const childIdList = child_ids || (child_id ? [child_id] : []);
+    if (childIdList.length === 0) {
+      return res.status(400).json({ error: 'يجب اختيار طفل واحد على الأقل' });
+    }
+    
+    // ATOMIC capacity check for all children at once
     const slot = await TimeSlot.findOneAndUpdate(
       { 
         _id: slot_id, 
         slot_type: 'hourly',
-        $expr: { $lt: ['$booked_count', '$capacity'] } // Only if capacity available
+        $expr: { $lte: [{ $add: ['$booked_count', childIdList.length] }, '$capacity'] }
       },
-      { $inc: { booked_count: 1 } },
+      { $inc: { booked_count: childIdList.length } },
       { new: true }
     );
     
     if (!slot) {
-      // Check if slot exists but is full
       const existingSlot = await TimeSlot.findById(slot_id);
       if (!existingSlot) {
-        return res.status(400).json({ error: 'Invalid slot' });
+        return res.status(400).json({ error: 'الوقت غير صالح' });
       }
-      return res.status(400).json({ error: 'عذراً، الوقت محجوز بالكامل. يرجى اختيار وقت آخر.' }); // Slot is full (Arabic)
+      const available = existingSlot.capacity - existingSlot.booked_count;
+      return res.status(400).json({ 
+        error: `عذراً، المتاح ${available} مكان فقط. اخترت ${childIdList.length} أطفال.`
+      });
     }
 
-    // Validate child belongs to user
-    const child = await Child.findOne({ _id: child_id, parent_id: req.userId });
-    if (!child) {
-      // Rollback capacity increment
-      await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: -1 } });
-      return res.status(400).json({ error: 'Invalid child' });
+    // Validate all children belong to user
+    const validChildren = await Child.find({ _id: { $in: childIdList }, parent_id: req.userId });
+    if (validChildren.length !== childIdList.length) {
+      // Rollback capacity
+      await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: -childIdList.length } });
+      return res.status(400).json({ error: 'طفل غير صالح' });
     }
 
-    // Generate booking code and QR
-    const booking_code = `PK-H-${uuidv4().substring(0, 8).toUpperCase()}`;
-    const qr_code = await generateQRCode(booking_code);
-
-    const booking = new HourlyBooking({
-      user_id: req.userId,
-      child_id,
-      slot_id,
-      duration_hours: parseInt(duration_hours) || 2,
-      custom_notes: custom_notes || '',
-      qr_code,
-      booking_code,
-      status: 'confirmed',
-      payment_id,
-      amount
-    });
-
-    await booking.save();
+    // Create a booking for each child
+    const bookings = [];
+    const pricePerChild = amount / childIdList.length;
     
-    // Capacity already incremented atomically above
+    for (const cid of childIdList) {
+      const booking_code = `PK-H-${uuidv4().substring(0, 8).toUpperCase()}`;
+      const qr_code = await generateQRCode(booking_code);
 
-    // Award loyalty points
+      const booking = new HourlyBooking({
+        user_id: req.userId,
+        child_id: cid,
+        slot_id,
+        duration_hours: parseInt(duration_hours) || 2,
+        custom_notes: custom_notes || '',
+        qr_code,
+        booking_code,
+        status: 'confirmed',
+        payment_id,
+        amount: pricePerChild
+      });
+
+      await booking.save();
+      bookings.push(booking);
+    }
+
+    // Award loyalty points once per payment
     if (payment_id) {
       await awardLoyaltyPoints(req.userId, payment_id, 'hourly');
     }
 
     // Send confirmation email
     const user = await User.findById(req.userId);
-    const template = emailTemplates.bookingConfirmation(booking, slot, child);
+    const childNames = validChildren.map(c => c.name).join(', ');
+    const template = emailTemplates.bookingConfirmation(bookings[0], slot, { name: childNames });
     await sendEmail(user.email, template.subject, template.html);
 
-    res.status(201).json({ booking: booking.toJSON() });
+    res.status(201).json({ bookings: bookings.map(b => b.toJSON()) });
   } catch (error) {
     console.error('Create hourly booking error:', error);
-    res.status(500).json({ error: 'Failed to create booking' });
+    res.status(500).json({ error: 'فشل إنشاء الحجز' });
   }
 });
 
