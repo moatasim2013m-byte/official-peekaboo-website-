@@ -26,25 +26,25 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white border-b border-border sticky top-0 z-50">
+    <nav className="bg-white border-b border-border sticky top-0 z-50" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo with Mascot */}
           <Link to="/" className="flex items-center gap-2" data-testid="nav-logo">
-            <img src={logoImg} alt="Peekaboo" className="h-10" />
+            <img src={logoImg} alt="بيكابو" className="h-10" />
           </Link>
 
           {/* Desktop Navigation - Show only for non-admin users */}
           {!isAdmin && (
             <div className="hidden md:flex items-center gap-6">
               <Link to="/tickets" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-tickets">
-                {t('Hourly Tickets')}
+                تذاكر بالساعة
               </Link>
               <Link to="/birthday" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-birthday">
-                {t('Birthday Parties')}
+                حفلات أعياد الميلاد
               </Link>
               <Link to="/subscriptions" className="text-foreground hover:text-primary transition-colors font-medium" data-testid="nav-subscriptions">
-                {t('Subscriptions')}
+                الاشتراكات
               </Link>
             </div>
           )}
@@ -63,7 +63,7 @@ export const Navbar = () => {
               <Link to="/admin">
                 <Button variant="default" className="rounded-full gap-2 bg-primary" data-testid="nav-admin-btn">
                   <LayoutDashboard className="h-4 w-4" />
-                  {t('Admin Dashboard')}
+                  لوحة التحكم
                 </Button>
               </Link>
             )}
@@ -71,14 +71,14 @@ export const Navbar = () => {
               <>
                 <Link to="/reception">
                   <Button variant="outline" className="rounded-full gap-2">
-                    Reception
+                    الاستقبال
                   </Button>
                 </Link>
                 {isStaff && !isAdmin && (
                   <Link to="/staff">
                     <Button variant="default" className="rounded-full gap-2 bg-secondary text-secondary-foreground" data-testid="nav-staff-btn">
                       <Users className="h-4 w-4" />
-                      {t('Staff Panel')}
+                      لوحة الموظفين
                     </Button>
                   </Link>
                 )}
@@ -92,23 +92,23 @@ export const Navbar = () => {
                     <span>{user?.name}</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuContent align="start" className="w-48">
                   {!isAdmin && (
                     <DropdownMenuItem onClick={() => navigate('/profile')} data-testid="menu-profile">
-                      <User className="h-4 w-4 mr-2" />
-                      {t('Profile')}
+                      <User className="h-4 w-4 ml-2" />
+                      الملف الشخصي
                     </DropdownMenuItem>
                   )}
                   {isAdmin && (
                     <DropdownMenuItem onClick={() => navigate('/admin')} data-testid="menu-admin">
-                      <LayoutDashboard className="h-4 w-4 mr-2" />
-                      {t('Admin Dashboard')}
+                      <LayoutDashboard className="h-4 w-4 ml-2" />
+                      لوحة التحكم
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} data-testid="menu-logout">
-                    <LogOut className="h-4 w-4 mr-2" />
-                    {t('Logout')}
+                    <LogOut className="h-4 w-4 ml-2" />
+                    تسجيل الخروج
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -116,12 +116,12 @@ export const Navbar = () => {
               <>
                 <Link to="/login">
                   <Button variant="outline" className="rounded-full" data-testid="nav-login">
-                    {t('Login')}
+                    تسجيل الدخول
                   </Button>
                 </Link>
                 <Link to="/register">
                   <Button className="rounded-full btn-playful" data-testid="nav-register">
-                    {t('Sign Up')}
+                    إنشاء حساب
                   </Button>
                 </Link>
               </>
@@ -145,7 +145,7 @@ export const Navbar = () => {
             {isAuthenticated && (isAdmin || isStaff) && (
               <div className="mb-4 flex items-center gap-2 px-3 py-2 rounded bg-[var(--peekaboo-green)]/10 border border-[var(--peekaboo-green)]">
                 <img src={mascotImg} alt="" className="h-6 w-6 rounded-full" />
-                <span className="text-xs font-medium text-[#2d6a4f]">{isAdmin ? 'Admin Mode' : 'Staff Mode'}</span>
+                <span className="text-xs font-medium text-[#2d6a4f]">{isAdmin ? 'وضع المدير' : 'وضع الموظف'}</span>
               </div>
             )}
             <div className="flex flex-col gap-4">
@@ -153,13 +153,13 @@ export const Navbar = () => {
               {!isAdmin && (
                 <>
                   <Link to="/tickets" className="text-foreground hover:text-primary font-medium" onClick={() => setMobileMenuOpen(false)}>
-                    {t('Hourly Tickets')}
+                    تذاكر بالساعة
                   </Link>
                   <Link to="/birthday" className="text-foreground hover:text-primary font-medium" onClick={() => setMobileMenuOpen(false)}>
-                    {t('Birthday Parties')}
+                    حفلات أعياد الميلاد
                   </Link>
                   <Link to="/subscriptions" className="text-foreground hover:text-primary font-medium" onClick={() => setMobileMenuOpen(false)}>
-                    {t('Subscriptions')}
+                    الاشتراكات
                   </Link>
                 </>
               )}
@@ -168,25 +168,25 @@ export const Navbar = () => {
                   <>
                     {!isAdmin && (
                       <Link to="/profile" onClick={() => setMobileMenuOpen(false)}>
-                        <Button variant="outline" className="w-full rounded-full">{t('Profile')}</Button>
+                        <Button variant="outline" className="w-full rounded-full">الملف الشخصي</Button>
                       </Link>
                     )}
                     {isAdmin && (
                       <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
-                        <Button variant="outline" className="w-full rounded-full">{t('Admin Dashboard')}</Button>
+                        <Button variant="outline" className="w-full rounded-full">لوحة التحكم</Button>
                       </Link>
                     )}
                     <Button onClick={handleLogout} variant="destructive" className="w-full rounded-full">
-                      {t('Logout')}
+                      تسجيل الخروج
                     </Button>
                   </>
                 ) : (
                   <>
                     <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                      <Button variant="outline" className="w-full rounded-full">{t('Login')}</Button>
+                      <Button variant="outline" className="w-full rounded-full">تسجيل الدخول</Button>
                     </Link>
                     <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                      <Button className="w-full rounded-full">{t('Sign Up')}</Button>
+                      <Button className="w-full rounded-full">إنشاء حساب</Button>
                     </Link>
                   </>
                 )}
