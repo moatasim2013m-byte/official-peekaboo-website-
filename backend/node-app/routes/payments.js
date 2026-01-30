@@ -114,9 +114,24 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
     switch (type) {
       case 'hourly':
         const hours = parseInt(duration_hours) || 2;
-        amount = await getHourlyPrice(hours);
+        const childIds = req.body.child_ids || (req.body.child_id ? [req.body.child_id] : []);
+        const childCount = childIds.length || 1;
+        
+        // Check capacity before creating checkout
+        const slot = await TimeSlot.findById(reference_id);
+        if (!slot) {
+          return res.status(400).json({ error: 'الوقت غير صالح' });
+        }
+        const availableSpots = slot.capacity - slot.booked_count;
+        if (availableSpots < childCount) {
+          return res.status(400).json({ error: `عذراً، المتاح ${availableSpots} مكان فقط. اخترت ${childCount} أطفال.` });
+        }
+        
+        const basePrice = await getHourlyPrice(hours);
+        amount = basePrice * childCount;
         metadata.slot_id = reference_id;
         metadata.duration_hours = hours;
+        metadata.child_ids = JSON.stringify(childIds);
         if (custom_notes) metadata.custom_notes = custom_notes;
         break;
       case 'birthday':
@@ -138,8 +153,11 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
         return res.status(400).json({ error: 'Invalid payment type' });
     }
 
-    if (req.body.child_id) {
-      metadata.child_id = req.body.child_id;
+    // Handle child_ids for multi-child booking (backward compat with child_id)
+    if (req.body.child_ids && req.body.child_ids.length > 0) {
+      metadata.child_ids = JSON.stringify(req.body.child_ids);
+    } else if (req.body.child_id) {
+      metadata.child_ids = JSON.stringify([req.body.child_id]);
     }
 
     // Ensure amount is a valid float
