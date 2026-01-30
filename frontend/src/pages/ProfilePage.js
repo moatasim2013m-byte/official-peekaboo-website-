@@ -141,20 +141,20 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-hero-gradient py-8 md:py-12">
+    <div className="min-h-screen bg-hero-gradient py-8 md:py-12" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
             <h1 className="font-heading text-4xl font-bold text-foreground" data-testid="profile-title">
-              {t('Welcome, {name}').replace('{name}', user?.name || '')}
+              مرحباً، {user?.name || ''}
             </h1>
             <p className="text-muted-foreground">{user?.email}</p>
           </div>
           <div className="flex items-center gap-4">
             <div className="bg-secondary/10 px-4 py-2 rounded-full flex items-center gap-2">
               <Star className="h-5 w-5 text-secondary" />
-              <span className="font-bold text-secondary">{user?.loyalty_points || 0} {t('points')}</span>
+              <span className="font-bold text-secondary">{user?.loyalty_points || 0} نقطة</span>
             </div>
           </div>
         </div>
@@ -169,21 +169,21 @@ export default function ProfilePage() {
                     <Clock className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-heading font-bold text-lg">Active Play Session</h3>
+                    <h3 className="font-heading font-bold text-lg">جلسة لعب نشطة</h3>
                     <p className="text-muted-foreground">
-                      {activeSession.child_id?.name || 'Child'} is playing!
+                      {activeSession.child_id?.name || 'الطفل'} يلعب الآن!
                     </p>
                   </div>
                 </div>
                 <div className="text-center">
                   <div className={`text-4xl font-heading font-bold ${activeSession.warning_5min ? 'text-destructive' : 'text-primary'}`}>
-                    {activeSession.remaining_minutes} min
+                    {activeSession.remaining_minutes} دقيقة
                   </div>
-                  <p className="text-sm text-muted-foreground">remaining</p>
+                  <p className="text-sm text-muted-foreground">متبقية</p>
                   {activeSession.warning_5min && (
                     <div className="flex items-center gap-1 text-destructive mt-1">
                       <AlertTriangle className="h-4 w-4" />
-                      <span className="text-sm font-medium">Session ending soon!</span>
+                      <span className="text-sm font-medium">الجلسة تنتهي قريباً!</span>
                     </div>
                   )}
                 </div>
@@ -196,19 +196,19 @@ export default function ProfilePage() {
         <Tabs defaultValue="children" className="space-y-6">
           <TabsList className="bg-white border-2 border-border rounded-full p-1 flex-wrap">
             <TabsTrigger value="children" className="rounded-full gap-2" data-testid="tab-children">
-              <Baby className="h-4 w-4" /> {t('Kids')}
+              <Baby className="h-4 w-4" /> أطفالي
             </TabsTrigger>
             <TabsTrigger value="hourly" className="rounded-full gap-2" data-testid="tab-hourly">
-              <Clock className="h-4 w-4" /> {t('Hourly')}
+              <Clock className="h-4 w-4" /> بالساعة
             </TabsTrigger>
             <TabsTrigger value="birthday" className="rounded-full gap-2" data-testid="tab-birthday">
-              <Cake className="h-4 w-4" /> {t('Birthday')}
+              <Cake className="h-4 w-4" /> أعياد الميلاد
             </TabsTrigger>
             <TabsTrigger value="subscriptions" className="rounded-full gap-2" data-testid="tab-subscriptions">
-              <Star className="h-4 w-4" /> {t('Subscriptions')}
+              <Star className="h-4 w-4" /> الاشتراكات
             </TabsTrigger>
             <TabsTrigger value="loyalty" className="rounded-full gap-2" data-testid="tab-loyalty">
-              <Gift className="h-4 w-4" /> {t('Loyalty')}
+              <Gift className="h-4 w-4" /> نقاط الولاء
             </TabsTrigger>
           </TabsList>
 
@@ -217,33 +217,33 @@ export default function ProfilePage() {
             <Card className="border-2 rounded-3xl">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="font-heading">{t('My Children')}</CardTitle>
-                  <CardDescription>{t('Manage your children\'s profiles')}</CardDescription>
+                  <CardTitle className="font-heading">أطفالي</CardTitle>
+                  <CardDescription>إدارة ملفات أطفالك</CardDescription>
                 </div>
                 <Dialog open={addChildOpen} onOpenChange={setAddChildOpen}>
                   <DialogTrigger asChild>
                     <Button className="rounded-full gap-2" data-testid="add-child-btn">
-                      <Plus className="h-4 w-4" /> {t('Add Child')}
+                      <Plus className="h-4 w-4" /> إضافة طفل
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="rounded-3xl">
                     <DialogHeader>
-                      <DialogTitle className="font-heading">{t('Add Child')}</DialogTitle>
+                      <DialogTitle className="font-heading">إضافة طفل</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleAddChild} className="space-y-4">
                       <div>
-                        <Label htmlFor="childName">Name</Label>
+                        <Label htmlFor="childName">الاسم</Label>
                         <Input
                           id="childName"
                           value={newChildName}
                           onChange={(e) => setNewChildName(e.target.value)}
                           className="rounded-xl mt-2"
-                          placeholder="Child's name"
+                          placeholder="اسم الطفل"
                           data-testid="child-name-input"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="childBirthday">Birthday</Label>
+                        <Label htmlFor="childBirthday">تاريخ الميلاد</Label>
                         <Input
                           id="childBirthday"
                           type="date"
@@ -254,7 +254,7 @@ export default function ProfilePage() {
                         />
                       </div>
                       <Button type="submit" className="w-full rounded-full" data-testid="save-child-btn">
-                        {t('Add Child')}
+                        إضافة طفل
                       </Button>
                     </form>
                   </DialogContent>
@@ -264,8 +264,8 @@ export default function ProfilePage() {
                 {children.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Baby className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>{t('No children added yet')}</p>
-                    <p className="text-sm mt-2">{t('Add your first child to start booking')}</p>
+                    <p>لم يتم إضافة أطفال بعد</p>
+                    <p className="text-sm mt-2">أضف طفلك الأول لبدء الحجز</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -279,7 +279,7 @@ export default function ProfilePage() {
                             <div>
                               <p className="font-semibold">{child.name}</p>
                               <p className="text-sm text-muted-foreground">
-                                {t('Born {date}').replace('{date}', format(new Date(child.birthday), 'MMM d, yyyy'))}
+                                تاريخ الميلاد: {format(new Date(child.birthday), 'yyyy/MM/dd')}
                               </p>
                             </div>
                           </div>
@@ -304,16 +304,16 @@ export default function ProfilePage() {
           <TabsContent value="hourly">
             <Card className="border-2 rounded-3xl">
               <CardHeader>
-                <CardTitle className="font-heading">{t('Hourly Bookings')}</CardTitle>
-                <CardDescription>{t('Your play session history')}</CardDescription>
+                <CardTitle className="font-heading">حجوزات اللعب بالساعة</CardTitle>
+                <CardDescription>سجل جلسات اللعب الخاصة بك</CardDescription>
               </CardHeader>
               <CardContent>
                 {hourlyBookings.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>{t('No bookings yet')}</p>
+                    <p>لا توجد حجوزات بعد</p>
                     <Button onClick={() => navigate('/tickets')} className="rounded-full mt-4">
-                      {t('Book a Session')}
+                      احجز جلسة
                     </Button>
                   </div>
                 ) : (
@@ -325,42 +325,42 @@ export default function ProfilePage() {
                             <div className="flex items-start gap-4">
                               {booking.status === 'confirmed' && booking.qr_code && (
                                 <div className="qr-container hidden md:block">
-                                  <img src={booking.qr_code} alt="QR Code" className="w-20 h-20" />
+                                  <img src={booking.qr_code} alt="رمز QR" className="w-20 h-20" />
                                 </div>
                               )}
                               <div>
                                 <div className="flex items-center gap-2 mb-1">
                                   <span className="font-semibold">{booking.booking_code}</span>
                                   <Badge className={getStatusBadge(booking.status)}>
-                                    {booking.status}
+                                    {booking.status === 'confirmed' ? 'مؤكد' : booking.status === 'checked_in' ? 'مسجل الدخول' : booking.status === 'completed' ? 'مكتمل' : booking.status}
                                   </Badge>
                                 </div>
                                 <p className="text-sm text-muted-foreground">
-                                  {booking.slot_id?.date} at {booking.slot_id?.start_time}
+                                  {booking.slot_id?.date} الساعة {booking.slot_id?.start_time}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
-                                  Child: {booking.child_id?.name}
+                                  الطفل: {booking.child_id?.name}
                                 </p>
                               </div>
                             </div>
-                            <div className="text-right">
-                              <p className="font-bold">${booking.amount}</p>
+                            <div className="text-left">
+                              <p className="font-bold">{booking.amount} دينار</p>
                               {booking.status === 'confirmed' && (
                                 <Dialog>
                                   <DialogTrigger asChild>
                                     <Button variant="outline" size="sm" className="rounded-full mt-2 md:hidden">
-                                      <QrCode className="h-4 w-4 mr-1" /> Show QR
+                                      <QrCode className="h-4 w-4 ml-1" /> عرض QR
                                     </Button>
                                   </DialogTrigger>
                                   <DialogContent>
                                     <DialogHeader>
-                                      <DialogTitle>Your Booking QR Code</DialogTitle>
+                                      <DialogTitle>رمز QR للحجز</DialogTitle>
                                     </DialogHeader>
                                     <div className="flex justify-center">
-                                      <img src={booking.qr_code} alt="QR Code" className="w-48 h-48" />
+                                      <img src={booking.qr_code} alt="رمز QR" className="w-48 h-48" />
                                     </div>
                                     <p className="text-center text-muted-foreground">
-                                      Show this at reception to check in
+                                      اعرض هذا الرمز في الاستقبال لتسجيل الدخول
                                     </p>
                                   </DialogContent>
                                 </Dialog>
@@ -380,16 +380,16 @@ export default function ProfilePage() {
           <TabsContent value="birthday">
             <Card className="border-2 rounded-3xl">
               <CardHeader>
-                <CardTitle className="font-heading">{t('Birthday Bookings')}</CardTitle>
-                <CardDescription>{t('Your party bookings')}</CardDescription>
+                <CardTitle className="font-heading">حجوزات أعياد الميلاد</CardTitle>
+                <CardDescription>حجوزات الحفلات الخاصة بك</CardDescription>
               </CardHeader>
               <CardContent>
                 {birthdayBookings.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Cake className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>{t('No party bookings yet')}</p>
+                    <p>لا توجد حجوزات حفلات بعد</p>
                     <Button onClick={() => navigate('/birthday')} className="rounded-full mt-4 bg-accent">
-                      {t('Book a Party')}
+                      احجز حفلة
                     </Button>
                   </div>
                 ) : (
@@ -402,23 +402,23 @@ export default function ProfilePage() {
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="font-semibold">{booking.booking_code}</span>
                                 <Badge className={getStatusBadge(booking.status)}>
-                                  {booking.status.replace('_', ' ')}
+                                  {booking.status === 'confirmed' ? 'مؤكد' : booking.status === 'custom_pending' ? 'قيد المراجعة' : booking.status}
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground">
-                                {booking.slot_id?.date} at {booking.slot_id?.start_time}
+                                {booking.slot_id?.date} الساعة {booking.slot_id?.start_time}
                               </p>
                               <p className="text-sm text-muted-foreground">
-                                Child: {booking.child_id?.name}
+                                الطفل: {booking.child_id?.name}
                               </p>
                               <p className="text-sm">
-                                Theme: {booking.is_custom ? 'Custom Request' : booking.theme_id?.name}
+                                الثيم: {booking.is_custom ? 'طلب مخصص' : booking.theme_id?.name_ar || booking.theme_id?.name}
                               </p>
                             </div>
-                            <div className="text-right">
-                              {booking.amount && <p className="font-bold">${booking.amount}</p>}
+                            <div className="text-left">
+                              {booking.amount && <p className="font-bold">{booking.amount} دينار</p>}
                               {booking.is_custom && (
-                                <p className="text-sm text-muted-foreground">Awaiting quote</p>
+                                <p className="text-sm text-muted-foreground">بانتظار التسعير</p>
                               )}
                             </div>
                           </div>
@@ -435,16 +435,16 @@ export default function ProfilePage() {
           <TabsContent value="subscriptions">
             <Card className="border-2 rounded-3xl">
               <CardHeader>
-                <CardTitle className="font-heading">{t('Subscription History')}</CardTitle>
-                <CardDescription>{t('Your subscription packages')}</CardDescription>
+                <CardTitle className="font-heading">سجل الاشتراكات</CardTitle>
+                <CardDescription>باقات الاشتراك الخاصة بك</CardDescription>
               </CardHeader>
               <CardContent>
                 {subscriptions.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Star className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>{t('No subscriptions yet')}</p>
+                    <p>لا توجد اشتراكات بعد</p>
                     <Button onClick={() => navigate('/subscriptions')} className="rounded-full mt-4 bg-secondary text-secondary-foreground">
-                      {t('Browse Plans')}
+                      تصفح الباقات
                     </Button>
                   </div>
                 ) : (
@@ -455,28 +455,28 @@ export default function ProfilePage() {
                           <div className="flex justify-between items-start">
                             <div>
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="font-semibold">{sub.plan_id?.name}</span>
+                                <span className="font-semibold">{sub.plan_id?.name_ar || sub.plan_id?.name}</span>
                                 <Badge className={getStatusBadge(sub.status)}>
-                                  {sub.status === 'pending' ? 'Not activated' : sub.status}
+                                  {sub.status === 'pending' ? 'غير مفعّل' : sub.status === 'active' ? 'نشط' : sub.status === 'expired' ? 'منتهي' : sub.status}
                                 </Badge>
                               </div>
                               <p className="text-sm text-muted-foreground">
-                                Child: {sub.child_id?.name}
+                                الطفل: {sub.child_id?.name}
                               </p>
                               <p className="text-sm text-muted-foreground">
                                 {sub.status === 'pending' 
-                                  ? 'Expires 30 days after first check-in'
+                                  ? 'ينتهي بعد 30 يوم من أول تسجيل دخول'
                                   : sub.expires_at 
-                                    ? `Expires: ${format(new Date(sub.expires_at), 'MMM d, yyyy')}`
-                                    : 'No expiry set'
+                                    ? `ينتهي: ${format(new Date(sub.expires_at), 'yyyy/MM/dd')}`
+                                    : 'لم يتم تحديد تاريخ انتهاء'
                                 }
                               </p>
                             </div>
-                            <div className="text-right">
+                            <div className="text-left">
                               <div className="text-2xl font-heading font-bold text-secondary">
                                 {sub.remaining_visits}
                               </div>
-                              <p className="text-sm text-muted-foreground">visits left</p>
+                              <p className="text-sm text-muted-foreground">زيارة متبقية</p>
                             </div>
                           </div>
                         </CardContent>
@@ -494,18 +494,18 @@ export default function ProfilePage() {
               <CardHeader>
                 <CardTitle className="font-heading flex items-center gap-2">
                   <Gift className="h-6 w-6 text-secondary" />
-                  {t('Loyalty Program')}
+                  برنامج الولاء
                 </CardTitle>
                 <CardDescription>
-                  {t('Your Points')}: <span className="font-bold text-secondary">{user?.loyalty_points || 0} {t('points')}</span>
+                  رصيدك: <span className="font-bold text-secondary">{user?.loyalty_points || 0} نقطة</span>
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 {loyaltyHistory.length === 0 ? (
                   <div className="text-center py-12 text-muted-foreground">
                     <Gift className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No points history yet</p>
-                    <p className="text-sm mt-2">Earn 10 points with every purchase!</p>
+                    <p>لا يوجد سجل نقاط بعد</p>
+                    <p className="text-sm mt-2">اكسب 10 نقاط مع كل عملية شراء!</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -514,7 +514,7 @@ export default function ProfilePage() {
                         <div>
                           <p className="font-medium">{entry.description}</p>
                           <p className="text-sm text-muted-foreground">
-                            {format(new Date(entry.created_at), 'MMM d, yyyy')}
+                            {format(new Date(entry.created_at), 'yyyy/MM/dd')}
                           </p>
                         </div>
                         <span className={`font-bold ${entry.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
