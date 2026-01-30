@@ -138,6 +138,18 @@ export default function AdminPage() {
       setGallery(galleryRes.data.media || []);
       setSettings(settingsRes.data.settings || {});
       setPricing(pricingRes.data.pricing || {});
+      
+      // Load hero settings from settings
+      const s = settingsRes.data.settings || {};
+      if (s.hero_title || s.hero_subtitle || s.hero_image) {
+        setHeroSettings({
+          hero_title: s.hero_title || heroSettings.hero_title,
+          hero_subtitle: s.hero_subtitle || heroSettings.hero_subtitle,
+          hero_cta_text: s.hero_cta_text || heroSettings.hero_cta_text,
+          hero_cta_route: s.hero_cta_route || heroSettings.hero_cta_route,
+          hero_image: s.hero_image || ''
+        });
+      }
     } catch (error) {
       console.error('Failed to fetch admin data:', error);
     } finally {
