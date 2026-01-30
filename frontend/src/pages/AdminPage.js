@@ -866,56 +866,12 @@ export default function AdminPage() {
           {/* Subscriptions */}
           <TabsContent value="subscriptions">
             <Card className="rounded-2xl">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle>Subscription Plans</CardTitle>
-                <Dialog open={planDialogOpen} onOpenChange={(open) => { setPlanDialogOpen(open); if (!open) { setEditingPlan(null); setNewPlan({ name: '', name_ar: '', description: '', description_ar: '', visits: '', price: '' }); } }}>
-                  <DialogTrigger asChild>
-                    <Button className="rounded-full gap-2">
-                      <Plus className="h-4 w-4" /> Add Plan
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>{editingPlan ? 'Edit Plan' : 'Create Plan'}</DialogTitle>
-                    </DialogHeader>
-                    <form onSubmit={handleCreatePlan} className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label>Name (EN)</Label>
-                          <Input value={newPlan.name} onChange={(e) => setNewPlan({...newPlan, name: e.target.value})} className="rounded-xl mt-1" />
-                        </div>
-                        <div>
-                          <Label>Name (AR)</Label>
-                          <Input value={newPlan.name_ar} onChange={(e) => setNewPlan({...newPlan, name_ar: e.target.value})} className="rounded-xl mt-1" dir="rtl" />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label>Description (EN)</Label>
-                          <Textarea value={newPlan.description} onChange={(e) => setNewPlan({...newPlan, description: e.target.value})} className="rounded-xl mt-1" />
-                        </div>
-                        <div>
-                          <Label>Description (AR)</Label>
-                          <Textarea value={newPlan.description_ar} onChange={(e) => setNewPlan({...newPlan, description_ar: e.target.value})} className="rounded-xl mt-1" dir="rtl" />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label>Visits</Label>
-                          <Input type="number" value={newPlan.visits} onChange={(e) => setNewPlan({...newPlan, visits: e.target.value})} className="rounded-xl mt-1" />
-                        </div>
-                        <div>
-                          <Label>Price (JD)</Label>
-                          <Input type="number" step="0.01" value={newPlan.price} onChange={(e) => setNewPlan({...newPlan, price: e.target.value})} className="rounded-xl mt-1" />
-                        </div>
-                      </div>
-                      <Button type="submit" className="w-full rounded-full">{editingPlan ? 'Update Plan' : 'Create Plan'}</Button>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-xl">باقات الاشتراك / Subscription Plans</CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">إدارة باقات الزيارات للعملاء</p>
               </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {plans.map((plan) => (
                     <Card key={plan.id} className="rounded-xl">
                       <CardContent className="p-4">
