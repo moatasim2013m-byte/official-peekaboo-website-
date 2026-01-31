@@ -40,6 +40,17 @@ app.use('/api/gallery', galleryRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/themes', themesRoutes);
 
+// Public settings endpoint (for homepage hero config)
+const Settings = require('./models/Settings');
+app.get('/api/settings', async (req, res) => {
+  try {
+    const settings = await Settings.findOne() || {};
+    res.json({ settings });
+  } catch (error) {
+    res.json({ settings: {} });
+  }
+});
+
 // Health check
 app.get('/api/', (req, res) => {
   res.json({ message: 'Peekaboo API is running!' });
