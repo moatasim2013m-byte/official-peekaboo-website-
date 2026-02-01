@@ -24,6 +24,20 @@ export const AuthProvider = ({ children }) => {
       }
       return config;
     });
+
+    // Handle 401 responses - only for truly expired tokens, not initial auth check
+    instance.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        // Don't auto-logout on /auth/me failures (handled separately)
+        const isAuthCheck = error.config?.url?.includes('/auth/me');
+        if (error.response?.status === 401 && !isAuthCheck) {
+          console.log('[Auth] API returned 401, session may have expired');
+          // Let the component handle the error - don't force logout here
+        }
+        return Promise.reject(error);
+      }
+    );
     
     return instance;
   }, []);
