@@ -85,35 +85,35 @@ export default function ProfilePage() {
 
   const handleAddChild = async (e) => {
     e.preventDefault();
-    if (!newChildName || !newChildBirthday) {
-      toast.error('Please fill in all fields');
+    if (!newChildName.trim()) {
+      toast.error('الرجاء إدخال اسم الطفل');
       return;
     }
 
     try {
       await api.post('/profile/children', {
-        name: newChildName,
-        birthday: newChildBirthday
+        name: newChildName.trim(),
+        birthday: newChildBirthday || null
       });
-      toast.success('Child added successfully!');
+      toast.success('تمت إضافة الطفل بنجاح');
       setNewChildName('');
       setNewChildBirthday('');
       setAddChildOpen(false);
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to add child');
+      toast.error(error.response?.data?.error || 'فشل إضافة الطفل');
     }
   };
 
   const handleDeleteChild = async (childId) => {
-    if (!window.confirm('Are you sure you want to remove this child?')) return;
+    if (!window.confirm('هل أنت متأكد من حذف هذا الطفل؟')) return;
 
     try {
       await api.delete(`/profile/children/${childId}`);
-      toast.success('Child removed');
+      toast.success('تم حذف الطفل');
       fetchData();
     } catch (error) {
-      toast.error('Failed to remove child');
+      toast.error('فشل حذف الطفل');
     }
   };
 
