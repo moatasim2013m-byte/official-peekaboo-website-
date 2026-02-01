@@ -31,7 +31,8 @@ export const AuthProvider = ({ children }) => {
   // Check auth on mount
   useEffect(() => {
     const checkAuth = async () => {
-      if (!token) {
+      const storedToken = localStorage.getItem('peekaboo_token');
+      if (!storedToken) {
         setLoading(false);
         return;
       }
@@ -39,18 +40,25 @@ export const AuthProvider = ({ children }) => {
       try {
         const response = await api.get('/auth/me');
         setUser(response.data.user);
+        setToken(storedToken);
       } catch (error) {
-        console.error('Auth check failed:', error);
-        localStorage.removeItem('peekaboo_token');
-        setToken(null);
-        setUser(null);
+        // Only clear auth on explicit 401 (invalid/expired token)
+        if (error.response?.status === 401) {
+          console.log('[Auth] Token invalid or expired, clearing session');
+          localStorage.removeItem('peekaboo_token');
+          setToken(null);
+          setUser(null);
+        } else {
+          // Network error or other issue - keep token, try to use cached user
+          console.log('[Auth] Auth check failed (non-401), keeping session:', error.message);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     checkAuth();
-  }, []);
+  }, [api]);
 
   const login = async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
