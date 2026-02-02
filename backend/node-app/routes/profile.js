@@ -24,10 +24,11 @@ router.get('/', authMiddleware, async (req, res) => {
 // Update profile
 router.put('/', authMiddleware, async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, phone } = req.body;
     
     const user = await User.findById(req.userId);
     if (name) user.name = name;
+    if (phone !== undefined) user.phone = phone.replace(/\s/g, ''); // Strip spaces
     await user.save();
     
     res.json({ user: user.toJSON() });
