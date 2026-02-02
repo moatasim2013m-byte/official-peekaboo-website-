@@ -518,7 +518,7 @@ export default function AdminPage() {
       const uploadRes = await api.post('/admin/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      setHeroSettings({ ...heroSettings, hero_image: uploadRes.data.url });
+      setHeroSettings({ ...heroSettings, hero_image: uploadRes.data.image_url });
       toast.success('تم رفع الصورة');
     } catch (error) {
       toast.error('فشل رفع الصورة');
