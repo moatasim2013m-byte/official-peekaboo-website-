@@ -6,16 +6,22 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
-import { Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Loader2, Phone } from 'lucide-react';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  const validatePhone = (phoneNum) => {
+    const cleaned = phoneNum.replace(/\s/g, '');
+    return /^07\d{8}$/.test(cleaned);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,6 +33,11 @@ export default function RegisterPage() {
 
     if (password.length < 6) {
       toast.error('يجب أن تكون كلمة المرور 6 أحرف على الأقل');
+      return;
+    }
+
+    if (phone && !validatePhone(phone)) {
+      toast.error('رقم الهاتف غير صالح (07XXXXXXXX)');
       return;
     }
 
