@@ -56,8 +56,8 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-hero-gradient py-12 px-4" dir="rtl">
-      <Card className="w-full max-w-md border-2 rounded-3xl shadow-xl">
+    <div className="min-h-[80vh] flex items-center justify-center py-12 px-4" dir="rtl">
+      <Card className="auth-card w-full max-w-md">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-4">
             <img src={mascotImg} alt="بيكابو" className="auth-brand-img rounded-full border-4 border-white shadow-lg" />
