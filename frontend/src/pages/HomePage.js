@@ -76,7 +76,7 @@ export default function HomePage() {
       icon: Users,
       title: 'المدارس والمجموعات',
       description: 'رحلات مدرسية ومجموعات منظمة ببرامج لعب آمنة',
-      link: '/tickets',
+      link: '/groups',
       color: 'bg-[var(--peekaboo-green)]',
       buttonText: 'تواصل معنا',
       accent: 'star'
@@ -85,7 +85,7 @@ export default function HomePage() {
       icon: Home,
       title: 'حفلتك في بيتك',
       description: 'نأتيكم للمنزل مع ديكور، شخصيات كرتونية، واحتفال كامل',
-      link: '/birthday',
+      link: '/home-party',
       color: 'bg-[var(--peekaboo-pink)]',
       buttonText: 'احجز حفلتك',
       accent: 'balloon'

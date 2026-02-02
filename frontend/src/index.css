@@ -256,12 +256,6 @@ code {
     height: 24px;
     opacity: 0.6;
     pointer-events: none;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.service-card:hover .service-accent {
-    opacity: 1;
-    transform: scale(1.15);
 }
 
 .service-accent--star {
