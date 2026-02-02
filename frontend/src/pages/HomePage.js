@@ -4,7 +4,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../i18n/useT';
-import { Clock, Cake, Star, ChevronRight, Play } from 'lucide-react';
+import { Clock, Cake, Star, ChevronRight, Play, Users, Home } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 
 export default function HomePage() {
@@ -51,7 +51,8 @@ export default function HomePage() {
       description: 'احجز جلسات لعب لأطفالك. اختر الوقت المثالي!',
       link: '/tickets',
       color: 'bg-primary',
-      buttonText: 'احجز الآن'
+      buttonText: 'احجز الآن',
+      accent: 'star'
     },
     {
       icon: Cake,
@@ -59,7 +60,8 @@ export default function HomePage() {
       description: 'احتفل مع 10 ثيمات رائعة! حفلات مخصصة متاحة أيضاً.',
       link: '/birthday',
       color: 'bg-accent',
-      buttonText: 'خطط لحفلتك'
+      buttonText: 'خطط لحفلتك',
+      accent: 'balloon'
     },
     {
       icon: Star,
@@ -67,7 +69,26 @@ export default function HomePage() {
       description: 'وفّر مع باقات الزيارات. صلاحية 30 يوم، متعة بلا حدود!',
       link: '/subscriptions',
       color: 'bg-secondary',
-      buttonText: 'اشترك الآن'
+      buttonText: 'اشترك الآن',
+      accent: 'cloud'
+    },
+    {
+      icon: Users,
+      title: 'المدارس والمجموعات',
+      description: 'رحلات مدرسية ومجموعات منظمة ببرامج لعب آمنة',
+      link: '/tickets',
+      color: 'bg-[var(--peekaboo-green)]',
+      buttonText: 'تواصل معنا',
+      accent: 'star'
+    },
+    {
+      icon: Home,
+      title: 'حفلتك في بيتك',
+      description: 'نأتيكم للمنزل مع ديكور، شخصيات كرتونية، واحتفال كامل',
+      link: '/birthday',
+      color: 'bg-[var(--peekaboo-pink)]',
+      buttonText: 'احجز حفلتك',
+      accent: 'balloon'
     }
   ];
 
@@ -133,21 +154,22 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {features.map((feature, index) => (
               <Card 
                 key={index} 
-                className="border-2 rounded-3xl card-interactive overflow-hidden"
+                className="service-card border-2 rounded-3xl card-interactive overflow-hidden relative"
                 data-testid={`feature-card-${index}`}
               >
-                <CardContent className="p-8 text-center">
-                  <div className={`${feature.color} w-16 h-16 rounded-2xl flex items-center justify-center mb-6 mx-auto`}>
-                    <feature.icon className="h-8 w-8 text-white" />
+                <div className={`service-accent service-accent--${feature.accent}`} />
+                <CardContent className="p-6 text-center relative z-10">
+                  <div className={`${feature.color} w-14 h-14 rounded-2xl flex items-center justify-center mb-4 mx-auto shadow-md`}>
+                    <feature.icon className="h-7 w-7 text-white" />
                   </div>
-                  <h3 className="font-heading text-2xl font-bold mb-3">{feature.title}</h3>
-                  <p className="text-muted-foreground mb-6">{feature.description}</p>
+                  <h3 className="service-title text-xl font-bold mb-2">{feature.title}</h3>
+                  <p className="text-muted-foreground text-sm mb-5 leading-relaxed">{feature.description}</p>
                   <Link to={feature.link}>
-                    <Button className="rounded-full btn-playful w-full" data-testid={`feature-btn-${index}`}>
+                    <Button className="rounded-full btn-playful w-full text-sm" data-testid={`feature-btn-${index}`}>
                       {feature.buttonText}
                       <ChevronRight className="mr-2 h-4 w-4 rotate-180" />
                     </Button>
