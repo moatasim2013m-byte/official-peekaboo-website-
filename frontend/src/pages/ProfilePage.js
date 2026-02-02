@@ -30,6 +30,8 @@ export default function ProfilePage() {
   const [addChildOpen, setAddChildOpen] = useState(false);
   const [newChildName, setNewChildName] = useState('');
   const [newChildBirthday, setNewChildBirthday] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [savingPhone, setSavingPhone] = useState(false);
 
   // Defense in depth: Redirect admin users
   useEffect(() => {
@@ -37,6 +39,13 @@ export default function ProfilePage() {
       navigate('/admin', { replace: true });
     }
   }, [isAdmin, navigate]);
+
+  // Initialize phone from user
+  useEffect(() => {
+    if (user?.phone) {
+      setEditPhone(user.phone);
+    }
+  }, [user]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
