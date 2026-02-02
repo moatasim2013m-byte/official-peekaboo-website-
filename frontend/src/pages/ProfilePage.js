@@ -562,6 +562,51 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings">
+            <Card className="border-2 rounded-3xl">
+              <CardHeader>
+                <CardTitle className="font-heading">الإعدادات</CardTitle>
+                <CardDescription>تعديل معلومات حسابك</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Phone Number */}
+                <div className="space-y-3">
+                  <Label className="text-base font-medium">رقم الهاتف</Label>
+                  <div className="flex gap-3 items-center max-w-md">
+                    <div className="relative flex-1">
+                      <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Input
+                        type="tel"
+                        value={editPhone}
+                        onChange={(e) => setEditPhone(e.target.value)}
+                        placeholder="07XXXXXXXX"
+                        className="pl-10 rounded-xl h-12"
+                        dir="ltr"
+                        data-testid="phone-input"
+                      />
+                    </div>
+                    <Button 
+                      onClick={handleSavePhone}
+                      disabled={savingPhone}
+                      className="rounded-full h-12 px-6"
+                      data-testid="save-phone-btn"
+                    >
+                      {savingPhone ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        'حفظ'
+                      )}
+                    </Button>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    أدخل رقم هاتفك الأردني للتواصل (07XXXXXXXX)
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </div>
     </div>
