@@ -213,7 +213,7 @@ h2 {
 }
 
 .auth-card:hover {
-    box-shadow: 0 16px 50px rgba(0, 0, 0, 0.18), 0 6px 16px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 16px 50px rgba(52, 152, 219, 0.2), 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
 /* Arabic RTL text */
