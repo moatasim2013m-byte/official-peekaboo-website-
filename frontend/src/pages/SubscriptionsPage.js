@@ -179,57 +179,70 @@ export default function SubscriptionsPage() {
                 <CardHeader>
                   <CardTitle className="font-heading">أكمل عملية الشراء</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">اختر الطفل</label>
-                      {children.length === 0 ? (
-                        <div className="text-muted-foreground">
-                          <p className="mb-2">لم يتم إضافة أطفال بعد</p>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            onClick={() => navigate('/profile')}
-                            className="rounded-full"
-                          >
-                            إضافة طفل
-                          </Button>
-                        </div>
-                      ) : (
-                        <Select value={selectedChild} onValueChange={setSelectedChild}>
-                          <SelectTrigger className="rounded-xl" data-testid="subscription-child-select">
-                            <SelectValue placeholder="اختر طفلاً" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {children.map((child) => (
-                              <SelectItem key={child.id} value={child.id}>
-                                {child.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </div>
+                <CardContent className="space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">اختر الطفل</label>
+                    {children.length === 0 ? (
+                      <div className="text-muted-foreground">
+                        <p className="mb-2">لم يتم إضافة أطفال بعد</p>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => navigate('/profile')}
+                          className="rounded-full"
+                        >
+                          إضافة طفل
+                        </Button>
+                      </div>
+                    ) : (
+                      <Select value={selectedChild} onValueChange={setSelectedChild}>
+                        <SelectTrigger className="rounded-xl" data-testid="subscription-child-select">
+                          <SelectValue placeholder="اختر طفلاً" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {children.map((child) => (
+                            <SelectItem key={child.id} value={child.id}>
+                              {child.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
 
-                    <div className="flex items-end">
-                      <Button
-                        onClick={handlePurchase}
-                        disabled={!selectedPlan || !selectedChild || loading}
-                        className="w-full rounded-full h-12 btn-playful bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-                        data-testid="purchase-btn"
-                      >
-                        {loading ? (
-                          <>
-                            <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                            جاري المعالجة...
-                          </>
-                        ) : selectedPlan ? (
-                          `شراء ${selectedPlan.name_ar || selectedPlan.name} - ${selectedPlan.price} دينار`
-                        ) : (
-                          'اختر باقة'
-                        )}
-                      </Button>
-                    </div>
+                  {/* Payment Method */}
+                  <div className="pt-4 border-t">
+                    <PaymentMethodSelector 
+                      value={paymentMethod} 
+                      onChange={setPaymentMethod} 
+                    />
+                  </div>
+
+                  {/* Summary & Purchase */}
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t">
+                    {selectedPlan && (
+                      <div className="text-center md:text-right">
+                        <p className="text-sm text-muted-foreground">الباقة المختارة</p>
+                        <p className="font-bold text-xl">{selectedPlan.name_ar || selectedPlan.name}</p>
+                        <p className="font-bold text-2xl text-secondary">{selectedPlan.price} دينار</p>
+                        <p className="text-sm">طريقة الدفع: {paymentMethod === 'cash' ? 'نقداً' : paymentMethod === 'card' ? 'بطاقة' : 'CliQ'}</p>
+                      </div>
+                    )}
+                    <Button
+                      onClick={handlePurchase}
+                      disabled={!selectedPlan || !selectedChild || loading}
+                      className="w-full md:w-auto px-8 rounded-full h-12 btn-playful bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                      data-testid="purchase-btn"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                          جاري المعالجة...
+                        </>
+                      ) : (
+                        'اشترِ الآن'
+                      )}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
