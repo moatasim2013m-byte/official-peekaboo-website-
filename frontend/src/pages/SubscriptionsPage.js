@@ -117,20 +117,21 @@ export default function SubscriptionsPage() {
                   <Card
                     key={plan.id}
                     onClick={() => setSelectedPlan(plan)}
-                    className={`border-2 rounded-3xl cursor-pointer transition-all relative overflow-hidden ${
+                    className={`pk-card cursor-pointer transition-all relative ${
                       selectedPlan?.id === plan.id 
-                        ? 'border-[#FFD93B] ring-4 ring-[#FFD93B]/20 shadow-lg' 
-                        : 'border-slate-200 hover:border-[#FFD93B]/50 hover:shadow-md'
-                    } ${isPopular ? 'md:-mt-6 md:mb-6 shadow-xl border-[#FFD93B]' : ''}`}
+                        ? 'ring-4 ring-[#FFD93B]/30 shadow-lg' 
+                        : 'hover:shadow-lg'
+                    } ${isPopular ? 'md:-mt-6 md:mb-6 shadow-xl' : ''}`}
                     data-testid={`plan-${plan.id}`}
                   >
+                    <div className={`pk-card-accent ${isPopular ? 'accent-rainbow' : tier === 'basic' ? 'accent-green' : tier === 'standard' ? 'accent-yellow' : 'accent-orange'}`} />
                     {isPopular && (
-                      <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-[#FFD93B] to-[#FF924C] text-white text-center py-2 text-sm font-bold">
+                      <div className="absolute top-2 left-0 right-0 bg-gradient-to-r from-[#FFD93B] to-[#FF924C] text-white text-center py-2 text-sm font-bold rounded-t-[20px]">
                         ⭐ الأكثر شعبية
                       </div>
                     )}
-                    <CardHeader className={`text-center pb-4 ${isPopular ? 'pt-12' : ''}`}>
-                      <CardTitle className="font-heading text-2xl text-slate-800">
+                    <CardHeader className={`text-center pb-4 ${isPopular ? 'pt-14' : 'pt-8'}`}>
+                      <CardTitle className="pk-card-title text-2xl">
                         {plan.name_ar || t(plan.name) || plan.name}
                       </CardTitle>
                       <CardDescription className="text-slate-500">
