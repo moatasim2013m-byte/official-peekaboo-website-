@@ -366,6 +366,29 @@ export default function TicketsPage() {
                   />
                 </div>
 
+                {/* Payment Method Selection */}
+                <div className="pt-4 border-t">
+                  <PaymentMethodSelector 
+                    value={paymentMethod} 
+                    onChange={setPaymentMethod} 
+                  />
+                </div>
+
+                {/* Booking Summary */}
+                {paymentMethod && (
+                  <div className="p-4 rounded-xl bg-muted/50 border">
+                    <p className="text-sm text-muted-foreground mb-1">ملخص الحجز</p>
+                    <p className="font-bold">
+                      {selectedDuration} ساعة × {selectedChildren.length || 1} طفل = {getSelectedPrice()} دينار
+                    </p>
+                    <p className="text-sm mt-1">
+                      طريقة الدفع: <span className="font-bold">
+                        {paymentMethod === 'cash' ? 'نقداً' : paymentMethod === 'card' ? 'بطاقة' : 'CliQ'}
+                      </span>
+                    </p>
+                  </div>
+                )}
+
                 <div className="flex justify-end">
                   <Button
                     onClick={handleBooking}
