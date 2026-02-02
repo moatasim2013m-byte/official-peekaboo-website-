@@ -7,6 +7,7 @@ import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
 import { Mail, Lock, Loader2 } from 'lucide-react';
+import mascotImg from '../assets/mascot.png';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -42,7 +43,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md border-2 rounded-3xl shadow-xl">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-4">
-            <span className="text-5xl">🎪</span>
+            <img src={mascotImg} alt="بيكابو" className="auth-brand-img rounded-full border-4 border-white shadow-lg" />
           </div>
           <CardTitle className="font-heading text-3xl" data-testid="login-title">أهلًا بعودتك!</CardTitle>
           <CardDescription className="text-base">
