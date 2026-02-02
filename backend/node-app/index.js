@@ -44,7 +44,17 @@ app.use('/api/themes', themesRoutes);
 const Settings = require('./models/Settings');
 app.get('/api/settings', async (req, res) => {
   try {
-    const settings = await Settings.findOne() || {};
+    // Settings are stored as individual key-value documents
+    const settingsDocs = await Settings.find({
+      key: { $in: ['hero_title', 'hero_subtitle', 'hero_cta_text', 'hero_cta_route', 'hero_image'] }
+    });
+    
+    // Convert to object
+    const settings = {};
+    settingsDocs.forEach(doc => {
+      settings[doc.key] = doc.value;
+    });
+    
     res.json({ settings });
   } catch (error) {
     res.json({ settings: {} });
