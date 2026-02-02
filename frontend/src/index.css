@@ -10,13 +10,22 @@
 }
 
 :root {
-    /* ===== BRAND TOKENS (Premium Kids Brand) ===== */
+    /* ===== PEEKABOO BRAND COLORS (From Logo) ===== */
     --brand-red: #FF4757;
     --brand-yellow: #FFD93D;
     --brand-orange: #FF9F43;
     --brand-blue: #00D2D3;
     --brand-green: #2ED573;
     --brand-pink: #FF6B9D;
+    --brand-purple: #6C5CE7;
+    
+    /* Peekaboo specific */
+    --pk-red: #FF4757;
+    --pk-yellow: #FFD93D;
+    --pk-blue: #00D2D3;
+    --pk-green: #2ED573;
+    --pk-sky: #7EC8E3;
+    --pk-footer-blue: #1A5276;
     
     /* Text Colors */
     --text-primary: #1A1A2E;
@@ -39,6 +48,7 @@
     --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
     --shadow-btn: 0 4px 14px rgba(255, 71, 87, 0.35);
     --shadow-btn-hover: 0 6px 20px rgba(255, 71, 87, 0.45);
+    --shadow-toy: 0 12px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
     
     /* Border Radius */
     --radius-sm: 8px;
