@@ -4,13 +4,14 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../i18n/useT';
-import { Clock, Cake, Star, ChevronRight, Play, Users, Home } from 'lucide-react';
+import { Clock, Cake, Star, ChevronRight, Play, Users, Home, X, ZoomIn } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 
 export default function HomePage() {
   const { isAuthenticated, api } = useAuth();
   const { t } = useTranslation();
   const [gallery, setGallery] = useState([]);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const [heroConfig, setHeroConfig] = useState({
     title: 'حيث يلعب الأطفال ويحتفلون 🎈',
     subtitle: 'أفضل تجربة ملعب داخلي! احجز جلسات اللعب، أقم حفلات أعياد ميلاد لا تُنسى، ووفّر مع باقات الاشتراك',
@@ -18,6 +19,21 @@ export default function HomePage() {
     ctaRoute: '/tickets',
     image: ''
   });
+
+  // Handle ESC key and body scroll
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') setLightboxOpen(false);
+    };
+    if (lightboxOpen) {
+      document.addEventListener('keydown', handleEsc);
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.removeEventListener('keydown', handleEsc);
+      document.body.style.overflow = '';
+    };
+  }, [lightboxOpen]);
 
   useEffect(() => {
     const fetchData = async () => {
