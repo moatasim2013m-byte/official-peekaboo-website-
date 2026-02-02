@@ -23,6 +23,8 @@ import AdminPage from "./pages/AdminPage";
 import StaffPage from "./pages/StaffPage";
 import ReceptionPage from "./pages/ReceptionPage";
 import TermsPage from "./pages/TermsPage";
+import GroupsPage from "./pages/GroupsPage";
+import HomePartyPage from "./pages/HomePartyPage";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false, staffOnly = false, parentOnly = false }) => {
