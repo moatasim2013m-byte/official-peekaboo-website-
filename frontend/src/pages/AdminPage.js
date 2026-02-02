@@ -530,12 +530,20 @@ export default function AdminPage() {
   const handleSaveHero = async () => {
     setSavingHero(true);
     try {
+      // Add cache-bust to hero image URL if it exists
+      let imageUrl = heroSettings.hero_image;
+      if (imageUrl && !imageUrl.includes('?v=')) {
+        imageUrl = `${imageUrl}?v=${Date.now()}`;
+      } else if (imageUrl) {
+        imageUrl = imageUrl.replace(/\?v=\d+/, `?v=${Date.now()}`);
+      }
+      
       await api.put('/admin/settings', {
         hero_title: heroSettings.hero_title,
         hero_subtitle: heroSettings.hero_subtitle,
         hero_cta_text: heroSettings.hero_cta_text,
         hero_cta_route: heroSettings.hero_cta_route,
-        hero_image: heroSettings.hero_image
+        hero_image: imageUrl
       });
       toast.success('تم حفظ إعدادات الصفحة الرئيسية');
     } catch (error) {
