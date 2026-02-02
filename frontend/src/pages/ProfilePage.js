@@ -150,6 +150,9 @@ export default function ProfilePage() {
               مرحباً، {user?.name || ''}
             </h1>
             <p className="text-muted-foreground">{user?.email}</p>
+            {user?.phone && (
+              <p className="text-muted-foreground ltr-text">{user.phone}</p>
+            )}
           </div>
           <div className="flex items-center gap-4">
             <div className="bg-secondary/10 px-4 py-2 rounded-full flex items-center gap-2">
