@@ -79,8 +79,8 @@ export const AuthProvider = ({ children }) => {
     return userData;
   };
 
-  const register = async (name, email, password) => {
-    const response = await api.post('/auth/register', { name, email, password });
+  const register = async (name, email, password, phone = null) => {
+    const response = await api.post('/auth/register', { name, email, password, phone });
     const { token: newToken, user: userData } = response.data;
     localStorage.setItem('peekaboo_token', newToken);
     setToken(newToken);
