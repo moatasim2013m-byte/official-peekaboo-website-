@@ -231,6 +231,62 @@ code {
     border-color: var(--brand-red);
 }
 
+/* ===== SERVICE CARDS (Kids-Friendly) ===== */
+.service-card {
+    background: var(--bg-white);
+    box-shadow: var(--shadow-md);
+    border-color: transparent;
+    overflow: visible;
+}
+
+.service-card:hover {
+    box-shadow: 0 12px 40px rgba(255, 71, 87, 0.15);
+}
+
+.service-title {
+    font-family: 'Fredoka', 'Cairo', sans-serif;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Playful accent decorations */
+.service-accent {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    opacity: 0.6;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.service-card:hover .service-accent {
+    opacity: 1;
+    transform: scale(1.15);
+}
+
+.service-accent--star {
+    top: 12px;
+    left: 12px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FFD93D'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E") no-repeat center/contain;
+}
+
+.service-accent--balloon {
+    top: 10px;
+    right: 14px;
+    left: auto;
+    width: 20px;
+    height: 28px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 36' fill='%23FF6B9D'%3E%3Cellipse cx='12' cy='12' rx='10' ry='12'/%3E%3Cpath d='M12 24 L12 34 M10 34 L14 34' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat center/contain;
+}
+
+.service-accent--cloud {
+    top: 8px;
+    left: 10px;
+    width: 32px;
+    height: 20px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24' fill='%2300D2D3' opacity='0.7'%3E%3Cellipse cx='20' cy='16' rx='16' ry='8'/%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Ccircle cx='28' cy='12' r='8'/%3E%3Ccircle cx='20' cy='8' r='8'/%3E%3C/svg%3E") no-repeat center/contain;
+}
+
 /* Soft cream background sections */
 .bg-cream {
     background-color: var(--bg-cream);
