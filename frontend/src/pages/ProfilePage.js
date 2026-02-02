@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { 
   User, Baby, Clock, Cake, Star, Gift, Plus, Edit, Trash2, 
-  QrCode, AlertTriangle, Calendar, Loader2 
+  QrCode, AlertTriangle, Calendar, Loader2, Phone, Settings
 } from 'lucide-react';
 
 export default function ProfilePage() {
