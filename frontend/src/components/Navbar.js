@@ -39,14 +39,14 @@ export const Navbar = () => {
 
           {/* Desktop Navigation - Show only for non-admin users */}
           {!isAdmin && (
-            <div className="hidden md:flex items-center gap-1">
-              <Link to="/tickets" className={`nav-link ${isActive('/tickets') ? 'nav-link-active' : ''}`} data-testid="nav-tickets">
+            <div className="hidden md:flex items-center gap-2">
+              <Link to="/tickets" className={`nav-pill pill-blue ${isActive('/tickets') ? 'active' : ''}`} data-testid="nav-tickets">
                 تذاكر بالساعة
               </Link>
-              <Link to="/birthday" className={`nav-link ${isActive('/birthday') ? 'nav-link-active' : ''}`} data-testid="nav-birthday">
+              <Link to="/birthday" className={`nav-pill pill-pink ${isActive('/birthday') ? 'active' : ''}`} data-testid="nav-birthday">
                 حفلات أعياد الميلاد
               </Link>
-              <Link to="/subscriptions" className={`nav-link ${isActive('/subscriptions') ? 'nav-link-active' : ''}`} data-testid="nav-subscriptions">
+              <Link to="/subscriptions" className={`nav-pill pill-yellow ${isActive('/subscriptions') ? 'active' : ''}`} data-testid="nav-subscriptions">
                 الاشتراكات
               </Link>
             </div>
