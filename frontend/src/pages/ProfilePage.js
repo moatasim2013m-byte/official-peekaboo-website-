@@ -242,6 +242,9 @@ export default function ProfilePage() {
             <TabsTrigger value="loyalty" className="rounded-full gap-2" data-testid="tab-loyalty">
               <Gift className="h-4 w-4" /> نقاط الولاء
             </TabsTrigger>
+            <TabsTrigger value="settings" className="rounded-full gap-2" data-testid="tab-settings">
+              <Settings className="h-4 w-4" /> الإعدادات
+            </TabsTrigger>
           </TabsList>
 
           {/* Children Tab */}
