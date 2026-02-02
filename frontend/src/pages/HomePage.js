@@ -138,12 +138,27 @@ export default function HomePage() {
               </div>
             </div>
             <div className="relative order-1 md:order-2">
-              <img 
-                src={heroConfig.image || "https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg"}
-                alt="أطفال يلعبون في بيكابو"
-                className="rounded-3xl shadow-2xl w-full object-cover aspect-[4/3]"
-                data-testid="hero-image"
-              />
+              {/* Clickable Hero Image */}
+              <div 
+                className="hero-image-container cursor-pointer relative group"
+                onClick={() => setLightboxOpen(true)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => e.key === 'Enter' && setLightboxOpen(true)}
+                data-testid="hero-image-clickable"
+              >
+                <img 
+                  src={heroConfig.image || "https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg"}
+                  alt="أطفال يلعبون في بيكابو"
+                  className="rounded-3xl shadow-2xl w-full object-cover aspect-[4/3] transition-transform group-hover:scale-[1.02]"
+                  data-testid="hero-image"
+                />
+                {/* Hint overlay */}
+                <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-sm flex items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                  <ZoomIn className="h-4 w-4" />
+                  <span>اضغط لعرض الصورة بالكامل</span>
+                </div>
+              </div>
               {/* Mascot peeking */}
               <img 
                 src={mascotImg}
@@ -157,6 +172,30 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Hero Image Lightbox Modal */}
+      {lightboxOpen && (
+        <div 
+          className="lightbox-overlay"
+          onClick={() => setLightboxOpen(false)}
+          data-testid="lightbox-overlay"
+        >
+          <button 
+            className="lightbox-close"
+            onClick={() => setLightboxOpen(false)}
+            aria-label="إغلاق"
+          >
+            <X className="h-6 w-6" />
+          </button>
+          <img
+            src={heroConfig.image || "https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg"}
+            alt="أطفال يلعبون في بيكابو - عرض كامل"
+            className="lightbox-image"
+            onClick={(e) => e.stopPropagation()}
+            data-testid="lightbox-image"
+          />
+        </div>
+      )}
 
       {/* Features Section */}
       <section className="py-16 md:py-24 bg-white">
