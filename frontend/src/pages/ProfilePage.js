@@ -532,33 +532,74 @@ export default function ProfilePage() {
                   برنامج الولاء
                 </CardTitle>
                 <CardDescription>
-                  رصيدك: <span className="font-bold text-secondary">{user?.loyalty_points || 0} نقطة</span>
+                  اجمع نقاط مع كل زيارة واستبدلها بعروض وخصومات.
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                {loyaltyHistory.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <Gift className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>لا يوجد سجل نقاط بعد</p>
-                    <p className="text-sm mt-2">اكسب 10 نقاط مع كل عملية شراء!</p>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {loyaltyHistory.map((entry) => (
-                      <div key={entry.id} className="flex justify-between items-center p-3 rounded-xl bg-muted/50">
-                        <div>
-                          <p className="font-medium">{entry.description}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {format(new Date(entry.created_at), 'yyyy/MM/dd')}
+              <CardContent className="space-y-6">
+                {/* Points Balance Card */}
+                <div className="bg-gradient-to-r from-[var(--brand-yellow)]/20 to-[var(--brand-orange)]/20 rounded-2xl p-6 text-center">
+                  <p className="text-sm text-muted-foreground mb-2">رصيد النقاط</p>
+                  <p className="text-5xl font-heading font-bold text-[var(--brand-orange)]">
+                    {user?.loyalty_points || 0}
+                  </p>
+                  <p className="text-lg text-muted-foreground mt-1">نقطة</p>
+                  
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="rounded-full mt-4 gap-2" data-testid="redeem-info-btn">
+                        <QrCode className="h-4 w-4" />
+                        طريقة الاستبدال
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="rounded-3xl" dir="rtl">
+                      <DialogHeader>
+                        <DialogTitle className="font-heading text-xl flex items-center gap-2">
+                          <Gift className="h-5 w-5 text-secondary" />
+                          طريقة استبدال النقاط
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="bg-muted/50 rounded-2xl p-4 text-center">
+                          <QrCode className="h-12 w-12 mx-auto mb-3 text-primary" />
+                          <p className="text-lg font-medium">
+                            سيتم تفعيل الاستبدال قريباً عبر كود أو QR عند الاستقبال.
                           </p>
                         </div>
-                        <span className={`font-bold ${entry.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {entry.points > 0 ? '+' : ''}{entry.points}
-                        </span>
+                        <p className="text-sm text-muted-foreground text-center">
+                          ترقبوا التحديثات القادمة لبرنامج الولاء!
+                        </p>
                       </div>
-                    ))}
-                  </div>
-                )}
+                    </DialogContent>
+                  </Dialog>
+                </div>
+
+                {/* History */}
+                <div>
+                  <h4 className="font-heading font-bold mb-4">سجل النقاط</h4>
+                  {loyaltyHistory.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Gift className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                      <p>لا يوجد سجل نقاط بعد</p>
+                      <p className="text-sm mt-2">اكسب 10 نقاط مع كل عملية شراء!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {loyaltyHistory.map((entry) => (
+                        <div key={entry.id} className="flex justify-between items-center p-3 rounded-xl bg-muted/50">
+                          <div>
+                            <p className="font-medium">{entry.description}</p>
+                            <p className="text-sm text-muted-foreground">
+                              {format(new Date(entry.created_at), 'yyyy/MM/dd')}
+                            </p>
+                          </div>
+                          <span className={`font-bold ${entry.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {entry.points > 0 ? '+' : ''}{entry.points}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
