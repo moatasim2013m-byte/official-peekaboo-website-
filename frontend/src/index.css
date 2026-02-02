@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=Fredoka:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -54,11 +54,15 @@
     --font-size-base: 16px;
     --font-size-lg: 18px;
     --font-size-xl: 20px;
+    
+    /* ===== FONT FAMILIES ===== */
+    --font-heading-ar: 'Baloo Bhaijaan 2', 'Cairo', sans-serif;
+    --font-body-ar: 'Cairo', sans-serif;
 }
 
 body {
     margin: 0;
-    font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: var(--font-body-ar);
     font-size: var(--font-size-base);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -66,15 +70,44 @@ body {
     color: var(--text-primary);
 }
 
-h1, h2, h3, h4, h5, h6 {
-    font-family: 'Fredoka', 'Cairo', sans-serif;
+/* ===== PLAYFUL HEADING TYPOGRAPHY ===== */
+h1, h2, h3, h4, h5, h6,
+.font-heading,
+.title-bubble {
+    font-family: var(--font-heading-ar);
     font-weight: 600;
-    line-height: 1.2;
+    line-height: 1.3;
     color: var(--text-primary);
 }
 
 h1 { font-weight: 700; }
 h2 { font-weight: 600; }
+
+/* Navbar links - bubble font */
+.nav-link {
+    font-family: var(--font-heading-ar);
+    font-weight: 600;
+}
+
+/* Buttons - bubble font for customer pages */
+.btn-playful,
+.sky-theme button,
+.sky-theme .btn {
+    font-family: var(--font-heading-ar);
+    font-weight: 600;
+}
+
+/* Service card titles */
+.service-title {
+    font-family: var(--font-heading-ar);
+    font-weight: 700;
+}
+
+/* Footer headings */
+.footer-heading {
+    font-family: var(--font-heading-ar);
+    font-weight: 600;
+}
 
 /* Arabic RTL text */
 [dir="rtl"], .rtl {
