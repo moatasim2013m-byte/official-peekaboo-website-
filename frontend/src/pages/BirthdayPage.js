@@ -260,16 +260,17 @@ export default function BirthdayPage() {
             <div>
               <h2 className="font-heading text-2xl font-bold mb-6">اختر الثيم</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-                {themes.map((theme) => (
+                {themes.map((theme, index) => (
                   <Card
                     key={theme.id}
                     onClick={() => setSelectedTheme(theme)}
-                    className={`border-2 rounded-2xl cursor-pointer transition-all card-interactive ${
-                      selectedTheme?.id === theme.id ? 'border-accent ring-2 ring-accent/20' : ''
+                    className={`pk-card cursor-pointer transition-all ${
+                      selectedTheme?.id === theme.id ? 'ring-4 ring-accent/30 shadow-lg' : 'hover:shadow-lg'
                     }`}
                     data-testid={`theme-${theme.id}`}
                   >
-                    <CardContent className="p-4 text-center">
+                    <div className={`pk-card-accent accent-${['pink', 'blue', 'yellow', 'green', 'orange'][index % 5]}`} />
+                    <CardContent className="p-4 pt-5 text-center">
                       {theme.image_url && (
                         <img 
                           src={theme.image_url} 
@@ -277,7 +278,7 @@ export default function BirthdayPage() {
                           className="w-full h-24 object-cover rounded-xl mb-3"
                         />
                       )}
-                      <h3 className="font-heading font-semibold">{theme.name_ar || theme.name}</h3>
+                      <h3 className="pk-card-title text-base">{theme.name_ar || theme.name}</h3>
                       <p className="text-sm text-muted-foreground line-clamp-2">{theme.description_ar || theme.description}</p>
                       <p className="text-accent font-bold mt-2">{theme.price} دينار</p>
                     </CardContent>
