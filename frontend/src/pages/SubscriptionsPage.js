@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
 import { Star, Check, Loader2 } from 'lucide-react';
+import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 
 export default function SubscriptionsPage() {
   const { isAuthenticated, api } = useAuth();
@@ -17,6 +18,7 @@ export default function SubscriptionsPage() {
   const [children, setChildren] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedChild, setSelectedChild] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
   const [loadingPlans, setLoadingPlans] = useState(true);
 
