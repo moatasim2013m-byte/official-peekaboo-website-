@@ -11,7 +11,7 @@ const router = express.Router();
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password, name, phone } = req.body;
     
     if (!email || !password || !name) {
       return res.status(400).json({ error: 'Email, password and name are required' });
@@ -27,6 +27,7 @@ router.post('/register', async (req, res) => {
       email: email.toLowerCase(),
       password_hash,
       name,
+      phone: phone ? phone.replace(/\s/g, '') : null,
       role: 'parent'
     });
 
