@@ -665,7 +665,7 @@ code {
 .footer-label {
     font-family: var(--font-heading-ar);
     font-weight: 700;
-    color: var(--brand-orange);
+    color: var(--pk-yellow);
     font-size: 1rem;
     margin-bottom: 0.5rem;
 }
@@ -676,35 +676,37 @@ code {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.75rem 1.5rem;
+    padding: 0.875rem 1.75rem;
     border-radius: 999px;
     font-family: var(--font-heading-ar);
     font-weight: 700;
-    font-size: 1rem;
+    font-size: 1.125rem;
     width: 100%;
-    max-width: 200px;
+    max-width: 220px;
 }
 
 .footer-btn-phone {
     background: white;
     color: var(--text-primary);
-    border: 2px solid var(--border-light);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    box-shadow: var(--shadow-toy);
 }
 
 .footer-btn-phone:hover {
-    border-color: var(--brand-red);
-    color: var(--brand-red);
+    background: var(--pk-yellow);
+    color: var(--text-primary);
 }
 
 .footer-btn-whatsapp {
-    background: linear-gradient(135deg, #25D366, #20BD5A);
+    background: linear-gradient(135deg, #25D366, #128C7E);
     color: white;
-    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+    font-size: 1.25rem;
+    padding: 1rem 2rem;
 }
 
 .footer-btn-whatsapp:hover {
-    box-shadow: 0 6px 16px rgba(37, 211, 102, 0.4);
+    box-shadow: 0 8px 28px rgba(37, 211, 102, 0.5);
+    transform: translateY(-2px);
 }
 
 /* Footer hours card */
@@ -712,10 +714,14 @@ code {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1rem;
-    background: white;
-    border-radius: 16px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.footer-hours-card p {
+    color: white;
 }
 
 /* ===== SLOGAN HIGHLIGHT ===== */
