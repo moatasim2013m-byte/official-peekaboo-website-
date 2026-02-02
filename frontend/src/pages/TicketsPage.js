@@ -11,6 +11,7 @@ import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
 import { Clock, Users, Loader2, AlertCircle, Star } from 'lucide-react';
+import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 
 export default function TicketsPage() {
   const { isAuthenticated, api, user } = useAuth();
@@ -22,6 +23,7 @@ export default function TicketsPage() {
   const [selectedChildren, setSelectedChildren] = useState([]);
   const [selectedDuration, setSelectedDuration] = useState(2); // Default 2 hours
   const [customNotes, setCustomNotes] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [pricing, setPricing] = useState([]);
