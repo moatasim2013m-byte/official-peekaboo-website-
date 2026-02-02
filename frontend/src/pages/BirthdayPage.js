@@ -292,8 +292,8 @@ export default function BirthdayPage() {
                 <CardHeader>
                   <CardTitle className="font-heading">أكمل حجزك</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <Label>طفل عيد الميلاد</Label>
                       <Select value={selectedChild} onValueChange={setSelectedChild}>
@@ -333,24 +333,40 @@ export default function BirthdayPage() {
                         )}
                       </div>
                     </div>
+                  </div>
 
-                    <div className="flex items-end">
-                      <Button
-                        onClick={handleStandardBooking}
-                        disabled={!selectedSlot || !selectedTheme || !selectedChild || loading}
-                        className="w-full rounded-full h-12 btn-playful bg-accent hover:bg-accent/90"
-                        data-testid="book-party-btn"
-                      >
-                        {loading ? (
-                          <>
-                            <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                            جاري المعالجة...
-                          </>
-                        ) : (
-                          'احجز وادفع'
-                        )}
-                      </Button>
-                    </div>
+                  {/* Payment Method */}
+                  <div className="pt-4 border-t">
+                    <PaymentMethodSelector 
+                      value={paymentMethod} 
+                      onChange={setPaymentMethod} 
+                    />
+                  </div>
+
+                  {/* Summary & Book Button */}
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t">
+                    {selectedTheme && (
+                      <div className="text-center md:text-right">
+                        <p className="text-sm text-muted-foreground">الإجمالي</p>
+                        <p className="font-bold text-2xl text-accent">{selectedTheme.price} دينار</p>
+                        <p className="text-sm">طريقة الدفع: {paymentMethod === 'cash' ? 'نقداً' : paymentMethod === 'card' ? 'بطاقة' : 'CliQ'}</p>
+                      </div>
+                    )}
+                    <Button
+                      onClick={handleStandardBooking}
+                      disabled={!selectedSlot || !selectedTheme || !selectedChild || loading}
+                      className="w-full md:w-auto px-8 rounded-full h-12 btn-playful bg-accent hover:bg-accent/90"
+                      data-testid="book-party-btn"
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                          جاري المعالجة...
+                        </>
+                      ) : (
+                        'احجز وادفع'
+                      )}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
