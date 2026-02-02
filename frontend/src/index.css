@@ -269,49 +269,102 @@ code {
     transform: translateY(0);
 }
 
-/* ===== NAVBAR STYLES ===== */
+/* ===== COLORFUL NAV PILLS (Kids-Friendly) ===== */
+.nav-pill {
+    font-family: var(--font-heading-ar);
+    font-weight: 700;
+    font-size: 1.125rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--radius-full);
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+@media (min-width: 768px) {
+    .nav-pill { font-size: 1.25rem; padding: 0.75rem 1.5rem; }
+}
+
+/* Color variants - pastel backgrounds with dark text */
+.nav-pill.pill-blue {
+    background: rgba(0, 210, 211, 0.18);
+    color: #0097A7;
+}
+.nav-pill.pill-blue:hover,
+.nav-pill.pill-blue.active {
+    background: rgba(0, 210, 211, 0.35);
+    box-shadow: 0 4px 14px rgba(0, 210, 211, 0.3);
+}
+
+.nav-pill.pill-pink {
+    background: rgba(255, 107, 157, 0.18);
+    color: #D81B60;
+}
+.nav-pill.pill-pink:hover,
+.nav-pill.pill-pink.active {
+    background: rgba(255, 107, 157, 0.35);
+    box-shadow: 0 4px 14px rgba(255, 107, 157, 0.3);
+}
+
+.nav-pill.pill-yellow {
+    background: rgba(255, 217, 61, 0.25);
+    color: #F57C00;
+}
+.nav-pill.pill-yellow:hover,
+.nav-pill.pill-yellow.active {
+    background: rgba(255, 217, 61, 0.45);
+    box-shadow: 0 4px 14px rgba(255, 217, 61, 0.35);
+}
+
+.nav-pill.pill-green {
+    background: rgba(46, 213, 115, 0.18);
+    color: #2E7D32;
+}
+.nav-pill.pill-green:hover,
+.nav-pill.pill-green.active {
+    background: rgba(46, 213, 115, 0.35);
+    box-shadow: 0 4px 14px rgba(46, 213, 115, 0.3);
+}
+
+.nav-pill.pill-orange {
+    background: rgba(255, 159, 67, 0.2);
+    color: #E65100;
+}
+.nav-pill.pill-orange:hover,
+.nav-pill.pill-orange.active {
+    background: rgba(255, 159, 67, 0.4);
+    box-shadow: 0 4px 14px rgba(255, 159, 67, 0.3);
+}
+
+.nav-pill.pill-purple {
+    background: rgba(156, 39, 176, 0.15);
+    color: #7B1FA2;
+}
+.nav-pill.pill-purple:hover,
+.nav-pill.pill-purple.active {
+    background: rgba(156, 39, 176, 0.3);
+    box-shadow: 0 4px 14px rgba(156, 39, 176, 0.25);
+}
+
+/* Legacy nav-link (for admin/staff - keep simple) */
 .nav-link {
     font-weight: 600;
     font-size: var(--font-size-lg);
     color: var(--text-primary);
     padding: 0.5rem 1.25rem;
     border-radius: var(--radius-full);
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-}
-
-/* Playful bubble underline on hover */
-.nav-link::after {
-    content: '';
-    position: absolute;
-    bottom: 2px;
-    left: 50%;
-    transform: translateX(-50%) scaleX(0);
-    width: 70%;
-    height: 4px;
-    background: linear-gradient(90deg, var(--brand-yellow) 0%, var(--brand-orange) 100%);
-    border-radius: var(--radius-full);
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
 }
 
 .nav-link:hover {
     color: var(--brand-red);
+    background: rgba(255, 71, 87, 0.08);
 }
 
-.nav-link:hover::after {
-    transform: translateX(-50%) scaleX(1);
-}
-
-/* Active state - cloud bubble highlight */
 .nav-link-active {
     color: var(--brand-red);
-    background: linear-gradient(135deg, rgba(255, 217, 61, 0.2) 0%, rgba(255, 159, 67, 0.15) 100%);
-    box-shadow: 0 2px 8px rgba(255, 217, 61, 0.25);
-}
-
-.nav-link-active::after {
-    transform: translateX(-50%) scaleX(1);
-    background: linear-gradient(90deg, var(--brand-red) 0%, var(--brand-orange) 100%);
+    background: rgba(255, 71, 87, 0.12);
 }
 
 /* ===== CARD STYLES ===== */
