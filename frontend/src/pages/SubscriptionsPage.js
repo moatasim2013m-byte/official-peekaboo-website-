@@ -148,6 +148,12 @@ export default function SubscriptionsPage() {
                         <span className="text-slate-600 mr-2">زيارة</span>
                       </div>
 
+                      {/* Validity Days Notice */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4 text-center">
+                        <p className="text-sm font-bold text-blue-700">صالحة من الأحد إلى الخميس فقط</p>
+                        <p className="text-xs text-blue-600 mt-1">لا تشمل الجمعة والسبت</p>
+                      </div>
+
                       <ul className="space-y-3 text-right" dir="rtl">
                         {planFeatures[tier]?.map((feature, i) => (
                           <li key={i} className="flex items-center gap-2">
