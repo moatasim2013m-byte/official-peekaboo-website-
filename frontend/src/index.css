@@ -392,9 +392,68 @@ code {
 }
 
 .service-title {
-    font-family: 'Fredoka', 'Cairo', sans-serif;
-    font-weight: 600;
+    font-family: var(--font-heading-ar);
+    font-weight: 700;
     color: var(--text-primary);
+}
+
+/* ===== WONDERLAND PREMIUM CARDS ===== */
+.pk-card {
+    background: white;
+    border-radius: 22px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+    border: 2px solid rgba(0, 0, 0, 0.05) !important;
+    overflow: hidden;
+    position: relative;
+}
+
+.pk-card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+/* Colorful top accent strip */
+.pk-card-accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    z-index: 10;
+}
+
+.pk-card-accent.accent-blue { background: linear-gradient(90deg, #00D2D3, #54E2E3); }
+.pk-card-accent.accent-pink { background: linear-gradient(90deg, #FF6B9D, #FF8FB1); }
+.pk-card-accent.accent-yellow { background: linear-gradient(90deg, #FFD93D, #FFE066); }
+.pk-card-accent.accent-green { background: linear-gradient(90deg, #2ED573, #5AE094); }
+.pk-card-accent.accent-orange { background: linear-gradient(90deg, #FF9F43, #FFB366); }
+.pk-card-accent.accent-purple { background: linear-gradient(90deg, #9C27B0, #BA68C8); }
+.pk-card-accent.accent-rainbow { background: linear-gradient(90deg, #FF4757, #FF9F43, #FFD93D, #2ED573, #00D2D3); }
+
+/* Icon badge - round bubble behind icon */
+.pk-icon-badge {
+    width: 64px;
+    height: 64px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.pk-icon-badge.badge-blue { background: linear-gradient(135deg, #00D2D3, #54E2E3); }
+.pk-icon-badge.badge-pink { background: linear-gradient(135deg, #FF6B9D, #FF8FB1); }
+.pk-icon-badge.badge-yellow { background: linear-gradient(135deg, #FFD93D, #FFE066); }
+.pk-icon-badge.badge-green { background: linear-gradient(135deg, #2ED573, #5AE094); }
+.pk-icon-badge.badge-orange { background: linear-gradient(135deg, #FF9F43, #FFB366); }
+
+/* Card title styling */
+.pk-card-title {
+    font-family: var(--font-heading-ar);
+    font-weight: 700;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
 }
 
 /* Playful accent decorations */
