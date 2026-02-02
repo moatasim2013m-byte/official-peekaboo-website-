@@ -466,13 +466,13 @@ code {
     z-index: 10;
 }
 
-.pk-card-accent.accent-blue { background: linear-gradient(90deg, #00D2D3, #54E2E3); }
-.pk-card-accent.accent-pink { background: linear-gradient(90deg, #FF6B9D, #FF8FB1); }
-.pk-card-accent.accent-yellow { background: linear-gradient(90deg, #FFD93D, #FFE066); }
-.pk-card-accent.accent-green { background: linear-gradient(90deg, #2ED573, #5AE094); }
-.pk-card-accent.accent-orange { background: linear-gradient(90deg, #FF9F43, #FFB366); }
+.pk-card-accent.accent-blue { background: linear-gradient(90deg, var(--pk-blue), #5DADE2); }
+.pk-card-accent.accent-pink { background: linear-gradient(90deg, var(--pk-red), #EC7063); }
+.pk-card-accent.accent-yellow { background: linear-gradient(90deg, var(--pk-yellow), #F4D03F); }
+.pk-card-accent.accent-green { background: linear-gradient(90deg, var(--pk-green), #58D68D); }
+.pk-card-accent.accent-orange { background: linear-gradient(90deg, var(--pk-orange), #EB984E); }
 .pk-card-accent.accent-purple { background: linear-gradient(90deg, #9C27B0, #BA68C8); }
-.pk-card-accent.accent-rainbow { background: linear-gradient(90deg, #FF4757, #FF9F43, #FFD93D, #2ED573, #00D2D3); }
+.pk-card-accent.accent-rainbow { background: linear-gradient(90deg, var(--pk-red), var(--pk-orange), var(--pk-yellow), var(--pk-green), var(--pk-blue)); }
 
 /* Icon badge - round bubble behind icon */
 .pk-icon-badge {
@@ -486,11 +486,11 @@ code {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.pk-icon-badge.badge-blue { background: linear-gradient(135deg, #00D2D3, #54E2E3); }
-.pk-icon-badge.badge-pink { background: linear-gradient(135deg, #FF6B9D, #FF8FB1); }
-.pk-icon-badge.badge-yellow { background: linear-gradient(135deg, #FFD93D, #FFE066); }
-.pk-icon-badge.badge-green { background: linear-gradient(135deg, #2ED573, #5AE094); }
-.pk-icon-badge.badge-orange { background: linear-gradient(135deg, #FF9F43, #FFB366); }
+.pk-icon-badge.badge-blue { background: linear-gradient(135deg, var(--pk-blue), #5DADE2); }
+.pk-icon-badge.badge-pink { background: linear-gradient(135deg, var(--pk-red), #EC7063); }
+.pk-icon-badge.badge-yellow { background: linear-gradient(135deg, var(--pk-yellow), #F7DC6F); }
+.pk-icon-badge.badge-green { background: linear-gradient(135deg, var(--pk-green), #58D68D); }
+.pk-icon-badge.badge-orange { background: linear-gradient(135deg, var(--pk-orange), #EB984E); }
 
 /* Card title styling */
 .pk-card-title {
