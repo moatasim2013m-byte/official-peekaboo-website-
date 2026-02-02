@@ -126,6 +126,26 @@ export default function ProfilePage() {
     }
   };
 
+  const handleSavePhone = async () => {
+    const cleaned = editPhone.replace(/\s/g, '');
+    if (cleaned && !/^07\d{8}$/.test(cleaned)) {
+      toast.error('رقم الهاتف غير صالح (07XXXXXXXX)');
+      return;
+    }
+    
+    setSavingPhone(true);
+    try {
+      await api.put('/profile', { phone: cleaned });
+      toast.success('تم حفظ رقم الهاتف');
+      // Refresh user data
+      window.location.reload();
+    } catch (error) {
+      toast.error('فشل حفظ رقم الهاتف');
+    } finally {
+      setSavingPhone(false);
+    }
+  };
+
   const getStatusBadge = (status) => {
     const colors = {
       confirmed: 'bg-green-100 text-green-700',
