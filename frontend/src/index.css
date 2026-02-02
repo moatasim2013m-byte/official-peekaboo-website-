@@ -331,55 +331,55 @@ code {
     .nav-pill { font-size: 1.25rem; padding: 0.75rem 1.5rem; }
 }
 
-/* Color variants - pastel backgrounds with dark text */
+/* Color variants - Peekaboo brand colors */
 .nav-pill.pill-blue {
-    background: rgba(0, 210, 211, 0.18);
-    color: #0097A7;
+    background: rgba(52, 152, 219, 0.15);
+    color: var(--pk-blue);
 }
 .nav-pill.pill-blue:hover,
 .nav-pill.pill-blue.active {
-    background: rgba(0, 210, 211, 0.35);
-    box-shadow: 0 4px 14px rgba(0, 210, 211, 0.3);
+    background: rgba(52, 152, 219, 0.3);
+    box-shadow: 0 4px 14px rgba(52, 152, 219, 0.3);
 }
 
 .nav-pill.pill-pink {
-    background: rgba(255, 107, 157, 0.18);
-    color: #D81B60;
+    background: rgba(231, 76, 60, 0.12);
+    color: var(--pk-red);
 }
 .nav-pill.pill-pink:hover,
 .nav-pill.pill-pink.active {
-    background: rgba(255, 107, 157, 0.35);
-    box-shadow: 0 4px 14px rgba(255, 107, 157, 0.3);
+    background: rgba(231, 76, 60, 0.25);
+    box-shadow: 0 4px 14px rgba(231, 76, 60, 0.3);
 }
 
 .nav-pill.pill-yellow {
-    background: rgba(255, 217, 61, 0.25);
-    color: #F57C00;
+    background: rgba(241, 196, 15, 0.2);
+    color: var(--pk-orange);
 }
 .nav-pill.pill-yellow:hover,
 .nav-pill.pill-yellow.active {
-    background: rgba(255, 217, 61, 0.45);
-    box-shadow: 0 4px 14px rgba(255, 217, 61, 0.35);
+    background: rgba(241, 196, 15, 0.4);
+    box-shadow: 0 4px 14px rgba(241, 196, 15, 0.35);
 }
 
 .nav-pill.pill-green {
-    background: rgba(46, 213, 115, 0.18);
-    color: #2E7D32;
+    background: rgba(39, 174, 96, 0.15);
+    color: var(--pk-green);
 }
 .nav-pill.pill-green:hover,
 .nav-pill.pill-green.active {
-    background: rgba(46, 213, 115, 0.35);
-    box-shadow: 0 4px 14px rgba(46, 213, 115, 0.3);
+    background: rgba(39, 174, 96, 0.3);
+    box-shadow: 0 4px 14px rgba(39, 174, 96, 0.3);
 }
 
 .nav-pill.pill-orange {
-    background: rgba(255, 159, 67, 0.2);
-    color: #E65100;
+    background: rgba(230, 126, 34, 0.15);
+    color: var(--pk-orange);
 }
 .nav-pill.pill-orange:hover,
 .nav-pill.pill-orange.active {
-    background: rgba(255, 159, 67, 0.4);
-    box-shadow: 0 4px 14px rgba(255, 159, 67, 0.3);
+    background: rgba(230, 126, 34, 0.35);
+    box-shadow: 0 4px 14px rgba(230, 126, 34, 0.3);
 }
 
 .nav-pill.pill-purple {
