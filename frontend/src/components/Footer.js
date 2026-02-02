@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { MessageCircle, Phone } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 
 export const Footer = () => {
@@ -9,20 +10,28 @@ export const Footer = () => {
           {/* Brand */}
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="inline-block mb-5">
-              <img src={logoImg} alt="بيكابو" className="h-14" />
+              <img src={logoImg} alt="بيكابو" className="h-16" />
             </Link>
             <p className="footer-text max-w-md mb-5">
               أفضل ملعب داخلي للأطفال! احجز جلسات اللعب بالساعة، احتفل بأعياد الميلاد، 
               ووفّر مع باقات الاشتراك.
             </p>
-            {/* Contact Info */}
-            <div className="space-y-2 footer-text">
-              <p>ابو راشد مجمع السيف التجاري, Wasfi At-Tal St., Irbid 11225</p>
-              <p>
-                <a href="tel:0777775652" className="footer-link font-semibold ltr-text">
-                  07 7777 5652
+            {/* Contact Info - Structured */}
+            <div className="space-y-3">
+              <div>
+                <p className="font-bold text-foreground mb-1">العنوان</p>
+                <p className="footer-text">ابو راشد مجمع السيف التجاري, Wasfi At-Tal St., Irbid 11225</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <a href="tel:0777775652" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border-2 border-border hover:border-primary transition-colors">
+                  <Phone className="h-4 w-4 text-primary" />
+                  <span className="font-bold ltr-text" dir="ltr">0777775652</span>
                 </a>
-              </p>
+                <a href="https://wa.me/962777775652" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#25D366] text-white hover:bg-[#20BD5A] transition-colors">
+                  <MessageCircle className="h-4 w-4" />
+                  <span className="font-bold">واتساب</span>
+                </a>
+              </div>
             </div>
           </div>
 
