@@ -640,8 +640,25 @@ code {
 
 /* Footer wrapper */
 .footer-wrapper {
-    background: linear-gradient(180deg, #FFF8E7 0%, #FFF5E0 100%);
-    border-top: 3px solid var(--brand-yellow);
+    background: linear-gradient(135deg, #1A5276 0%, #154360 100%);
+    border-top: 4px solid var(--pk-yellow);
+    color: white;
+}
+
+.footer-wrapper .footer-text {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.footer-wrapper .footer-heading {
+    color: var(--pk-yellow);
+}
+
+.footer-wrapper .footer-link {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.footer-wrapper .footer-link:hover {
+    color: var(--pk-yellow);
 }
 
 /* Footer label (for address, etc) */
