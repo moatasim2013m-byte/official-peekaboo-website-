@@ -675,7 +675,7 @@ code {
 
 /* Footer wrapper */
 .footer-wrapper {
-    background: linear-gradient(135deg, #1A5276 0%, #154360 100%);
+    background: linear-gradient(135deg, var(--pk-footer-blue) 0%, #154360 100%);
     border-top: 4px solid var(--pk-yellow);
     color: white;
 }
