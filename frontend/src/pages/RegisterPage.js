@@ -44,7 +44,7 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await register(name, email, password);
+      await register(name, email, password, phone.replace(/\s/g, ''));
       toast.success('تم إنشاء الحساب بنجاح!');
       navigate('/profile');
     } catch (error) {
