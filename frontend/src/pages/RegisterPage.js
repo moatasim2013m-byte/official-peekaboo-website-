@@ -103,6 +103,23 @@ export default function RegisterPage() {
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="phone">رقم الهاتف</Label>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  id="phone"
+                  type="tel"
+                  placeholder="07XXXXXXXX"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="pl-10 rounded-xl h-12"
+                  dir="ltr"
+                  data-testid="register-phone"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
               <Label htmlFor="password">كلمة المرور</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
