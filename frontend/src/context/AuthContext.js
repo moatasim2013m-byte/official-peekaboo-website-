@@ -32,8 +32,7 @@ export const AuthProvider = ({ children }) => {
         // Don't auto-logout on /auth/me failures (handled separately)
         const isAuthCheck = error.config?.url?.includes('/auth/me');
         if (error.response?.status === 401 && !isAuthCheck) {
-          console.log('[Auth] API returned 401, session may have expired');
-          // Let the component handle the error - don't force logout here
+          // 401 on API call - let component handle the error
         }
         return Promise.reject(error);
       }
@@ -58,14 +57,11 @@ export const AuthProvider = ({ children }) => {
       } catch (error) {
         // Only clear auth on explicit 401 (invalid/expired token)
         if (error.response?.status === 401) {
-          console.log('[Auth] Token invalid or expired, clearing session');
           localStorage.removeItem('peekaboo_token');
           setToken(null);
           setUser(null);
-        } else {
-          // Network error or other issue - keep token, try to use cached user
-          console.log('[Auth] Auth check failed (non-401), keeping session:', error.message);
         }
+        // Network errors or other issues - keep token, don't force logout
       } finally {
         setLoading(false);
       }
