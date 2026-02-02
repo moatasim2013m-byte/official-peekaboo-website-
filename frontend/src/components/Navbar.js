@@ -31,15 +31,15 @@ export const Navbar = () => {
   return (
     <nav className="bg-white border-b border-border sticky top-0 z-50 shadow-sm" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-18 py-2">
-          {/* Logo with Mascot */}
-          <Link to="/" className="flex items-center gap-2" data-testid="nav-logo">
-            <img src={logoImg} alt="بيكابو" className="h-12 md:h-14" />
+        <div className="flex justify-between items-center h-18 py-3">
+          {/* Logo with Pill Container */}
+          <Link to="/" className="brand-logo-pill" data-testid="nav-logo">
+            <img src={logoImg} alt="بيكابو" className="brand-logo-lg" />
           </Link>
 
           {/* Desktop Navigation - Show only for non-admin users */}
           {!isAdmin && (
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-1">
               <Link to="/tickets" className={`nav-link ${isActive('/tickets') ? 'nav-link-active' : ''}`} data-testid="nav-tickets">
                 تذاكر بالساعة
               </Link>
