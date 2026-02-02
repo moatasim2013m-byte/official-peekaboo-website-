@@ -213,15 +213,15 @@ export default function HomePage() {
             {features.map((feature, index) => (
               <Card 
                 key={index} 
-                className="service-card border-2 rounded-3xl card-interactive overflow-hidden relative"
+                className="pk-card"
                 data-testid={`feature-card-${index}`}
               >
-                <div className={`service-accent service-accent--${feature.accent}`} />
-                <CardContent className="p-6 text-center relative z-10">
-                  <div className={`${feature.color} w-14 h-14 rounded-2xl flex items-center justify-center mb-4 mx-auto shadow-md`}>
+                <div className={`pk-card-accent accent-${feature.accent === 'star' ? 'yellow' : feature.accent === 'balloon' ? 'pink' : 'blue'}`} />
+                <CardContent className="p-6 pt-8 text-center relative z-10">
+                  <div className={`pk-icon-badge badge-${feature.accent === 'star' ? 'yellow' : feature.accent === 'balloon' ? 'pink' : feature.accent === 'cloud' ? 'blue' : 'green'}`}>
                     <feature.icon className="h-7 w-7 text-white" />
                   </div>
-                  <h3 className="service-title text-xl font-bold mb-2">{feature.title}</h3>
+                  <h3 className="pk-card-title">{feature.title}</h3>
                   <p className="text-muted-foreground text-sm mb-5 leading-relaxed">{feature.description}</p>
                   <Link to={feature.link}>
                     <Button className="rounded-full btn-playful w-full text-sm" data-testid={`feature-btn-${index}`}>
