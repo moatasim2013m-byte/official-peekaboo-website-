@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
 import { Cake, Users, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 
 export default function BirthdayPage() {
   const { isAuthenticated, api } = useAuth();
@@ -28,6 +29,7 @@ export default function BirthdayPage() {
   const [guestCount, setGuestCount] = useState(10);
   const [specialNotes, setSpecialNotes] = useState('');
   const [customRequest, setCustomRequest] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [activeTab, setActiveTab] = useState('standard');
