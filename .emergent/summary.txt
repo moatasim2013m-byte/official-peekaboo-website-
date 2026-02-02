@@ -17,60 +17,44 @@ The user wants to build a launch-ready web app for an indoor playground named Pe
 **User's preferred language**: English
 
 **what currently exists?**
-The application is fully functional and stable. The initial critical backend connectivity issue has been resolved. The admin panel is feature-rich, supporting full CRUD operations for Birthday Themes and Subscription Plans, including direct image uploads (which are resized and stored as  files). The booking process includes a server-side atomic check to prevent double-booking popular slots.
+The application is stable and fully functional. A major UI/UX and branding overhaul has been completed, resulting in a polished, playful, and consistent premium kids brand look and feel for all customer-facing pages. This includes a global sky with clouds and balloons theme, updated typography (using the 'Cairo' font), and refined brand color tokens, all managed via CSS variables in . All customer-facing pages are now fully localized to Arabic with right-to-left (RTL) support.
 
-A major branding and UI/UX overhaul has begun. A complete set of design tokens (colors, fonts, spacing, shadows) has been defined in . The application has been updated with a new logo and mascot. A separate, distinctly branded login page for staff/admins has been created at . The UI polish has been applied to the  (with enhanced card styles) and the  (with a high-contrast, professional UI).
+Core functionality has been enhanced:
+- **Session Stability:** A critical bug causing unexpected logouts has been fixed. The session now persists reliably across page refreshes and navigations.
+- **Multi-Child Booking:** The tickets page now supports booking for multiple children in a single transaction.
+- **Profile Management:** Parents can now add/manage their children and view/edit their phone number from their profile page.
+- **Admin Controls:** The admin panel now includes a Homepage tab to dynamically edit the hero section's image, title, subtitle, and call-to-action button. A backend bug preventing these settings from being displayed on the homepage has been resolved.
 
 **Last working item**:
-- **Last item agent was working:** The agent was in the middle of a major UI/UX design enhancement task. It had already defined the design tokens (brand colors, fonts, spacing, shadows) in  and successfully applied the new, polished styling to the  and . The next step is to apply this visual consistency across the rest of the application.
-- **Status:** IN PROGRESS
-- **Agent Testing Done:** N
-- **Which testing method agent to use?** frontend testing agent. The agent should verify visual consistency, correct application of design tokens, and responsiveness across all updated pages.
+- **Last item agent was working:** Fixing a bug where updating the hero image in the admin panel did not reflect on the homepage. The agent identified that the public  endpoint was incorrectly using  and only returning a single setting document, instead of aggregating all settings. The agent fixed the endpoint to use  and correctly aggregate all  settings into one object. A cache-busting timestamp was also added to the image URL on save.
+- **Status:** USER VERIFICATION PENDING
+- **Agent Testing Done:** Y (The agent verified that text-based settings were flowing correctly from the admin panel to the homepage after the fix. The data flow is confirmed to be working.)
+- **Which testing method agent to use?** Manual testing. The next agent should log in as admin, navigate to the Homepage tab, upload a new hero image, save it, and then visit the live homepage to confirm the image has been updated.
 - **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
 - None.
 
 **In progress Task List**:
-- **Task 1: Complete UI/UX Design Enhancement (P0)**
-    - **Description:** Apply the new design tokens and visual styles to all remaining pages to ensure a consistent, polished, and on-brand user experience.
-    - **Where to resume:** Systematically edit the following files, applying the CSS variables and classes defined in  for colors, spacing, typography, and component styles.
-        - 
-        - 
-        - 
-        - 
-        - 
-        - 
-        -  (if it exists or needs creating)
-    - **What will be achieved with this?** A visually cohesive and professional application that aligns with the Peekaboo brand identity.
-    - **Status:** IN PROGRESS
-    - **Should Test frontend/backend/both after fix?** frontend
-    - **Blocked on something:** None
+- None.
 
 **Upcoming and Future Tasks**
 - **Upcoming Tasks:**
-    - **P1: Multi-Child Booking:** On the , change the single-child selector to a multi-select or an Add another child flow, allowing parents to book for multiple children in a single transaction. This will require frontend changes in  and potentially backend changes in  to handle an array of children in the checkout session.
     - **P1: Profile Page - Active Session Countdown:** Implement the UI on the parent's profile page to show any active play sessions for their children, including a live countdown timer for the remaining time. (File: ).
-    - **P2: Complete Global Arabic Localization:** Continue translating the remaining English text across the application using the existing  system.
 - **Future Tasks:**
+    - **Refactor AdminPage.js:** The  component is very large and could be broken down into smaller, more manageable components for each tab to improve maintainability.
     - **Add Language Toggle:** Implement a UI switch to allow users to toggle between Arabic and English.
     - **Create Test Checklist:** Deliver the 8-step test checklist for staff + parent that was originally requested.
 
 **Completed work in this session**
-- **Backend Stability:** Fixed a critical backend not available error caused by a crashing Node.js process due to an undefined middleware reference.
-- **Admin CRUD:** Implemented full Create, Read, Update, and Delete functionality for Birthday Themes and Subscription Plans in the Admin Panel.
-- **Admin Image Upload:** Replaced image URL inputs with a direct file upload system ( + ) that resizes images and saves them to .
-- **Concurrent Booking Safety:** Implemented an atomic, server-side capacity check during the booking process to prevent race conditions and double-bookings.
-- **Branding & UI:**
-    - Integrated a new logo and mascot across the application.
-    - Removed all DEBUG and Made with Emergent badges from the customer-facing UI.
-    - Created a separate, professionally branded  page for admins and staff.
-    - Defined a full set of design tokens (CSS variables) for colors, fonts, spacing, and shadows in .
-    - Partially implemented the UI redesign on the  and .
-- **Admin UX Polish:**
-    - Made dashboard cards clickable, linking to the relevant admin tabs.
-    - Added expandable details for parents in the Users tab.
-    - Improved layout by moving action buttons to the bottom of their respective sections.
+- **Full UI/UX Overhaul:** Completed a comprehensive visual redesign across all customer-facing pages (, , , , , , , , ) using a new design system based on CSS variables.
+- **Complete Arabic Localization:** Translated all remaining English text on customer-facing pages to Arabic and ensured full RTL support.
+- **Brand Polish:** Implemented a premium kids brand aesthetic, including a sky/clouds/balloons background theme for customer pages, refined typography and colors, and playful hover/active effects on navigation links.
+- **Session Stability Fix:** Resolved a critical bug that caused users to be logged out prematurely. The session now persists correctly across page refreshes by only logging out on explicit 401 errors.
+- **Multi-Child Booking:** Implemented the feature allowing parents to book tickets for multiple children in one transaction.
+- **Profile & Registration Enhancement:** Added a required mobile number field to the registration page and made it viewable/editable in the parent's profile. Confirmed the existing Add/List Children feature was fully functional and localized.
+- **Admin Hero Management:** Added a new Homepage tab to the admin panel for editing the hero image and text.
+- **Backend Data Flow Fix:** Corrected the public  endpoint to properly aggregate all settings, allowing changes made in the admin panel to be reflected on the homepage.
 
 **Earlier issues found/mentioned but not fixed**
 - None.
@@ -83,53 +67,57 @@ A major branding and UI/UX overhaul has begun. A complete set of design tokens (
 
 **Key Technical Concepts**
 - **Hybrid Backend:** Node.js/Express app managed by a Python/FastAPI wrapper.
-- **Image Handling:**  for multipart/form-data parsing,  for server-side image resizing and conversion to . Static file serving via Express.
-- **Concurrency Control:** Atomic updates in MongoDB using  with an expression-based query () to safely check capacity.
-- **Design System:** A foundational system built with CSS variables in  for brand colors, spacing, shadows, and border-radius, promoting visual consistency.
-- **Role-Based UI:** Separate login pages ( for parents,  for staff/admin) and role-specific UI elements.
+- **Session Management:** Robust session persistence using  for JWT tokens and an . The context rehydrates the user's auth state on page load and includes an Axios interceptor to gracefully handle 401 errors without logging out on transient network failures.
+- **Dynamic Theming:** Conditional CSS class application in a root  component (based on URL path) to apply different background themes for customer-facing routes versus admin routes.
+- **CSS Design System:** A comprehensive system built with CSS variables for brand colors, spacing, shadows, and typography. It also includes advanced CSS for background layers (gradients, SVGs) and keyframe animations for decorative elements (floating balloons).
+- **Centralized Settings Management:** Storing application settings (like hero content) as individual key-value documents in a MongoDB  collection and aggregating them via a public API endpoint for use in the frontend.
 
 **key DB schema**
-- No new collections.
-- **Theme/SubscriptionPlan:**  field now stores a local path like .
+- **User:** Updated to include a  field.
+- **Settings:** A collection used to store key-value pairs for site-wide configuration, such as , , and .
 
 **changes in tech stack**
-- **Backend:** Added  and  for image processing.
+- None.
 
 **All files of reference**
-- : **Critical.** Contains all the new CSS variables (design tokens) that must be applied to other pages.
-- : Complex component with full CRUD UI for multiple resources and image upload logic.
-- : New, distinctly branded login page for internal users.
-- : Contains the  endpoint logic.
-- : Contains the atomic  logic for booking safety.
+- : The core of the session persistence and authentication state management.
+- : The central file for the entire application's visual identity, containing all design tokens, fonts, animations, and the sky theme.
+- : Contains routing logic, protected routes, and the conditional layout logic that applies different themes to customer vs. admin areas.
+- : A large component that now includes the logic for managing the homepage hero content.
+- : Updated to fetch and render dynamic content from the  endpoint.
+- : Updated to include the new public  endpoint.
 
 **Areas that need refactoring**:
--  remains very large. While polished, it could still benefit from being broken down into smaller components per tab in the future.
+-  is a large, monolithic component that handles all admin tabs. It should be broken down into smaller, tab-specific components to improve code readability and maintainability.
 
 **key api endpoints**
-- : New endpoint for uploading files.
-- , : Updated with atomic capacity checks.
-- , : Endpoints for plan CRUD.
-- , : Endpoints for theme CRUD.
+- : **NEW** public endpoint that aggregates and returns all hero-related settings for the homepage.
+- : **UPDATED** to allow editing the user's phone number.
+- : **UPDATED** to include a  number during user registration.
+- : **UPDATED** to handle an array of  for multi-child booking.
 
 **Critical Info for New Agent**
-- The application is stable and functional. The immediate priority (P0) is to complete the visual redesign by applying the existing design tokens from  to the remaining pages.
-- The user prefers small, focused micro-missions. After completing the design pass, the next logical step would be to propose the Multi-Child Booking task as the next mission.
-- Do not add new features or logic while implementing the UI/UX polish. The task is strictly to apply the existing design system for visual consistency.
+- The application is stable. The immediate priority is to verify the last fix (hero image update) and then move on to the next user-requested feature.
+- The development process has been following a credit control or micro-mission pattern. Expect prompts to be very specific, with strict rules about which files to touch. Adhere to this focused approach.
+- All customer-facing UI is now in Arabic (RTL). Do not introduce any English text into the parent/customer experience. The admin panel remains in a mix of English/Arabic, which is acceptable.
+- The session stability issue is resolved. Do not modify  unless a new session-related bug is discovered.
 
 **documents and test reports created in this job**
-- None in this session. The PRD.md was updated once but not kept current.
+-  (Updated during the session)
 
 **Last 10 User Messages and any pending HUMAN messages**
-1. **User:** (Task) Implement a comprehensive UI/UX redesign based on provided design guidelines. (IN PROGRESS)
-2. **Agent:** Implemented a portion of the redesign, adding design tokens to  and updating  and . (COMPLETED)
-3. **User:** (Task) Polish the Admin UX by moving action buttons to the bottom of sections. (COMPLETED)
-4. **Agent:** Implemented the admin UX polish, moving buttons and adding headers. (COMPLETED)
-5. **User:** (Task) Create a separate login page for staff/admins. (COMPLETED)
-6. **Agent:** Created  page and confirmed it works as required. (COMPLETED)
-7. **User:** (Task) Implement expandable parent details and gallery image upload in the Admin Panel. (COMPLETED)
-8. **Agent:** Implemented both features in the Admin Panel. (COMPLETED)
-9. **User:** (Task) Implement admin image upload, concurrent booking safety, and clarify reception badge. (COMPLETED)
-10. **Agent:** Implemented all three fixes. (COMPLETED)
+1. **User:** Fix session stability. (COMPLETED)
+2. **Agent:** Implemented a fix in  to only log out on 401 errors and persist the token in .
+3. **User:** Close the session stability task and remove debug logs. (COMPLETED)
+4. **Agent:** Removed  statements from .
+5. **User:** Close the session stability micro-mission (final confirmation). (COMPLETED)
+6. **Agent:** Confirmed task closure.
+7. **User:** Add a mobile number field to the register and profile pages. (COMPLETED)
+8. **Agent:** Implemented the phone number field on frontend and backend.
+9. **User:** Close the phone number micro-mission. (COMPLETED)
+10. **Agent:** Confirmed task closure.
+11. **User:** Fix the hero image update flow so changes in admin reflect on the homepage. (IN PROGRESS - Fix implemented, verification pending)
+12. **Agent:** Fixed the  endpoint and added cache-busting. Verified text updates work.
 
 **Project Health Check:**
 - **Broken:** None.
@@ -151,4 +139,4 @@ A major branding and UI/UX overhaul has begun. A complete set of design tokens (
 - **Parent:** Register a new user via the signup page.
 
 **What agent forgot to execute**
-- After the initial update, the agent did not consistently update the  file after completing major tasks.</analysis>
+- Nothing was forgotten from the specific tasks assigned during this session. The agent methodically completed each micro-mission. The initial  update task was not consistently followed after every major feature, but this is a minor process point.</analysis>
