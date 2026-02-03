@@ -22,6 +22,8 @@ export default function SubscriptionsPage() {
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
   const [loadingPlans, setLoadingPlans] = useState(true);
+  const [showCliqModal, setShowCliqModal] = useState(false);
+  const [lastSubscription, setLastSubscription] = useState(null);
 
   useEffect(() => {
     fetchPlans();
