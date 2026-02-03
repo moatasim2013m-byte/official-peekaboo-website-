@@ -34,6 +34,8 @@ export default function BirthdayPage() {
   const [loading, setLoading] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [activeTab, setActiveTab] = useState('standard');
+  const [showCliqModal, setShowCliqModal] = useState(false);
+  const [lastBooking, setLastBooking] = useState(null);
 
   useEffect(() => {
     fetchThemes();
