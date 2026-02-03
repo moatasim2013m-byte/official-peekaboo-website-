@@ -137,17 +137,26 @@ export default function BirthdayPage() {
           amount
         });
         
-        if (paymentMethod === 'cash') {
-          toast.success('تم الحجز بنجاح! الرجاء الدفع نقداً عند الاستقبال.');
-          navigate('/profile');
-        } else {
-          // CliQ - show modal with bank info
-          setLastBooking({ 
-            code: response.data.booking?.booking_code, 
-            amount 
-          });
-          setShowCliqModal(true);
-        }
+        // Get child name for confirmation
+        const childObj = children.find(c => c.id === selectedChild);
+        
+        // Navigate to confirmation page with booking details
+        const confirmationData = {
+          bookingId: response.data.booking?.id,
+          bookingCode: response.data.booking?.booking_code,
+          bookingType: 'birthday',
+          childName: childObj?.name,
+          date: selectedSlot.date,
+          time: selectedSlot.start_time,
+          duration: 2,
+          amount,
+          paymentMethod
+        };
+        
+        // Store in localStorage for refresh persistence
+        localStorage.setItem('pk_last_confirmation', JSON.stringify(confirmationData));
+        
+        navigate('/booking-confirmation', { state: confirmationData });
         setLoading(false);
       }
     } catch (error) {
