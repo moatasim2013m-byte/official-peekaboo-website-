@@ -8,6 +8,8 @@ const userSubscriptionSchema = new mongoose.Schema({
   expires_at: { type: Date }, // null until first check-in
   first_checkin_at: { type: Date }, // when subscription was activated
   payment_id: { type: String },
+  payment_method: { type: String, enum: ['card', 'cash', 'cliq'], default: 'card' },
+  payment_status: { type: String, enum: ['paid', 'pending_cash', 'pending_cliq'], default: 'paid' },
   status: { type: String, enum: ['pending', 'active', 'expired', 'consumed'], default: 'pending' },
   created_at: { type: Date, default: Date.now }
 });
