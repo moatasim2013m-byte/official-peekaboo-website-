@@ -66,14 +66,38 @@ export default function SubscriptionsPage() {
 
     setLoading(true);
     try {
-      const response = await api.post('/payments/create-checkout', {
-        type: 'subscription',
-        reference_id: selectedPlan.id,
-        child_id: selectedChild,
-        origin_url: window.location.origin
-      });
-
-      window.location.href = response.data.url;
+      const amount = selectedPlan.price;
+      
+      if (paymentMethod === 'card') {
+        // Stripe checkout flow
+        const response = await api.post('/payments/create-checkout', {
+          type: 'subscription',
+          reference_id: selectedPlan.id,
+          child_id: selectedChild,
+          origin_url: window.location.origin
+        });
+        window.location.href = response.data.url;
+      } else {
+        // Cash or CliQ - create subscription directly
+        const response = await api.post('/subscriptions/purchase/offline', {
+          plan_id: selectedPlan.id,
+          child_id: selectedChild,
+          payment_method: paymentMethod
+        });
+        
+        if (paymentMethod === 'cash') {
+          toast.success('تم الاشتراك بنجاح! الرجاء الدفع نقداً عند الاستقبال.');
+          navigate('/profile');
+        } else {
+          // CliQ - show modal with bank info
+          setLastSubscription({ 
+            planName: selectedPlan.name, 
+            amount 
+          });
+          setShowCliqModal(true);
+        }
+        setLoading(false);
+      }
     } catch (error) {
       toast.error(error.response?.data?.error || 'فشل بدء عملية الشراء');
       setLoading(false);
