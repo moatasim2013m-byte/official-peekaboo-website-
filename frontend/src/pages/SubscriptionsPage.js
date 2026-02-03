@@ -85,17 +85,23 @@ export default function SubscriptionsPage() {
           payment_method: paymentMethod
         });
         
-        if (paymentMethod === 'cash') {
-          toast.success('تم الاشتراك بنجاح! الرجاء الدفع نقداً عند الاستقبال.');
-          navigate('/profile');
-        } else {
-          // CliQ - show modal with bank info
-          setLastSubscription({ 
-            planName: selectedPlan.name, 
-            amount 
-          });
-          setShowCliqModal(true);
-        }
+        // Get child name for confirmation
+        const childObj = children.find(c => c.id === selectedChild);
+        
+        // Navigate to confirmation page with booking details
+        const confirmationData = {
+          bookingId: response.data.subscription?.id,
+          bookingCode: `PK-SUB-${response.data.subscription?.id?.slice(-6).toUpperCase() || 'XXXXXX'}`,
+          bookingType: 'subscription',
+          childName: childObj?.name,
+          amount,
+          paymentMethod
+        };
+        
+        // Store in localStorage for refresh persistence
+        localStorage.setItem('pk_last_confirmation', JSON.stringify(confirmationData));
+        
+        navigate('/booking-confirmation', { state: confirmationData });
         setLoading(false);
       }
     } catch (error) {
