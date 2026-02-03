@@ -389,6 +389,85 @@ router.post('/birthday', authMiddleware, async (req, res) => {
   }
 });
 
+// Create birthday booking with cash/cliq payment (no Stripe)
+router.post('/birthday/offline', authMiddleware, async (req, res) => {
+  try {
+    const { slot_id, child_id, theme_id, guest_count, special_notes, payment_method, amount } = req.body;
+    
+    // Validate payment method
+    if (!['cash', 'cliq'].includes(payment_method)) {
+      return res.status(400).json({ error: 'طريقة دفع غير صالحة' });
+    }
+    
+    // ATOMIC capacity check for birthday slots
+    const slot = await TimeSlot.findOneAndUpdate(
+      { 
+        _id: slot_id, 
+        slot_type: 'birthday',
+        $expr: { $lt: ['$booked_count', '$capacity'] }
+      },
+      { $inc: { booked_count: 1 } },
+      { new: true }
+    );
+    
+    if (!slot) {
+      const existingSlot = await TimeSlot.findById(slot_id);
+      if (!existingSlot) {
+        return res.status(400).json({ error: 'Invalid birthday slot' });
+      }
+      return res.status(400).json({ error: 'عذراً، هذا الموعد محجوز. يرجى اختيار موعد آخر.' });
+    }
+
+    // Validate child
+    const child = await Child.findOne({ _id: child_id, parent_id: req.userId });
+    if (!child) {
+      await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: -1 } });
+      return res.status(400).json({ error: 'طفل غير صالح' });
+    }
+
+    // Validate theme
+    const theme = await Theme.findById(theme_id);
+    if (!theme) {
+      await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: -1 } });
+      return res.status(400).json({ error: 'ثيم غير صالح' });
+    }
+
+    const booking_code = `PK-B-${uuidv4().substring(0, 8).toUpperCase()}`;
+    const paymentStatus = payment_method === 'cash' ? 'pending_cash' : 'pending_cliq';
+
+    const booking = new BirthdayBooking({
+      user_id: req.userId,
+      child_id,
+      slot_id,
+      theme_id,
+      booking_code,
+      status: 'confirmed',
+      payment_method,
+      payment_status: paymentStatus,
+      amount: amount || theme.price,
+      guest_count,
+      special_notes
+    });
+
+    await booking.save();
+
+    // Send confirmation email
+    const user = await User.findById(req.userId);
+    const template = emailTemplates.birthdayConfirmation(booking, slot, child, theme);
+    await sendEmail(user.email, template.subject, template.html);
+
+    res.status(201).json({ 
+      booking: booking.toJSON(),
+      message: payment_method === 'cash' 
+        ? 'تم الحجز بنجاح! الرجاء الدفع نقداً عند الاستقبال.' 
+        : 'تم الحجز بنجاح! الرجاء إتمام التحويل عبر CliQ.'
+    });
+  } catch (error) {
+    console.error('Create offline birthday booking error:', error);
+    res.status(500).json({ error: 'فشل إنشاء الحجز' });
+  }
+});
+
 // Get user's birthday bookings
 router.get('/birthday', authMiddleware, async (req, res) => {
   try {
