@@ -321,82 +321,98 @@ code {
     transform: translateY(0);
 }
 
-/* ===== COLORFUL NAV PILLS (Kids-Friendly) ===== */
+/* ===== COLORFUL NAV PILLS (Kids Playground Style) ===== */
 .nav-pill {
     font-family: var(--font-heading-ar);
     font-weight: 700;
     font-size: 1.125rem;
-    padding: 0.625rem 1.25rem;
-    border-radius: var(--radius-full);
-    transition: all 0.2s ease;
+    padding: 0.875rem 1.5rem;
+    border-radius: 999px;
     text-decoration: none;
-    display: inline-block;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    border: none;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.nav-pill:hover {
+    transform: translateY(-2px);
 }
 
 @media (min-width: 768px) {
-    .nav-pill { font-size: 1.25rem; padding: 0.75rem 1.5rem; }
+    .nav-pill { 
+        font-size: 1.3rem; 
+        padding: 1rem 1.75rem; 
+    }
 }
 
-/* Color variants - Peekaboo brand colors */
+/* Color variants - Solid gradient fills with white text */
 .nav-pill.pill-blue {
-    background: rgba(52, 152, 219, 0.15);
-    color: var(--pk-blue);
+    background: linear-gradient(135deg, var(--pk-blue), #5DADE2);
+    color: white;
 }
 .nav-pill.pill-blue:hover,
 .nav-pill.pill-blue.active {
-    background: rgba(52, 152, 219, 0.3);
-    box-shadow: 0 4px 14px rgba(52, 152, 219, 0.3);
+    background: linear-gradient(135deg, #2980B9, var(--pk-blue));
+    box-shadow: 0 6px 24px rgba(52, 152, 219, 0.45);
+    transform: translateY(-3px);
 }
 
 .nav-pill.pill-pink {
-    background: rgba(231, 76, 60, 0.12);
-    color: var(--pk-red);
+    background: linear-gradient(135deg, var(--pk-red), #EC7063);
+    color: white;
 }
 .nav-pill.pill-pink:hover,
 .nav-pill.pill-pink.active {
-    background: rgba(231, 76, 60, 0.25);
-    box-shadow: 0 4px 14px rgba(231, 76, 60, 0.3);
+    background: linear-gradient(135deg, #C0392B, var(--pk-red));
+    box-shadow: 0 6px 24px rgba(231, 76, 60, 0.45);
+    transform: translateY(-3px);
 }
 
 .nav-pill.pill-yellow {
-    background: rgba(241, 196, 15, 0.2);
-    color: var(--pk-orange);
+    background: linear-gradient(135deg, var(--pk-yellow), #F7DC6F);
+    color: #6D5800;
 }
 .nav-pill.pill-yellow:hover,
 .nav-pill.pill-yellow.active {
-    background: rgba(241, 196, 15, 0.4);
-    box-shadow: 0 4px 14px rgba(241, 196, 15, 0.35);
+    background: linear-gradient(135deg, #D4AC0D, var(--pk-yellow));
+    box-shadow: 0 6px 24px rgba(241, 196, 15, 0.55);
+    transform: translateY(-3px);
 }
 
 .nav-pill.pill-green {
-    background: rgba(39, 174, 96, 0.15);
-    color: var(--pk-green);
+    background: linear-gradient(135deg, var(--pk-green), #58D68D);
+    color: white;
 }
 .nav-pill.pill-green:hover,
 .nav-pill.pill-green.active {
-    background: rgba(39, 174, 96, 0.3);
-    box-shadow: 0 4px 14px rgba(39, 174, 96, 0.3);
+    background: linear-gradient(135deg, #1E8449, var(--pk-green));
+    box-shadow: 0 6px 24px rgba(39, 174, 96, 0.45);
+    transform: translateY(-3px);
 }
 
 .nav-pill.pill-orange {
-    background: rgba(230, 126, 34, 0.15);
-    color: var(--pk-orange);
+    background: linear-gradient(135deg, var(--pk-orange), #EB984E);
+    color: white;
 }
 .nav-pill.pill-orange:hover,
 .nav-pill.pill-orange.active {
-    background: rgba(230, 126, 34, 0.35);
-    box-shadow: 0 4px 14px rgba(230, 126, 34, 0.3);
+    background: linear-gradient(135deg, #CA6F1E, var(--pk-orange));
+    box-shadow: 0 6px 24px rgba(230, 126, 34, 0.45);
+    transform: translateY(-3px);
 }
 
 .nav-pill.pill-purple {
-    background: rgba(156, 39, 176, 0.15);
-    color: #7B1FA2;
+    background: linear-gradient(135deg, #9C27B0, #BA68C8);
+    color: white;
 }
 .nav-pill.pill-purple:hover,
 .nav-pill.pill-purple.active {
-    background: rgba(156, 39, 176, 0.3);
-    box-shadow: 0 4px 14px rgba(156, 39, 176, 0.25);
+    background: linear-gradient(135deg, #7B1FA2, #9C27B0);
+    box-shadow: 0 6px 24px rgba(156, 39, 176, 0.45);
+    transform: translateY(-3px);
 }
 
 /* Legacy nav-link (for admin/staff - keep simple) */
