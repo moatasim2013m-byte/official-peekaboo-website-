@@ -40,13 +40,17 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4" dir="rtl">
-      <Card className="auth-card w-full max-w-md">
+      <Card className="auth-card-premium w-full max-w-md">
         <CardHeader className="text-center pb-2">
+          {/* Mascot with yellow badge */}
           <div className="flex justify-center mb-4">
-            <img src={mascotImg} alt="بيكابو" className="auth-brand-img rounded-full border-4 border-white shadow-lg" />
+            <div className="auth-mascot-badge">
+              <img src={mascotImg} alt="بيكابو" className="auth-mascot-img" />
+            </div>
           </div>
-          <CardTitle className="font-heading text-3xl" data-testid="login-title">أهلًا بعودتك!</CardTitle>
-          <CardDescription className="text-base">
+          <CardTitle className="font-heading text-3xl text-[var(--text-primary)]" data-testid="login-title">أهلًا بعودتك!</CardTitle>
+          <p className="auth-slogan">بيكابو يصنع السعادة ✨</p>
+          <CardDescription className="text-base mt-2">
             سجّل دخولك إلى حساب بيكابو
           </CardDescription>
         </CardHeader>
