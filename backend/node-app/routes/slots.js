@@ -99,15 +99,21 @@ const getActiveKidsAtTime = async (date, timeStr) => {
   const [checkHour, checkMinute] = timeStr.split(':').map(Number);
   const checkTimeMinutes = checkHour * 60 + checkMinute;
   
-  // Find all confirmed/checked_in hourly bookings for this date
+  // Find all confirmed/checked_in hourly bookings for this date only
+  // Use aggregation to filter by slot date efficiently
   const bookings = await HourlyBooking.find({
     status: { $in: ['confirmed', 'checked_in'] }
-  }).populate('slot_id');
+  }).populate({
+    path: 'slot_id',
+    match: { date: date },
+    select: 'date start_time'
+  }).lean();
   
   let activeCount = 0;
   
   for (const booking of bookings) {
-    if (!booking.slot_id || booking.slot_id.date !== date) continue;
+    // Skip if slot doesn't match the date filter (populate match returns null)
+    if (!booking.slot_id) continue;
     
     const [slotHour, slotMinute] = booking.slot_id.start_time.split(':').map(Number);
     const slotStartMinutes = slotHour * 60 + slotMinute;
