@@ -138,6 +138,97 @@ router.post('/hourly', authMiddleware, async (req, res) => {
   }
 });
 
+// Create hourly booking with cash/cliq payment (no Stripe)
+router.post('/hourly/offline', authMiddleware, async (req, res) => {
+  try {
+    const { slot_id, child_ids, child_id, duration_hours, custom_notes, payment_method, amount } = req.body;
+    
+    // Validate payment method
+    if (!['cash', 'cliq'].includes(payment_method)) {
+      return res.status(400).json({ error: 'طريقة دفع غير صالحة' });
+    }
+    
+    // Support both child_ids array and legacy child_id
+    const childIdList = child_ids || (child_id ? [child_id] : []);
+    if (childIdList.length === 0) {
+      return res.status(400).json({ error: 'يجب اختيار طفل واحد على الأقل' });
+    }
+    
+    // ATOMIC capacity check for all children at once
+    const slot = await TimeSlot.findOneAndUpdate(
+      { 
+        _id: slot_id, 
+        slot_type: 'hourly',
+        $expr: { $lte: [{ $add: ['$booked_count', childIdList.length] }, '$capacity'] }
+      },
+      { $inc: { booked_count: childIdList.length } },
+      { new: true }
+    );
+    
+    if (!slot) {
+      const existingSlot = await TimeSlot.findById(slot_id);
+      if (!existingSlot) {
+        return res.status(400).json({ error: 'الوقت غير صالح' });
+      }
+      const available = existingSlot.capacity - existingSlot.booked_count;
+      return res.status(400).json({ 
+        error: `عذراً، المتاح ${available} مكان فقط. اخترت ${childIdList.length} أطفال.`
+      });
+    }
+
+    // Validate all children belong to user
+    const validChildren = await Child.find({ _id: { $in: childIdList }, parent_id: req.userId });
+    if (validChildren.length !== childIdList.length) {
+      // Rollback capacity
+      await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: -childIdList.length } });
+      return res.status(400).json({ error: 'طفل غير صالح' });
+    }
+
+    // Create a booking for each child
+    const bookings = [];
+    const pricePerChild = amount / childIdList.length;
+    const paymentStatus = payment_method === 'cash' ? 'pending_cash' : 'pending_cliq';
+    
+    for (const cid of childIdList) {
+      const booking_code = `PK-H-${uuidv4().substring(0, 8).toUpperCase()}`;
+      const qr_code = await generateQRCode(booking_code);
+
+      const booking = new HourlyBooking({
+        user_id: req.userId,
+        child_id: cid,
+        slot_id,
+        duration_hours: parseInt(duration_hours) || 2,
+        custom_notes: custom_notes || '',
+        qr_code,
+        booking_code,
+        status: 'confirmed',
+        payment_method,
+        payment_status: paymentStatus,
+        amount: pricePerChild
+      });
+
+      await booking.save();
+      bookings.push(booking);
+    }
+
+    // Send confirmation email
+    const user = await User.findById(req.userId);
+    const childNames = validChildren.map(c => c.name).join(', ');
+    const template = emailTemplates.bookingConfirmation(bookings[0], slot, { name: childNames });
+    await sendEmail(user.email, template.subject, template.html);
+
+    res.status(201).json({ 
+      bookings: bookings.map(b => b.toJSON()),
+      message: payment_method === 'cash' 
+        ? 'تم الحجز بنجاح! الرجاء الدفع نقداً عند الاستقبال.' 
+        : 'تم الحجز بنجاح! الرجاء إتمام التحويل عبر CliQ.'
+    });
+  } catch (error) {
+    console.error('Create offline hourly booking error:', error);
+    res.status(500).json({ error: 'فشل إنشاء الحجز' });
+  }
+});
+
 // Get user's hourly bookings
 router.get('/hourly', authMiddleware, async (req, res) => {
   try {
