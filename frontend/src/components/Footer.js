@@ -5,80 +5,89 @@ import mascotImg from '../assets/mascot.png';
 
 export const Footer = () => {
   return (
-    <footer className="footer-wrapper mt-auto" dir="rtl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+    <footer className="footer-section mt-auto" dir="rtl">
+      {/* Wave Divider */}
+      <div className="footer-wave"></div>
+      
+      {/* Footer Card Container */}
+      <div className="footer-card">
+        <div className="footer-gradient-border"></div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
+          {/* Decorative Mascot */}
+          <img 
+            src={mascotImg} 
+            alt="بيكابو" 
+            className="footer-mascot"
+          />
           
-          {/* Column 1: Contact Info */}
-          <div className="md:col-span-2">
-            <Link to="/" className="inline-block mb-5">
-              <img src={logoImg} alt="بيكابو" className="h-16 brightness-0 invert" />
-            </Link>
-            <h4 className="footer-heading text-xl mb-4">معلومات التواصل</h4>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
             
-            {/* Address */}
-            <div className="mb-6">
-              <p className="footer-label flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                العنوان
-              </p>
-              <p className="footer-text text-lg">
-                ابو راشد مجمع السيف التجاري,<br />
-                Wasfi At-Tal St., Irbid 11225
-              </p>
-            </div>
-            
-            {/* Phone & WhatsApp - Big buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <a href="tel:0777775652" className="footer-btn footer-btn-phone">
-                <Phone className="h-5 w-5" />
-                <span className="ltr-text" dir="ltr">0777775652</span>
-              </a>
-              <a href="https://wa.me/962777775652" target="_blank" rel="noopener noreferrer" className="footer-btn footer-btn-whatsapp">
-                <MessageCircle className="h-6 w-6" />
-                <span>واتساب</span>
-              </a>
-            </div>
-          </div>
-
-          {/* Column 2: Quick Links */}
-          <div>
-            <h4 className="footer-heading text-xl mb-4">روابط سريعة</h4>
-            <ul className="space-y-3">
-              <li><Link to="/tickets" className="footer-link text-lg">تذاكر بالساعة</Link></li>
-              <li><Link to="/birthday" className="footer-link text-lg">حفلات أعياد الميلاد</Link></li>
-              <li><Link to="/subscriptions" className="footer-link text-lg">الاشتراكات</Link></li>
-              <li><Link to="/terms" className="footer-link text-lg">الشروط والأحكام</Link></li>
-            </ul>
-          </div>
-
-          {/* Column 3: Hours + Mascot */}
-          <div className="relative">
-            <h4 className="footer-heading text-xl mb-4">ساعات العمل</h4>
-            <div className="footer-hours-card">
-              <Clock className="h-8 w-8 text-[var(--pk-yellow)]" />
-              <div>
-                <p className="font-bold text-lg">مفتوح يومياً</p>
-                <p className="text-xl font-heading ltr-text" dir="ltr">10:00 AM - 12:00 AM</p>
+            {/* Column 1: Contact Info */}
+            <div>
+              <Link to="/" className="inline-block mb-5">
+                <img src={logoImg} alt="بيكابو" className="h-14" />
+              </Link>
+              <h4 className="footer-heading footer-heading-blue">معلومات التواصل</h4>
+              
+              {/* Address */}
+              <div className="mb-5">
+                <span className="footer-address-label">
+                  <MapPin className="h-4 w-4" />
+                  العنوان
+                </span>
+                <p className="text-[var(--text-secondary)] mt-2 leading-relaxed">
+                  ابو راشد مجمع السيف التجاري,<br />
+                  Wasfi At-Tal St., Irbid 11225
+                </p>
+              </div>
+              
+              {/* Phone & WhatsApp - Big buttons */}
+              <div className="flex flex-col gap-3">
+                <a href="tel:0777775652" className="footer-btn-new footer-btn-phone-new">
+                  <Phone className="h-5 w-5" />
+                  <span className="ltr-text" dir="ltr">0777775652</span>
+                </a>
+                <a href="https://wa.me/962777775652" target="_blank" rel="noopener noreferrer" className="footer-btn-new footer-btn-whatsapp-new">
+                  <MessageCircle className="h-5 w-5" />
+                  <span>واتساب</span>
+                </a>
               </div>
             </div>
-            
-            {/* Mascot waving */}
-            <img 
-              src={mascotImg} 
-              alt="بيكابو" 
-              className="hidden md:block absolute -bottom-8 left-0 w-28 h-28 transform -rotate-12 drop-shadow-lg"
-            />
-            
-            <Link to="/staff/login" className="footer-link text-sm mt-6 inline-block opacity-60 hover:opacity-100">
-              تسجيل دخول الإدارة
-            </Link>
-          </div>
-        </div>
 
-        <div className="border-t border-white/20 mt-12 pt-8 text-center">
-          <p className="footer-text text-lg">&copy; {new Date().getFullYear()} بيكابو. جميع الحقوق محفوظة.</p>
-          <p className="text-[var(--pk-yellow)] font-heading text-xl mt-2">بيكابو يصنع السعادة ✨</p>
+            {/* Column 2: Quick Links */}
+            <div>
+              <h4 className="footer-heading footer-heading-red">روابط سريعة</h4>
+              <ul className="space-y-3">
+                <li><Link to="/tickets" className="footer-link-new">تذاكر بالساعة</Link></li>
+                <li><Link to="/birthday" className="footer-link-new">حفلات أعياد الميلاد</Link></li>
+                <li><Link to="/subscriptions" className="footer-link-new">الاشتراكات</Link></li>
+                <li><Link to="/terms" className="footer-link-new">الشروط والأحكام</Link></li>
+              </ul>
+            </div>
+
+            {/* Column 3: Hours */}
+            <div>
+              <h4 className="footer-heading footer-heading-green">ساعات العمل</h4>
+              <div className="footer-hours-new">
+                <Clock className="h-7 w-7 text-[var(--pk-green)]" />
+                <div>
+                  <p className="font-bold text-[var(--text-primary)]">مفتوح يومياً</p>
+                  <p className="text-lg font-heading text-[var(--pk-blue)] ltr-text" dir="ltr">10:00 AM - 12:00 AM</p>
+                </div>
+              </div>
+              
+              <Link to="/staff/login" className="text-sm text-[var(--text-muted)] hover:text-[var(--pk-blue)] mt-6 inline-block">
+                تسجيل دخول الإدارة
+              </Link>
+            </div>
+          </div>
+
+          {/* Footer Bottom */}
+          <div className="border-t border-[var(--border-light)] mt-10 pt-8 text-center">
+            <p className="text-[var(--text-secondary)]">&copy; {new Date().getFullYear()} بيكابو. جميع الحقوق محفوظة.</p>
+            <p className="font-heading text-lg text-[var(--pk-orange)] mt-2">بيكابو يصنع السعادة ✨</p>
+          </div>
         </div>
       </div>
     </footer>
