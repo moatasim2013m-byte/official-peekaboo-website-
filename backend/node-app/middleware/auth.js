@@ -53,4 +53,4 @@ const staffMiddleware = async (req, res, next) => {
   next();
 };
 
-module.exports = { authMiddleware, adminMiddleware, staffMiddleware, JWT_SECRET };
+module.exports = { authMiddleware, adminMiddleware, staffMiddleware, getJwtSecret };
