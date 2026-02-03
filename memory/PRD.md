@@ -1,102 +1,61 @@
-# Peekaboo Indoor Playground - Product Requirements Document
+# Peekaboo Kids Indoor Playground - PRD
 
-## Overview
-A launch-ready web app for an indoor playground named "Peekaboo" in Jordan. The app allows parents to buy hourly tickets, book birthday parties, and purchase subscriptions. Admins and staff manage operations through dedicated panels.
+## Project Overview
+**Domain**: peekaboojor.com  
+**Brand**: Peekaboo  
+**Language**: Arabic (RTL-first)  
+**Target**: Parents of children aged 1-8 years in Jordan
 
-## User Roles
-- **Parent (Customer):** Books play sessions, parties, and subscriptions
-- **Admin:** Full control over pricing, themes, subscriptions, and business rules
-- **Staff:** Reception operations and check-in management
+## Core Features
 
-## Tech Stack
-- **Frontend:** React with Tailwind CSS, Shadcn/UI components
-- **Backend:** Node.js/Express (managed by Python wrapper)
-- **Database:** MongoDB
-- **Payments:** Stripe
-- **Emails:** Resend
+### Customer-Facing Pages
+1. **Homepage** - Hero, services overview, gallery
+2. **Hourly Play Booking** (`/tickets`) - Date, time slot, child selection, payment
+3. **Birthday Party Booking** (`/birthday`) - Date, theme, guest count, payment
+4. **Subscriptions** (`/subscriptions`) - Plan cards (5/10/15 visits), purchase
+5. **Profile** (`/profile`) - Children, bookings history, loyalty points
+6. **Auth** (`/login`, `/register`) - User authentication
 
-## Core Features (MVP)
-1. **Hourly Tickets:** Parents select duration and time slot, QR code for check-in
-2. **Birthday Parties:** Theme selection with admin-managed options, custom requests
-3. **Subscriptions:** Visit-based packages with 30-day validity
-4. **Loyalty Program:** Points awarded for purchases
-5. **Admin Panel:** Full CRUD for themes, plans, pricing, gallery
-6. **Staff Panel:** Reception with QR scanning for check-in
+### Payment Methods
+- **Card**: Stripe checkout redirect
+- **Cash**: Direct booking → Confirmation page → Pay at reception
+- **CliQ**: Direct booking → Confirmation page → Bank transfer info (Peekaboo1, Housing Bank)
 
-## Localization
-- **Primary Language:** Arabic (RTL)
-- **Direction:** Right-to-Left throughout the application
+### Admin/Staff Pages
+- Admin dashboard for managing slots, themes, bookings
+- Staff check-in interface
 
----
+## Technical Stack
+- **Frontend**: React.js + Tailwind CSS + Shadcn/UI
+- **Backend**: Node.js/Express (via FastAPI wrapper)
+- **Database**: MongoDB
+- **Payments**: Stripe
+- **Email**: Resend
 
-## Completed Work
+## Design System (FROZEN)
+- **Primary Yellow**: #F1C40F
+- **Secondary Pink**: #FF6B9D
+- **Sky Background**: #E8F6FF
+- **Headings**: Baloo Bhaijaan 2
+- **Body**: Cairo
+- **Cards**: Rounded 24-32px, soft blue shadows
 
-### January 30, 2026 - UI/UX Polish (RTL Arabic)
-**STATUS: COMPLETED**
+## Completed Work (Feb 2026)
+- ✅ Full visual overhaul matching mywonderland.co.nz quality
+- ✅ Payment method-dependent flow (Cash/CliQ no Stripe redirect)
+- ✅ Booking confirmation page with CliQ transfer details
+- ✅ Arabic email templates with payment status
+- ✅ Loyalty program UI in profile
+- ✅ Subscription days rule badges
+- ✅ Section containers with visual rhythm
+- ✅ Hero image fallback with object-contain
 
-Applied RTL Arabic localization and design tokens to all customer-facing pages:
+## Deployment Status
+- **Environment**: Ready for Google Cloud Run
+- **Domain**: peekaboojor.com (via Google Domains/Squarespace)
+- **Blockers Fixed**: JWT security, DB query optimization
 
-**Files Changed:**
-- `/app/frontend/src/pages/HomePage.js` - Full Arabic translation, RTL layout
-- `/app/frontend/src/pages/TicketsPage.js` - RTL direction added
-- `/app/frontend/src/pages/BirthdayPage.js` - Full Arabic translation, RTL layout
-- `/app/frontend/src/pages/ProfilePage.js` - Full Arabic translation, RTL layout
-- `/app/frontend/src/components/Navbar.js` - Arabic navigation, RTL direction
-- `/app/frontend/src/components/Footer.js` - Arabic content, RTL layout, logo integration
-
-**Key Changes:**
-- All English text converted to Arabic
-- RTL (`dir="rtl"`) applied to all page containers
-- Icon positioning adjusted for RTL (ChevronRight rotated 180°)
-- Navbar dropdown alignment changed from `align="end"` to `align="start"`
-- Footer uses logo image instead of emoji
-
-### Previous Completions
-- Backend stability fixes
-- Admin CRUD for Birthday Themes and Subscription Plans
-- Image upload system (multer + sharp)
-- Concurrent booking safety (atomic MongoDB checks)
-- Separate staff/admin login page (`/staff/login`)
-- Design token system in `index.css`
-- Subscriptions and Reception page UI polish
-
----
-
-## Upcoming Tasks (P1)
-
-### Multi-Child Booking ✅ COMPLETED
-Allow parents to book tickets for multiple children in a single transaction.
-- **Files:** `/app/frontend/src/pages/TicketsPage.js`, `/app/backend/node-app/routes/bookings.js`, `/app/backend/node-app/routes/payments.js`
-- **Implementation:**
-  - Checkbox-based multi-select for children
-  - Atomic capacity check for all children
-  - Price multiplied by child count
-  - Each child gets separate booking record with QR code
-
-### Profile Page - Active Session Countdown
-Display live countdown timer for children's play sessions.
-- **File:** `/app/frontend/src/pages/ProfilePage.js`
-- **Scope:** UI timer component with real-time updates
-
----
-
-## Future Tasks (P2)
-
-1. **Complete Global Arabic Localization** - Remaining admin panel text
-2. **Add Language Toggle** - UI switch for Arabic/English
-3. **Create Staff Test Checklist** - 8-step verification guide
-
----
-
-## Test Credentials
-- **Admin:** `admin@peekaboo.com` / `admin123` (via `/staff/login`)
-- **Staff:** `staff@peekaboo.com` / `staff123` (via `/staff/login`)
-- **Parent:** Register new user via signup page
-
----
-
-## Architecture Notes
-- Admin panel intentionally kept in bilingual English/Arabic for staff usability
-- Design tokens defined in `/app/frontend/src/index.css`
-- Image uploads stored in `/app/backend/node-app/uploads/`
-- Atomic MongoDB updates prevent race conditions in booking
+## Backlog (P2+)
+- Points Redemption Flow (QR code generation)
+- Groups booking page (functional)
+- Home Party page (functional)
