@@ -29,6 +29,8 @@ export default function TicketsPage() {
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [pricing, setPricing] = useState([]);
   const [extraHourText, setExtraHourText] = useState('');
+  const [showCliqModal, setShowCliqModal] = useState(false);
+  const [lastBooking, setLastBooking] = useState(null);
 
   useEffect(() => {
     fetchPricing();
