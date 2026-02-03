@@ -3,7 +3,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
-const { JWT_SECRET, authMiddleware } = require('../middleware/auth');
+const { getJwtSecret, authMiddleware } = require('../middleware/auth');
 const { sendEmail, emailTemplates } = require('../utils/email');
 
 const router = express.Router();
@@ -33,7 +33,7 @@ router.post('/register', async (req, res) => {
 
     await user.save();
 
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user._id }, getJwtSecret(), { expiresIn: '7d' });
 
     res.status(201).json({
       message: 'Registration successful',
@@ -65,7 +65,7 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user._id }, getJwtSecret(), { expiresIn: '7d' });
 
     res.json({
       message: 'Login successful',
