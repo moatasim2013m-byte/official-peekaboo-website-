@@ -160,9 +160,10 @@ export default function HomePage() {
                 data-testid="hero-image-clickable"
               >
                 <img 
-                  src={heroConfig.image || "https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg"}
+                  src={heroImgSrc}
                   alt="أطفال يلعبون في بيكابو"
                   className="w-full aspect-[4/3] object-contain transition-transform group-hover:scale-[1.02]"
+                  onError={() => setHeroImgSrc(HERO_FALLBACK)}
                   data-testid="hero-image"
                 />
                 {/* Hint overlay */}
