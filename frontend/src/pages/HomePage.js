@@ -308,7 +308,7 @@ export default function HomePage() {
 
       {/* CTA Section */}
       {!isAuthenticated && (
-        <section className="py-16 md:py-24 bg-primary">
+        <section className="section-container section-sky mx-4 md:mx-8 bg-primary !bg-primary">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 className="font-heading text-3xl md:text-5xl font-bold text-white mb-6" data-testid="cta-title">
               هل أنت مستعد للمتعة؟
