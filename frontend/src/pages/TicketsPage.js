@@ -127,18 +127,43 @@ export default function TicketsPage() {
 
     setLoading(true);
     try {
-      // Create checkout session with multiple children
-      const response = await api.post('/payments/create-checkout', {
-        type: 'hourly',
-        reference_id: selectedSlot.id,
-        child_ids: selectedChildren,
-        duration_hours: selectedDuration,
-        custom_notes: customNotes.trim(),
-        origin_url: window.location.origin
-      });
-
-      // Redirect to Stripe
-      window.location.href = response.data.url;
+      const amount = getSelectedPrice();
+      
+      if (paymentMethod === 'card') {
+        // Stripe checkout flow
+        const response = await api.post('/payments/create-checkout', {
+          type: 'hourly',
+          reference_id: selectedSlot.id,
+          child_ids: selectedChildren,
+          duration_hours: selectedDuration,
+          custom_notes: customNotes.trim(),
+          origin_url: window.location.origin
+        });
+        window.location.href = response.data.url;
+      } else {
+        // Cash or CliQ - create booking directly
+        const response = await api.post('/bookings/hourly/offline', {
+          slot_id: selectedSlot.id,
+          child_ids: selectedChildren,
+          duration_hours: selectedDuration,
+          custom_notes: customNotes.trim(),
+          payment_method: paymentMethod,
+          amount
+        });
+        
+        if (paymentMethod === 'cash') {
+          toast.success('تم الحجز بنجاح! الرجاء الدفع نقداً عند الاستقبال.');
+          navigate('/profile');
+        } else {
+          // CliQ - show modal with bank info
+          setLastBooking({ 
+            code: response.data.bookings?.[0]?.booking_code, 
+            amount 
+          });
+          setShowCliqModal(true);
+        }
+        setLoading(false);
+      }
     } catch (error) {
       toast.error(error.response?.data?.error || 'فشل إنشاء الحجز');
       setLoading(false);
