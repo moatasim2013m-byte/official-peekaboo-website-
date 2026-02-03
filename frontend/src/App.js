@@ -25,6 +25,7 @@ import ReceptionPage from "./pages/ReceptionPage";
 import TermsPage from "./pages/TermsPage";
 import GroupsPage from "./pages/GroupsPage";
 import HomePartyPage from "./pages/HomePartyPage";
+import BookingConfirmationPage from "./pages/BookingConfirmationPage";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false, staffOnly = false, parentOnly = false }) => {
