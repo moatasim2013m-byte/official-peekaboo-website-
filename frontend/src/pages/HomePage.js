@@ -56,6 +56,10 @@ export default function HomePage() {
           ctaRoute: s.hero_cta_route || heroConfig.ctaRoute,
           image: s.hero_image || ''
         });
+        // Set hero image src (prefer admin image, fallback if empty)
+        if (s.hero_image) {
+          setHeroImgSrc(s.hero_image);
+        }
       } catch (error) {
         console.error('Failed to fetch data:', error);
       }
