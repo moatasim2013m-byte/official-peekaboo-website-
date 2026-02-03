@@ -324,4 +324,4 @@ router.post('/generate', authMiddleware, adminMiddleware, async (req, res) => {
 
 module.exports = router;
 module.exports.checkHourlyCapacity = checkHourlyCapacity;
-module.exports.getAvailableCapacityForSlot = getAvailableCapacityForSlot;
+module.exports.calculateAvailableCapacityForSlot = calculateAvailableCapacityForSlot;
