@@ -201,7 +201,7 @@ export default function HomePage() {
             <X className="h-6 w-6" />
           </button>
           <img
-            src={heroConfig.image || "https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg"}
+            src={heroImgSrc}
             alt="أطفال يلعبون في بيكابو - عرض كامل"
             className="lightbox-image"
             onClick={(e) => e.stopPropagation()}
