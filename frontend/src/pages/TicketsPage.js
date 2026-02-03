@@ -454,6 +454,17 @@ export default function TicketsPage() {
           </Card>
         )}
       </div>
+
+      {/* CliQ Payment Info Modal */}
+      <CliqInfoModal 
+        open={showCliqModal}
+        onClose={() => {
+          setShowCliqModal(false);
+          navigate('/profile');
+        }}
+        bookingCode={lastBooking?.code}
+        amount={lastBooking?.amount}
+      />
     </div>
   );
 }
