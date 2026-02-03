@@ -106,6 +106,7 @@ function AppRoutes() {
       {/* Payment Routes */}
       <Route path="/payment/success" element={<Layout><PaymentSuccessPage /></Layout>} />
       <Route path="/payment/cancel" element={<Layout><PaymentCancelPage /></Layout>} />
+      <Route path="/booking-confirmation" element={<Layout><BookingConfirmationPage /></Layout>} />
 
       {/* Protected Routes - Parent Only */}
       <Route
