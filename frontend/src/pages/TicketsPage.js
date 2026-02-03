@@ -151,17 +151,29 @@ export default function TicketsPage() {
           amount
         });
         
-        if (paymentMethod === 'cash') {
-          toast.success('تم الحجز بنجاح! الرجاء الدفع نقداً عند الاستقبال.');
-          navigate('/profile');
-        } else {
-          // CliQ - show modal with bank info
-          setLastBooking({ 
-            code: response.data.bookings?.[0]?.booking_code, 
-            amount 
-          });
-          setShowCliqModal(true);
-        }
+        // Get child name(s) for confirmation
+        const selectedChildNames = children
+          .filter(c => selectedChildren.includes(c.id))
+          .map(c => c.name)
+          .join('، ');
+        
+        // Navigate to confirmation page with booking details
+        const confirmationData = {
+          bookingId: response.data.bookings?.[0]?.id,
+          bookingCode: response.data.bookings?.[0]?.booking_code,
+          bookingType: 'hourly',
+          childName: selectedChildNames,
+          date: selectedSlot.date,
+          time: selectedSlot.start_time,
+          duration: selectedDuration,
+          amount,
+          paymentMethod
+        };
+        
+        // Store in localStorage for refresh persistence
+        localStorage.setItem('pk_last_confirmation', JSON.stringify(confirmationData));
+        
+        navigate('/booking-confirmation', { state: confirmationData });
         setLoading(false);
       }
     } catch (error) {
