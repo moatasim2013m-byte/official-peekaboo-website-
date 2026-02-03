@@ -80,6 +80,58 @@ router.post('/purchase', authMiddleware, async (req, res) => {
   }
 });
 
+// Purchase subscription with cash/cliq payment (no Stripe)
+router.post('/purchase/offline', authMiddleware, async (req, res) => {
+  try {
+    const { plan_id, child_id, payment_method } = req.body;
+    
+    // Validate payment method
+    if (!['cash', 'cliq'].includes(payment_method)) {
+      return res.status(400).json({ error: 'طريقة دفع غير صالحة' });
+    }
+    
+    const plan = await SubscriptionPlan.findById(plan_id);
+    if (!plan || !plan.is_active) {
+      return res.status(400).json({ error: 'باقة غير صالحة' });
+    }
+
+    const child = await Child.findOne({ _id: child_id, parent_id: req.userId });
+    if (!child) {
+      return res.status(400).json({ error: 'طفل غير صالح' });
+    }
+
+    const paymentStatus = payment_method === 'cash' ? 'pending_cash' : 'pending_cliq';
+
+    const subscription = new UserSubscription({
+      user_id: req.userId,
+      child_id,
+      plan_id,
+      remaining_visits: plan.visits,
+      expires_at: null, // Will be set on first check-in
+      payment_method,
+      payment_status: paymentStatus,
+      status: 'pending' // Pending until first check-in activates it
+    });
+
+    await subscription.save();
+
+    // Send confirmation email
+    const user = await User.findById(req.userId);
+    const template = emailTemplates.subscriptionConfirmation(subscription, plan, child);
+    await sendEmail(user.email, template.subject, template.html);
+
+    res.status(201).json({ 
+      subscription: subscription.toJSON(),
+      message: payment_method === 'cash' 
+        ? 'تم الحجز بنجاح! الرجاء الدفع نقداً عند الاستقبال.' 
+        : 'تم الحجز بنجاح! الرجاء إتمام التحويل عبر CliQ.'
+    });
+  } catch (error) {
+    console.error('Purchase offline subscription error:', error);
+    res.status(500).json({ error: 'فشل شراء الاشتراك' });
+  }
+});
+
 // Get user's subscriptions
 router.get('/my', authMiddleware, async (req, res) => {
   try {
