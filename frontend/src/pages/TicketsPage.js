@@ -12,7 +12,6 @@ import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
 import { Clock, Users, Loader2, AlertCircle, Star } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
-import { CliqInfoModal } from '../components/CliqInfoModal';
 
 export default function TicketsPage() {
   const { isAuthenticated, api, user } = useAuth();
