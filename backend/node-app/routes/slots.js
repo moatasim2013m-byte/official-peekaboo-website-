@@ -129,9 +129,8 @@ const getActiveKidsAtTime = async (date, timeStr) => {
   return activeCount;
 };
 
-// Calculate available capacity for a new booking at a given slot
-// Must check all 60-minute windows this session would occupy
-const getAvailableCapacityForSlot = async (date, startTimeStr) => {
+// Optimized: Calculate available capacity using pre-fetched bookings
+const calculateAvailableCapacityForSlot = (date, startTimeStr, allBookings) => {
   const [startHour, startMinute] = startTimeStr.split(':').map(Number);
   const startTimeMinutes = startHour * 60 + startMinute;
   const endTimeMinutes = startTimeMinutes + HOURLY_CONFIG.sessionDurationMinutes;
@@ -140,12 +139,22 @@ const getAvailableCapacityForSlot = async (date, startTimeStr) => {
   
   // Check every 10-minute interval during this session
   for (let t = startTimeMinutes; t < endTimeMinutes; t += 10) {
-    const hour = Math.floor(t / 60);
-    const minute = t % 60;
-    const timeStr = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+    let activeCount = 0;
     
-    const activeKids = await getActiveKidsAtTime(date, timeStr);
-    maxActiveKids = Math.max(maxActiveKids, activeKids);
+    for (const booking of allBookings) {
+      if (!booking.slot_id || booking.slot_id.date !== date) continue;
+      
+      const [slotHour, slotMinute] = booking.slot_id.start_time.split(':').map(Number);
+      const slotStartMinutes = slotHour * 60 + slotMinute;
+      const slotEndMinutes = slotStartMinutes + HOURLY_CONFIG.sessionDurationMinutes;
+      
+      // Check if this session overlaps with the check time
+      if (slotStartMinutes <= t && t < slotEndMinutes) {
+        activeCount++;
+      }
+    }
+    
+    maxActiveKids = Math.max(maxActiveKids, activeCount);
   }
   
   return HOURLY_CONFIG.maxCapacity - maxActiveKids;
@@ -177,8 +186,19 @@ router.get('/available', async (req, res) => {
       is_active: true
     }).sort({ start_time: 1 });
 
-    // Process slots with availability
-    const availableSlots = await Promise.all(slots.map(async (slot) => {
+    // OPTIMIZATION: Fetch all bookings for the date ONCE (instead of per-slot)
+    let allBookings = [];
+    if (slot_type === 'hourly') {
+      allBookings = await HourlyBooking.find({
+        status: { $in: ['confirmed', 'checked_in'] }
+      }).populate({
+        path: 'slot_id',
+        select: 'date start_time'
+      }).lean();
+    }
+
+    // Process slots with availability (now using in-memory calculation)
+    const availableSlots = slots.map((slot) => {
       const slotDateTime = parse(`${slot.date} ${slot.start_time}`, 'yyyy-MM-dd HH:mm', new Date());
       const slotInAmman = toZonedTime(slotDateTime, TIMEZONE);
       
@@ -188,8 +208,8 @@ router.get('/available', async (req, res) => {
       let isAvailable;
       
       if (slot_type === 'hourly') {
-        // For hourly, calculate based on overlapping sessions
-        availableSpots = await getAvailableCapacityForSlot(date, slot.start_time);
+        // For hourly, calculate based on overlapping sessions (using cached bookings)
+        availableSpots = calculateAvailableCapacityForSlot(date, slot.start_time, allBookings);
         isAvailable = !isPast && availableSpots > 0;
       } else {
         // For birthday, simple capacity check
@@ -203,7 +223,7 @@ router.get('/available', async (req, res) => {
         is_available: isAvailable,
         is_past: isPast
       };
-    }));
+    });
 
     res.json({ slots: availableSlots });
   } catch (error) {
