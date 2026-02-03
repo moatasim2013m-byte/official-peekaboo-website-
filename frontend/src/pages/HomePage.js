@@ -115,16 +115,17 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <div className="order-2 md:order-1">
-              <h1 className="font-heading text-4xl md:text-6xl font-bold text-foreground mb-4" data-testid="hero-title">
-                {heroConfig.title}
-              </h1>
-              {/* Slogan with marker highlight */}
-              <p className="slogan-highlight mb-6">
-                <span className="slogan-text">✨ بيكابو يصنع السعادة</span>
-              </p>
-              <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
-                {heroConfig.subtitle}
-              </p>
+              {/* Hero Text Panel */}
+              <div className="hero-text-panel">
+                <h1 className="font-heading text-4xl md:text-6xl font-bold text-foreground mb-2" data-testid="hero-title">
+                  بيكابو يصنع السعادة
+                </h1>
+                {/* Decorative underline */}
+                <div className="hero-title-underline"></div>
+                <p className="text-lg md:text-xl text-muted-foreground mt-5 mb-6 leading-relaxed">
+                  {heroConfig.subtitle}
+                </p>
+              </div>
               <div className="flex flex-wrap gap-4">
                 <Link to={heroConfig.ctaRoute}>
                   <Button size="lg" className="rounded-full btn-playful text-lg px-8" data-testid="hero-book-btn">
