@@ -1,7 +1,20 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'peekaboo-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// Validate JWT_SECRET is set in production
+if (!JWT_SECRET) {
+  console.error('WARNING: JWT_SECRET environment variable is not set. Using default for development only.');
+}
+
+const getJwtSecret = () => {
+  if (JWT_SECRET) return JWT_SECRET;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET environment variable is required in production');
+  }
+  return 'peekaboo-dev-secret-only';
+};
 
 const authMiddleware = async (req, res, next) => {
   try {
@@ -11,7 +24,7 @@ const authMiddleware = async (req, res, next) => {
     }
 
     const token = authHeader.split(' ')[1];
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, getJwtSecret());
     
     const user = await User.findById(decoded.userId);
     if (!user) {
