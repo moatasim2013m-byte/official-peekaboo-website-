@@ -28,10 +28,13 @@ export const Navbar = () => {
     navigate('/');
   };
 
+  // Determine if this is customer navbar (not admin/staff)
+  const isCustomerNav = !isAdmin && !isStaff;
+
   return (
-    <nav className="bg-white border-b border-border sticky top-0 z-50 shadow-sm" dir="rtl">
+    <nav className={`sticky top-0 z-50 ${isCustomerNav ? 'navbar-customer' : 'bg-white border-b border-border shadow-sm'}`} dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-18 py-3">
+        <div className="flex justify-between items-center h-20 py-3">
           {/* Logo with Pill Container */}
           <Link to="/" className="brand-logo-pill" data-testid="nav-logo">
             <img src={logoImg} alt="بيكابو" className="brand-logo-lg" />
@@ -39,7 +42,7 @@ export const Navbar = () => {
 
           {/* Desktop Navigation - Show only for non-admin users */}
           {!isAdmin && (
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden md:flex items-center gap-3">
               <Link to="/tickets" className={`nav-pill pill-blue ${isActive('/tickets') ? 'active' : ''}`} data-testid="nav-tickets">
                 تذاكر بالساعة
               </Link>
