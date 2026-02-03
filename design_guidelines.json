@@ -1,156 +1,157 @@
 {
-  "identity": {
+  "brand_identity": {
     "name": "Peekaboo",
-    "persona": "E1 - The Anti-AI Designer",
-    "tone": "Playful, Energetic, Kid-Friendly, Trustworthy",
-    "theme_strategy": "Light Mode Dominant (Bright, Airy, Colorful). Dark mode reserved for 'Glow Party' specific sections only."
+    "core_values": ["Joyful", "Premium", "Safe", "Playful"],
+    "voice": "Friendly, Approachable, Professional, Arabic-First",
+    "target_audience": "Parents of children 1-8 years, Arabic speaking",
+    "theme_mode": "light",
+    "rtl_enforcement": true
   },
-  "typography": {
-    "primary_font": "Fredoka",
-    "secondary_font": "Nunito",
-    "import_url": "https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&family=Nunito:wght@400;500;600;700&display=swap",
-    "usage": {
-      "headings": "font-family: 'Fredoka', sans-serif; font-weight: 600;",
-      "body": "font-family: 'Nunito', sans-serif;",
-      "buttons": "font-family: 'Fredoka', sans-serif; font-weight: 500;"
-    },
-    "scale": {
-      "h1": "text-4xl md:text-6xl tracking-tight",
-      "h2": "text-3xl md:text-5xl",
-      "h3": "text-2xl md:text-3xl",
-      "body": "text-base md:text-lg leading-relaxed"
-    }
-  },
-  "colors": {
-    "palette": {
+  "design_system": {
+    "colors": {
       "primary": {
-        "name": "Peekaboo Purple",
-        "hex": "#8B5CF6",
-        "hsl": "258 70% 60%",
-        "usage": "Primary CTAs, Brand Headers, Active States"
+        "main": "#F1C40F",
+        "hover": "#D4AC0D",
+        "text": "#2C3E50",
+        "description": "Sunny Yellow - Main Action Color"
       },
       "secondary": {
-        "name": "Sunshine Yellow",
-        "hex": "#FBBF24",
-        "hsl": "43 96% 56%",
-        "usage": "Highlights, Badges, 'Fun' Accents"
-      },
-      "accent": {
-        "name": "Bubblegum Pink",
-        "hex": "#EC4899",
-        "hsl": "330 81% 60%",
-        "usage": "Secondary CTAs, Hearts, Likes"
+        "main": "#FF6B9D",
+        "hover": "#E64C7E",
+        "text": "#FFFFFF",
+        "description": "Playful Pink - Accents & Secondary Actions"
       },
       "background": {
-        "name": "Cloud White",
-        "hex": "#FFFFFF",
-        "hsl": "0 0% 100%",
-        "usage": "Main Background"
-      },
-      "surface": {
-        "name": "Soft Cream",
-        "hex": "#FFFBEB",
-        "hsl": "48 100% 96%",
-        "usage": "Card Backgrounds, Section Alternates"
+        "sky": "#E8F6FF",
+        "cream": "#FFF9E6",
+        "white": "#FFFFFF",
+        "gradient_sky": "linear-gradient(180deg, #E8F6FF 0%, #D6EAF8 100%)"
       },
       "text": {
-        "primary": "#1F2937",
-        "secondary": "#4B5563"
+        "primary": "#2C3E50",
+        "secondary": "#566573",
+        "muted": "#7F8C8D"
+      },
+      "status": {
+        "success": "#27AE60",
+        "error": "#E74C3C",
+        "info": "#3498DB"
       }
     },
-    "css_variables": {
-      "root": {
-        "--background": "0 0% 100%",
-        "--foreground": "260 20% 20%",
-        "--card": "0 0% 100%",
-        "--card-foreground": "260 20% 20%",
-        "--popover": "0 0% 100%",
-        "--popover-foreground": "260 20% 20%",
-        "--primary": "258 70% 60%",
-        "--primary-foreground": "0 0% 100%",
-        "--secondary": "43 96% 56%",
-        "--secondary-foreground": "260 20% 20%",
-        "--muted": "260 20% 96%",
-        "--muted-foreground": "260 10% 50%",
-        "--accent": "330 81% 60%",
-        "--accent-foreground": "0 0% 100%",
-        "--destructive": "0 84.2% 60.2%",
-        "--destructive-foreground": "0 0% 98%",
-        "--border": "260 20% 90%",
-        "--input": "260 20% 90%",
-        "--ring": "258 70% 60%",
-        "--radius": "1rem"
+    "typography": {
+      "font_family": {
+        "heading": "'Baloo Bhaijaan 2', 'Cairo', sans-serif",
+        "body": "'Cairo', sans-serif"
+      },
+      "scale": {
+        "h1": "text-4xl md:text-6xl font-bold tracking-tight",
+        "h2": "text-3xl md:text-5xl font-bold",
+        "h3": "text-2xl md:text-3xl font-semibold",
+        "body_lg": "text-lg md:text-xl leading-relaxed",
+        "body_base": "text-base leading-relaxed"
+      }
+    },
+    "spacing": {
+      "container_padding": "px-4 md:px-8 lg:px-16",
+      "section_spacing": "py-16 md:py-24",
+      "element_spacing": "gap-4 md:gap-8"
+    },
+    "visual_enhancers": {
+      "radius": {
+        "card": "rounded-3xl",
+        "button": "rounded-full",
+        "input": "rounded-xl"
+      },
+      "shadows": {
+        "card": "0 10px 30px -5px rgba(52, 152, 219, 0.1)",
+        "card_hover": "0 20px 40px -5px rgba(52, 152, 219, 0.2)",
+        "button": "0 4px 14px rgba(241, 196, 15, 0.4)",
+        "text_shadow": "0 2px 4px rgba(0,0,0,0.1)"
+      },
+      "gradients": {
+        "sky_overlay": "linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 100%)"
       }
     }
   },
-  "layout": {
-    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
-    "spacing": {
-      "section_padding": "py-12 md:py-24",
-      "element_gap": "gap-6 md:gap-8"
-    },
+  "layout_strategy": {
+    "rtl_rules": [
+      "Add dir='rtl' to the root html/body tag",
+      "Use logical properties: ms-* (margin-start), me-* (margin-end), ps-* (padding-start), pe-* (padding-end)",
+      "Use text-start and text-end instead of text-left/right",
+      "Mirror icons: Arrows should point left for 'next' and right for 'back'",
+      "Logo on Right, Navigation on Left (in RTL context)"
+    ],
     "grid_system": {
-      "marketing": "grid grid-cols-1 md:grid-cols-12 gap-8",
-      "dashboard": "grid grid-cols-1 md:grid-cols-4 gap-6"
+      "bento_grid": "grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8",
+      "hero_layout": "grid grid-cols-1 lg:grid-cols-2 gap-12 items-center"
     },
-    "border_radius": {
-      "default": "rounded-2xl",
-      "large": "rounded-3xl",
-      "button": "rounded-full"
+    "dividers": {
+      "wave_svg": "Use SVG wave dividers between sections to create a fluid, organic feel. Avoid straight lines."
     }
   },
   "components": {
     "buttons": {
-      "primary": "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 rounded-full px-8 py-6 text-lg font-bold",
-      "secondary": "bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-md hover:shadow-lg transition-all rounded-full px-6 py-4 font-bold",
-      "outline": "border-2 border-primary text-primary hover:bg-primary/10 rounded-full px-6 py-4 font-bold"
+      "primary": "bg-[#F1C40F] hover:bg-[#D4AC0D] text-[#2C3E50] font-bold py-4 px-8 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 active:translate-y-0",
+      "secondary": "bg-white text-[#FF6B9D] border-2 border-[#FF6B9D] font-bold py-3 px-6 rounded-full hover:bg-[#FFF0F5] transition-all"
     },
     "cards": {
-      "style": "bg-card border-2 border-border/50 shadow-sm hover:shadow-md transition-all rounded-3xl overflow-hidden",
-      "interactive": "hover:border-primary/50 hover:scale-[1.02] cursor-pointer"
+      "service_card": "bg-white rounded-3xl p-8 shadow-card hover:shadow-card-hover transition-all duration-300 border-2 border-transparent hover:border-[#F1C40F] group relative overflow-hidden",
+      "booking_card": "bg-white rounded-2xl p-6 shadow-md border border-gray-100"
     },
     "inputs": {
-      "style": "rounded-xl border-2 border-input focus:border-primary focus:ring-4 focus:ring-primary/20 h-12 bg-background/50 backdrop-blur-sm"
+      "style": "bg-gray-50 border-2 border-gray-100 focus:border-[#3498DB] rounded-xl px-4 py-3 w-full transition-colors outline-none text-gray-700 placeholder-gray-400"
+    },
+    "navigation": {
+      "container": "fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-white/20 shadow-sm",
+      "link": "text-[#2C3E50] font-bold hover:text-[#3498DB] transition-colors px-4 py-2 rounded-full hover:bg-blue-50"
     }
   },
-  "visual_enhancers": {
-    "shadows": "shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
-    "gradients": {
-      "hero": "bg-gradient-to-b from-purple-50 to-white",
-      "accent": "bg-gradient-to-r from-pink-500 to-purple-500"
-    },
-    "decorations": [
-      "Use floating shapes (circles, squiggles) in backgrounds using absolute positioning and low opacity",
-      "Use 'confetti' style patterns for celebration sections"
-    ]
-  },
-  "media": {
-    "image_urls": {
-      "hero_main": "https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg",
-      "birthday_party": "https://images.pexels.com/photos/6148511/pexels-photo-6148511.jpeg",
-      "family_fun": "https://images.pexels.com/photos/3951099/pexels-photo-3951099.png",
-      "gallery_1": "https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg",
-      "gallery_2": "https://images.pexels.com/photos/6148511/pexels-photo-6148511.jpeg",
-      "gallery_3": "https://images.pexels.com/photos/3951099/pexels-photo-3951099.png"
-    },
-    "icons": "Use 'Lucide React' with rounded stroke endings. Prefer filled icons for active states."
+  "assets": {
+    "images": {
+      "hero_main": {
+        "url": "https://images.unsplash.com/photo-1760704892974-60b5ddb59825?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwxfHxoYXBweSUyMGFyYWIlMjBjaGlsZCUyMHBsYXlpbmclMjBpbmRvb3IlMjBwbGF5Z3JvdW5kJTIwY29sb3JmdWx8ZW58MHx8fHwxNzcwMTIwMDMxfDA&ixlib=rb-4.1.0&q=85",
+        "alt": "Happy child playing with blocks",
+        "usage": "Hero Section Main Image"
+      },
+      "mascot_3d": {
+        "url": "https://images.unsplash.com/photo-1751127659089-fb4cd1283965?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHwyfHxjdXRlJTIwM2QlMjB5ZWxsb3clMjBtYXNjb3QlMjBjaGFyYWN0ZXIlMjBwbGF5ZnVsfGVufDB8fHx8MTc3MDExOTk5M3ww&ixlib=rb-4.1.0&q=85",
+        "alt": "Playful 3D Yellow Balloon Dog",
+        "usage": "Floating decorative element / Mascot"
+      },
+      "background_abstract": {
+        "url": "https://images.unsplash.com/photo-1750286747830-cbdbce72199a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwxfHwzZCUyMGFic3RyYWN0JTIwc29mdCUyMHNoYXBlcyUyMHllbGxvdyUyMHBpbmslMjBibHVlJTIwYmFja2dyb3VuZCUyMG1pbmltYWxpc3R8ZW58MHx8fHwxNzcwMTIwMDM3fDA&ixlib=rb-4.1.0&q=85",
+        "alt": "Abstract Soft Shapes",
+        "usage": "Section Backgrounds (Low Opacity)"
+      },
+      "ball_pit": {
+        "url": "https://images.unsplash.com/photo-1768054193070-ec10b5583bc4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTZ8MHwxfHNlYXJjaHwxfHxpbmRvb3IlMjBwbGF5Z3JvdW5kJTIwYmFsbCUyMHBpdCUyMGNvbG9yZnVsJTIwYnJpZ2h0fGVufDB8fHx8MTc3MDEyMDA0MXww&ixlib=rb-4.1.0&q=85",
+        "alt": "Colorful Ball Pit",
+        "usage": "Gallery / Services Section"
+      },
+      "birthday_party": {
+        "url": "https://images.unsplash.com/photo-1753742731099-028d1a0555fb?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTJ8MHwxfHNlYXJjaHwxfHxraWRzJTIwYmlydGhkYXklMjBwYXJ0eSUyMGluZG9vciUyMGJhbGxvb25zJTIwY2FrZXxlbnwwfHx8fDE3NzAxMjAwMDB8MA&ixlib=rb-4.1.0&q=85",
+        "alt": "Birthday Party Cupcakes",
+        "usage": "Birthday Booking Page"
+      }
+    }
   },
   "instructions_to_main_agent": [
-    "1. UPDATE index.css: Replace the root variables with the 'css_variables' provided above.",
-    "2. INSTALL FONTS: Add the Google Fonts import to index.css or index.html.",
-    "3. OVERRIDE SHADCN: Update ui/button.jsx and ui/card.jsx to match the 'components' styles defined here (rounded-full, border-2, etc).",
-    "4. MOBILE FIRST: Always design for mobile view first, then expand to md/lg.",
-    "5. DATA-TESTID: Add data-testid to all interactive elements (buttons, inputs, links).",
-    "6. NO CORPORATE VIBES: Avoid sharp corners (rounded-none) and standard grays. Use the 'Soft Cream' or 'Cloud White' backgrounds.",
-    "7. QR CODE: Use a standard library for QR generation, but frame it in a playful container."
+    "1. RTL FIRST: Ensure all layouts work perfectly in RTL. Use 'flex-row-reverse' if needed for specific LTR components in an RTL context, but rely on logical properties first.",
+    "2. THEME: Apply the 'sky-theme' class to the main wrapper of customer-facing pages.",
+    "3. TYPOGRAPHY: Use 'font-heading' (Baloo Bhaijaan 2) for all titles and 'font-body' (Cairo) for text.",
+    "4. COMPONENTS: Use the provided Shadcn components but style them with the 'visual_enhancers' defined above (rounded-3xl, soft shadows).",
+    "5. ANIMATION: Add 'hover:scale-105' and 'transition-transform' to all interactive cards and buttons.",
+    "6. IMAGES: Use the provided image URLs. Do not use placeholders.",
+    "7. DO NOT TOUCH: Admin/Staff pages should remain 'bg-professional' (neutral/white). Only style the customer journey.",
+    "8. NAVIGATION: Ensure the Navbar is sticky and has a glassmorphism effect."
   ],
   "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
     "Dark colors look good when used independently without gradients. DO NOT use dark colors as gradients",
     "Don't make generic centered layouts, simplistic gradients, and uniform styling.",
     "Create depth through layered design elements with z-index hierarchy",
     "Use glass-morphism effects with backdrop filters (12-24px blur)",
-    "You MUST NOT apply universal transition. Eg: `transition: all`. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms",
-    "You MUST NOT center align the app container, ie do not add `.App { text-align: center; }` in the css file. This disrupts the human natural reading flow of text",
+    "You MUST NOT apply universal transition. Eg: transition: all. This results in breaking transforms. Always add transitions for specific interactive elements like button, input excluding transforms",
+    "You MUST NOT center align the app container, ie do not add .App { text-align: center; } in the css file. This disrupts the human natural reading flow of text",
     "Always use modern button styles like pill-shaped, or sharp button with interaction animations & color relevant to the app style",
     "NEVER: use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯📚🎭🎬🎪🎉🎊🎁🎀🎂🍰🎈🎨🎰💰💵💳🏦💎🪙💸🤑📊📈📉💹🔢🏆🥇 etc for icons.",
     "Every interaction needs micro-animations - hover states, transitions, parallax effects, and entrance animations. Static = dead.",
@@ -162,6 +163,6 @@
     "Examine existing components to understand the project's component patterns before creating new ones",
     "Components MUST use named exports (export const ComponentName = ...)",
     "Pages MUST use default exports (export default function PageName() {...})",
-    "Use `sonner` for toasts. Sonner component are located in `/app/src/components/ui/sonner.tsx`"
+    "Use 'sonner' for toasts"
   ]
 }
