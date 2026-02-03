@@ -696,90 +696,201 @@ code {
     color: var(--brand-red);
 }
 
-/* Footer wrapper */
-.footer-wrapper {
-    background: linear-gradient(135deg, var(--pk-footer-blue) 0%, #154360 100%);
-    border-top: 4px solid var(--pk-yellow);
-    color: white;
+/* ===== PREMIUM FOOTER ===== */
+.footer-section {
+    background: var(--pk-bg-sky);
 }
 
-.footer-wrapper .footer-text {
-    color: rgba(255, 255, 255, 0.85);
+/* Wave Divider */
+.footer-wave {
+    height: 60px;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 100'%3E%3Cpath fill='%23FFFFFF' d='M0,50 C360,100 720,0 1080,50 C1260,75 1380,75 1440,50 L1440,100 L0,100 Z'/%3E%3C/svg%3E") no-repeat bottom center;
+    background-size: cover;
 }
 
-.footer-wrapper .footer-heading {
-    color: var(--pk-yellow);
+/* Footer Card Container */
+.footer-card {
+    background: white;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -8px 40px rgba(52, 152, 219, 0.1);
+    position: relative;
+    overflow: hidden;
 }
 
-.footer-wrapper .footer-link {
-    color: rgba(255, 255, 255, 0.85);
+/* Gradient top border */
+.footer-gradient-border {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--pk-blue), var(--pk-yellow), var(--pk-red), var(--pk-green));
 }
 
-.footer-wrapper .footer-link:hover {
-    color: var(--pk-yellow);
+/* Footer Mascot */
+.footer-mascot {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    width: 72px;
+    height: 72px;
+    transform: rotate(-8deg);
+    opacity: 0.9;
+    z-index: 0;
+    display: none;
 }
 
-/* Footer label (for address, etc) */
-.footer-label {
+@media (min-width: 768px) {
+    .footer-mascot {
+        display: block;
+    }
+}
+
+/* Colored Footer Headings */
+.footer-heading {
     font-family: var(--font-heading-ar);
     font-weight: 700;
-    color: var(--pk-yellow);
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    margin-bottom: 1.25rem;
 }
 
-/* Footer pill buttons */
-.footer-btn {
+.footer-heading-blue { color: var(--pk-blue); }
+.footer-heading-red { color: var(--pk-red); }
+.footer-heading-green { color: var(--pk-green); }
+
+/* Address Label Pill */
+.footer-address-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    background: linear-gradient(135deg, var(--pk-blue), #5DADE2);
+    color: white;
+    font-family: var(--font-heading-ar);
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 999px;
+}
+
+/* Footer Links */
+.footer-link-new {
+    color: var(--text-secondary);
+    font-size: 1rem;
+    transition: color 0.15s ease;
+}
+
+.footer-link-new:hover {
+    color: var(--pk-red);
+}
+
+/* Footer Buttons - New Style */
+.footer-btn-new {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.875rem 1.75rem;
+    padding: 0.875rem 1.5rem;
     border-radius: 999px;
     font-family: var(--font-heading-ar);
     font-weight: 700;
-    font-size: 1.125rem;
+    font-size: 1rem;
     width: 100%;
-    max-width: 220px;
+    max-width: 200px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.footer-btn-phone {
+.footer-btn-phone-new {
     background: white;
     color: var(--text-primary);
-    box-shadow: var(--shadow-toy);
+    border: 2px solid var(--pk-blue);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
 }
 
-.footer-btn-phone:hover {
-    background: var(--pk-yellow);
-    color: var(--text-primary);
-}
-
-.footer-btn-whatsapp {
-    background: linear-gradient(135deg, #25D366, #128C7E);
-    color: white;
-    box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
-    font-size: 1.25rem;
-    padding: 1rem 2rem;
-}
-
-.footer-btn-whatsapp:hover {
-    box-shadow: 0 8px 28px rgba(37, 211, 102, 0.5);
+.footer-btn-phone-new:hover {
+    background: var(--pk-bg-light-blue);
     transform: translateY(-2px);
 }
 
-/* Footer hours card */
-.footer-hours-card {
+.footer-btn-whatsapp-new {
+    background: linear-gradient(135deg, #25D366, #128C7E);
+    color: white;
+    box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+}
+
+.footer-btn-whatsapp-new:hover {
+    box-shadow: 0 6px 24px rgba(37, 211, 102, 0.45);
+    transform: translateY(-2px);
+}
+
+/* Footer Hours Box */
+.footer-hours-new {
     display: flex;
     align-items: center;
     gap: 1rem;
-    padding: 1.25rem;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 1rem;
+    background: var(--pk-bg-light-green);
+    border-radius: 16px;
+    border: 2px solid rgba(39, 174, 96, 0.2);
 }
 
-.footer-hours-card p {
-    color: white;
+/* ===== PREMIUM AUTH CARD ===== */
+.auth-card-premium {
+    background: white;
+    border-radius: 26px !important;
+    border: 2px solid rgba(52, 152, 219, 0.15) !important;
+    box-shadow: 0 12px 40px rgba(52, 152, 219, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* Mascot with yellow badge background */
+.auth-mascot-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-mascot-badge::before {
+    content: '';
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    background: linear-gradient(135deg, rgba(241, 196, 15, 0.25), rgba(241, 196, 15, 0.4));
+    border-radius: 50%;
+    z-index: 0;
+}
+
+@media (max-width: 640px) {
+    .auth-mascot-badge::before {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+.auth-mascot-img {
+    position: relative;
+    z-index: 1;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    border: 4px solid white;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    object-fit: cover;
+}
+
+@media (min-width: 640px) {
+    .auth-mascot-img {
+        width: 130px;
+        height: 130px;
+    }
+}
+
+/* Auth Slogan */
+.auth-slogan {
+    font-family: var(--font-heading-ar);
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: var(--pk-orange);
+    margin-top: 0.5rem;
 }
 
 /* ===== SLOGAN HIGHLIGHT ===== */
