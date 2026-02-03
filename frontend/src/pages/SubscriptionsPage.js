@@ -301,17 +301,6 @@ export default function SubscriptionsPage() {
           </>
         )}
       </div>
-
-      {/* CliQ Payment Info Modal */}
-      <CliqInfoModal 
-        open={showCliqModal}
-        onClose={() => {
-          setShowCliqModal(false);
-          navigate('/profile');
-        }}
-        bookingCode={lastSubscription?.planName}
-        amount={lastSubscription?.amount}
-      />
     </div>
   );
 }
