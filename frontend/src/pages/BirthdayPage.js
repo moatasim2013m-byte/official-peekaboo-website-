@@ -101,29 +101,57 @@ export default function BirthdayPage() {
 
   const handleStandardBooking = async () => {
     if (!isAuthenticated) {
-      toast.error('Please login to book');
+      toast.error('الرجاء تسجيل الدخول للحجز');
       navigate('/login');
       return;
     }
 
     if (!selectedSlot || !selectedTheme || !selectedChild) {
-      toast.error('Please select a slot, theme, and child');
+      toast.error('الرجاء اختيار الموعد والثيم والطفل');
       return;
     }
 
     setLoading(true);
     try {
-      const response = await api.post('/payments/create-checkout', {
-        type: 'birthday',
-        reference_id: selectedSlot.id,
-        theme_id: selectedTheme.id,
-        child_id: selectedChild,
-        origin_url: window.location.origin
-      });
-
-      window.location.href = response.data.url;
+      const amount = selectedTheme.price;
+      
+      if (paymentMethod === 'card') {
+        // Stripe checkout flow
+        const response = await api.post('/payments/create-checkout', {
+          type: 'birthday',
+          reference_id: selectedSlot.id,
+          theme_id: selectedTheme.id,
+          child_id: selectedChild,
+          origin_url: window.location.origin
+        });
+        window.location.href = response.data.url;
+      } else {
+        // Cash or CliQ - create booking directly
+        const response = await api.post('/bookings/birthday/offline', {
+          slot_id: selectedSlot.id,
+          child_id: selectedChild,
+          theme_id: selectedTheme.id,
+          guest_count: guestCount,
+          special_notes: specialNotes,
+          payment_method: paymentMethod,
+          amount
+        });
+        
+        if (paymentMethod === 'cash') {
+          toast.success('تم الحجز بنجاح! الرجاء الدفع نقداً عند الاستقبال.');
+          navigate('/profile');
+        } else {
+          // CliQ - show modal with bank info
+          setLastBooking({ 
+            code: response.data.booking?.booking_code, 
+            amount 
+          });
+          setShowCliqModal(true);
+        }
+        setLoading(false);
+      }
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to initiate booking');
+      toast.error(error.response?.data?.error || 'فشل إنشاء الحجز');
       setLoading(false);
     }
   };
