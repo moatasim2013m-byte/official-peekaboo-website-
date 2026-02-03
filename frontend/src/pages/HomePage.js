@@ -7,11 +7,14 @@ import { useTranslation } from '../i18n/useT';
 import { Clock, Cake, Star, ChevronRight, Play, Users, Home, X, ZoomIn } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 
+const HERO_FALLBACK = '/hero-fallback.jpg';
+
 export default function HomePage() {
   const { isAuthenticated, api } = useAuth();
   const { t } = useTranslation();
   const [gallery, setGallery] = useState([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [heroImgSrc, setHeroImgSrc] = useState(HERO_FALLBACK);
   const [heroConfig, setHeroConfig] = useState({
     title: 'حيث يلعب الأطفال ويحتفلون 🎈',
     subtitle: 'أفضل تجربة ملعب داخلي! احجز جلسات اللعب، أقم حفلات أعياد ميلاد لا تُنسى، ووفّر مع باقات الاشتراك',
