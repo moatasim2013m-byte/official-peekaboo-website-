@@ -1,79 +1,122 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
-import { Mail, Loader2, ArrowLeft } from 'lucide-react';
+import { Lock, Loader2, CheckCircle } from 'lucide-react';
 
-export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState('');
+export default function ResetPasswordPage() {
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get('token');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
-  const { forgotPassword } = useAuth();
+  const [success, setSuccess] = useState(false);
+  const { resetPassword } = useAuth();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast.error('كلمتا المرور غير متطابقتين');
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error('يجب أن تكون كلمة المرور 6 أحرف على الأقل');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await forgotPassword(email);
-      setSent(true);
-      toast.success('Check your email for reset instructions');
+      await resetPassword(token, password);
+      setSuccess(true);
+      toast.success('تم إعادة تعيين كلمة المرور بنجاح!');
+      setTimeout(() => navigate('/login'), 2000);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to send reset email');
+      toast.error(error.response?.data?.error || 'فشل إعادة تعيين كلمة المرور');
     } finally {
       setLoading(false);
     }
   };
 
+  if (!token) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center bg-hero-gradient py-12 px-4" dir="rtl">
+        <Card className="w-full max-w-md border-2 rounded-3xl shadow-xl">
+          <CardContent className="py-12 text-center">
+            <p className="text-destructive mb-4">رابط إعادة التعيين غير صالح أو مفقود</p>
+            <Link to="/forgot-password">
+              <Button className="rounded-full">طلب رابط جديد</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-hero-gradient py-12 px-4">
+    <div className="min-h-[80vh] flex items-center justify-center bg-hero-gradient py-12 px-4" dir="rtl">
       <Card className="w-full max-w-md border-2 rounded-3xl shadow-xl">
         <CardHeader className="text-center pb-2">
           <div className="flex justify-center mb-4">
-            <span className="text-5xl">🔐</span>
+            <span className="text-5xl">{success ? '✅' : '🔐'}</span>
           </div>
-          <CardTitle className="font-heading text-3xl" data-testid="forgot-title">Forgot Password?</CardTitle>
+          <CardTitle className="font-heading text-3xl" data-testid="reset-title">
+            {success ? 'تم إعادة التعيين!' : 'إعادة تعيين كلمة المرور'}
+          </CardTitle>
           <CardDescription className="text-base">
-            {sent 
-              ? 'Check your email for reset instructions'
-              : 'No worries! Enter your email and we\'ll send you a reset link'
+            {success 
+              ? 'تم تحديث كلمة المرور بنجاح'
+              : 'أدخل كلمة المرور الجديدة أدناه'
             }
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {sent ? (
+          {success ? (
             <div className="text-center space-y-6">
-              <div className="bg-primary/10 rounded-2xl p-6">
-                <p className="text-foreground">
-                  We've sent a password reset link to <strong>{email}</strong>
-                </p>
+              <div className="flex justify-center">
+                <CheckCircle className="h-16 w-16 text-green-500" />
               </div>
-              <Link to="/login">
-                <Button variant="outline" className="rounded-full">
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back to Login
-                </Button>
-              </Link>
+              <p className="text-muted-foreground">جاري التحويل إلى صفحة الدخول...</p>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="password">كلمة المرور الجديدة</Label>
                 <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10 rounded-xl h-12"
+                    id="password"
+                    type="password"
+                    placeholder="6 أحرف على الأقل"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pr-10 rounded-xl h-12"
                     required
-                    data-testid="forgot-email"
+                    data-testid="reset-password"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>
+                <div className="relative">
+                  <Lock className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="أعد إدخال كلمة المرور"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pr-10 rounded-xl h-12"
+                    required
+                    data-testid="reset-confirm-password"
                   />
                 </div>
               </div>
@@ -82,24 +125,17 @@ export default function ForgotPasswordPage() {
                 type="submit" 
                 className="w-full rounded-full h-12 text-lg btn-playful"
                 disabled={loading}
-                data-testid="forgot-submit"
+                data-testid="reset-submit"
               >
                 {loading ? (
                   <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Sending...
+                    <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                    جاري إعادة التعيين...
                   </>
                 ) : (
-                  'Send Reset Link'
+                  'إعادة تعيين كلمة المرور'
                 )}
               </Button>
-
-              <div className="text-center">
-                <Link to="/login" className="text-primary hover:underline inline-flex items-center gap-2">
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Login
-                </Link>
-              </div>
             </form>
           )}
         </CardContent>

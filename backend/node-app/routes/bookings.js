@@ -1,6 +1,6 @@
 const express = require('express');
 const QRCode = require('qrcode');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID } = require('crypto');
 const HourlyBooking = require('../models/HourlyBooking');
 const BirthdayBooking = require('../models/BirthdayBooking');
 const TimeSlot = require('../models/TimeSlot');
@@ -100,7 +100,7 @@ router.post('/hourly', authMiddleware, async (req, res) => {
     const pricePerChild = amount / childIdList.length;
     
     for (const cid of childIdList) {
-      const booking_code = `PK-H-${uuidv4().substring(0, 8).toUpperCase()}`;
+      const booking_code = `PK-H-${randomUUID().substring(0, 8).toUpperCase()}`;
       const qr_code = await generateQRCode(booking_code);
 
       const booking = new HourlyBooking({
@@ -190,7 +190,7 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
     const paymentStatus = payment_method === 'cash' ? 'pending_cash' : 'pending_cliq';
     
     for (const cid of childIdList) {
-      const booking_code = `PK-H-${uuidv4().substring(0, 8).toUpperCase()}`;
+      const booking_code = `PK-H-${randomUUID().substring(0, 8).toUpperCase()}`;
       const qr_code = await generateQRCode(booking_code);
 
       const booking = new HourlyBooking({
@@ -356,7 +356,7 @@ router.post('/birthday', authMiddleware, async (req, res) => {
       }
     }
 
-    const booking_code = `PK-B-${uuidv4().substring(0, 8).toUpperCase()}`;
+    const booking_code = `PK-B-${randomUUID().substring(0, 8).toUpperCase()}`;
 
     const booking = new BirthdayBooking({
       user_id: req.userId,
@@ -432,7 +432,7 @@ router.post('/birthday/offline', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'ثيم غير صالح' });
     }
 
-    const booking_code = `PK-B-${uuidv4().substring(0, 8).toUpperCase()}`;
+    const booking_code = `PK-B-${randomUUID().substring(0, 8).toUpperCase()}`;
     const paymentStatus = payment_method === 'cash' ? 'pending_cash' : 'pending_cliq';
 
     const booking = new BirthdayBooking({
@@ -499,7 +499,7 @@ router.post('/birthday/custom', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Invalid child' });
     }
 
-    const booking_code = `PK-BC-${uuidv4().substring(0, 8).toUpperCase()}`;
+    const booking_code = `PK-BC-${randomUUID().substring(0, 8).toUpperCase()}`;
 
     const booking = new BirthdayBooking({
       user_id: req.userId,

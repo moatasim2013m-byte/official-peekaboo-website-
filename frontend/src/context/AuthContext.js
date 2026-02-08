@@ -3,7 +3,13 @@ import axios from 'axios';
 
 const AuthContext = createContext(null);
 
-const API_URL = process.env.REACT_APP_BACKEND_URL;
+const RAW_API_URL = (process.env.REACT_APP_BACKEND_URL || "").trim();
+
+const API_URL =
+  !RAW_API_URL || RAW_API_URL === "undefined" || RAW_API_URL === "null"
+    ? ""
+    : RAW_API_URL;
+
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -13,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   // Create api instance that updates when token changes
   const api = useMemo(() => {
     const instance = axios.create({
-      baseURL: `${API_URL}/api`,
+      baseURL: API_URL ? `${API_URL}/api` : "/api",
     });
     
     // Add interceptor to always use latest token
@@ -78,6 +84,7 @@ export const AuthProvider = ({ children }) => {
     setUser(userData);
     return userData;
   };
+
 
   const register = async (name, email, password, phone = null) => {
     const response = await api.post('/auth/register', { name, email, password, phone });

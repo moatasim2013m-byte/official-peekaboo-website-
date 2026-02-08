@@ -1,11 +1,11 @@
-require('dotenv').config({ path: '../.env' });
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 8002;
+
 
 // Middleware
 app.use(cors({ origin: process.env.CORS_ORIGINS === '*' ? true : process.env.CORS_ORIGINS?.split(',') }));
@@ -39,6 +39,48 @@ app.use('/api/payments', paymentsRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/themes', themesRoutes);
+// ==================== START SERVER ====================
+// 2. Connect to MongoDB in the background
+console.log('⏳ Attempting to connect to MongoDB...');
+mongoose.connect(process.env.MONGO_URL, { dbName: process.env.DB_NAME })
+  .then(() => {
+    console.log('✅ Connected to MongoDB');
+  })
+  .catch(err => {
+    console.error('❌ MongoDB connection error:', err);
+  });
+
+
+// ==================== MONGODB CONNECT ====================
+const mongoUrl = process.env.MONGO_URL;
+const dbName = process.env.DB_NAME || 'peekaboo';
+
+if (!mongoUrl) {
+  console.error('❌ MONGO_URL is missing. App will run but DB features will NOT work.');
+} else {
+  console.log('⏳ Attempting to connect to MongoDB Atlas...');
+  mongoose
+    .connect(mongoUrl, { dbName })
+    .then(() => console.log('✅ Connected to MongoDB:', dbName))
+    .catch((err) => console.error('❌ MongoDB connection error:', err));
+}
+
+
+// ================= FRONTEND =================
+
+// Serve frontend build
+// ================= FRONTEND =================
+const fs = require('fs');
+const frontendBuildPath = path.join(__dirname, '../../frontend/build');
+
+console.log('[Peekaboo] Serving frontend from:', frontendBuildPath);
+
+app.use(express.static(frontendBuildPath));
+
+app.get(/^(?!\/api).*/, (req, res) => {
+  res.sendFile(path.join(frontendBuildPath, 'index.html'));
+});
+
 
 // Public settings endpoint (for homepage hero config)
 const Settings = require('./models/Settings');
@@ -67,14 +109,22 @@ app.get('/api/', (req, res) => {
 });
 
 // Connect to MongoDB
+// --- NEW STARTUP CODE ---
+
+// FIX: Define the PORT variable here!
+const PORT = process.env.PORT || 8080;
+// 1. Start the server IMMEDIATELY (Don't wait for DB)
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`✅ Server running immediately on port ${PORT}`);
+});
+
+// 2. Connect to MongoDB in the background
+console.log('⏳ Attempting to connect to MongoDB...');
 mongoose.connect(process.env.MONGO_URL, { dbName: process.env.DB_NAME })
   .then(() => {
-    console.log('Connected to MongoDB');
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+    console.log('✅ Connected to MongoDB');
   })
   .catch(err => {
-    console.error('MongoDB connection error:', err);
-    process.exit(1);
+    console.error('❌ MongoDB connection error:', err);
+    // Keep server alive even if DB fails initially
   });
