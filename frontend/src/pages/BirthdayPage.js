@@ -483,21 +483,24 @@ export default function BirthdayPage() {
                   />
                 </div>
 
-                <Button
-                  onClick={handleCustomRequest}
-                  disabled={!selectedSlot || !selectedChild || !customRequest || loading}
-                  className="rounded-full h-12 btn-playful bg-accent hover:bg-accent/90"
-                  data-testid="submit-custom-btn"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                      جاري الإرسال...
-                    </>
-                  ) : (
-                    'إرسال الطلب المخصص'
-                  )}
-                </Button>
+                {/* Sticky CTA Container */}
+                <div className="sticky bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-lg p-4 -mx-6 -mb-6 mt-6 z-50">
+                  <Button
+                    onClick={handleCustomRequest}
+                    disabled={!selectedSlot || !selectedChild || !customRequest || loading}
+                    className="w-full rounded-full h-14 btn-playful bg-accent hover:bg-accent/90 text-lg"
+                    data-testid="submit-custom-btn"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                        جاري الإرسال...
+                      </>
+                    ) : (
+                      'إرسال الطلب المخصص'
+                    )}
+                  </Button>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   لا يلزم الدفع للطلبات المخصصة. سيتواصل فريقنا معك بالأسعار.
                 </p>
