@@ -460,8 +460,14 @@ export default function TicketsPage() {
                   <div className="p-4 rounded-xl bg-muted/50 border">
                     <p className="text-sm text-muted-foreground mb-1">ملخص الحجز</p>
                     <p className="font-bold">
-                      {selectedDuration} ساعة × {selectedChildren.length || 1} طفل = {getSelectedPrice()} دينار
+                      {selectedSlot 
+                        ? `${selectedDuration} ساعة × ${selectedChildren.length || 1} طفل = ${(parseFloat(getSlotTotalPrice(selectedSlot.start_time)) * Math.max(1, selectedChildren.length)).toFixed(1)} دينار`
+                        : `${selectedDuration} ساعة × ${selectedChildren.length || 1} طفل = ${getSelectedPrice()} دينار`
+                      }
                     </p>
+                    {selectedSlot && getSlotPrice(selectedSlot.start_time) === 3.5 && (
+                      <p className="text-sm text-yellow-600 mt-1">⏰ Happy Hour Price (3.5 JD/hour)</p>
+                    )}
                     <p className="text-sm mt-1">
                       طريقة الدفع: <span className="font-bold">
                         {paymentMethod === 'cash' ? 'نقداً' : paymentMethod === 'card' ? 'بطاقة' : 'CliQ'}
