@@ -1,25 +1,13 @@
 require('dotenv').config();
+console.log('BOOT_START');
+console.log('PORT', process.env.PORT);
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 
-// ==================== ENV VALIDATION ====================
-const requiredEnvVars = ['SENDER_EMAIL', 'RESEND_API_KEY', 'MONGO_URL', 'FRONTEND_URL', 'JWT_SECRET'];
-
-console.log('=== Environment Variables Check ===');
-requiredEnvVars.forEach(varName => {
-  const isPresent = Boolean(process.env[varName]);
-  console.log(`ENV_OK ${varName} ${isPresent}`);
-  if (!isPresent) {
-    console.error(`FATAL: Required env var ${varName} is missing`);
-    process.exit(1);
-  }
-});
-console.log('=== All required env vars present ===');
-
 const app = express();
-
 
 // Middleware
 app.use(cors({ origin: process.env.CORS_ORIGINS === '*' ? true : process.env.CORS_ORIGINS?.split(',') }));
@@ -97,8 +85,25 @@ if (fs.existsSync(frontendBuildPath)) {
 // ==================== START SERVER ====================
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Server running on port ${PORT}`);
+  console.log('LISTENING', PORT);
 });
+
+// ==================== ENV VALIDATION ====================
+const requiredEnvVars = ['SENDER_EMAIL', 'RESEND_API_KEY', 'MONGO_URL', 'FRONTEND_URL', 'JWT_SECRET'];
+
+console.log('=== Environment Variables Check ===');
+let hasAllVars = true;
+requiredEnvVars.forEach(varName => {
+  const isPresent = Boolean(process.env[varName]);
+  console.log(`ENV_OK ${varName} ${isPresent}`);
+  if (!isPresent) {
+    console.error(`FATAL: Required env var ${varName} is missing`);
+    hasAllVars = false;
+  }
+});
+if (hasAllVars) {
+  console.log('=== All required env vars present ===');
+}
 
 // ==================== MONGODB CONNECT ====================
 const mongoUrl = process.env.MONGO_URL;
@@ -109,7 +114,10 @@ if (!mongoUrl) {
 } else {
   console.log('⏳ Attempting to connect to MongoDB...');
   mongoose
-    .connect(mongoUrl, { dbName })
+    .connect(mongoUrl, { 
+      dbName,
+      serverSelectionTimeoutMS: 10000
+    })
     .then(() => console.log('✅ Connected to MongoDB:', dbName))
     .catch((err) => console.error('❌ MongoDB connection error:', err));
 }
