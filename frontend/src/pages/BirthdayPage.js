@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
 import { Cake, Users, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
+import { PaymentCardIcons } from '../components/PaymentCardIcons';
 
 export default function BirthdayPage() {
   const { isAuthenticated, api } = useAuth();
@@ -395,6 +396,7 @@ export default function BirthdayPage() {
                       disabled={!selectedSlot || !selectedTheme || !selectedChild || loading}
                       className="w-full md:w-auto px-8 rounded-full h-12 btn-playful bg-accent hover:bg-accent/90"
                       data-testid="book-party-btn"
+                      aria-label="احجز وادفع - يقبل بطاقات فيزا وماستركارد"
                     >
                       {loading ? (
                         <>
@@ -402,7 +404,10 @@ export default function BirthdayPage() {
                           جاري المعالجة...
                         </>
                       ) : (
-                        'احجز وادفع'
+                        <span className="inline-flex items-center gap-2">
+                          <PaymentCardIcons />
+                          <span>احجز وادفع</span>
+                        </span>
                       )}
                     </Button>
                   </div>

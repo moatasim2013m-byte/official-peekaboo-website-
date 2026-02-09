@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
 import { Clock, Users, Loader2, AlertCircle, Star } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
+import { PaymentCardIcons } from '../components/PaymentCardIcons';
 
 export default function TicketsPage() {
   const { isAuthenticated, api, user } = useAuth();
@@ -431,6 +432,7 @@ export default function TicketsPage() {
                     onClick={handleBooking}
                     disabled={!selectedSlot || selectedChildren.length === 0 || loading}
                     className="w-full md:w-auto px-8 rounded-full h-12 btn-playful text-lg"
+                    aria-label={`احجز وادفع ${getSelectedPrice()} دينار - يقبل بطاقات فيزا وماستركارد`}
                   >
                     {loading ? (
                       <>
@@ -438,7 +440,10 @@ export default function TicketsPage() {
                         جاري المعالجة...
                       </>
                     ) : (
-                      `احجز وادفع - ${getSelectedPrice()} دينار`
+                      <span className="inline-flex items-center gap-2">
+                        <PaymentCardIcons />
+                        <span>{`احجز وادفع - ${getSelectedPrice()} دينار`}</span>
+                      </span>
                     )}
                   </Button>
                 </div>
