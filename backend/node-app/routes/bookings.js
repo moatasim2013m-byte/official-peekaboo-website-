@@ -141,7 +141,7 @@ router.post('/hourly', authMiddleware, async (req, res) => {
 // Create hourly booking with cash/cliq payment (no Stripe)
 router.post('/hourly/offline', authMiddleware, async (req, res) => {
   try {
-    const { slot_id, child_ids, child_id, duration_hours, custom_notes, payment_method, amount } = req.body;
+    const { slot_id, child_ids, child_id, duration_hours, custom_notes, payment_method, slot_start_time } = req.body;
     
     // Validate payment method
     if (!['cash', 'cliq'].includes(payment_method)) {
@@ -184,9 +184,14 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'طفل غير صالح' });
     }
 
+    // Calculate price on server side with Happy Hour logic
+    const hours = parseInt(duration_hours) || 2;
+    const basePrice = await getHourlyPrice(hours, slot_start_time);
+    const totalAmount = basePrice * childIdList.length;
+    const pricePerChild = totalAmount / childIdList.length;
+
     // Create a booking for each child
     const bookings = [];
-    const pricePerChild = amount / childIdList.length;
     const paymentStatus = payment_method === 'cash' ? 'pending_cash' : 'pending_cliq';
     
     for (const cid of childIdList) {
@@ -197,7 +202,7 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
         user_id: req.userId,
         child_id: cid,
         slot_id,
-        duration_hours: parseInt(duration_hours) || 2,
+        duration_hours: hours,
         custom_notes: custom_notes || '',
         qr_code,
         booking_code,
