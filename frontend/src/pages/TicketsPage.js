@@ -257,34 +257,96 @@ export default function TicketsPage() {
         {/* Duration Selection - BEFORE slot selection */}
         <Card className="border-2 rounded-3xl mb-8">
           <CardHeader>
-            <CardTitle className="font-heading text-xl">اختر مدة اللعب</CardTitle>
-            <CardDescription className="text-sm">{extraHourText}</CardDescription>
+            <CardTitle className="font-heading text-xl">اختر فترة اللعب</CardTitle>
+            <CardDescription className="text-sm">اختر الفترة الصباحية للاستفادة من عرض Happy Hour</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {pricing.map((option) => (
-                <button
-                  key={option.hours}
-                  onClick={() => setSelectedDuration(option.hours)}
-                  className={`relative p-6 rounded-2xl border-2 transition-all ${
-                    selectedDuration === option.hours
-                      ? 'border-primary bg-primary/10 shadow-lg'
-                      : 'border-border bg-white hover:border-primary/50'
-                  }`}
-                >
-                  {option.best_value && (
-                    <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white">
-                      <Star className="h-3 w-3 mr-1" />
-                      أفضل قيمة
-                    </Badge>
-                  )}
-                  <div className="text-center">
-                    <div className="font-heading text-3xl font-bold mb-2">{option.label_ar}</div>
-                    <div className="text-2xl font-bold text-primary mb-1">{option.price} دينار</div>
-                    <div className="text-sm text-muted-foreground">{option.price} JD</div>
-                  </div>
-                </button>
-              ))}
+          <CardContent className="space-y-6">
+            {/* Time Mode Toggle */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setTimeMode('morning')}
+                disabled={(() => {
+                  const now = new Date();
+                  const isToday = format(date, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd');
+                  return isToday && now.getHours() >= 14;
+                })()}
+                className={`flex-1 p-4 rounded-xl border-2 transition-all text-right ${
+                  timeMode === 'morning'
+                    ? 'border-yellow-500 bg-yellow-50'
+                    : 'border-gray-200 bg-white hover:border-yellow-300'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                <div className="font-bold text-lg mb-1">☀️ صباحي (Happy Hour)</div>
+                <div className="text-sm text-muted-foreground">10:00 ص - 2:00 م</div>
+                <div className="text-primary font-bold mt-1">3.5 دينار/ساعة</div>
+                {(() => {
+                  const now = new Date();
+                  const isToday = format(date, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd');
+                  return isToday && now.getHours() >= 14 && (
+                    <div className="text-xs text-destructive mt-1">انتهى وقت العرض اليوم</div>
+                  );
+                })()}
+              </button>
+              
+              <button
+                onClick={() => setTimeMode('afternoon')}
+                className={`flex-1 p-4 rounded-xl border-2 transition-all text-right ${
+                  timeMode === 'afternoon'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-gray-200 bg-white hover:border-primary/50'
+                }`}
+              >
+                <div className="font-bold text-lg mb-1">🌙 مسائي</div>
+                <div className="text-sm text-muted-foreground">بعد 2:00 م</div>
+                <div className="text-muted-foreground font-bold mt-1">الأسعار العادية</div>
+              </button>
+            </div>
+
+            {/* Note based on mode */}
+            {timeMode === 'morning' && (
+              <div className="flex items-center gap-2 text-sm text-yellow-700 bg-yellow-50 p-3 rounded-lg">
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <span>متاح فقط قبل الساعة 2:00 ظهراً</span>
+              </div>
+            )}
+
+            <div className="border-t pt-6">
+              <h3 className="font-heading text-lg mb-4">اختر مدة اللعب</h3>
+              <div className="text-sm text-muted-foreground mb-4">{extraHourText}</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {pricing.map((option) => {
+                  // Calculate price based on time mode
+                  const displayPrice = timeMode === 'morning' 
+                    ? (3.5 * option.hours).toFixed(1)
+                    : option.price;
+                  
+                  return (
+                    <button
+                      key={option.hours}
+                      onClick={() => setSelectedDuration(option.hours)}
+                      className={`relative p-6 rounded-2xl border-2 transition-all ${
+                        selectedDuration === option.hours
+                          ? 'border-primary bg-primary/10 shadow-lg'
+                          : 'border-border bg-white hover:border-primary/50'
+                      }`}
+                    >
+                      {option.best_value && timeMode !== 'morning' && (
+                        <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white">
+                          <Star className="h-3 w-3 mr-1" />
+                          أفضل قيمة
+                        </Badge>
+                      )}
+                      <div className="text-center">
+                        <div className="font-heading text-3xl font-bold mb-2">{option.label_ar}</div>
+                        <div className="text-2xl font-bold text-primary mb-1">{displayPrice} دينار</div>
+                        {timeMode === 'morning' && (
+                          <div className="text-xs text-yellow-600">Happy Hour</div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </CardContent>
         </Card>
