@@ -103,8 +103,8 @@ router.post('/forgot-password', async (req, res) => {
     user.reset_token_expires = new Date(Date.now() + 3600000); // 1 hour (60 minutes)
     await user.save();
 
-    const baseUrl = process.env.FRONTEND_URL || 'https://peekaboojor.com';
-    const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
+    const baseUrl = process.env.FRONTEND_URL; // Required env var validated at startup
+    const resetLink = `${baseUrl}/reset-password?token=${encodeURIComponent(resetToken)}`;
     console.log('FORGOT_LINK_OK', resetLink);
     
     const template = emailTemplates.passwordReset(resetLink);
