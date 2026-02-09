@@ -87,33 +87,32 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(400).json({ error: 'Email is required' });
     }
 
-    console.log('FORGOT_PASSWORD request for email:', email);
+    console.log('FORGOT_START', email);
 
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       // Don't reveal if email exists
-      console.log('FORGOT_PASSWORD: email not found (no action taken)');
       return res.json({ ok: true, message: 'If the email exists, a reset link will be sent' });
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
     user.reset_token = resetToken;
-    user.reset_token_expires = new Date(Date.now() + 3600000); // 1 hour
+    user.reset_token_expires = new Date(Date.now() + 3600000); // 1 hour (60 minutes)
     await user.save();
+    
+    console.log('FORGOT_TOKEN_OK');
 
     const baseUrl = process.env.FRONTEND_URL || 'https://peekaboojor.com';
     const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
+    console.log('FORGOT_LINK_OK', resetLink);
+    
     const template = emailTemplates.passwordReset(resetLink);
     
-    // Debug: verify Resend configuration
-    console.log('RESEND_FROM=' + (process.env.RESEND_FROM || 'MISSING'));
-    console.log('RESEND_KEY_PRESENT=' + Boolean(process.env.RESEND_API_KEY));
-    
     try {
-      const emailData = await sendEmail(user.email, template.subject, template.html);
-      console.log('RESEND_SENT id=' + emailData.id);
+      await sendEmail(user.email, template.subject, template.html);
+      console.log('FORGOT_EMAIL_SENT', user.email);
     } catch (emailError) {
-      console.error('RESEND_FAIL', emailError.message || emailError);
+      console.error('FORGOT_EMAIL_ERROR', emailError.message || emailError);
       // Continue and return success to user (don't reveal email sending failure)
     }
 
