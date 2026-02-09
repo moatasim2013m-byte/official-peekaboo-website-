@@ -51,10 +51,17 @@ export default function ResetPasswordPage() {
     return (
       <div className="min-h-[80vh] flex items-center justify-center bg-hero-gradient py-12 px-4">
         <Card className="w-full max-w-md border-2 rounded-3xl shadow-xl">
-          <CardContent className="py-12 text-center">
-            <p className="text-destructive mb-4">{t('Invalid or missing reset token')}</p>
+          <CardContent className="py-12 text-center space-y-6">
+            <div className="flex justify-center mb-4">
+              <span className="text-5xl">⚠️</span>
+            </div>
+            <p className="text-destructive text-lg font-semibold mb-4">
+              {t('Invalid or missing reset token')}
+            </p>
             <Link to="/forgot-password">
-              <Button className="rounded-full">{t('Request New Reset Link')}</Button>
+              <Button className="rounded-full px-8 py-6 text-lg btn-playful">
+                {t('Send New Link')}
+              </Button>
             </Link>
           </CardContent>
         </Card>
