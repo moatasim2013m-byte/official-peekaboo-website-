@@ -23,6 +23,8 @@ import AdminPage from "./pages/AdminPage";
 import StaffPage from "./pages/StaffPage";
 import ReceptionPage from "./pages/ReceptionPage";
 import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
+import RefundPage from "./pages/RefundPage";
 import GroupsPage from "./pages/GroupsPage";
 import HomePartyPage from "./pages/HomePartyPage";
 import BookingConfirmationPage from "./pages/BookingConfirmationPage";
@@ -100,6 +102,8 @@ function AppRoutes() {
       <Route path="/birthday" element={<Layout><BirthdayPage /></Layout>} />
       <Route path="/subscriptions" element={<Layout><SubscriptionsPage /></Layout>} />
       <Route path="/terms" element={<Layout><TermsPage /></Layout>} />
+      <Route path="/privacy" element={<Layout><PrivacyPage /></Layout>} />
+      <Route path="/refund" element={<Layout><RefundPage /></Layout>} />
       <Route path="/groups" element={<Layout><GroupsPage /></Layout>} />
       <Route path="/home-party" element={<Layout><HomePartyPage /></Layout>} />
       
