@@ -63,7 +63,13 @@ export const Footer = () => {
                 <li><Link to="/tickets" className="footer-link-new">تذاكر بالساعة</Link></li>
                 <li><Link to="/birthday" className="footer-link-new">حفلات أعياد الميلاد</Link></li>
                 <li><Link to="/subscriptions" className="footer-link-new">الاشتراكات</Link></li>
+              </ul>
+              
+              <h4 className="footer-heading footer-heading-red mt-6">السياسات</h4>
+              <ul className="space-y-3">
                 <li><Link to="/terms" className="footer-link-new">الشروط والأحكام</Link></li>
+                <li><Link to="/privacy" className="footer-link-new">سياسة الخصوصية</Link></li>
+                <li><Link to="/refund" className="footer-link-new">سياسة الاسترجاع</Link></li>
               </ul>
             </div>
 
