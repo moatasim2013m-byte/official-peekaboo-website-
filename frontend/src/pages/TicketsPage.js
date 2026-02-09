@@ -363,7 +363,7 @@ export default function TicketsPage() {
               <CardTitle className="font-heading">أكمل حجزك</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 gap-6">
+              <div className="grid grid-cols-1 gap-6 pb-24">{/* Added pb-24 for sticky button space */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <Label className="block text-sm font-medium mb-2">اختر الأطفال</Label>
