@@ -81,7 +81,7 @@ router.post('/login', async (req, res) => {
 // Forgot Password
 router.post('/forgot-password', async (req, res) => {
   try {
-    const { email, origin_url } = req.body;
+    const { email } = req.body;
     
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
@@ -98,9 +98,17 @@ router.post('/forgot-password', async (req, res) => {
     user.reset_token_expires = new Date(Date.now() + 3600000); // 1 hour
     await user.save();
 
-    const resetUrl = `${origin_url || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-    const template = emailTemplates.passwordReset(resetUrl);
-    await sendEmail(user.email, template.subject, template.html);
+    const baseUrl = process.env.FRONTEND_URL || 'https://peekaboojor.com';
+    const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
+    const template = emailTemplates.passwordReset(resetLink);
+    
+    try {
+      await sendEmail(user.email, template.subject, template.html);
+      console.log('Password reset email sent to:', user.email);
+    } catch (emailError) {
+      console.error('Failed to send reset email:', emailError);
+      // Continue and return success to user (don't reveal email sending failure)
+    }
 
     res.json({ message: 'If the email exists, a reset link will be sent' });
   } catch (error) {
