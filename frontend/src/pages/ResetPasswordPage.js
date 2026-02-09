@@ -92,7 +92,12 @@ export default function ResetPasswordPage() {
               <div className="flex justify-center">
                 <CheckCircle className="h-16 w-16 text-green-500" />
               </div>
-              <p className="text-muted-foreground">{t('Redirecting to login...')}</p>
+              <p className="text-muted-foreground mb-6">{t('Redirecting to login...')}</p>
+              <Link to="/login">
+                <Button className="w-full rounded-full h-12 text-lg btn-playful">
+                  {t('Back to Login')}
+                </Button>
+              </Link>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
