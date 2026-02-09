@@ -131,6 +131,7 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
         const hours = parseInt(duration_hours) || 2;
         const childIds = req.body.child_ids || (req.body.child_id ? [req.body.child_id] : []);
         const childCount = childIds.length || 1;
+        const slotStartTime = req.body.slot_start_time || null;
 
         // Check capacity before creating checkout
         const slot = await TimeSlot.findById(reference_id);
@@ -142,11 +143,12 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
           return res.status(400).json({ error: `عذراً، المتاح ${availableSpots} مكان فقط. اخترت ${childCount} أطفال.` });
         }
 
-        const basePrice = await getHourlyPrice(hours);
+        const basePrice = await getHourlyPrice(hours, slotStartTime);
         amount = basePrice * childCount;
         metadata.slot_id = reference_id;
         metadata.duration_hours = hours;
         metadata.child_ids = JSON.stringify(childIds);
+        if (slotStartTime) metadata.slot_start_time = slotStartTime;
         if (custom_notes) metadata.custom_notes = custom_notes;
         break;
       }
