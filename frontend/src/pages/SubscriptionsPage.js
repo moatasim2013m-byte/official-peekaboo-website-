@@ -217,7 +217,7 @@ export default function SubscriptionsPage() {
                 <CardHeader>
                   <CardTitle className="font-heading">أكمل عملية الشراء</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pb-24">{/* Added pb-24 for sticky button space */}
                   <div>
                     <label className="block text-sm font-medium mb-2">اختر الطفل</label>
                     {children.length === 0 ? (
