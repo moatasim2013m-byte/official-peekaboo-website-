@@ -87,10 +87,13 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(400).json({ error: 'Email is required' });
     }
 
+    console.log('FORGOT_PASSWORD request for email:', email);
+
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       // Don't reveal if email exists
-      return res.json({ message: 'If the email exists, a reset link will be sent' });
+      console.log('FORGOT_PASSWORD: email not found (no action taken)');
+      return res.json({ ok: true, message: 'If the email exists, a reset link will be sent' });
     }
 
     const resetToken = crypto.randomBytes(32).toString('hex');
@@ -103,14 +106,14 @@ router.post('/forgot-password', async (req, res) => {
     const template = emailTemplates.passwordReset(resetLink);
     
     try {
-      await sendEmail(user.email, template.subject, template.html);
-      console.log('Password reset email sent to:', user.email);
+      const emailData = await sendEmail(user.email, template.subject, template.html);
+      console.log('RESEND_SENT id=' + emailData.id);
     } catch (emailError) {
-      console.error('Failed to send reset email:', emailError);
+      console.error('RESEND_FAIL', emailError.message || emailError);
       // Continue and return success to user (don't reveal email sending failure)
     }
 
-    res.json({ message: 'If the email exists, a reset link will be sent' });
+    res.json({ ok: true, message: 'If the email exists, a reset link will be sent' });
   } catch (error) {
     console.error('Forgot password error:', error);
     res.status(500).json({ error: 'Failed to process request' });
