@@ -391,25 +391,29 @@ export default function BirthdayPage() {
                         <p className="text-sm">طريقة الدفع: {paymentMethod === 'cash' ? 'نقداً' : paymentMethod === 'card' ? 'بطاقة' : 'CliQ'}</p>
                       </div>
                     )}
-                    <Button
-                      onClick={handleStandardBooking}
-                      disabled={!selectedSlot || !selectedTheme || !selectedChild || loading}
-                      className="w-full md:w-auto px-8 rounded-full h-12 btn-playful bg-accent hover:bg-accent/90"
-                      data-testid="book-party-btn"
-                      aria-label="احجز وادفع - يقبل بطاقات فيزا وماستركارد"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                          جاري المعالجة...
-                        </>
-                      ) : (
-                        <span className="inline-flex items-center gap-2">
-                          <PaymentCardIcons />
-                          <span>احجز وادفع</span>
-                        </span>
-                      )}
-                    </Button>
+                    
+                    {/* Sticky CTA Container */}
+                    <div className="sticky bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-lg p-4 -mx-6 -mb-6 mt-6 z-50">
+                      <Button
+                        onClick={handleStandardBooking}
+                        disabled={!selectedSlot || !selectedTheme || !selectedChild || loading}
+                        className="w-full px-8 rounded-full h-14 btn-playful bg-accent hover:bg-accent/90 text-lg"
+                        data-testid="book-party-btn"
+                        aria-label="احجز وادفع - يقبل بطاقات فيزا وماستركارد"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                            جاري المعالجة...
+                          </>
+                        ) : (
+                          <span className="inline-flex items-center gap-2">
+                            <PaymentCardIcons />
+                            <span>احجز وادفع</span>
+                          </span>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
