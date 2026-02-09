@@ -4,7 +4,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async (to, subject, html) => {
   try {
-    const fromEmail = process.env.SENDER_EMAIL || process.env.RESEND_FROM || 'Peekaboo <support@peekaboojor.com>';
+    const fromEmail = process.env.SENDER_EMAIL; // Required env var validated at startup
     console.log('EMAIL_FROM_USED', fromEmail);
     
     const { data, error } = await resend.emails.send({
