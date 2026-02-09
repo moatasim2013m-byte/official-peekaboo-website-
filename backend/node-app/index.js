@@ -4,6 +4,20 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 
+// ==================== ENV VALIDATION ====================
+const requiredEnvVars = ['SENDER_EMAIL', 'RESEND_API_KEY', 'MONGO_URL', 'FRONTEND_URL', 'JWT_SECRET'];
+
+console.log('=== Environment Variables Check ===');
+requiredEnvVars.forEach(varName => {
+  const isPresent = Boolean(process.env[varName]);
+  console.log(`ENV_OK ${varName} ${isPresent}`);
+  if (!isPresent) {
+    console.error(`FATAL: Required env var ${varName} is missing`);
+    process.exit(1);
+  }
+});
+console.log('=== All required env vars present ===');
+
 const app = express();
 
 
