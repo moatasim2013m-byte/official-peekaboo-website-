@@ -53,6 +53,11 @@ export default function TicketsPage() {
     }
   }, [selectedDuration]);
 
+  useEffect(() => {
+    // Clear selected slot when time mode changes
+    setSelectedSlot(null);
+  }, [timeMode]);
+
   const fetchPricing = async () => {
     try {
       const response = await api.get('/payments/hourly-pricing');
