@@ -480,11 +480,12 @@ export default function TicketsPage() {
                   </div>
                 )}
 
-                <div className="flex justify-end">
+                {/* Sticky CTA Container */}
+                <div className="sticky bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-lg p-4 -mx-6 -mb-6 mt-6 z-50">
                   <Button
                     onClick={handleBooking}
                     disabled={!selectedSlot || selectedChildren.length === 0 || loading}
-                    className="w-full md:w-auto px-8 rounded-full h-12 btn-playful text-lg"
+                    className="w-full px-8 rounded-full h-14 btn-playful text-lg"
                     aria-label={`احجز وادفع ${getSelectedPrice()} دينار - يقبل بطاقات فيزا وماستركارد`}
                   >
                     {loading ? (
