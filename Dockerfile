@@ -30,6 +30,5 @@ ENV PORT=8080
 EXPOSE 8080
 
 # FIX: Add the dummy key so the app starts
-ENV RESEND_API_KEY=DWx9Yo5R_BR3TwVp5VsTE6Xz58uceZxws
 
 CMD ["node", "backend/node-app/index.js"]
