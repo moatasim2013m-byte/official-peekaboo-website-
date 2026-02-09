@@ -9,6 +9,7 @@ import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
 import { Star, Check, Loader2 } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
+import { PaymentCardIcons } from '../components/PaymentCardIcons';
 
 export default function SubscriptionsPage() {
   const { isAuthenticated, api } = useAuth();
@@ -270,6 +271,7 @@ export default function SubscriptionsPage() {
                       disabled={!selectedPlan || !selectedChild || loading}
                       className="w-full md:w-auto px-8 rounded-full h-12 btn-playful bg-secondary hover:bg-secondary/90 text-secondary-foreground"
                       data-testid="purchase-btn"
+                      aria-label="اشترِ الآن - يقبل بطاقات فيزا وماستركارد"
                     >
                       {loading ? (
                         <>
@@ -277,7 +279,10 @@ export default function SubscriptionsPage() {
                           جاري المعالجة...
                         </>
                       ) : (
-                        'اشترِ الآن'
+                        <span className="inline-flex items-center gap-2">
+                          <PaymentCardIcons />
+                          <span>اشترِ الآن</span>
+                        </span>
                       )}
                     </Button>
                   </div>
