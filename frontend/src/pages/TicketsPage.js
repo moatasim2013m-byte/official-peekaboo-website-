@@ -308,6 +308,10 @@ export default function TicketsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                   {getFilteredSlots().map((slot) => {
                     const endTime = getEndTime(slot.start_time, selectedDuration);
+                    const pricePerHour = getSlotPrice(slot.start_time);
+                    const totalPrice = getSlotTotalPrice(slot.start_time);
+                    const isHappyHour = pricePerHour === 3.5;
+                    
                     return (
                       <button
                         key={slot.id}
@@ -324,6 +328,14 @@ export default function TicketsPage() {
                         <div className="font-heading font-semibold text-lg">
                           {slot.start_time} → {endTime}
                         </div>
+                        {totalPrice && (
+                          <div className="text-primary font-bold mt-1">
+                            {totalPrice} دينار
+                            {isHappyHour && (
+                              <span className="block text-xs text-yellow-600">⏰ Happy Hour</span>
+                            )}
+                          </div>
+                        )}
                         <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground mt-1">
                           <Users className="h-4 w-4" />
                           {slot.available_spots} متاح
