@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../i18n/useT';
 import { Clock, Cake, Star, ChevronRight, Play, Users, Home, X, ZoomIn } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
+import { PaymentCardIcons } from '../components/PaymentCardIcons';
 
 const HERO_FALLBACK = '/hero-fallback.jpg';
 
