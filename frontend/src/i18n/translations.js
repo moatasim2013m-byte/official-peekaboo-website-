@@ -184,5 +184,23 @@ export const translations = {
     'Fun Moments at Peekaboo': 'Fun Moments at Peekaboo',
     'See what makes us special!': 'See what makes us special!',
     'Gallery image': 'Gallery image',
+    
+    // Reset Password Page
+    'Reset Password': 'Reset Password',
+    'Password Reset!': 'Password Reset!',
+    'Enter your new password below': 'Enter your new password below',
+    'Your password has been updated successfully': 'Your password has been updated successfully',
+    'New Password': 'New Password',
+    'Confirm New Password': 'Confirm New Password',
+    'At least 6 characters': 'At least 6 characters',
+    'Confirm your password': 'Confirm your password',
+    'Resetting...': 'Resetting...',
+    'Redirecting to login...': 'Redirecting to login...',
+    'Invalid or missing reset token': 'Invalid or missing reset token',
+    'Request New Reset Link': 'Request New Reset Link',
+    'Passwords do not match': 'Passwords do not match',
+    'Password must be at least 6 characters': 'Password must be at least 6 characters',
+    'Password reset successful!': 'Password reset successful!',
+    'Failed to reset password': 'Failed to reset password',
   }
 };
