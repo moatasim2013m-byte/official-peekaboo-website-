@@ -123,6 +123,7 @@ if (!mongoUrl) {
     .then(() => {
       const dbName = process.env.DB_NAME || 'from URI';
       console.log('✅ Connected to MongoDB:', dbName);
+      console.log('DB_CONNECTED name=' + mongoose.connection.name + ' host=' + mongoose.connection.host);
     })
     .catch((err) => console.error('❌ MongoDB connection error:', err));
 }
