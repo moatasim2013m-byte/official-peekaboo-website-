@@ -107,17 +107,22 @@ if (hasAllVars) {
 
 // ==================== MONGODB CONNECT ====================
 const mongoUrl = process.env.MONGO_URL;
-const dbName = process.env.DB_NAME || 'peekaboo';
 
 if (!mongoUrl) {
   console.error('❌ MONGO_URL is missing. App will run but DB features will NOT work.');
 } else {
   console.log('⏳ Attempting to connect to MongoDB...');
+  
+  const options = { serverSelectionTimeoutMS: 10000 };
+  if (process.env.DB_NAME) {
+    options.dbName = process.env.DB_NAME;
+  }
+  
   mongoose
-    .connect(mongoUrl, { 
-      dbName,
-      serverSelectionTimeoutMS: 10000
+    .connect(mongoUrl, options)
+    .then(() => {
+      const dbName = process.env.DB_NAME || 'from URI';
+      console.log('✅ Connected to MongoDB:', dbName);
     })
-    .then(() => console.log('✅ Connected to MongoDB:', dbName))
     .catch((err) => console.error('❌ MongoDB connection error:', err));
 }
