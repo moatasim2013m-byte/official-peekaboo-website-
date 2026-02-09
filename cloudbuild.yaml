@@ -13,5 +13,10 @@ steps:
      "--region=us-west1",
      "--platform=managed",
      "--allow-unauthenticated"]
+
 images:
 - gcr.io/$PROJECT_ID/peekaboo
+
+# 👇 ADD THIS BLOCK
+options:
+  logging: CLOUD_LOGGING_ONLY
