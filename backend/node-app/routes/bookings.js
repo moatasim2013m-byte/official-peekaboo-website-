@@ -16,6 +16,55 @@ const { addMinutes, isBefore, isAfter } = require('date-fns');
 const router = express.Router();
 const LOYALTY_POINTS_PER_ORDER = 10;
 
+// Helper function for Happy Hour pricing
+const getHourlyPrice = async (duration_hours = 2, slot_start_time = null) => {
+  const hours = parseInt(duration_hours) || 2;
+
+  // Happy Hour logic: 10:00-13:59 => 3.5 JD per hour
+  if (slot_start_time) {
+    try {
+      const [startHour] = slot_start_time.split(':').map(Number);
+      const isHappyHour = startHour >= 10 && startHour < 14;
+      
+      if (isHappyHour) {
+        return 3.5 * hours; // Happy Hour: 3.5 JD per hour
+      }
+    } catch (err) {
+      console.error('Error parsing slot_start_time:', err);
+      // Fall through to normal pricing
+    }
+  }
+
+  try {
+    // Fetch pricing from Settings
+    const pricing = await Settings.find({
+      key: { $in: ['hourly_1hr', 'hourly_2hr', 'hourly_3hr', 'hourly_extra_hr'] }
+    });
+
+    const prices = {
+      hourly_1hr: 7,
+      hourly_2hr: 10,
+      hourly_3hr: 13,
+      hourly_extra_hr: 3
+    };
+
+    pricing.forEach(p => { prices[p.key] = parseFloat(p.value); });
+
+    if (hours === 1) return prices.hourly_1hr;
+    if (hours === 2) return prices.hourly_2hr;
+    if (hours === 3) return prices.hourly_3hr;
+    // For 4+ hours: 2h base price + extra hour price per additional hour
+    return prices.hourly_2hr + (hours - 2) * prices.hourly_extra_hr;
+  } catch (error) {
+    console.error('Error fetching hourly pricing:', error);
+    // Fallback to defaults
+    if (hours === 1) return 7;
+    if (hours === 2) return 10;
+    if (hours === 3) return 13;
+    return 10 + (hours - 2) * 3;
+  }
+};
+
 // Generate QR code as data URL
 const generateQRCode = async (data) => {
   try {
