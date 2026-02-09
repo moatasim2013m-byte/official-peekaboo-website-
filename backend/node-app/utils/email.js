@@ -25,7 +25,7 @@ const sendEmail = async (to, subject, html) => {
 
 const emailTemplates = {
   passwordReset: (resetUrl) => ({
-    subject: '🔐 بيكابو - إعادة تعيين كلمة المرور',
+    subject: 'إعادة تعيين كلمة المرور - بيكابو',
     html: `
       <!DOCTYPE html>
       <html dir="rtl" lang="ar">
@@ -40,6 +40,7 @@ const emailTemplates = {
           .content { background: #FFF9E6; border-radius: 16px; padding: 20px; margin: 20px 0; text-align: center; color: #2C3E50; }
           .btn { display: inline-block; background: #F1C40F; color: #2C3E50; padding: 16px 32px; border-radius: 50px; text-decoration: none; margin: 20px 0; font-weight: bold; }
           .note { font-size: 14px; color: #7F8C8D; text-align: center; margin-top: 16px; }
+          .link-fallback { font-size: 12px; color: #7F8C8D; word-break: break-all; margin-top: 16px; text-align: center; }
           .footer { text-align: center; color: #7F8C8D; font-size: 14px; margin-top: 24px; padding-top: 20px; border-top: 1px solid #EAEDED; }
         </style>
       </head>
@@ -57,7 +58,11 @@ const emailTemplates = {
           </p>
           <p class="note">
             ⚠️ هذا الرابط صالح لمدة ساعة واحدة فقط.<br>
-            <strong>إذا لم تطلب ذلك، تجاهل الرسالة</strong> - حسابك آمن ولن يتم تغييره.
+            <strong>إذا لم تطلب ذلك، تجاهل هذه الرسالة</strong> - حسابك آمن ولن يتم تغييره.
+          </p>
+          <p class="link-fallback">
+            أو انسخ هذا الرابط والصقه في المتصفح:<br>
+            <a href="${resetUrl}" style="color: #3498DB;">${resetUrl}</a>
           </p>
           <div class="footer">
             <p>فريق بيكابو 🎪</p>
