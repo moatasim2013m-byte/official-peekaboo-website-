@@ -186,6 +186,31 @@ export default function TicketsPage() {
     return basePrice * Math.max(1, selectedChildren.length);
   };
 
+  // Helper function for Happy Hour pricing (10:00-14:00)
+  const getSlotPrice = (startTime) => {
+    if (!startTime) return null;
+    
+    // Parse the time string (format: "HH:mm")
+    const [hours] = startTime.split(':').map(Number);
+    
+    // Happy Hour: 10:00 to 13:59 (before 14:00)
+    const isHappyHour = hours >= 10 && hours < 14;
+    
+    if (isHappyHour) {
+      return 3.5; // Happy Hour price per hour
+    }
+    
+    // Normal price from pricing data
+    const selected = pricing.find(p => p.hours === selectedDuration);
+    return selected ? selected.price / selected.hours : null;
+  };
+
+  const getSlotTotalPrice = (startTime) => {
+    const pricePerHour = getSlotPrice(startTime);
+    if (!pricePerHour) return null;
+    return (pricePerHour * selectedDuration).toFixed(1);
+  };
+
   const toggleChildSelection = (childId) => {
     setSelectedChildren(prev => 
       prev.includes(childId) 
