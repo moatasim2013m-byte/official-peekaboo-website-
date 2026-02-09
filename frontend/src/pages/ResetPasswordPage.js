@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
@@ -19,6 +19,11 @@ export default function ResetPasswordPage() {
   const { resetPassword } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+
+  useEffect(() => {
+    console.log('RESET_URL', window.location.href);
+    console.log('RESET_TOKEN', token || 'null');
+  }, [token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
