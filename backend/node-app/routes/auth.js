@@ -91,16 +91,17 @@ router.post('/forgot-password', async (req, res) => {
 
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
+      console.log('FORGOT_NO_USER');
       // Don't reveal if email exists
       return res.json({ ok: true, message: 'If the email exists, a reset link will be sent' });
     }
+
+    console.log('FORGOT_USER_FOUND');
 
     const resetToken = crypto.randomBytes(32).toString('hex');
     user.reset_token = resetToken;
     user.reset_token_expires = new Date(Date.now() + 3600000); // 1 hour (60 minutes)
     await user.save();
-    
-    console.log('FORGOT_TOKEN_OK');
 
     const baseUrl = process.env.FRONTEND_URL || 'https://peekaboojor.com';
     const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
