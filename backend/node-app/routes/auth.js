@@ -84,7 +84,7 @@ router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     
     if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
+      return res.status(400).json({ ok: false, message: 'Email required' });
     }
 
     console.log('FORGOT_START', email);
@@ -93,7 +93,7 @@ router.post('/forgot-password', async (req, res) => {
     if (!user) {
       console.log('FORGOT_NO_USER');
       // Don't reveal if email exists
-      return res.json({ ok: true, message: 'If the email exists, a reset link will be sent' });
+      return res.status(200).json({ ok: true, message: 'If the email exists, a reset link will be sent' });
     }
 
     console.log('FORGOT_USER_FOUND');
@@ -117,10 +117,11 @@ router.post('/forgot-password', async (req, res) => {
       // Continue and return success to user (don't reveal email sending failure)
     }
 
-    res.json({ ok: true, message: 'If the email exists, a reset link will be sent' });
+    return res.status(200).json({ ok: true, message: 'If the email exists, a reset link will be sent' });
   } catch (error) {
-    console.error('Forgot password error:', error);
-    res.status(500).json({ error: 'Failed to process request' });
+    console.error('FORGOT_PASSWORD_UNHANDLED_ERROR', error);
+    // Always return success even on error - don't reveal system state
+    return res.status(200).json({ ok: true, message: 'If the email exists, a reset link will be sent' });
   }
 });
 
