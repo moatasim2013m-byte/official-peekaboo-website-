@@ -17,6 +17,7 @@ const sendEmail = async (to, subject, html) => {
     }
     
     console.log('Email sent successfully to:', to, '- ID:', data?.id);
+    return data; // Return data object containing email id
   } catch (error) {
     console.error('Email sending failed:', error);
     throw error;
