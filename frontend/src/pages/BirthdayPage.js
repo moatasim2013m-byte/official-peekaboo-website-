@@ -431,7 +431,7 @@ export default function BirthdayPage() {
                   لديك فكرة فريدة؟ أخبرنا عن حفلة أحلامك وسيتواصل فريقنا معك لمناقشة التفاصيل والأسعار.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 pb-24">{/* Added pb-24 for sticky button space */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label>طفل عيد الميلاد</Label>
