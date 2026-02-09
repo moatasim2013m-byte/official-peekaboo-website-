@@ -102,6 +102,8 @@ export const translations = {
     'Password must be at least 6 characters': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
     'Password reset successful!': 'تم إعادة تعيين كلمة المرور بنجاح!',
     'Failed to reset password': 'فشل إعادة تعيين كلمة المرور',
+    'Back to Login': 'العودة لتسجيل الدخول',
+    'Send New Link': 'إرسال رابط جديد',
   },
   
   en: {
