@@ -331,7 +331,7 @@ export default function BirthdayPage() {
                 <CardHeader>
                   <CardTitle className="font-heading">أكمل حجزك</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pb-24">{/* Added pb-24 for sticky button space */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <Label>طفل عيد الميلاد</Label>
