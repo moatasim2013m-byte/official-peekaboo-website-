@@ -91,14 +91,24 @@ export default function TicketsPage() {
     }
   };
 
-  // Filter slots based on selected duration - must not pass midnight (00:00)
+  // Filter slots based on selected duration AND time mode
   const getFilteredSlots = () => {
     return slots.filter(slot => {
       const [hours, minutes] = slot.start_time.split(':').map(Number);
       const startMinutes = hours * 60 + minutes;
       const endMinutes = startMinutes + (selectedDuration * 60);
-      // Midnight is 24:00 (1440 minutes)
-      return endMinutes <= 1440;
+      
+      // Must not pass midnight (00:00)
+      if (endMinutes > 1440) return false;
+      
+      // Filter by time mode
+      if (timeMode === 'morning') {
+        // Morning (Happy Hour): 10:00 to 13:59
+        return hours >= 10 && hours < 14;
+      } else {
+        // Afternoon: 14:00 onwards
+        return hours >= 14;
+      }
     });
   };
 
