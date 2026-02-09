@@ -104,6 +104,10 @@ export const translations = {
     'Failed to reset password': 'فشل إعادة تعيين كلمة المرور',
     'Back to Login': 'العودة لتسجيل الدخول',
     'Send New Link': 'إرسال رابط جديد',
+    
+    // Auth actions
+    'auth.backToLogin': 'العودة لتسجيل الدخول',
+    'auth.sendNewLink': 'إرسال رابط جديد',
   },
   
   en: {
