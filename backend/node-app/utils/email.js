@@ -4,8 +4,9 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendEmail = async (to, subject, html) => {
   try {
+    const fromEmail = process.env.SENDER_EMAIL || process.env.RESEND_FROM || 'onboarding@resend.dev';
     const { data, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM || 'onboarding@resend.dev',
+      from: fromEmail,
       to,
       subject,
       html
