@@ -6,13 +6,12 @@ import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../i18n/useT';
 import { Clock, Cake, Star, ChevronRight, Play, Users, Home, X, ZoomIn } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
-import { PaymentCardIcons } from '../components/PaymentCardIcons';
 
 const HERO_FALLBACK = '/hero-fallback.jpg';
 
 export default function HomePage() {
   const { isAuthenticated, api } = useAuth();
-  const { t, lang } = useTranslation();
+  const { t } = useTranslation();
   const [gallery, setGallery] = useState([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [heroImgSrc, setHeroImgSrc] = useState(HERO_FALLBACK);
@@ -148,13 +147,6 @@ export default function HomePage() {
                     </Button>
                   </Link>
                 )}
-              </div>
-              {/* Trust Badge - Payment Methods */}
-              <div className="mt-4 inline-flex items-center gap-2 text-xs text-muted-foreground bg-white/60 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                <PaymentCardIcons className="order-1 rtl:order-2" />
-                <span className="order-2 rtl:order-1">
-                  {lang === 'ar' ? 'نقبل فيزا وماستركارد' : 'We accept Visa & Mastercard'}
-                </span>
               </div>
             </div>
             <div className="relative order-1 md:order-2">
