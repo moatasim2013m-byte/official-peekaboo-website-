@@ -105,6 +105,10 @@ router.post('/forgot-password', async (req, res) => {
     const resetLink = `${baseUrl}/reset-password?token=${resetToken}`;
     const template = emailTemplates.passwordReset(resetLink);
     
+    // Debug: verify Resend configuration
+    console.log('RESEND_FROM=' + (process.env.RESEND_FROM || 'MISSING'));
+    console.log('RESEND_KEY_PRESENT=' + Boolean(process.env.RESEND_API_KEY));
+    
     try {
       const emailData = await sendEmail(user.email, template.subject, template.html);
       console.log('RESEND_SENT id=' + emailData.id);
