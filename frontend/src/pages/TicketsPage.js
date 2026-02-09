@@ -421,8 +421,14 @@ export default function TicketsPage() {
                     <Label className="block text-sm font-medium mb-2">المدة والسعر</Label>
                     <div className="p-3 rounded-xl bg-primary/10 border-2 border-primary">
                       <div className="font-bold text-lg text-primary">
-                        {selectedDuration} ساعة - {getSelectedPrice()} دينار
+                        {selectedSlot && selectedDuration 
+                          ? `${selectedDuration} ساعة - ${(parseFloat(getSlotTotalPrice(selectedSlot.start_time)) * Math.max(1, selectedChildren.length)).toFixed(1)} دينار`
+                          : `${selectedDuration} ساعة - ${getSelectedPrice()} دينار`
+                        }
                       </div>
+                      {selectedSlot && getSlotPrice(selectedSlot.start_time) === 3.5 && (
+                        <div className="text-sm text-yellow-600 mt-1">⏰ Happy Hour Price</div>
+                      )}
                     </div>
                   </div>
                 </div>
