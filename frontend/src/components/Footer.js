@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { MessageCircle, Phone, MapPin, Clock } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 import mascotImg from '../assets/mascot.png';
+import { PaymentCardIcons } from './PaymentCardIcons';
 
 export const Footer = () => {
   return (
@@ -87,6 +88,14 @@ export const Footer = () => {
           <div className="border-t border-[var(--border-light)] mt-10 pt-8 text-center">
             <p className="text-[var(--text-secondary)]">&copy; {new Date().getFullYear()} بيكابو. جميع الحقوق محفوظة.</p>
             <p className="font-heading text-lg text-[var(--pk-orange)] mt-2">بيكابو يصنع السعادة ✨</p>
+            
+            {/* Trust Badge - Payment Methods */}
+            <div className="mt-6 flex justify-center">
+              <div className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] bg-white/80 px-4 py-2 rounded-full shadow-sm">
+                <PaymentCardIcons className="order-1 rtl:order-2 [&_svg]:h-6 [&_svg]:w-auto" />
+                <span className="order-2 rtl:order-1 font-medium">نقبل فيزا وماستركارد</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
