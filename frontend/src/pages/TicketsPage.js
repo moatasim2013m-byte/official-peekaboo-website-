@@ -125,7 +125,10 @@ export default function TicketsPage() {
 
     setLoading(true);
     try {
-      const amount = getSelectedPrice();
+      // Calculate amount using Happy Hour logic
+      const amount = selectedSlot 
+        ? parseFloat(getSlotTotalPrice(selectedSlot.start_time)) * Math.max(1, selectedChildren.length)
+        : getSelectedPrice();
       
       if (paymentMethod === 'card') {
         // Stripe checkout flow
@@ -134,6 +137,7 @@ export default function TicketsPage() {
           reference_id: selectedSlot.id,
           child_ids: selectedChildren,
           duration_hours: selectedDuration,
+          slot_start_time: selectedSlot.start_time, // Pass slot time for Happy Hour calculation
           custom_notes: customNotes.trim(),
           origin_url: window.location.origin
         });
@@ -144,9 +148,9 @@ export default function TicketsPage() {
           slot_id: selectedSlot.id,
           child_ids: selectedChildren,
           duration_hours: selectedDuration,
+          slot_start_time: selectedSlot.start_time, // Pass slot time for Happy Hour calculation
           custom_notes: customNotes.trim(),
-          payment_method: paymentMethod,
-          amount
+          payment_method: paymentMethod
         });
         
         // Get child name(s) for confirmation
