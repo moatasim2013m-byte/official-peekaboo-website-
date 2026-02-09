@@ -95,7 +95,7 @@ export default function ResetPasswordPage() {
               <p className="text-muted-foreground mb-6">{t('Redirecting to login...')}</p>
               <Link to="/login">
                 <Button className="w-full rounded-full h-12 text-lg btn-playful">
-                  {t('Back to Login')}
+                  {t('auth.backToLogin')}
                 </Button>
               </Link>
             </div>
