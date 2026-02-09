@@ -13,8 +13,23 @@ console.warn('[Payments] Stripe disabled (manual payments only)');
 
 
 // Get hourly price from Settings or use defaults
-const getHourlyPrice = async (duration_hours = 2) => {
+const getHourlyPrice = async (duration_hours = 2, slot_start_time = null) => {
   const hours = parseInt(duration_hours) || 2;
+
+  // Happy Hour logic: 10:00-13:59 => 3.5 JD per hour
+  if (slot_start_time) {
+    try {
+      const [startHour] = slot_start_time.split(':').map(Number);
+      const isHappyHour = startHour >= 10 && startHour < 14;
+      
+      if (isHappyHour) {
+        return 3.5 * hours; // Happy Hour: 3.5 JD per hour
+      }
+    } catch (err) {
+      console.error('Error parsing slot_start_time:', err);
+      // Fall through to normal pricing
+    }
+  }
 
   try {
     // Fetch pricing from Settings
