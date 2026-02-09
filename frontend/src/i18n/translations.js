@@ -210,5 +210,9 @@ export const translations = {
     'Failed to reset password': 'Failed to reset password',
     'Back to Login': 'Back to Login',
     'Send New Link': 'Send New Link',
+    
+    // Auth actions
+    'auth.backToLogin': 'Back to Login',
+    'auth.sendNewLink': 'Send New Link',
   }
 };
