@@ -21,14 +21,19 @@ export default function ForgotPasswordPage() {
       return;
     }
 
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
+    console.log('FORGOT_UI_SUBMIT', email);
+    console.log('FORGOT_UI_BACKEND_URL', backendUrl);
+
     setLoading(true);
 
     try {
-      const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
-      await axios.post(`${backendUrl}/api/auth/forgot-password`, { email });
+      const response = await axios.post(`${backendUrl}/api/auth/forgot-password`, { email });
+      console.log('FORGOT_UI_RESPONSE', response.status);
       setSuccess(true);
       toast.success('تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني');
     } catch (error) {
+      console.log('FORGOT_UI_RESPONSE', error.response?.status || 'ERROR');
       toast.error(error.response?.data?.error || 'فشل في إرسال رابط إعادة التعيين');
     } finally {
       setLoading(false);
