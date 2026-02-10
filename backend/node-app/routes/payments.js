@@ -130,7 +130,7 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       });
     }
 
-    const { type, reference_id, origin_url, duration_hours, custom_notes } = req.body;
+    const { type, reference_id, origin_url, duration_hours, custom_notes, timeMode } = req.body;
 
     if (!type || !origin_url) {
       return res.status(400).json({ error: 'type and origin_url are required' });
@@ -156,7 +156,8 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
           return res.status(400).json({ error: `عذراً، المتاح ${availableSpots} مكان فقط. اخترت ${childCount} أطفال.` });
         }
 
-        const basePrice = await getHourlyPrice(hours);
+        // Pass timeMode to pricing function for morning/afternoon pricing
+        const basePrice = await getHourlyPrice(hours, timeMode || 'afternoon');
         amount = basePrice * childCount;
         metadata.slot_id = reference_id;
         metadata.duration_hours = hours;
