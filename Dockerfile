@@ -18,8 +18,11 @@ ENV CI=false
 ENV GENERATE_SOURCEMAP=false
 
 # Cache bust to force rebuild (increment to invalidate Docker layer cache)
-ARG CACHE_BUST=20260210_1
+ARG CACHE_BUST=20260210_2
 RUN echo "CACHE_BUST=${CACHE_BUST}"
+
+# TEMPORARY DIAGNOSTIC: Print TicketsPage.js lines 45-75 to Cloud Build logs
+RUN echo "=== TicketsPage.js (45-75) ===" && sed -n '45,75p' frontend/src/pages/TicketsPage.js || true
 
 # Build the React app
 RUN cd frontend && npm run build
