@@ -12,10 +12,20 @@ let stripe = null;
 console.warn('[Payments] Stripe disabled (manual payments only)');
 
 
+// Morning (Happy Hour) price: 3.5 JD per hour
+const MORNING_PRICE_PER_HOUR = 3.5;
+
 // Get hourly price from Settings or use defaults
-const getHourlyPrice = async (duration_hours = 2) => {
+// timeMode: 'morning' = 3.5 JD/hour, 'afternoon' = standard pricing
+const getHourlyPrice = async (duration_hours = 2, timeMode = 'afternoon') => {
   const hours = parseInt(duration_hours) || 2;
 
+  // Morning mode: flat 3.5 JD per hour
+  if (timeMode === 'morning') {
+    return MORNING_PRICE_PER_HOUR * hours;
+  }
+
+  // Afternoon mode: standard pricing from Settings
   try {
     // Fetch pricing from Settings
     const pricing = await Settings.find({
