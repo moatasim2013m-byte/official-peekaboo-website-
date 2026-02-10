@@ -559,37 +559,36 @@ code {
     background-color: var(--bg-light);
 }
 
-/* ===== HERO TEXT PANEL (Premium Kids Style) ===== */
+/* ===== WONDERLAND HERO TEXT PANEL ===== */
 .hero-text-panel {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(8px);
-    border-radius: 24px;
-    padding: 1.5rem 2rem;
-    box-shadow: 0 8px 32px rgba(52, 152, 219, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
-    border: 2px solid rgba(255, 255, 255, 0.9);
-    margin-bottom: 1.5rem;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(12px);
+    border-radius: var(--radius-2xl);
+    padding: 2rem 2.5rem;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+    border: none;
+    margin-bottom: 2rem;
 }
 
 @media (min-width: 768px) {
     .hero-text-panel {
-        padding: 2rem 2.5rem;
-        border-radius: 28px;
+        padding: 2.5rem 3rem;
     }
 }
 
 /* Decorative underline using brand colors */
 .hero-title-underline {
-    height: 6px;
-    width: 180px;
-    background: linear-gradient(90deg, var(--pk-red), var(--pk-yellow), var(--pk-blue));
-    border-radius: 999px;
-    margin-top: 0.5rem;
+    height: 5px;
+    width: 160px;
+    background: linear-gradient(90deg, var(--pk-red), var(--pk-orange), var(--pk-yellow));
+    border-radius: var(--radius-full);
+    margin-top: 0.75rem;
 }
 
 @media (min-width: 768px) {
     .hero-title-underline {
-        height: 8px;
-        width: 240px;
+        height: 6px;
+        width: 200px;
     }
 }
 
