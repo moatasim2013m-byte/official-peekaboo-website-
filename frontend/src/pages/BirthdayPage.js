@@ -331,7 +331,7 @@ export default function BirthdayPage() {
                 <CardHeader>
                   <CardTitle className="font-heading">أكمل حجزك</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pb-24">{/* Added pb-24 for sticky button space */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div>
                       <Label>طفل عيد الميلاد</Label>
@@ -391,25 +391,29 @@ export default function BirthdayPage() {
                         <p className="text-sm">طريقة الدفع: {paymentMethod === 'cash' ? 'نقداً' : paymentMethod === 'card' ? 'بطاقة' : 'CliQ'}</p>
                       </div>
                     )}
-                    <Button
-                      onClick={handleStandardBooking}
-                      disabled={!selectedSlot || !selectedTheme || !selectedChild || loading}
-                      className="w-full md:w-auto px-8 rounded-full h-12 btn-playful bg-accent hover:bg-accent/90"
-                      data-testid="book-party-btn"
-                      aria-label="احجز وادفع - يقبل بطاقات فيزا وماستركارد"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                          جاري المعالجة...
-                        </>
-                      ) : (
-                        <span className="inline-flex items-center gap-2">
-                          <PaymentCardIcons />
-                          <span>احجز وادفع</span>
-                        </span>
-                      )}
-                    </Button>
+                    
+                    {/* Sticky CTA Container */}
+                    <div className="sticky bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-lg p-4 -mx-6 -mb-6 mt-6 z-50">
+                      <Button
+                        onClick={handleStandardBooking}
+                        disabled={!selectedSlot || !selectedTheme || !selectedChild || loading}
+                        className="w-full px-8 rounded-full h-14 btn-playful bg-accent hover:bg-accent/90 text-lg"
+                        data-testid="book-party-btn"
+                        aria-label="احجز وادفع - يقبل بطاقات فيزا وماستركارد"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                            جاري المعالجة...
+                          </>
+                        ) : (
+                          <span className="inline-flex items-center gap-2">
+                            <PaymentCardIcons />
+                            <span>احجز وادفع</span>
+                          </span>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -427,7 +431,7 @@ export default function BirthdayPage() {
                   لديك فكرة فريدة؟ أخبرنا عن حفلة أحلامك وسيتواصل فريقنا معك لمناقشة التفاصيل والأسعار.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-6 pb-24">{/* Added pb-24 for sticky button space */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label>طفل عيد الميلاد</Label>
@@ -479,21 +483,24 @@ export default function BirthdayPage() {
                   />
                 </div>
 
-                <Button
-                  onClick={handleCustomRequest}
-                  disabled={!selectedSlot || !selectedChild || !customRequest || loading}
-                  className="rounded-full h-12 btn-playful bg-accent hover:bg-accent/90"
-                  data-testid="submit-custom-btn"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                      جاري الإرسال...
-                    </>
-                  ) : (
-                    'إرسال الطلب المخصص'
-                  )}
-                </Button>
+                {/* Sticky CTA Container */}
+                <div className="sticky bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-lg p-4 -mx-6 -mb-6 mt-6 z-50">
+                  <Button
+                    onClick={handleCustomRequest}
+                    disabled={!selectedSlot || !selectedChild || !customRequest || loading}
+                    className="w-full rounded-full h-14 btn-playful bg-accent hover:bg-accent/90 text-lg"
+                    data-testid="submit-custom-btn"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                        جاري الإرسال...
+                      </>
+                    ) : (
+                      'إرسال الطلب المخصص'
+                    )}
+                  </Button>
+                </div>
                 <p className="text-sm text-muted-foreground">
                   لا يلزم الدفع للطلبات المخصصة. سيتواصل فريقنا معك بالأسعار.
                 </p>
