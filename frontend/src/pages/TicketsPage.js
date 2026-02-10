@@ -46,6 +46,7 @@ export default function TicketsPage() {
     if (isAuthenticated) {
       fetchChildren();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   // Fetch pricing when timeMode changes
@@ -53,6 +54,7 @@ export default function TicketsPage() {
     if (timeMode) {
       fetchPricing(timeMode);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeMode]);
 
   // Lazy fetch slots ONLY when all 3 selections are made
@@ -74,6 +76,7 @@ export default function TicketsPage() {
     
     // Fetch slots with timeMode and duration
     fetchSlots(dateStr, cacheKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeMode, date, selectedDuration]);
 
   // Reset selections when timeMode changes
