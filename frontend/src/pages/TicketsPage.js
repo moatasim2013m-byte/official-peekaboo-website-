@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Calendar } from '../components/ui/calendar';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
@@ -14,12 +13,15 @@ import { Clock, Users, Loader2, AlertCircle, Star, Sun, Moon } from 'lucide-reac
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import { PaymentCardIcons } from '../components/PaymentCardIcons';
 
+// Morning pricing constant
+const MORNING_PRICE_PER_HOUR = 3.5;
+
 export default function TicketsPage() {
   const { isAuthenticated, api, user } = useAuth();
   const navigate = useNavigate();
   
-  // Step 1: Time mode (morning/evening)
-  const [timeMode, setTimeMode] = useState(null); // 'morning' or 'evening'
+  // Step 1: Time mode (morning/afternoon)
+  const [timeMode, setTimeMode] = useState(null); // 'morning' or 'afternoon'
   // Step 2: Date
   const [date, setDate] = useState(null);
   // Step 3: Duration
@@ -39,13 +41,19 @@ export default function TicketsPage() {
   const [pricing, setPricing] = useState([]);
   const [extraHourText, setExtraHourText] = useState('');
 
-  // Fetch pricing and children on mount
+  // Fetch children on mount
   useEffect(() => {
-    fetchPricing();
     if (isAuthenticated) {
       fetchChildren();
     }
   }, [isAuthenticated]);
+
+  // Fetch pricing when timeMode changes
+  useEffect(() => {
+    if (timeMode) {
+      fetchPricing(timeMode);
+    }
+  }, [timeMode]);
 
   // Lazy fetch slots ONLY when all 3 selections are made
   useEffect(() => {
@@ -64,27 +72,38 @@ export default function TicketsPage() {
       return;
     }
     
-    // Fetch slots
+    // Fetch slots with timeMode and duration
     fetchSlots(dateStr, cacheKey);
   }, [timeMode, date, selectedDuration]);
 
-  // Reset slot selection when duration changes
-  useEffect(() => {
-    if (selectedSlot && slots.length > 0) {
-      const filtered = getFilteredSlots();
-      if (!filtered.find(s => s.id === selectedSlot.id)) {
-        setSelectedSlot(null);
-      }
+  // Reset selections when timeMode changes
+  const handleTimeModeChange = (mode) => {
+    if (mode !== timeMode) {
+      setTimeMode(mode);
+      setDate(null);
+      setSelectedDuration(null);
+      setSelectedSlot(null);
+      setSlots([]);
+      setPricing([]);
     }
-  }, [selectedDuration, slots]);
+  };
 
-  const fetchPricing = async () => {
+  const fetchPricing = async (mode) => {
     try {
-      const response = await api.get('/payments/hourly-pricing');
+      const response = await api.get(`/payments/hourly-pricing?timeMode=${mode}`);
       setPricing(response.data.pricing || []);
       setExtraHourText(response.data.extra_hour_text || '');
     } catch (error) {
       console.error('Failed to fetch pricing:', error);
+      // Fallback pricing
+      if (mode === 'morning') {
+        setPricing([
+          { hours: 1, price: 3.5, label_ar: 'ساعة واحدة' },
+          { hours: 2, price: 7, label_ar: 'ساعتان' },
+          { hours: 3, price: 10.5, label_ar: '3 ساعات' }
+        ]);
+        setExtraHourText('كل ساعة = 3.5 دينار فقط (عرض الصباح)');
+      }
     }
   };
 
@@ -102,7 +121,9 @@ export default function TicketsPage() {
     setSlotsError(null);
     setSelectedSlot(null);
     try {
-      const response = await api.get(`/slots/available?date=${dateStr}&slot_type=hourly`);
+      const response = await api.get(
+        `/slots/available?date=${dateStr}&slot_type=hourly&timeMode=${timeMode}&duration=${selectedDuration}`
+      );
       const fetchedSlots = response.data.slots || [];
       // Cache the result
       slotsCache.current.set(cacheKey, fetchedSlots);
@@ -114,27 +135,6 @@ export default function TicketsPage() {
     } finally {
       setSlotsLoading(false);
     }
-  };
-
-  // Filter slots based on selected duration and time mode
-  const getFilteredSlots = () => {
-    return slots.filter(slot => {
-      const [hours, minutes] = slot.start_time.split(':').map(Number);
-      const startMinutes = hours * 60 + minutes;
-      const endMinutes = startMinutes + (selectedDuration * 60);
-      
-      // Filter by time mode
-      if (timeMode === 'morning') {
-        // Morning/Happy Hour: before 4 PM (16:00 = 960 minutes)
-        if (hours >= 16) return false;
-      } else if (timeMode === 'evening') {
-        // Evening: 4 PM and after
-        if (hours < 16) return false;
-      }
-      
-      // Must not pass midnight (00:00 = 1440 minutes)
-      return endMinutes <= 1440;
-    });
   };
 
   // Calculate end time for a slot based on duration
@@ -176,7 +176,8 @@ export default function TicketsPage() {
           child_ids: selectedChildren,
           duration_hours: selectedDuration,
           custom_notes: customNotes.trim(),
-          origin_url: window.location.origin
+          origin_url: window.location.origin,
+          timeMode: timeMode // Pass timeMode for server-side pricing
         });
         window.location.href = response.data.url;
       } else {
@@ -187,7 +188,8 @@ export default function TicketsPage() {
           duration_hours: selectedDuration,
           custom_notes: customNotes.trim(),
           payment_method: paymentMethod,
-          amount
+          amount,
+          timeMode: timeMode
         });
         
         // Get child name(s) for confirmation
@@ -274,7 +276,7 @@ export default function TicketsPage() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <button
-                onClick={() => setTimeMode('morning')}
+                onClick={() => handleTimeModeChange('morning')}
                 className={`relative p-6 rounded-2xl border-2 transition-all ${
                   timeMode === 'morning'
                     ? 'border-yellow-500 bg-yellow-50 shadow-lg'
@@ -288,15 +290,16 @@ export default function TicketsPage() {
                   <Sun className="h-8 w-8 text-yellow-500" />
                   <div className="text-right">
                     <div className="font-heading text-2xl font-bold">صباحي</div>
-                    <div className="text-sm text-muted-foreground">قبل 4 عصراً - أسعار مخفضة</div>
+                    <div className="text-sm text-muted-foreground">10 صباحاً - 2 ظهراً</div>
+                    <div className="text-lg font-bold text-yellow-600 mt-1">3.5 دينار/ساعة</div>
                   </div>
                 </div>
               </button>
               
               <button
-                onClick={() => setTimeMode('evening')}
+                onClick={() => handleTimeModeChange('afternoon')}
                 className={`p-6 rounded-2xl border-2 transition-all ${
-                  timeMode === 'evening'
+                  timeMode === 'afternoon'
                     ? 'border-indigo-500 bg-indigo-50 shadow-lg'
                     : 'border-border bg-white hover:border-indigo-300'
                 }`}
@@ -305,7 +308,8 @@ export default function TicketsPage() {
                   <Moon className="h-8 w-8 text-indigo-500" />
                   <div className="text-right">
                     <div className="font-heading text-2xl font-bold">مسائي</div>
-                    <div className="text-sm text-muted-foreground">4 عصراً فما بعد</div>
+                    <div className="text-sm text-muted-foreground">2 ظهراً - منتصف الليل</div>
+                    <div className="text-lg font-bold text-indigo-600 mt-1">7-13 دينار</div>
                   </div>
                 </div>
               </button>
@@ -326,7 +330,12 @@ export default function TicketsPage() {
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={(d) => d && setDate(d)}
+                onSelect={(d) => {
+                  if (d) {
+                    setDate(d);
+                    setSelectedSlot(null);
+                  }
+                }}
                 disabled={(d) => d < minDate || d > maxDate}
                 className="rounded-xl"
               />
@@ -349,10 +358,15 @@ export default function TicketsPage() {
                 {pricing.map((option) => (
                   <button
                     key={option.hours}
-                    onClick={() => setSelectedDuration(option.hours)}
+                    onClick={() => {
+                      setSelectedDuration(option.hours);
+                      setSelectedSlot(null);
+                    }}
                     className={`relative p-6 rounded-2xl border-2 transition-all ${
                       selectedDuration === option.hours
-                        ? 'border-primary bg-primary/10 shadow-lg'
+                        ? timeMode === 'morning' 
+                          ? 'border-yellow-500 bg-yellow-50 shadow-lg'
+                          : 'border-primary bg-primary/10 shadow-lg'
                         : 'border-border bg-white hover:border-primary/50'
                     }`}
                   >
@@ -364,7 +378,9 @@ export default function TicketsPage() {
                     )}
                     <div className="text-center">
                       <div className="font-heading text-3xl font-bold mb-2">{option.label_ar}</div>
-                      <div className="text-2xl font-bold text-primary mb-1">{option.price} دينار</div>
+                      <div className={`text-2xl font-bold mb-1 ${timeMode === 'morning' ? 'text-yellow-600' : 'text-primary'}`}>
+                        {option.price} دينار
+                      </div>
                       <div className="text-sm text-muted-foreground">{option.price} JD</div>
                     </div>
                   </button>
@@ -383,6 +399,11 @@ export default function TicketsPage() {
                 <Clock className="h-5 w-5 text-primary" />
                 الأوقات المتاحة - {format(date, 'MMMM d, yyyy')}
               </CardTitle>
+              <CardDescription>
+                {timeMode === 'morning' 
+                  ? 'الفترة الصباحية: 10:00 ص - 2:00 م' 
+                  : 'الفترة المسائية: 2:00 م - منتصف الليل'}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               {slotsLoading ? (
@@ -395,26 +416,25 @@ export default function TicketsPage() {
                   <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>{slotsError}</p>
                 </div>
-              ) : getFilteredSlots().length === 0 ? (
+              ) : slots.filter(s => s.is_available).length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>لا توجد أوقات متاحة لهذه الفترة والمدة</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {getFilteredSlots().map((slot) => {
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {slots.filter(s => s.is_available).map((slot) => {
                     const endTime = getEndTime(slot.start_time, selectedDuration);
                     return (
                       <button
                         key={slot.id}
-                        onClick={() => slot.is_available && setSelectedSlot(slot)}
-                        disabled={!slot.is_available}
+                        onClick={() => setSelectedSlot(slot)}
                         className={`p-4 rounded-2xl border-2 transition-all ${
                           selectedSlot?.id === slot.id
-                            ? 'border-primary bg-primary/10'
-                            : slot.is_available
-                            ? 'border-border hover:border-primary/50 bg-white'
-                            : 'border-border bg-muted opacity-50 cursor-not-allowed'
+                            ? timeMode === 'morning'
+                              ? 'border-yellow-500 bg-yellow-50'
+                              : 'border-primary bg-primary/10'
+                            : 'border-border hover:border-primary/50 bg-white'
                         }`}
                       >
                         <div className="font-heading font-semibold text-lg">
@@ -424,9 +444,6 @@ export default function TicketsPage() {
                           <Users className="h-4 w-4" />
                           {slot.available_spots} متاح
                         </div>
-                        {slot.is_past && (
-                          <div className="text-xs text-destructive mt-1">منتهي</div>
-                        )}
                       </button>
                     );
                   })}
@@ -494,15 +511,27 @@ export default function TicketsPage() {
                       <span className="font-semibold">
                         {format(date, 'MMM d')} في {selectedSlot.start_time}
                       </span>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {timeMode === 'morning' ? '☀️ فترة صباحية' : '🌙 فترة مسائية'}
+                      </div>
                     </div>
                   </div>
 
                   <div>
                     <Label className="block text-sm font-medium mb-2">المدة والسعر</Label>
-                    <div className="p-3 rounded-xl bg-primary/10 border-2 border-primary">
-                      <div className="font-bold text-lg text-primary">
+                    <div className={`p-3 rounded-xl border-2 ${
+                      timeMode === 'morning' 
+                        ? 'bg-yellow-50 border-yellow-500' 
+                        : 'bg-primary/10 border-primary'
+                    }`}>
+                      <div className={`font-bold text-lg ${
+                        timeMode === 'morning' ? 'text-yellow-700' : 'text-primary'
+                      }`}>
                         {selectedDuration} ساعة - {getSelectedPrice()} دينار
                       </div>
+                      {timeMode === 'morning' && (
+                        <div className="text-xs text-yellow-600 mt-1">عرض الصباح الخاص</div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -531,12 +560,16 @@ export default function TicketsPage() {
 
                 {/* Booking Summary */}
                 {paymentMethod && (
-                  <div className="p-4 rounded-xl bg-muted/50 border">
+                  <div className={`p-4 rounded-xl border ${
+                    timeMode === 'morning' ? 'bg-yellow-50/50' : 'bg-muted/50'
+                  }`}>
                     <p className="text-sm text-muted-foreground mb-1">ملخص الحجز</p>
                     <p className="font-bold">
                       {selectedDuration} ساعة × {selectedChildren.length || 1} طفل = {getSelectedPrice()} دينار
                     </p>
                     <p className="text-sm mt-1">
+                      الفترة: <span className="font-bold">{timeMode === 'morning' ? 'صباحية' : 'مسائية'}</span>
+                      {' | '}
                       طريقة الدفع: <span className="font-bold">
                         {paymentMethod === 'cash' ? 'نقداً' : paymentMethod === 'card' ? 'بطاقة' : 'CliQ'}
                       </span>
@@ -548,7 +581,11 @@ export default function TicketsPage() {
                   <Button
                     onClick={handleBooking}
                     disabled={!selectedSlot || selectedChildren.length === 0 || loading}
-                    className="w-full md:w-auto px-8 rounded-full h-12 btn-playful text-lg"
+                    className={`w-full md:w-auto px-8 rounded-full h-12 text-lg ${
+                      timeMode === 'morning' 
+                        ? 'bg-yellow-500 hover:bg-yellow-600 text-white' 
+                        : 'btn-playful'
+                    }`}
                     aria-label={`احجز وادفع ${getSelectedPrice()} دينار - يقبل بطاقات فيزا وماستركارد`}
                   >
                     {loading ? (
