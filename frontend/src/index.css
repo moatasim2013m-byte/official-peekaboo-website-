@@ -618,22 +618,17 @@ code {
 
 /* Gradient backgrounds */
 .bg-hero-gradient {
-    background: linear-gradient(180deg, var(--bg-cream) 0%, var(--bg-white) 100%);
+    background: transparent;
 }
 
-/* ===== SKY THEME FOR CUSTOMER PAGES ===== */
+/* ===== WONDERLAND SKY THEME ===== */
 .sky-theme {
     background: 
-        /* Top clouds layer */
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 200'%3E%3Cellipse cx='100' cy='120' rx='100' ry='35' fill='%23ffffff' opacity='0.7'/%3E%3Cellipse cx='180' cy='130' rx='70' ry='25' fill='%23ffffff' opacity='0.5'/%3E%3Cellipse cx='1300' cy='100' rx='120' ry='40' fill='%23ffffff' opacity='0.7'/%3E%3Cellipse cx='1220' cy='115' rx='80' ry='28' fill='%23ffffff' opacity='0.5'/%3E%3C/svg%3E") repeat-x top,
-        /* Bottom clouds layer */
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 180'%3E%3Cellipse cx='200' cy='140' rx='140' ry='45' fill='%23ffffff' opacity='0.6'/%3E%3Cellipse cx='320' cy='150' rx='90' ry='32' fill='%23ffffff' opacity='0.5'/%3E%3Cellipse cx='750' cy='145' rx='160' ry='50' fill='%23ffffff' opacity='0.6'/%3E%3Cellipse cx='1150' cy='140' rx='130' ry='42' fill='%23ffffff' opacity='0.6'/%3E%3Cellipse cx='1280' cy='155' rx='85' ry='30' fill='%23ffffff' opacity='0.5'/%3E%3C/svg%3E") repeat-x bottom,
-        /* Sky gradient */
         linear-gradient(180deg, 
-            #7EC8E3 0%,
-            #A8DAEC 25%,
-            #C5E8F2 50%,
-            #E8F4F8 75%,
+            #87CEEB 0%,
+            #B4E4FF 20%,
+            #D6F0FF 40%,
+            #E8F7FF 60%,
             #FFF8E7 100%
         );
     background-attachment: fixed;
@@ -641,44 +636,85 @@ code {
     position: relative;
 }
 
-/* Floating balloons decoration - fewer, better positioned */
-.sky-theme::before {
+/* Fluffy cloud layers */
+.sky-theme::before,
+.sky-theme::after {
     content: '';
     position: fixed;
-    top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
     pointer-events: none;
     z-index: 0;
-    background-image: 
-        /* Red balloon - far left */
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 60'%3E%3Cellipse cx='20' cy='18' rx='14' ry='18' fill='%23FF4757' opacity='0.55'/%3E%3Cellipse cx='16' cy='14' rx='4' ry='6' fill='%23ffffff' opacity='0.3'/%3E%3Cpath d='M20 36 L20 55' stroke='%23888' stroke-width='1' opacity='0.4'/%3E%3C/svg%3E"),
-        /* Yellow balloon - far right */
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 60'%3E%3Cellipse cx='20' cy='18' rx='14' ry='18' fill='%23FFD93D' opacity='0.55'/%3E%3Cellipse cx='16' cy='14' rx='4' ry='6' fill='%23ffffff' opacity='0.3'/%3E%3Cpath d='M20 36 L20 55' stroke='%23888' stroke-width='1' opacity='0.4'/%3E%3C/svg%3E"),
-        /* Blue balloon - bottom left */
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 60'%3E%3Cellipse cx='20' cy='18' rx='12' ry='16' fill='%2300D2D3' opacity='0.45'/%3E%3Cellipse cx='16' cy='14' rx='3' ry='5' fill='%23ffffff' opacity='0.25'/%3E%3Cpath d='M20 34 L20 50' stroke='%23888' stroke-width='1' opacity='0.4'/%3E%3C/svg%3E");
-    background-position: 
-        3% 20%,
-        97% 12%,
-        8% 75%;
-    background-size: 
-        45px 68px,
-        42px 63px,
-        35px 52px;
-    background-repeat: no-repeat;
-    animation: floatBalloons 25s ease-in-out infinite;
 }
 
-/* Gentle float animation */
-@keyframes floatBalloons {
+/* Top clouds - large fluffy clouds */
+.sky-theme::before {
+    top: 0;
+    height: 300px;
+    background-image: 
+        /* Large cloud left */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 80'%3E%3Cellipse cx='100' cy='50' rx='80' ry='30' fill='white'/%3E%3Cellipse cx='60' cy='40' rx='50' ry='25' fill='white'/%3E%3Cellipse cx='140' cy='40' rx='50' ry='25' fill='white'/%3E%3Cellipse cx='100' cy='30' rx='40' ry='20' fill='white'/%3E%3C/svg%3E"),
+        /* Large cloud right */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 70'%3E%3Cellipse cx='90' cy='45' rx='70' ry='25' fill='white'/%3E%3Cellipse cx='50' cy='35' rx='45' ry='22' fill='white'/%3E%3Cellipse cx='130' cy='35' rx='45' ry='22' fill='white'/%3E%3Cellipse cx='90' cy='25' rx='35' ry='18' fill='white'/%3E%3C/svg%3E"),
+        /* Small cloud center */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 50'%3E%3Cellipse cx='50' cy='30' rx='40' ry='18' fill='white'/%3E%3Cellipse cx='30' cy='25' rx='25' ry='15' fill='white'/%3E%3Cellipse cx='70' cy='25' rx='25' ry='15' fill='white'/%3E%3C/svg%3E");
+    background-position: 
+        -50px 20px,
+        calc(100% + 30px) 60px,
+        50% 120px;
+    background-size: 
+        280px 110px,
+        250px 100px,
+        160px 80px;
+    background-repeat: no-repeat;
+    opacity: 0.9;
+    animation: cloudsDrift 60s linear infinite;
+}
+
+/* Bottom decorative elements - balloons */
+.sky-theme::after {
+    bottom: 0;
+    top: auto;
+    height: 100%;
+    background-image: 
+        /* Red balloon */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 80'%3E%3Cellipse cx='25' cy='22' rx='18' ry='22' fill='%23FF4757'/%3E%3Cellipse cx='20' cy='16' rx='5' ry='7' fill='white' opacity='0.3'/%3E%3Cpath d='M25 44 Q25 50 23 55 L27 55 Q25 50 25 44' fill='%23FF4757'/%3E%3Cpath d='M25 55 C25 60 24 75 25 78' stroke='%23999' stroke-width='1' fill='none'/%3E%3C/svg%3E"),
+        /* Yellow balloon */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 80'%3E%3Cellipse cx='25' cy='22' rx='18' ry='22' fill='%23FFD93D'/%3E%3Cellipse cx='20' cy='16' rx='5' ry='7' fill='white' opacity='0.3'/%3E%3Cpath d='M25 44 Q25 50 23 55 L27 55 Q25 50 25 44' fill='%23FFD93D'/%3E%3Cpath d='M25 55 C25 60 26 75 25 78' stroke='%23999' stroke-width='1' fill='none'/%3E%3C/svg%3E"),
+        /* Pink balloon */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 80'%3E%3Cellipse cx='25' cy='22' rx='16' ry='20' fill='%23FF6B9D'/%3E%3Cellipse cx='20' cy='16' rx='4' ry='6' fill='white' opacity='0.3'/%3E%3Cpath d='M25 42 Q25 48 23 52 L27 52 Q25 48 25 42' fill='%23FF6B9D'/%3E%3Cpath d='M25 52 C25 57 24 70 25 73' stroke='%23999' stroke-width='1' fill='none'/%3E%3C/svg%3E"),
+        /* Green balloon */
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 50 80'%3E%3Cellipse cx='25' cy='22' rx='16' ry='20' fill='%2326DE81'/%3E%3Cellipse cx='20' cy='16' rx='4' ry='6' fill='white' opacity='0.3'/%3E%3Cpath d='M25 42 Q25 48 23 52 L27 52 Q25 48 25 42' fill='%2326DE81'/%3E%3Cpath d='M25 52 C26 57 25 70 25 73' stroke='%23999' stroke-width='1' fill='none'/%3E%3C/svg%3E");
+    background-position: 
+        3% 15%,
+        97% 8%,
+        6% 70%,
+        94% 65%;
+    background-size: 
+        45px 72px,
+        50px 80px,
+        40px 64px,
+        42px 68px;
+    background-repeat: no-repeat;
+    opacity: 0.5;
+    animation: balloonsFloat 20s ease-in-out infinite;
+}
+
+@keyframes cloudsDrift {
+    0% { background-position: -50px 20px, calc(100% + 30px) 60px, 50% 120px; }
+    50% { background-position: -30px 25px, calc(100% + 50px) 55px, 52% 115px; }
+    100% { background-position: -50px 20px, calc(100% + 30px) 60px, 50% 120px; }
+}
+
+@keyframes balloonsFloat {
     0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-12px); }
+    50% { transform: translateY(-15px); }
 }
 
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
-    .sky-theme::before {
+    .sky-theme::before,
+    .sky-theme::after {
         animation: none;
     }
 }
@@ -689,30 +725,34 @@ code {
     z-index: 1;
 }
 
-/* Cards maintain pure white background for readability */
+/* Cards maintain pure white background */
 .sky-theme .bg-white,
 .sky-theme [class*="Card"],
 .sky-theme .card {
     background-color: #FFFFFF;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-card);
 }
 
-/* Override hero gradient on sky theme pages */
-.sky-theme .bg-hero-gradient {
-    background: transparent;
-}
-
-/* Hide balloons on small screens to avoid clutter */
+/* Hide balloons on mobile for cleaner look */
 @media (max-width: 768px) {
-    .sky-theme::before {
+    .sky-theme::after {
         background-size: 
-            35px 52px,
-            32px 48px,
+            35px 56px,
+            40px 64px,
+            0 0,
             0 0;
         background-position: 
-            2% 15%,
-            98% 10%,
+            2% 12%,
+            98% 6%,
+            0 0,
             0 0;
+        opacity: 0.4;
+    }
+    .sky-theme::before {
+        background-size: 
+            200px 80px,
+            180px 72px,
+            120px 60px;
     }
 }
 .footer-text {
