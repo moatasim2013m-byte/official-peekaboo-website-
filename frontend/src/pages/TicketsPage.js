@@ -8,13 +8,28 @@ import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
-import { format, addDays } from 'date-fns';
+import { format, addDays, isToday } from 'date-fns';
 import { Clock, Users, Loader2, AlertCircle, Star, Sun, Moon } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import { PaymentCardIcons } from '../components/PaymentCardIcons';
 
 // Morning pricing constant
 const MORNING_PRICE_PER_HOUR = 3.5;
+
+// Check if morning period has expired for a given date
+const isMorningExpiredForDate = (selectedDate) => {
+  if (!selectedDate) return false;
+  
+  // Check if selected date is today
+  if (!isToday(selectedDate)) return false;
+  
+  // Get current hour in local timezone
+  const now = new Date();
+  const currentHour = now.getHours();
+  
+  // Morning ends at 14:00 (2 PM)
+  return currentHour >= 14;
+};
 
 export default function TicketsPage() {
   const { isAuthenticated, api, user } = useAuth();
@@ -81,10 +96,16 @@ export default function TicketsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeMode, date, selectedDuration]);
 
-  useEffect(() => {
-    // Clear selected slot when time mode changes
-    setSelectedSlot(null);
-  }, [timeMode]);
+  // Reset selections when timeMode changes
+  const handleTimeModeChange = (mode) => {
+    if (mode !== timeMode) {
+      setTimeMode(mode);
+      setSelectedDuration(null);
+      setSelectedSlot(null);
+      setSlots([]);
+      setPricing([]);
+    }
+  };
 
   const fetchPricing = async () => {
     try {
@@ -288,6 +309,9 @@ export default function TicketsPage() {
   const minDate = new Date();
   const maxDate = addDays(new Date(), 30);
 
+  // Check if morning is expired for selected date
+  const morningExpired = isMorningExpiredForDate(date);
+
   // Skeleton loader for slots
   const SlotsSkeleton = () => (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -308,135 +332,108 @@ export default function TicketsPage() {
             احجز وقت اللعب بالساعة
           </h1>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            اختر الفترة، التاريخ، المدة، ثم الوقت المناسب
+            اختر التاريخ، الفترة، المدة، ثم الوقت المناسب
           </p>
         </div>
 
-        {/* STEP 1: Time Mode Selection */}
+        {/* STEP 1: Date Selection */}
         <Card className="border-2 rounded-3xl mb-8">
           <CardHeader>
-            <CardTitle className="font-heading text-xl">اختر فترة اللعب</CardTitle>
-            <CardDescription className="text-sm">اختر الفترة الصباحية للاستفادة من عرض Happy Hour</CardDescription>
+            <CardTitle className="font-heading text-xl flex items-center gap-2">
+              <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">1</span>
+              اختر التاريخ
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Time Mode Toggle */}
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={() => setTimeMode('morning')}
-                disabled={(() => {
-                  const now = new Date();
-                  const isToday = format(date, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd');
-                  return isToday && now.getHours() >= 14;
-                })()}
-                className={`flex-1 p-4 rounded-xl border-2 transition-all text-right ${
-                  timeMode === 'morning'
-                    ? 'border-yellow-500 bg-yellow-50'
-                    : 'border-gray-200 bg-white hover:border-yellow-300'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                <div className="font-bold text-lg mb-1">☀️ صباحي (Happy Hour)</div>
-                <div className="text-sm text-muted-foreground">10:00 ص - 2:00 م</div>
-                <div className="text-primary font-bold mt-1">3.5 دينار/ساعة</div>
-                {(() => {
-                  const now = new Date();
-                  const isToday = format(date, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd');
-                  return isToday && now.getHours() >= 14 && (
-                    <div className="text-xs text-destructive mt-1">انتهى وقت العرض اليوم</div>
-                  );
-                })()}
-              </button>
-              
-              <button
-                onClick={() => setTimeMode('afternoon')}
-                className={`flex-1 p-4 rounded-xl border-2 transition-all text-right ${
-                  timeMode === 'afternoon'
-                    ? 'border-primary bg-primary/10'
-                    : 'border-gray-200 bg-white hover:border-primary/50'
-                }`}
-              >
-                <div className="font-bold text-lg mb-1">🌙 مسائي</div>
-                <div className="text-sm text-muted-foreground">بعد 2:00 م</div>
-                <div className="text-muted-foreground font-bold mt-1">الأسعار العادية</div>
-              </button>
-            </div>
-
-            {/* Note based on mode */}
-            {timeMode === 'morning' && (
-              <div className="flex items-center gap-2 text-sm text-yellow-700 bg-yellow-50 p-3 rounded-lg">
-                <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                <span>متاح فقط قبل الساعة 2:00 ظهراً</span>
-              </div>
-            )}
-
-            <div className="border-t pt-6">
-              <h3 className="font-heading text-lg mb-4">اختر مدة اللعب</h3>
-              <div className="text-sm text-muted-foreground mb-4">{extraHourText}</div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {pricing.map((option) => {
-                  // Calculate price based on time mode
-                  const displayPrice = timeMode === 'morning' 
-                    ? (3.5 * option.hours).toFixed(1)
-                    : option.price;
-                  
-                  return (
-                    <button
-                      key={option.hours}
-                      onClick={() => setSelectedDuration(option.hours)}
-                      className={`relative p-6 rounded-2xl border-2 transition-all ${
-                        selectedDuration === option.hours
-                          ? 'border-primary bg-primary/10 shadow-lg'
-                          : 'border-border bg-white hover:border-primary/50'
-                      }`}
-                    >
-                      {option.best_value && timeMode !== 'morning' && (
-                        <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white">
-                          <Star className="h-3 w-3 mr-1" />
-                          أفضل قيمة
-                        </Badge>
-                      )}
-                      <div className="text-center">
-                        <div className="font-heading text-3xl font-bold mb-2">{option.label_ar}</div>
-                        <div className="text-2xl font-bold text-primary mb-1">{displayPrice} دينار</div>
-                        {timeMode === 'morning' && (
-                          <div className="text-xs text-yellow-600">Happy Hour</div>
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+          <CardContent className="flex justify-center">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={(d) => {
+                if (d) {
+                  setDate(d);
+                  // If morning was selected but is now expired for new date, reset timeMode
+                  if (timeMode === 'morning' && isMorningExpiredForDate(d)) {
+                    setTimeMode(null);
+                    setPricing([]);
+                  }
+                  setSelectedSlot(null);
+                  setSelectedDuration(null);
+                  setSlots([]);
+                }
+              }}
+              disabled={(d) => d < minDate || d > maxDate}
+              className="rounded-xl"
+            />
           </CardContent>
         </Card>
 
-        {/* STEP 2: Date Selection - Show only after timeMode selected */}
-        {timeMode && (
+        {/* STEP 2: Time Mode Selection - Show only after date selected */}
+        {date && (
           <Card className="border-2 rounded-3xl mb-8">
             <CardHeader>
               <CardTitle className="font-heading text-xl flex items-center gap-2">
                 <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">2</span>
-                اختر التاريخ
+                اختر الفترة
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex justify-center">
-              <Calendar
-                mode="single"
-                selected={date}
-                onSelect={(d) => {
-                  if (d) {
-                    setDate(d);
-                    setSelectedSlot(null);
-                  }
-                }}
-                disabled={(d) => d < minDate || d > maxDate}
-                className="rounded-xl"
-              />
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button
+                  onClick={() => !morningExpired && handleTimeModeChange('morning')}
+                  disabled={morningExpired}
+                  className={`relative p-6 rounded-2xl border-2 transition-all ${
+                    morningExpired
+                      ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                      : timeMode === 'morning'
+                        ? 'border-yellow-500 bg-yellow-50 shadow-lg'
+                        : 'border-border bg-white hover:border-yellow-300'
+                  }`}
+                >
+                  <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2 ${
+                    morningExpired 
+                      ? 'bg-gray-400' 
+                      : 'bg-gradient-to-r from-yellow-400 to-orange-500'
+                  } text-white`}>
+                    Happy Hour
+                  </Badge>
+                  <div className="flex items-center justify-center gap-3">
+                    <Sun className={`h-8 w-8 ${morningExpired ? 'text-gray-400' : 'text-yellow-500'}`} />
+                    <div className="text-right">
+                      <div className={`font-heading text-2xl font-bold ${morningExpired ? 'text-gray-400' : ''}`}>صباحي</div>
+                      <div className="text-sm text-muted-foreground">10 صباحاً - 2 ظهراً</div>
+                      {morningExpired ? (
+                        <div className="text-sm text-red-500 mt-1">غير متاح اليوم (انتهى وقت الفترة الصباحية)</div>
+                      ) : (
+                        <div className="text-lg font-bold text-yellow-600 mt-1">3.5 دينار/ساعة</div>
+                      )}
+                    </div>
+                  </div>
+                </button>
+                
+                <button
+                  onClick={() => handleTimeModeChange('afternoon')}
+                  className={`p-6 rounded-2xl border-2 transition-all ${
+                    timeMode === 'afternoon'
+                      ? 'border-indigo-500 bg-indigo-50 shadow-lg'
+                      : 'border-border bg-white hover:border-indigo-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-center gap-3">
+                    <Moon className="h-8 w-8 text-indigo-500" />
+                    <div className="text-right">
+                      <div className="font-heading text-2xl font-bold">مسائي</div>
+                      <div className="text-sm text-muted-foreground">2 ظهراً - منتصف الليل</div>
+                      <div className="text-lg font-bold text-indigo-600 mt-1">7-13 دينار</div>
+                    </div>
+                  </div>
+                </button>
+              </div>
             </CardContent>
           </Card>
         )}
 
-        {/* STEP 3: Duration Selection - Show only after date selected */}
-        {timeMode && date && (
+        {/* STEP 3: Duration Selection - Show only after timeMode selected */}
+        {date && timeMode && (
           <Card className="border-2 rounded-3xl mb-8">
             <CardHeader>
               <CardTitle className="font-heading text-xl flex items-center gap-2">
