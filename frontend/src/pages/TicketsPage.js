@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
@@ -10,26 +10,36 @@ import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
-import { Clock, Users, Loader2, AlertCircle, Star } from 'lucide-react';
+import { Clock, Users, Loader2, AlertCircle, Star, Sun, Moon } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import { PaymentCardIcons } from '../components/PaymentCardIcons';
 
 export default function TicketsPage() {
   const { isAuthenticated, api, user } = useAuth();
   const navigate = useNavigate();
-  const [date, setDate] = useState(new Date());
+  
+  // Step 1: Time mode (morning/evening)
+  const [timeMode, setTimeMode] = useState(null); // 'morning' or 'evening'
+  // Step 2: Date
+  const [date, setDate] = useState(null);
+  // Step 3: Duration
+  const [selectedDuration, setSelectedDuration] = useState(null);
+  // Step 4: Slots (lazy loaded)
   const [slots, setSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [slotsError, setSlotsError] = useState(null);
+  const slotsCache = useRef(new Map());
+  
   const [children, setChildren] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [selectedChildren, setSelectedChildren] = useState([]);
-  const [selectedDuration, setSelectedDuration] = useState(2); // Default 2 hours
   const [customNotes, setCustomNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
-  const [loadingSlots, setLoadingSlots] = useState(false);
   const [pricing, setPricing] = useState([]);
   const [extraHourText, setExtraHourText] = useState('');
 
+  // Fetch pricing and children on mount
   useEffect(() => {
     fetchPricing();
     if (isAuthenticated) {
@@ -37,20 +47,36 @@ export default function TicketsPage() {
     }
   }, [isAuthenticated]);
 
+  // Lazy fetch slots ONLY when all 3 selections are made
   useEffect(() => {
-    fetchSlots();
-    setSelectedSlot(null); // Reset selection when date changes
-  }, [date]);
+    if (!timeMode || !date || !selectedDuration) {
+      setSlots([]);
+      setSelectedSlot(null);
+      return;
+    }
+    
+    const dateStr = format(date, 'yyyy-MM-dd');
+    const cacheKey = `${dateStr}-${selectedDuration}-${timeMode}`;
+    
+    // Check cache first
+    if (slotsCache.current.has(cacheKey)) {
+      setSlots(slotsCache.current.get(cacheKey));
+      return;
+    }
+    
+    // Fetch slots
+    fetchSlots(dateStr, cacheKey);
+  }, [timeMode, date, selectedDuration]);
 
+  // Reset slot selection when duration changes
   useEffect(() => {
-    // Reset selected slot when duration changes (might filter it out)
-    if (selectedSlot) {
+    if (selectedSlot && slots.length > 0) {
       const filtered = getFilteredSlots();
       if (!filtered.find(s => s.id === selectedSlot.id)) {
         setSelectedSlot(null);
       }
     }
-  }, [selectedDuration]);
+  }, [selectedDuration, slots]);
 
   const fetchPricing = async () => {
     try {
@@ -71,27 +97,42 @@ export default function TicketsPage() {
     }
   };
 
-  const fetchSlots = async () => {
-    setLoadingSlots(true);
+  const fetchSlots = async (dateStr, cacheKey) => {
+    setSlotsLoading(true);
+    setSlotsError(null);
+    setSelectedSlot(null);
     try {
-      const dateStr = format(date, 'yyyy-MM-dd');
       const response = await api.get(`/slots/available?date=${dateStr}&slot_type=hourly`);
-      setSlots(response.data.slots || []);
+      const fetchedSlots = response.data.slots || [];
+      // Cache the result
+      slotsCache.current.set(cacheKey, fetchedSlots);
+      setSlots(fetchedSlots);
     } catch (error) {
       console.error('Failed to fetch slots:', error);
+      setSlotsError('فشل تحميل الأوقات المتاحة');
       toast.error('فشل تحميل الأوقات المتاحة');
     } finally {
-      setLoadingSlots(false);
+      setSlotsLoading(false);
     }
   };
 
-  // Filter slots based on selected duration - must not pass midnight (00:00)
+  // Filter slots based on selected duration and time mode
   const getFilteredSlots = () => {
     return slots.filter(slot => {
       const [hours, minutes] = slot.start_time.split(':').map(Number);
       const startMinutes = hours * 60 + minutes;
       const endMinutes = startMinutes + (selectedDuration * 60);
-      // Midnight is 24:00 (1440 minutes)
+      
+      // Filter by time mode
+      if (timeMode === 'morning') {
+        // Morning/Happy Hour: before 4 PM (16:00 = 960 minutes)
+        if (hours >= 16) return false;
+      } else if (timeMode === 'evening') {
+        // Evening: 4 PM and after
+        if (hours < 16) return false;
+      }
+      
+      // Must not pass midnight (00:00 = 1440 minutes)
       return endMinutes <= 1440;
     });
   };
@@ -181,6 +222,7 @@ export default function TicketsPage() {
   };
 
   const getSelectedPrice = () => {
+    if (!selectedDuration) return 0;
     const selected = pricing.find(p => p.hours === selectedDuration);
     const basePrice = selected ? selected.price : 0;
     return basePrice * Math.max(1, selectedChildren.length);
@@ -197,6 +239,18 @@ export default function TicketsPage() {
   const minDate = new Date();
   const maxDate = addDays(new Date(), 30);
 
+  // Skeleton loader for slots
+  const SlotsSkeleton = () => (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div key={i} className="p-4 rounded-2xl border-2 border-border bg-muted/30 animate-pulse">
+          <div className="h-5 bg-muted rounded w-24 mx-auto mb-2"></div>
+          <div className="h-4 bg-muted rounded w-16 mx-auto"></div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-hero-gradient py-8 md:py-12" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -205,50 +259,68 @@ export default function TicketsPage() {
             احجز وقت اللعب بالساعة
           </h1>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            اختر التاريخ والوقت والمدة لجلسة لعب طفلك
+            اختر الفترة، التاريخ، المدة، ثم الوقت المناسب
           </p>
         </div>
 
-        {/* Duration Selection - BEFORE slot selection */}
+        {/* STEP 1: Time Mode Selection */}
         <Card className="border-2 rounded-3xl mb-8">
           <CardHeader>
-            <CardTitle className="font-heading text-xl">اختر مدة اللعب</CardTitle>
-            <CardDescription className="text-sm">{extraHourText}</CardDescription>
+            <CardTitle className="font-heading text-xl flex items-center gap-2">
+              <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">1</span>
+              اختر الفترة
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {pricing.map((option) => (
-                <button
-                  key={option.hours}
-                  onClick={() => setSelectedDuration(option.hours)}
-                  className={`relative p-6 rounded-2xl border-2 transition-all ${
-                    selectedDuration === option.hours
-                      ? 'border-primary bg-primary/10 shadow-lg'
-                      : 'border-border bg-white hover:border-primary/50'
-                  }`}
-                >
-                  {option.best_value && (
-                    <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white">
-                      <Star className="h-3 w-3 mr-1" />
-                      أفضل قيمة
-                    </Badge>
-                  )}
-                  <div className="text-center">
-                    <div className="font-heading text-3xl font-bold mb-2">{option.label_ar}</div>
-                    <div className="text-2xl font-bold text-primary mb-1">{option.price} دينار</div>
-                    <div className="text-sm text-muted-foreground">{option.price} JD</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                onClick={() => setTimeMode('morning')}
+                className={`relative p-6 rounded-2xl border-2 transition-all ${
+                  timeMode === 'morning'
+                    ? 'border-yellow-500 bg-yellow-50 shadow-lg'
+                    : 'border-border bg-white hover:border-yellow-300'
+                }`}
+              >
+                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+                  Happy Hour
+                </Badge>
+                <div className="flex items-center justify-center gap-3">
+                  <Sun className="h-8 w-8 text-yellow-500" />
+                  <div className="text-right">
+                    <div className="font-heading text-2xl font-bold">صباحي</div>
+                    <div className="text-sm text-muted-foreground">قبل 4 عصراً - أسعار مخفضة</div>
                   </div>
-                </button>
-              ))}
+                </div>
+              </button>
+              
+              <button
+                onClick={() => setTimeMode('evening')}
+                className={`p-6 rounded-2xl border-2 transition-all ${
+                  timeMode === 'evening'
+                    ? 'border-indigo-500 bg-indigo-50 shadow-lg'
+                    : 'border-border bg-white hover:border-indigo-300'
+                }`}
+              >
+                <div className="flex items-center justify-center gap-3">
+                  <Moon className="h-8 w-8 text-indigo-500" />
+                  <div className="text-right">
+                    <div className="font-heading text-2xl font-bold">مسائي</div>
+                    <div className="text-sm text-muted-foreground">4 عصراً فما بعد</div>
+                  </div>
+                </div>
+              </button>
             </div>
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Calendar */}
-          <Card className="border-2 rounded-3xl">
+        {/* STEP 2: Date Selection - Show only after timeMode selected */}
+        {timeMode && (
+          <Card className="border-2 rounded-3xl mb-8">
             <CardHeader>
-              <CardTitle className="font-heading">اختر التاريخ</CardTitle>
+              <CardTitle className="font-heading text-xl flex items-center gap-2">
+                <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">2</span>
+                اختر التاريخ
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center">
               <Calendar
@@ -260,24 +332,73 @@ export default function TicketsPage() {
               />
             </CardContent>
           </Card>
+        )}
 
-          {/* Time Slots */}
-          <Card className="border-2 rounded-3xl lg:col-span-2">
+        {/* STEP 3: Duration Selection - Show only after date selected */}
+        {timeMode && date && (
+          <Card className="border-2 rounded-3xl mb-8">
+            <CardHeader>
+              <CardTitle className="font-heading text-xl flex items-center gap-2">
+                <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">3</span>
+                اختر مدة اللعب
+              </CardTitle>
+              <CardDescription className="text-sm">{extraHourText}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {pricing.map((option) => (
+                  <button
+                    key={option.hours}
+                    onClick={() => setSelectedDuration(option.hours)}
+                    className={`relative p-6 rounded-2xl border-2 transition-all ${
+                      selectedDuration === option.hours
+                        ? 'border-primary bg-primary/10 shadow-lg'
+                        : 'border-border bg-white hover:border-primary/50'
+                    }`}
+                  >
+                    {option.best_value && (
+                      <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white">
+                        <Star className="h-3 w-3 mr-1" />
+                        أفضل قيمة
+                      </Badge>
+                    )}
+                    <div className="text-center">
+                      <div className="font-heading text-3xl font-bold mb-2">{option.label_ar}</div>
+                      <div className="text-2xl font-bold text-primary mb-1">{option.price} دينار</div>
+                      <div className="text-sm text-muted-foreground">{option.price} JD</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* STEP 4: Time Slots - Show only after duration selected, lazy load */}
+        {timeMode && date && selectedDuration && (
+          <Card className="border-2 rounded-3xl mb-8">
             <CardHeader>
               <CardTitle className="font-heading flex items-center gap-2">
+                <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">4</span>
                 <Clock className="h-5 w-5 text-primary" />
                 الأوقات المتاحة - {format(date, 'MMMM d, yyyy')}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {loadingSlots ? (
-                <div className="flex justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              {slotsLoading ? (
+                <div>
+                  <p className="text-center text-muted-foreground mb-4">جاري تحميل الأوقات...</p>
+                  <SlotsSkeleton />
                 </div>
-              ) : slots.length === 0 ? (
+              ) : slotsError ? (
+                <div className="text-center py-12 text-destructive">
+                  <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>{slotsError}</p>
+                </div>
+              ) : getFilteredSlots().length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>لا توجد أوقات متاحة لهذا التاريخ</p>
+                  <p>لا توجد أوقات متاحة لهذه الفترة والمدة</p>
                 </div>
               ) : (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -313,10 +434,10 @@ export default function TicketsPage() {
               )}
             </CardContent>
           </Card>
-        </div>
+        )}
 
         {/* Booking Summary */}
-        {isAuthenticated && (
+        {isAuthenticated && selectedSlot && (
           <Card className="border-2 rounded-3xl mt-8">
             <CardHeader>
               <CardTitle className="font-heading">أكمل حجزك</CardTitle>
@@ -370,13 +491,9 @@ export default function TicketsPage() {
                   <div>
                     <Label className="block text-sm font-medium mb-2">الوقت المختار</Label>
                     <div className="p-3 rounded-xl bg-muted">
-                      {selectedSlot ? (
-                        <span className="font-semibold">
-                          {format(date, 'MMM d')} في {selectedSlot.start_time}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">لم يتم اختيار الوقت</span>
-                      )}
+                      <span className="font-semibold">
+                        {format(date, 'MMM d')} في {selectedSlot.start_time}
+                      </span>
                     </div>
                   </div>
 
