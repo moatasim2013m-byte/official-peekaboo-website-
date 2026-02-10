@@ -165,6 +165,9 @@ router.get('/available', async (req, res) => {
   try {
     const { date, slot_type = 'hourly', timeMode, duration } = req.query;
     
+    // Debug logging
+    console.log(`SLOTS_AVAILABLE_HIT: date=${date}, slot_type=${slot_type}, timeMode=${timeMode}, duration=${duration}`);
+    
     if (!date) {
       return res.status(400).json({ error: 'Date is required' });
     }
