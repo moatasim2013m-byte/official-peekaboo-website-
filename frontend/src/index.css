@@ -10,21 +10,25 @@
 }
 
 :root {
-    /* ===== PEEKABOO BRAND COLORS (Extracted from Logo) ===== */
-    /* Primary brand colors */
-    --pk-red: #E74C3C;           /* Mushroom cap red */
-    --pk-yellow: #F1C40F;        /* Sunny yellow */
-    --pk-green: #27AE60;         /* Playful green */
-    --pk-blue: #3498DB;          /* Sky blue */
-    --pk-orange: #E67E22;        /* Warm orange */
+    /* ===== PEEKABOO BRAND COLORS (Wonderland-Inspired) ===== */
+    /* Primary brand colors - vibrant and playful */
+    --pk-red: #FF4757;           /* Bright playful red */
+    --pk-yellow: #FFD93D;        /* Sunny golden yellow */
+    --pk-green: #26DE81;         /* Fresh mint green */
+    --pk-blue: #45AAF2;          /* Friendly sky blue */
+    --pk-orange: #FF9F43;        /* Warm sunset orange */
+    --pk-pink: #FF6B9D;          /* Playful pink */
+    --pk-purple: #A55EEA;        /* Fun purple */
     --pk-white: #FFFFFF;         /* Pure white */
     
-    /* Background colors */
-    --pk-bg-sky: #E8F6FF;        /* Light sky background */
-    --pk-bg-cream: #FFF9E6;      /* Soft cream */
-    --pk-bg-light-blue: #D6EAF8; /* Very light blue */
-    --pk-bg-light-yellow: #FEF9E7; /* Very light yellow */
-    --pk-bg-light-green: #E8F8F5; /* Very light green */
+    /* Background colors - dreamy and soft */
+    --pk-bg-sky: #E3F6FF;        /* Light sky background */
+    --pk-bg-sky-deep: #B8E4FF;   /* Deeper sky */
+    --pk-bg-cream: #FFF8E7;      /* Warm cream */
+    --pk-bg-light-blue: #D6EFFF; /* Very light blue */
+    --pk-bg-light-yellow: #FFF9E0; /* Very light yellow */
+    --pk-bg-light-green: #E8FFF0; /* Very light green */
+    --pk-bg-light-pink: #FFE8F0;  /* Very light pink */
     
     /* Footer/Dark sections */
     --pk-footer-blue: #1A5276;   /* Dark blue for footer */
@@ -35,43 +39,46 @@
     --brand-orange: var(--pk-orange);
     --brand-blue: var(--pk-blue);
     --brand-green: var(--pk-green);
-    --brand-pink: #FF6B9D;
-    --brand-purple: #6C5CE7;
+    --brand-pink: var(--pk-pink);
+    --brand-purple: var(--pk-purple);
     
-    /* Text Colors - softer, not harsh black */
-    --text-primary: #2C3E50;     /* Soft dark blue-gray */
-    --text-secondary: #566573;   /* Medium gray-blue */
-    --text-muted: #7F8C8D;       /* Muted gray */
-    --text-light: #BDC3C7;       /* Light gray */
+    /* Text Colors - warm and friendly */
+    --text-primary: #2D3748;     /* Warm dark gray */
+    --text-secondary: #4A5568;   /* Medium warm gray */
+    --text-muted: #718096;       /* Muted gray */
+    --text-light: #A0AEC0;       /* Light gray */
     
     /* Backgrounds */
     --bg-cream: var(--pk-bg-cream);
     --bg-white: var(--pk-white);
     --bg-light: var(--pk-bg-sky);
     
-    /* UI Colors - minimal gray usage */
-    --border-light: rgba(52, 152, 219, 0.15); /* Subtle blue tint */
-    --border-medium: rgba(52, 152, 219, 0.25);
+    /* UI Colors */
+    --border-light: rgba(69, 170, 242, 0.12);
+    --border-medium: rgba(69, 170, 242, 0.2);
     
-    /* Shadows with brand color tints */
-    --shadow-sm: 0 2px 8px rgba(52, 152, 219, 0.08);
-    --shadow-md: 0 4px 16px rgba(52, 152, 219, 0.1);
-    --shadow-lg: 0 8px 32px rgba(52, 152, 219, 0.12);
-    --shadow-btn: 0 4px 14px rgba(231, 76, 60, 0.35);
-    --shadow-btn-hover: 0 6px 20px rgba(231, 76, 60, 0.45);
-    --shadow-toy: 0 12px 40px rgba(52, 152, 219, 0.2), 0 4px 12px rgba(0, 0, 0, 0.08);
+    /* Shadows - soft and dreamy */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.08);
+    --shadow-xl: 0 16px 60px rgba(0, 0, 0, 0.1);
+    --shadow-btn: 0 4px 14px rgba(255, 71, 87, 0.3);
+    --shadow-btn-hover: 0 6px 24px rgba(255, 71, 87, 0.4);
+    --shadow-card: 0 8px 30px rgba(69, 170, 242, 0.12);
+    --shadow-card-hover: 0 12px 40px rgba(69, 170, 242, 0.18);
     
-    /* Border Radius */
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 20px;
-    --radius-xl: 28px;
+    /* Border Radius - more rounded for playful feel */
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-lg: 24px;
+    --radius-xl: 32px;
+    --radius-2xl: 40px;
     --radius-full: 9999px;
     
     /* Touch targets */
     --touch-min: 48px;
     
-    /* ===== TYPOGRAPHY SCALE (Larger for Kids) ===== */
+    /* ===== TYPOGRAPHY SCALE ===== */
     --font-size-base: 16px;
     --font-size-lg: 18px;
     --font-size-xl: 20px;
@@ -86,7 +93,8 @@
     --peekaboo-green: var(--pk-green);
     --peekaboo-blue: var(--pk-blue);
     --peekaboo-orange: var(--pk-orange);
-    --peekaboo-pink: #FF6B9D;
+    --peekaboo-pink: var(--pk-pink);
+    --peekaboo-purple: var(--pk-purple);
 }
 
 body {
