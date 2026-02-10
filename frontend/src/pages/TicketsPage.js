@@ -408,7 +408,7 @@ export default function TicketsPage() {
                         }`}
                       >
                         <div className="font-heading font-semibold text-lg">
-                          {slot.start_time} → {endTime}
+                          {endTime} ← {slot.start_time}
                         </div>
                         {totalPrice && (
                           <div className="text-primary font-bold mt-1">
