@@ -384,14 +384,6 @@ export default function TicketsPage() {
 
         {/* STEP 3: Duration Selection - Show only after timeMode selected */}
         {date && timeMode && (
-                className="rounded-xl"
-              />
-            </CardContent>
-          </Card>
-        )}
-
-        {/* STEP 3: Duration Selection - Show only after date selected */}
-        {timeMode && date && (
           <Card className="border-2 rounded-3xl mb-8">
             <CardHeader>
               <CardTitle className="font-heading text-xl flex items-center gap-2">
