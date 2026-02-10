@@ -165,8 +165,8 @@ router.get('/available', async (req, res) => {
   try {
     const { date, slot_type = 'hourly', timeMode, duration } = req.query;
     
-    // Debug logging
-    console.log(`SLOTS_AVAILABLE_HIT: date=${date}, slot_type=${slot_type}, timeMode=${timeMode}, duration=${duration}`);
+    // Debug logging - 1) Query params
+    console.log('SLOTS_AVAILABLE_HIT', { date, timeMode, duration });
     
     if (!date) {
       return res.status(400).json({ error: 'Date is required' });
@@ -196,6 +196,9 @@ router.get('/available', async (req, res) => {
       is_active: true
     }).sort({ start_time: 1 });
 
+    // Debug logging - 2) Total slots from DB
+    console.log('SLOTS_DB_COUNT_TOTAL', slots.length);
+
     // OPTIMIZATION: Fetch all bookings for the date ONCE (instead of per-slot)
     let allBookings = [];
     if (slot_type === 'hourly') {
@@ -209,6 +212,10 @@ router.get('/available', async (req, res) => {
 
     // Duration in hours for end time calculation
     const durationHours = parseInt(duration) || 2;
+
+    // Counters for logging
+    let countAfterMode = 0;
+    let countAfterEndTime = 0;
 
     // Process slots with availability (now using in-memory calculation)
     const availableSlots = slots.map((slot) => {
@@ -242,6 +249,10 @@ router.get('/available', async (req, res) => {
           matchesTimeMode = (startHour >= 14);
         }
         
+        // Count for logging
+        if (matchesTimeMode) countAfterMode++;
+        if (matchesTimeMode && fitsClosing) countAfterEndTime++;
+        
         isAvailable = !isPast && availableSpots > 0 && fitsClosing && matchesTimeMode;
       } else {
         // For birthday, simple capacity check
@@ -256,6 +267,12 @@ router.get('/available', async (req, res) => {
         is_past: isPast
       };
     });
+
+    // Debug logging - 3) Count after timeMode filter
+    console.log('SLOTS_DB_COUNT_AFTER_MODE', countAfterMode);
+    
+    // Debug logging - 4) Count after endTime filter
+    console.log('SLOTS_DB_COUNT_AFTER_ENDTIME', countAfterEndTime, { closingMinutes, dayOfWeek });
 
     // Filter out non-matching timeMode slots entirely for cleaner response
     const filteredSlots = timeMode 
