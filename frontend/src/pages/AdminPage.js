@@ -79,6 +79,7 @@ export default function AdminPage() {
     if (isAdmin) {
       fetchDashboard();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
   // Show 403 page if not admin
