@@ -1,24 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Calendar } from '../components/ui/calendar';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
-import { Clock, Users, Loader2, AlertCircle, Star } from 'lucide-react';
+import { Clock, Users, Loader2, AlertCircle, Star, Sun, Moon } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import { PaymentCardIcons } from '../components/PaymentCardIcons';
+
+// Morning pricing constant
+const MORNING_PRICE_PER_HOUR = 3.5;
 
 export default function TicketsPage() {
   const { isAuthenticated, api, user } = useAuth();
   const navigate = useNavigate();
-  const [date, setDate] = useState(new Date());
+  
+  // Step 1: Time mode (morning/afternoon)
+  const [timeMode, setTimeMode] = useState(null); // 'morning' or 'afternoon'
+  // Step 2: Date
+  const [date, setDate] = useState(null);
+  // Step 3: Duration
+  const [selectedDuration, setSelectedDuration] = useState(null);
+  // Step 4: Slots (lazy loaded)
   const [slots, setSlots] = useState([]);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [slotsError, setSlotsError] = useState(null);
+  const slotsCache = useRef(new Map());
+  
   const [children, setChildren] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [selectedChildren, setSelectedChildren] = useState([]);
@@ -27,31 +40,43 @@ export default function TicketsPage() {
   const [customNotes, setCustomNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
-  const [loadingSlots, setLoadingSlots] = useState(false);
   const [pricing, setPricing] = useState([]);
   const [extraHourText, setExtraHourText] = useState('');
 
+  // Fetch children on mount
   useEffect(() => {
-    fetchPricing();
     if (isAuthenticated) {
       fetchChildren();
     }
   }, [isAuthenticated]);
 
+  // Fetch pricing when timeMode changes
   useEffect(() => {
-    fetchSlots();
-    setSelectedSlot(null); // Reset selection when date changes
-  }, [date]);
-
-  useEffect(() => {
-    // Reset selected slot when duration changes (might filter it out)
-    if (selectedSlot) {
-      const filtered = getFilteredSlots();
-      if (!filtered.find(s => s.id === selectedSlot.id)) {
-        setSelectedSlot(null);
-      }
+    if (timeMode) {
+      fetchPricing(timeMode);
     }
-  }, [selectedDuration]);
+  }, [timeMode]);
+
+  // Lazy fetch slots ONLY when all 3 selections are made
+  useEffect(() => {
+    if (!timeMode || !date || !selectedDuration) {
+      setSlots([]);
+      setSelectedSlot(null);
+      return;
+    }
+    
+    const dateStr = format(date, 'yyyy-MM-dd');
+    const cacheKey = `${dateStr}-${selectedDuration}-${timeMode}`;
+    
+    // Check cache first
+    if (slotsCache.current.has(cacheKey)) {
+      setSlots(slotsCache.current.get(cacheKey));
+      return;
+    }
+    
+    // Fetch slots with timeMode and duration
+    fetchSlots(dateStr, cacheKey);
+  }, [timeMode, date, selectedDuration]);
 
   useEffect(() => {
     // Clear selected slot when time mode changes
@@ -60,11 +85,20 @@ export default function TicketsPage() {
 
   const fetchPricing = async () => {
     try {
-      const response = await api.get('/payments/hourly-pricing');
+      const response = await api.get(`/payments/hourly-pricing?timeMode=${mode}`);
       setPricing(response.data.pricing || []);
       setExtraHourText(response.data.extra_hour_text || '');
     } catch (error) {
       console.error('Failed to fetch pricing:', error);
+      // Fallback pricing
+      if (mode === 'morning') {
+        setPricing([
+          { hours: 1, price: 3.5, label_ar: 'ساعة واحدة' },
+          { hours: 2, price: 7, label_ar: 'ساعتان' },
+          { hours: 3, price: 10.5, label_ar: '3 ساعات' }
+        ]);
+        setExtraHourText('كل ساعة = 3.5 دينار فقط (عرض الصباح)');
+      }
     }
   };
 
@@ -77,17 +111,24 @@ export default function TicketsPage() {
     }
   };
 
-  const fetchSlots = async () => {
-    setLoadingSlots(true);
+  const fetchSlots = async (dateStr, cacheKey) => {
+    setSlotsLoading(true);
+    setSlotsError(null);
+    setSelectedSlot(null);
     try {
-      const dateStr = format(date, 'yyyy-MM-dd');
-      const response = await api.get(`/slots/available?date=${dateStr}&slot_type=hourly`);
-      setSlots(response.data.slots || []);
+      const response = await api.get(
+        `/slots/available?date=${dateStr}&slot_type=hourly&timeMode=${timeMode}&duration=${selectedDuration}`
+      );
+      const fetchedSlots = response.data.slots || [];
+      // Cache the result
+      slotsCache.current.set(cacheKey, fetchedSlots);
+      setSlots(fetchedSlots);
     } catch (error) {
       console.error('Failed to fetch slots:', error);
+      setSlotsError('فشل تحميل الأوقات المتاحة');
       toast.error('فشل تحميل الأوقات المتاحة');
     } finally {
-      setLoadingSlots(false);
+      setSlotsLoading(false);
     }
   };
 
@@ -155,7 +196,8 @@ export default function TicketsPage() {
           duration_hours: selectedDuration,
           slot_start_time: selectedSlot.start_time, // Pass slot time for Happy Hour calculation
           custom_notes: customNotes.trim(),
-          origin_url: window.location.origin
+          origin_url: window.location.origin,
+          timeMode: timeMode // Pass timeMode for server-side pricing
         });
         window.location.href = response.data.url;
       } else {
@@ -201,6 +243,7 @@ export default function TicketsPage() {
   };
 
   const getSelectedPrice = () => {
+    if (!selectedDuration) return 0;
     const selected = pricing.find(p => p.hours === selectedDuration);
     const basePrice = selected ? selected.price : 0;
     return basePrice * Math.max(1, selectedChildren.length);
@@ -242,6 +285,18 @@ export default function TicketsPage() {
   const minDate = new Date();
   const maxDate = addDays(new Date(), 30);
 
+  // Skeleton loader for slots
+  const SlotsSkeleton = () => (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div key={i} className="p-4 rounded-2xl border-2 border-border bg-muted/30 animate-pulse">
+          <div className="h-5 bg-muted rounded w-24 mx-auto mb-2"></div>
+          <div className="h-4 bg-muted rounded w-16 mx-auto"></div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-hero-gradient py-8 md:py-12" dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -250,11 +305,11 @@ export default function TicketsPage() {
             احجز وقت اللعب بالساعة
           </h1>
           <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
-            اختر التاريخ والوقت والمدة لجلسة لعب طفلك
+            اختر الفترة، التاريخ، المدة، ثم الوقت المناسب
           </p>
         </div>
 
-        {/* Duration Selection - BEFORE slot selection */}
+        {/* STEP 1: Time Mode Selection */}
         <Card className="border-2 rounded-3xl mb-8">
           <CardHeader>
             <CardTitle className="font-heading text-xl">اختر فترة اللعب</CardTitle>
@@ -351,44 +406,113 @@ export default function TicketsPage() {
           </CardContent>
         </Card>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Calendar */}
-          <Card className="border-2 rounded-3xl">
+        {/* STEP 2: Date Selection - Show only after timeMode selected */}
+        {timeMode && (
+          <Card className="border-2 rounded-3xl mb-8">
             <CardHeader>
-              <CardTitle className="font-heading">اختر التاريخ</CardTitle>
+              <CardTitle className="font-heading text-xl flex items-center gap-2">
+                <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">2</span>
+                اختر التاريخ
+              </CardTitle>
             </CardHeader>
             <CardContent className="flex justify-center">
               <Calendar
                 mode="single"
                 selected={date}
-                onSelect={(d) => d && setDate(d)}
+                onSelect={(d) => {
+                  if (d) {
+                    setDate(d);
+                    setSelectedSlot(null);
+                  }
+                }}
                 disabled={(d) => d < minDate || d > maxDate}
                 className="rounded-xl"
               />
             </CardContent>
           </Card>
+        )}
 
-          {/* Time Slots */}
-          <Card className="border-2 rounded-3xl lg:col-span-2">
+        {/* STEP 3: Duration Selection - Show only after date selected */}
+        {timeMode && date && (
+          <Card className="border-2 rounded-3xl mb-8">
+            <CardHeader>
+              <CardTitle className="font-heading text-xl flex items-center gap-2">
+                <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">3</span>
+                اختر مدة اللعب
+              </CardTitle>
+              <CardDescription className="text-sm">{extraHourText}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {pricing.map((option) => (
+                  <button
+                    key={option.hours}
+                    onClick={() => {
+                      setSelectedDuration(option.hours);
+                      setSelectedSlot(null);
+                    }}
+                    className={`relative p-6 rounded-2xl border-2 transition-all ${
+                      selectedDuration === option.hours
+                        ? timeMode === 'morning' 
+                          ? 'border-yellow-500 bg-yellow-50 shadow-lg'
+                          : 'border-primary bg-primary/10 shadow-lg'
+                        : 'border-border bg-white hover:border-primary/50'
+                    }`}
+                  >
+                    {option.best_value && (
+                      <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white">
+                        <Star className="h-3 w-3 mr-1" />
+                        أفضل قيمة
+                      </Badge>
+                    )}
+                    <div className="text-center">
+                      <div className="font-heading text-3xl font-bold mb-2">{option.label_ar}</div>
+                      <div className={`text-2xl font-bold mb-1 ${timeMode === 'morning' ? 'text-yellow-600' : 'text-primary'}`}>
+                        {option.price} دينار
+                      </div>
+                      <div className="text-sm text-muted-foreground">{option.price} JD</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* STEP 4: Time Slots - Show only after duration selected, lazy load */}
+        {timeMode && date && selectedDuration && (
+          <Card className="border-2 rounded-3xl mb-8">
             <CardHeader>
               <CardTitle className="font-heading flex items-center gap-2">
+                <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">4</span>
                 <Clock className="h-5 w-5 text-primary" />
                 الأوقات المتاحة - {format(date, 'MMMM d, yyyy')}
               </CardTitle>
+              <CardDescription>
+                {timeMode === 'morning' 
+                  ? 'الفترة الصباحية: 10:00 ص - 2:00 م' 
+                  : 'الفترة المسائية: 2:00 م - منتصف الليل'}
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              {loadingSlots ? (
-                <div className="flex justify-center py-12">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              {slotsLoading ? (
+                <div>
+                  <p className="text-center text-muted-foreground mb-4">جاري تحميل الأوقات...</p>
+                  <SlotsSkeleton />
                 </div>
-              ) : slots.length === 0 ? (
+              ) : slotsError ? (
+                <div className="text-center py-12 text-destructive">
+                  <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>{slotsError}</p>
+                </div>
+              ) : slots.filter(s => s.is_available).length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                   <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>لا توجد أوقات متاحة لهذا التاريخ</p>
+                  <p>لا توجد أوقات متاحة لهذه الفترة والمدة</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                  {getFilteredSlots().map((slot) => {
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  {slots.filter(s => s.is_available).map((slot) => {
                     const endTime = getEndTime(slot.start_time, selectedDuration);
                     const pricePerHour = getSlotPrice(slot.start_time);
                     const totalPrice = getSlotTotalPrice(slot.start_time);
@@ -397,14 +521,13 @@ export default function TicketsPage() {
                     return (
                       <button
                         key={slot.id}
-                        onClick={() => slot.is_available && setSelectedSlot(slot)}
-                        disabled={!slot.is_available}
+                        onClick={() => setSelectedSlot(slot)}
                         className={`p-4 rounded-2xl border-2 transition-all ${
                           selectedSlot?.id === slot.id
-                            ? 'border-primary bg-primary/10'
-                            : slot.is_available
-                            ? 'border-border hover:border-primary/50 bg-white'
-                            : 'border-border bg-muted opacity-50 cursor-not-allowed'
+                            ? timeMode === 'morning'
+                              ? 'border-yellow-500 bg-yellow-50'
+                              : 'border-primary bg-primary/10'
+                            : 'border-border hover:border-primary/50 bg-white'
                         }`}
                       >
                         <div className="font-heading font-semibold text-lg">
@@ -422,9 +545,6 @@ export default function TicketsPage() {
                           <Users className="h-4 w-4" />
                           {slot.available_spots} متاح
                         </div>
-                        {slot.is_past && (
-                          <div className="text-xs text-destructive mt-1">منتهي</div>
-                        )}
                       </button>
                     );
                   })}
@@ -432,10 +552,10 @@ export default function TicketsPage() {
               )}
             </CardContent>
           </Card>
-        </div>
+        )}
 
         {/* Booking Summary */}
-        {isAuthenticated && (
+        {isAuthenticated && selectedSlot && (
           <Card className="border-2 rounded-3xl mt-8">
             <CardHeader>
               <CardTitle className="font-heading">أكمل حجزك</CardTitle>
@@ -489,13 +609,12 @@ export default function TicketsPage() {
                   <div>
                     <Label className="block text-sm font-medium mb-2">الوقت المختار</Label>
                     <div className="p-3 rounded-xl bg-muted">
-                      {selectedSlot ? (
-                        <span className="font-semibold">
-                          {format(date, 'MMM d')} في {selectedSlot.start_time}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">لم يتم اختيار الوقت</span>
-                      )}
+                      <span className="font-semibold">
+                        {format(date, 'MMM d')} في {selectedSlot.start_time}
+                      </span>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {timeMode === 'morning' ? '☀️ فترة صباحية' : '🌙 فترة مسائية'}
+                      </div>
                     </div>
                   </div>
 
@@ -539,7 +658,9 @@ export default function TicketsPage() {
 
                 {/* Booking Summary */}
                 {paymentMethod && (
-                  <div className="p-4 rounded-xl bg-muted/50 border">
+                  <div className={`p-4 rounded-xl border ${
+                    timeMode === 'morning' ? 'bg-yellow-50/50' : 'bg-muted/50'
+                  }`}>
                     <p className="text-sm text-muted-foreground mb-1">ملخص الحجز</p>
                     <p className="font-bold">
                       {selectedSlot 
@@ -551,6 +672,8 @@ export default function TicketsPage() {
                       <p className="text-sm text-yellow-600 mt-1">⏰ Happy Hour Price (3.5 JD/hour)</p>
                     )}
                     <p className="text-sm mt-1">
+                      الفترة: <span className="font-bold">{timeMode === 'morning' ? 'صباحية' : 'مسائية'}</span>
+                      {' | '}
                       طريقة الدفع: <span className="font-bold">
                         {paymentMethod === 'cash' ? 'نقداً' : paymentMethod === 'card' ? 'بطاقة' : 'CliQ'}
                       </span>

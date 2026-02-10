@@ -12,6 +12,9 @@ let stripe = null;
 console.warn('[Payments] Stripe disabled (manual payments only)');
 
 
+// Morning (Happy Hour) price: 3.5 JD per hour
+const MORNING_PRICE_PER_HOUR = 3.5;
+
 // Get hourly price from Settings or use defaults
 const getHourlyPrice = async (duration_hours = 2, slot_start_time = null) => {
   const hours = parseInt(duration_hours) || 2;
@@ -76,6 +79,24 @@ const getSubscriptionPrice = async (planId) => {
 // Get hourly pricing info (public endpoint for frontend)
 router.get('/hourly-pricing', async (req, res) => {
   try {
+    const { timeMode } = req.query;
+    
+    // Morning mode: flat 3.5 JD per hour
+    if (timeMode === 'morning') {
+      return res.json({
+        pricing: [
+          { hours: 1, price: 3.5, label: '1 Hour', label_ar: 'ساعة واحدة' },
+          { hours: 2, price: 7, label: '2 Hours', label_ar: 'ساعتان' },
+          { hours: 3, price: 10.5, label: '3 Hours', label_ar: '3 ساعات' }
+        ],
+        extra_hour_price: 3.5,
+        extra_hour_text: 'كل ساعة = 3.5 دينار فقط (عرض الصباح)',
+        currency: 'JD',
+        timeMode: 'morning'
+      });
+    }
+    
+    // Afternoon mode: standard pricing
     const pricing = await Settings.find({
       key: { $in: ['hourly_1hr', 'hourly_2hr', 'hourly_3hr', 'hourly_extra_hr'] }
     });
@@ -97,7 +118,8 @@ router.get('/hourly-pricing', async (req, res) => {
       ],
       extra_hour_price: prices.hourly_extra_hr,
       extra_hour_text: 'كل ساعة إضافية بعد الساعتين = 3 دنانير فقط',
-      currency: 'JD'
+      currency: 'JD',
+      timeMode: 'afternoon'
     });
   } catch (error) {
     console.error('Get hourly pricing error:', error);
@@ -116,7 +138,7 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       });
     }
 
-    const { type, reference_id, origin_url, duration_hours, custom_notes } = req.body;
+    const { type, reference_id, origin_url, duration_hours, custom_notes, timeMode } = req.body;
 
     if (!type || !origin_url) {
       return res.status(400).json({ error: 'type and origin_url are required' });

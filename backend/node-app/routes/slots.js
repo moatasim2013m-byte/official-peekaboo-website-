@@ -163,7 +163,10 @@ const calculateAvailableCapacityForSlot = (date, startTimeStr, allBookings) => {
 // Get available slots for a date (public - no auth required for viewing)
 router.get('/available', async (req, res) => {
   try {
-    const { date, slot_type = 'hourly' } = req.query;
+    const { date, slot_type = 'hourly', timeMode, duration } = req.query;
+    
+    // Debug logging
+    console.log(`SLOTS_AVAILABLE_HIT: date=${date}, slot_type=${slot_type}, timeMode=${timeMode}, duration=${duration}`);
     
     if (!date) {
       return res.status(400).json({ error: 'Date is required' });
@@ -179,6 +182,13 @@ router.get('/available', async (req, res) => {
     // Get current time in Amman timezone
     const nowInAmman = toZonedTime(new Date(), TIMEZONE);
     const cutoffTime = addMinutes(nowInAmman, BOOKING_CUTOFF_MINUTES);
+
+    // Determine closing time based on day of week (Thu=4, Fri=5)
+    const dateObj = new Date(date);
+    const dayOfWeek = dateObj.getDay();
+    const isWeekend = (dayOfWeek === 4 || dayOfWeek === 5); // Thu or Fri
+    const closingHour = isWeekend ? 24 : 23; // midnight vs 23:00
+    const closingMinutes = closingHour * 60;
 
     const slots = await TimeSlot.find({ 
       date, 
@@ -197,6 +207,9 @@ router.get('/available', async (req, res) => {
       }).lean();
     }
 
+    // Duration in hours for end time calculation
+    const durationHours = parseInt(duration) || 2;
+
     // Process slots with availability (now using in-memory calculation)
     const availableSlots = slots.map((slot) => {
       const slotDateTime = parse(`${slot.date} ${slot.start_time}`, 'yyyy-MM-dd HH:mm', new Date());
@@ -204,13 +217,32 @@ router.get('/available', async (req, res) => {
       
       const isPast = isBefore(slotInAmman, cutoffTime);
       
+      // Parse start time
+      const [startHour, startMinute] = slot.start_time.split(':').map(Number);
+      const startMinutes = startHour * 60 + startMinute;
+      const endMinutes = startMinutes + (durationHours * 60);
+      
       let availableSpots;
       let isAvailable;
       
       if (slot_type === 'hourly') {
         // For hourly, calculate based on overlapping sessions (using cached bookings)
         availableSpots = calculateAvailableCapacityForSlot(date, slot.start_time, allBookings);
-        isAvailable = !isPast && availableSpots > 0;
+        
+        // Check if slot fits within closing time
+        const fitsClosing = endMinutes <= closingMinutes;
+        
+        // Filter by timeMode if provided
+        let matchesTimeMode = true;
+        if (timeMode === 'morning') {
+          // Morning: slots from 10:00 to before 14:00
+          matchesTimeMode = (startHour >= 10 && startHour < 14);
+        } else if (timeMode === 'afternoon') {
+          // Afternoon: slots from 14:00 onwards
+          matchesTimeMode = (startHour >= 14);
+        }
+        
+        isAvailable = !isPast && availableSpots > 0 && fitsClosing && matchesTimeMode;
       } else {
         // For birthday, simple capacity check
         availableSpots = slot.capacity - slot.booked_count;
@@ -225,7 +257,12 @@ router.get('/available', async (req, res) => {
       };
     });
 
-    res.json({ slots: availableSlots });
+    // Filter out non-matching timeMode slots entirely for cleaner response
+    const filteredSlots = timeMode 
+      ? availableSlots.filter(s => s.is_available || s.is_past)
+      : availableSlots;
+
+    res.json({ slots: filteredSlots });
   } catch (error) {
     console.error('Get available slots error:', error);
     res.status(500).json({ error: 'Failed to get slots' });
