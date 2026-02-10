@@ -449,26 +449,29 @@ code {
 
 /* ===== CARD STYLES ===== */
 .card-interactive {
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 2px solid var(--border-light);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 2px solid transparent;
+    border-radius: var(--radius-xl) !important;
 }
 
 .card-interactive:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg);
-    border-color: var(--brand-red);
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-card-hover);
 }
 
-/* ===== SERVICE CARDS (Kids-Friendly) ===== */
+/* ===== WONDERLAND SERVICE CARDS ===== */
 .service-card {
     background: var(--bg-white);
-    box-shadow: var(--shadow-md);
-    border-color: transparent;
+    box-shadow: var(--shadow-card);
+    border: none;
+    border-radius: var(--radius-xl) !important;
     overflow: visible;
+    transition: all 0.3s ease;
 }
 
 .service-card:hover {
-    box-shadow: 0 12px 40px rgba(255, 71, 87, 0.15);
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-card-hover);
 }
 
 .service-title {
@@ -477,55 +480,57 @@ code {
     color: var(--text-primary);
 }
 
-/* ===== WONDERLAND PREMIUM CARDS ===== */
+/* ===== WONDERLAND CARDS ===== */
 .pk-card {
     background: white;
-    border-radius: 22px !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
-    border: 2px solid rgba(0, 0, 0, 0.05) !important;
+    border-radius: var(--radius-xl) !important;
+    box-shadow: var(--shadow-card);
+    border: none !important;
     overflow: hidden;
     position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .pk-card:hover {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.05);
+    transform: translateY(-8px);
+    box-shadow: var(--shadow-card-hover);
 }
 
-/* Colorful top accent strip */
+/* Colorful top accent strip - thicker */
 .pk-card-accent {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
-    height: 6px;
+    height: 5px;
     z-index: 10;
 }
 
-.pk-card-accent.accent-blue { background: linear-gradient(90deg, var(--pk-blue), #5DADE2); }
-.pk-card-accent.accent-pink { background: linear-gradient(90deg, var(--pk-red), #EC7063); }
-.pk-card-accent.accent-yellow { background: linear-gradient(90deg, var(--pk-yellow), #F4D03F); }
-.pk-card-accent.accent-green { background: linear-gradient(90deg, var(--pk-green), #58D68D); }
-.pk-card-accent.accent-orange { background: linear-gradient(90deg, var(--pk-orange), #EB984E); }
-.pk-card-accent.accent-purple { background: linear-gradient(90deg, #9C27B0, #BA68C8); }
+.pk-card-accent.accent-blue { background: var(--pk-blue); }
+.pk-card-accent.accent-pink { background: var(--pk-red); }
+.pk-card-accent.accent-yellow { background: var(--pk-yellow); }
+.pk-card-accent.accent-green { background: var(--pk-green); }
+.pk-card-accent.accent-orange { background: var(--pk-orange); }
+.pk-card-accent.accent-purple { background: var(--pk-purple); }
 .pk-card-accent.accent-rainbow { background: linear-gradient(90deg, var(--pk-red), var(--pk-orange), var(--pk-yellow), var(--pk-green), var(--pk-blue)); }
 
-/* Icon badge - round bubble behind icon */
+/* Icon badge - circular with shadow */
 .pk-icon-badge {
-    width: 64px;
-    height: 64px;
-    border-radius: 20px;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 1rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    margin: 0 auto 1.25rem;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
-.pk-icon-badge.badge-blue { background: linear-gradient(135deg, var(--pk-blue), #5DADE2); }
-.pk-icon-badge.badge-pink { background: linear-gradient(135deg, var(--pk-red), #EC7063); }
-.pk-icon-badge.badge-yellow { background: linear-gradient(135deg, var(--pk-yellow), #F7DC6F); }
-.pk-icon-badge.badge-green { background: linear-gradient(135deg, var(--pk-green), #58D68D); }
-.pk-icon-badge.badge-orange { background: linear-gradient(135deg, var(--pk-orange), #EB984E); }
+.pk-icon-badge.badge-blue { background: var(--pk-blue); }
+.pk-icon-badge.badge-pink { background: var(--pk-red); }
+.pk-icon-badge.badge-yellow { background: var(--pk-yellow); }
+.pk-icon-badge.badge-green { background: var(--pk-green); }
+.pk-icon-badge.badge-orange { background: var(--pk-orange); }
 
 /* Card title styling */
 .pk-card-title {
@@ -533,39 +538,12 @@ code {
     font-weight: 700;
     font-size: 1.25rem;
     color: var(--text-primary);
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.75rem;
 }
 
-/* Playful accent decorations */
+/* Playful accent decorations - hidden for cleaner look */
 .service-accent {
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.service-accent--star {
-    top: 12px;
-    left: 12px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FFD93D'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E") no-repeat center/contain;
-}
-
-.service-accent--balloon {
-    top: 10px;
-    right: 14px;
-    left: auto;
-    width: 20px;
-    height: 28px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 36' fill='%23FF6B9D'%3E%3Cellipse cx='12' cy='12' rx='10' ry='12'/%3E%3Cpath d='M12 24 L12 34 M10 34 L14 34' stroke='%23999' stroke-width='1.5' fill='none'/%3E%3C/svg%3E") no-repeat center/contain;
-}
-
-.service-accent--cloud {
-    top: 8px;
-    left: 10px;
-    width: 32px;
-    height: 20px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 24' fill='%2300D2D3' opacity='0.7'%3E%3Cellipse cx='20' cy='16' rx='16' ry='8'/%3E%3Ccircle cx='12' cy='12' r='8'/%3E%3Ccircle cx='28' cy='12' r='8'/%3E%3Ccircle cx='20' cy='8' r='8'/%3E%3C/svg%3E") no-repeat center/contain;
+    display: none;
 }
 
 /* Soft cream background sections */
