@@ -84,6 +84,30 @@ export const translations = {
     'Fun Moments at Peekaboo': 'لحظات ممتعة في بيكابوو',
     'See what makes us special!': 'شاهد ما يميزنا!',
     'Gallery image': 'صورة من المعرض',
+    
+    // Reset Password Page
+    'Reset Password': 'إعادة تعيين كلمة المرور',
+    'Password Reset!': 'تم إعادة تعيين كلمة المرور!',
+    'Enter your new password below': 'أدخل كلمة المرور الجديدة أدناه',
+    'Your password has been updated successfully': 'تم تحديث كلمة المرور بنجاح',
+    'New Password': 'كلمة المرور الجديدة',
+    'Confirm New Password': 'تأكيد كلمة المرور الجديدة',
+    'At least 6 characters': 'على الأقل 6 أحرف',
+    'Confirm your password': 'أكد كلمة المرور',
+    'Resetting...': 'جاري إعادة التعيين...',
+    'Redirecting to login...': 'جاري التوجيه لتسجيل الدخول...',
+    'Invalid or missing reset token': 'رابط غير صالح أو مفقود',
+    'Request New Reset Link': 'طلب رابط جديد',
+    'Passwords do not match': 'كلمتا المرور غير متطابقتين',
+    'Password must be at least 6 characters': 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
+    'Password reset successful!': 'تم إعادة تعيين كلمة المرور بنجاح!',
+    'Failed to reset password': 'فشل إعادة تعيين كلمة المرور',
+    'Back to Login': 'العودة لتسجيل الدخول',
+    'Send New Link': 'إرسال رابط جديد',
+    
+    // Auth actions
+    'auth.backToLogin': 'العودة لتسجيل الدخول',
+    'auth.sendNewLink': 'إرسال رابط جديد',
   },
   
   en: {
@@ -166,5 +190,29 @@ export const translations = {
     'Fun Moments at Peekaboo': 'Fun Moments at Peekaboo',
     'See what makes us special!': 'See what makes us special!',
     'Gallery image': 'Gallery image',
+    
+    // Reset Password Page
+    'Reset Password': 'Reset Password',
+    'Password Reset!': 'Password Reset!',
+    'Enter your new password below': 'Enter your new password below',
+    'Your password has been updated successfully': 'Your password has been updated successfully',
+    'New Password': 'New Password',
+    'Confirm New Password': 'Confirm New Password',
+    'At least 6 characters': 'At least 6 characters',
+    'Confirm your password': 'Confirm your password',
+    'Resetting...': 'Resetting...',
+    'Redirecting to login...': 'Redirecting to login...',
+    'Invalid or missing reset token': 'Invalid or missing reset token',
+    'Request New Reset Link': 'Request New Reset Link',
+    'Passwords do not match': 'Passwords do not match',
+    'Password must be at least 6 characters': 'Password must be at least 6 characters',
+    'Password reset successful!': 'Password reset successful!',
+    'Failed to reset password': 'Failed to reset password',
+    'Back to Login': 'Back to Login',
+    'Send New Link': 'Send New Link',
+    
+    // Auth actions
+    'auth.backToLogin': 'Back to Login',
+    'auth.sendNewLink': 'Send New Link',
   }
 };

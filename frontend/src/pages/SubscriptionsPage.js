@@ -218,7 +218,7 @@ export default function SubscriptionsPage() {
                 <CardHeader>
                   <CardTitle className="font-heading">أكمل عملية الشراء</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 pb-24">{/* Added pb-24 for sticky button space */}
                   <div>
                     <label className="block text-sm font-medium mb-2">اختر الطفل</label>
                     {children.length === 0 ? (
@@ -267,25 +267,29 @@ export default function SubscriptionsPage() {
                         <p className="text-sm">طريقة الدفع: {paymentMethod === 'cash' ? 'نقداً' : paymentMethod === 'card' ? 'بطاقة' : 'CliQ'}</p>
                       </div>
                     )}
-                    <Button
-                      onClick={handlePurchase}
-                      disabled={!selectedPlan || !selectedChild || loading}
-                      className="w-full md:w-auto px-8 rounded-full h-12 btn-playful bg-secondary hover:bg-secondary/90 text-secondary-foreground"
-                      data-testid="purchase-btn"
-                      aria-label="اشترِ الآن - يقبل بطاقات فيزا وماستركارد"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                          جاري المعالجة...
-                        </>
-                      ) : (
-                        <span className="inline-flex items-center gap-2">
-                          <PaymentCardIcons />
-                          <span>اشترِ الآن</span>
-                        </span>
-                      )}
-                    </Button>
+                    
+                    {/* Sticky CTA Container */}
+                    <div className="sticky bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-lg p-4 -mx-6 -mb-6 mt-6 z-50">
+                      <Button
+                        onClick={handlePurchase}
+                        disabled={!selectedPlan || !selectedChild || loading}
+                        className="w-full px-8 rounded-full h-14 btn-playful bg-secondary hover:bg-secondary/90 text-secondary-foreground text-lg"
+                        data-testid="purchase-btn"
+                        aria-label="اشترِ الآن - يقبل بطاقات فيزا وماستركارد"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                            جاري المعالجة...
+                          </>
+                        ) : (
+                          <span className="inline-flex items-center gap-2">
+                            <PaymentCardIcons />
+                            <span>اشترِ الآن</span>
+                          </span>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>

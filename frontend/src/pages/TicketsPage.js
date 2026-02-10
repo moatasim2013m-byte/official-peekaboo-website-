@@ -35,6 +35,8 @@ export default function TicketsPage() {
   const [children, setChildren] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [selectedChildren, setSelectedChildren] = useState([]);
+  const [selectedDuration, setSelectedDuration] = useState(2); // Default 2 hours
+  const [timeMode, setTimeMode] = useState('morning'); // 'morning' or 'afternoon'
   const [customNotes, setCustomNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
@@ -79,19 +81,12 @@ export default function TicketsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeMode, date, selectedDuration]);
 
-  // Reset selections when timeMode changes
-  const handleTimeModeChange = (mode) => {
-    if (mode !== timeMode) {
-      setTimeMode(mode);
-      setDate(null);
-      setSelectedDuration(null);
-      setSelectedSlot(null);
-      setSlots([]);
-      setPricing([]);
-    }
-  };
+  useEffect(() => {
+    // Clear selected slot when time mode changes
+    setSelectedSlot(null);
+  }, [timeMode]);
 
-  const fetchPricing = async (mode) => {
+  const fetchPricing = async () => {
     try {
       const response = await api.get(`/payments/hourly-pricing?timeMode=${mode}`);
       setPricing(response.data.pricing || []);
@@ -140,6 +135,27 @@ export default function TicketsPage() {
     }
   };
 
+  // Filter slots based on selected duration AND time mode
+  const getFilteredSlots = () => {
+    return slots.filter(slot => {
+      const [hours, minutes] = slot.start_time.split(':').map(Number);
+      const startMinutes = hours * 60 + minutes;
+      const endMinutes = startMinutes + (selectedDuration * 60);
+      
+      // Must not pass midnight (00:00)
+      if (endMinutes > 1440) return false;
+      
+      // Filter by time mode
+      if (timeMode === 'morning') {
+        // Morning (Happy Hour): 10:00 to 13:59
+        return hours >= 10 && hours < 14;
+      } else {
+        // Afternoon: 14:00 onwards
+        return hours >= 14;
+      }
+    });
+  };
+
   // Calculate end time for a slot based on duration
   const getEndTime = (startTime, duration) => {
     const [hours, minutes] = startTime.split(':').map(Number);
@@ -169,7 +185,10 @@ export default function TicketsPage() {
 
     setLoading(true);
     try {
-      const amount = getSelectedPrice();
+      // Calculate amount using Happy Hour logic
+      const amount = selectedSlot 
+        ? parseFloat(getSlotTotalPrice(selectedSlot.start_time)) * Math.max(1, selectedChildren.length)
+        : getSelectedPrice();
       
       if (paymentMethod === 'card') {
         // Stripe checkout flow
@@ -178,6 +197,7 @@ export default function TicketsPage() {
           reference_id: selectedSlot.id,
           child_ids: selectedChildren,
           duration_hours: selectedDuration,
+          slot_start_time: selectedSlot.start_time, // Pass slot time for Happy Hour calculation
           custom_notes: customNotes.trim(),
           origin_url: window.location.origin,
           timeMode: timeMode // Pass timeMode for server-side pricing
@@ -189,10 +209,9 @@ export default function TicketsPage() {
           slot_id: selectedSlot.id,
           child_ids: selectedChildren,
           duration_hours: selectedDuration,
+          slot_start_time: selectedSlot.start_time, // Pass slot time for Happy Hour calculation
           custom_notes: customNotes.trim(),
-          payment_method: paymentMethod,
-          amount,
-          timeMode: timeMode
+          payment_method: paymentMethod
         });
         
         // Get child name(s) for confirmation
@@ -233,6 +252,31 @@ export default function TicketsPage() {
     return basePrice * Math.max(1, selectedChildren.length);
   };
 
+  // Helper function for Happy Hour pricing (10:00-14:00)
+  const getSlotPrice = (startTime) => {
+    if (!startTime) return null;
+    
+    // Parse the time string (format: "HH:mm")
+    const [hours] = startTime.split(':').map(Number);
+    
+    // Happy Hour: 10:00 to 13:59 (before 14:00)
+    const isHappyHour = hours >= 10 && hours < 14;
+    
+    if (isHappyHour) {
+      return 3.5; // Happy Hour price per hour
+    }
+    
+    // Normal price from pricing data
+    const selected = pricing.find(p => p.hours === selectedDuration);
+    return selected ? selected.price / selected.hours : null;
+  };
+
+  const getSlotTotalPrice = (startTime) => {
+    const pricePerHour = getSlotPrice(startTime);
+    if (!pricePerHour) return null;
+    return (pricePerHour * selectedDuration).toFixed(1);
+  };
+
   const toggleChildSelection = (childId) => {
     setSelectedChildren(prev => 
       prev.includes(childId) 
@@ -271,51 +315,96 @@ export default function TicketsPage() {
         {/* STEP 1: Time Mode Selection */}
         <Card className="border-2 rounded-3xl mb-8">
           <CardHeader>
-            <CardTitle className="font-heading text-xl flex items-center gap-2">
-              <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">1</span>
-              اختر الفترة
-            </CardTitle>
+            <CardTitle className="font-heading text-xl">اختر فترة اللعب</CardTitle>
+            <CardDescription className="text-sm">اختر الفترة الصباحية للاستفادة من عرض Happy Hour</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className="space-y-6">
+            {/* Time Mode Toggle */}
+            <div className="flex flex-col sm:flex-row gap-3">
               <button
-                onClick={() => handleTimeModeChange('morning')}
-                className={`relative p-6 rounded-2xl border-2 transition-all ${
+                onClick={() => setTimeMode('morning')}
+                disabled={(() => {
+                  const now = new Date();
+                  const isToday = format(date, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd');
+                  return isToday && now.getHours() >= 14;
+                })()}
+                className={`flex-1 p-4 rounded-xl border-2 transition-all text-right ${
                   timeMode === 'morning'
-                    ? 'border-yellow-500 bg-yellow-50 shadow-lg'
-                    : 'border-border bg-white hover:border-yellow-300'
-                }`}
+                    ? 'border-yellow-500 bg-yellow-50'
+                    : 'border-gray-200 bg-white hover:border-yellow-300'
+                } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
-                <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
-                  Happy Hour
-                </Badge>
-                <div className="flex items-center justify-center gap-3">
-                  <Sun className="h-8 w-8 text-yellow-500" />
-                  <div className="text-right">
-                    <div className="font-heading text-2xl font-bold">صباحي</div>
-                    <div className="text-sm text-muted-foreground">10 صباحاً - 2 ظهراً</div>
-                    <div className="text-lg font-bold text-yellow-600 mt-1">3.5 دينار/ساعة</div>
-                  </div>
-                </div>
+                <div className="font-bold text-lg mb-1">☀️ صباحي (Happy Hour)</div>
+                <div className="text-sm text-muted-foreground">10:00 ص - 2:00 م</div>
+                <div className="text-primary font-bold mt-1">3.5 دينار/ساعة</div>
+                {(() => {
+                  const now = new Date();
+                  const isToday = format(date, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd');
+                  return isToday && now.getHours() >= 14 && (
+                    <div className="text-xs text-destructive mt-1">انتهى وقت العرض اليوم</div>
+                  );
+                })()}
               </button>
               
               <button
-                onClick={() => handleTimeModeChange('afternoon')}
-                className={`p-6 rounded-2xl border-2 transition-all ${
+                onClick={() => setTimeMode('afternoon')}
+                className={`flex-1 p-4 rounded-xl border-2 transition-all text-right ${
                   timeMode === 'afternoon'
-                    ? 'border-indigo-500 bg-indigo-50 shadow-lg'
-                    : 'border-border bg-white hover:border-indigo-300'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-gray-200 bg-white hover:border-primary/50'
                 }`}
               >
-                <div className="flex items-center justify-center gap-3">
-                  <Moon className="h-8 w-8 text-indigo-500" />
-                  <div className="text-right">
-                    <div className="font-heading text-2xl font-bold">مسائي</div>
-                    <div className="text-sm text-muted-foreground">2 ظهراً - منتصف الليل</div>
-                    <div className="text-lg font-bold text-indigo-600 mt-1">7-13 دينار</div>
-                  </div>
-                </div>
+                <div className="font-bold text-lg mb-1">🌙 مسائي</div>
+                <div className="text-sm text-muted-foreground">بعد 2:00 م</div>
+                <div className="text-muted-foreground font-bold mt-1">الأسعار العادية</div>
               </button>
+            </div>
+
+            {/* Note based on mode */}
+            {timeMode === 'morning' && (
+              <div className="flex items-center gap-2 text-sm text-yellow-700 bg-yellow-50 p-3 rounded-lg">
+                <AlertCircle className="h-4 w-4 flex-shrink-0" />
+                <span>متاح فقط قبل الساعة 2:00 ظهراً</span>
+              </div>
+            )}
+
+            <div className="border-t pt-6">
+              <h3 className="font-heading text-lg mb-4">اختر مدة اللعب</h3>
+              <div className="text-sm text-muted-foreground mb-4">{extraHourText}</div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {pricing.map((option) => {
+                  // Calculate price based on time mode
+                  const displayPrice = timeMode === 'morning' 
+                    ? (3.5 * option.hours).toFixed(1)
+                    : option.price;
+                  
+                  return (
+                    <button
+                      key={option.hours}
+                      onClick={() => setSelectedDuration(option.hours)}
+                      className={`relative p-6 rounded-2xl border-2 transition-all ${
+                        selectedDuration === option.hours
+                          ? 'border-primary bg-primary/10 shadow-lg'
+                          : 'border-border bg-white hover:border-primary/50'
+                      }`}
+                    >
+                      {option.best_value && timeMode !== 'morning' && (
+                        <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white">
+                          <Star className="h-3 w-3 mr-1" />
+                          أفضل قيمة
+                        </Badge>
+                      )}
+                      <div className="text-center">
+                        <div className="font-heading text-3xl font-bold mb-2">{option.label_ar}</div>
+                        <div className="text-2xl font-bold text-primary mb-1">{displayPrice} دينار</div>
+                        {timeMode === 'morning' && (
+                          <div className="text-xs text-yellow-600">Happy Hour</div>
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -428,6 +517,10 @@ export default function TicketsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {slots.filter(s => s.is_available).map((slot) => {
                     const endTime = getEndTime(slot.start_time, selectedDuration);
+                    const pricePerHour = getSlotPrice(slot.start_time);
+                    const totalPrice = getSlotTotalPrice(slot.start_time);
+                    const isHappyHour = pricePerHour === 3.5;
+                    
                     return (
                       <button
                         key={slot.id}
@@ -441,8 +534,16 @@ export default function TicketsPage() {
                         }`}
                       >
                         <div className="font-heading font-semibold text-lg">
-                          {slot.start_time} → {endTime}
+                          {endTime} ← {slot.start_time}
                         </div>
+                        {totalPrice && (
+                          <div className="text-primary font-bold mt-1">
+                            {totalPrice} دينار
+                            {isHappyHour && (
+                              <span className="block text-xs text-yellow-600">⏰ Happy Hour</span>
+                            )}
+                          </div>
+                        )}
                         <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground mt-1">
                           <Users className="h-4 w-4" />
                           {slot.available_spots} متاح
@@ -463,7 +564,7 @@ export default function TicketsPage() {
               <CardTitle className="font-heading">أكمل حجزك</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 gap-6">
+              <div className="grid grid-cols-1 gap-6 pb-24">{/* Added pb-24 for sticky button space */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <Label className="block text-sm font-medium mb-2">اختر الأطفال</Label>
@@ -522,18 +623,15 @@ export default function TicketsPage() {
 
                   <div>
                     <Label className="block text-sm font-medium mb-2">المدة والسعر</Label>
-                    <div className={`p-3 rounded-xl border-2 ${
-                      timeMode === 'morning' 
-                        ? 'bg-yellow-50 border-yellow-500' 
-                        : 'bg-primary/10 border-primary'
-                    }`}>
-                      <div className={`font-bold text-lg ${
-                        timeMode === 'morning' ? 'text-yellow-700' : 'text-primary'
-                      }`}>
-                        {selectedDuration} ساعة - {getSelectedPrice()} دينار
+                    <div className="p-3 rounded-xl bg-primary/10 border-2 border-primary">
+                      <div className="font-bold text-lg text-primary">
+                        {selectedSlot && selectedDuration 
+                          ? `${selectedDuration} ساعة - ${(parseFloat(getSlotTotalPrice(selectedSlot.start_time)) * Math.max(1, selectedChildren.length)).toFixed(1)} دينار`
+                          : `${selectedDuration} ساعة - ${getSelectedPrice()} دينار`
+                        }
                       </div>
-                      {timeMode === 'morning' && (
-                        <div className="text-xs text-yellow-600 mt-1">عرض الصباح الخاص</div>
+                      {selectedSlot && getSlotPrice(selectedSlot.start_time) === 3.5 && (
+                        <div className="text-sm text-yellow-600 mt-1">⏰ Happy Hour Price</div>
                       )}
                     </div>
                   </div>
@@ -568,8 +666,14 @@ export default function TicketsPage() {
                   }`}>
                     <p className="text-sm text-muted-foreground mb-1">ملخص الحجز</p>
                     <p className="font-bold">
-                      {selectedDuration} ساعة × {selectedChildren.length || 1} طفل = {getSelectedPrice()} دينار
+                      {selectedSlot 
+                        ? `${selectedDuration} ساعة × ${selectedChildren.length || 1} طفل = ${(parseFloat(getSlotTotalPrice(selectedSlot.start_time)) * Math.max(1, selectedChildren.length)).toFixed(1)} دينار`
+                        : `${selectedDuration} ساعة × ${selectedChildren.length || 1} طفل = ${getSelectedPrice()} دينار`
+                      }
                     </p>
+                    {selectedSlot && getSlotPrice(selectedSlot.start_time) === 3.5 && (
+                      <p className="text-sm text-yellow-600 mt-1">⏰ Happy Hour Price (3.5 JD/hour)</p>
+                    )}
                     <p className="text-sm mt-1">
                       الفترة: <span className="font-bold">{timeMode === 'morning' ? 'صباحية' : 'مسائية'}</span>
                       {' | '}
@@ -580,15 +684,12 @@ export default function TicketsPage() {
                   </div>
                 )}
 
-                <div className="flex justify-end">
+                {/* Sticky CTA Container */}
+                <div className="sticky bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-lg p-4 -mx-6 -mb-6 mt-6 z-50">
                   <Button
                     onClick={handleBooking}
                     disabled={!selectedSlot || selectedChildren.length === 0 || loading}
-                    className={`w-full md:w-auto px-8 rounded-full h-12 text-lg ${
-                      timeMode === 'morning' 
-                        ? 'bg-yellow-500 hover:bg-yellow-600 text-white' 
-                        : 'btn-playful'
-                    }`}
+                    className="w-full px-8 rounded-full h-14 btn-playful text-lg"
                     aria-label={`احجز وادفع ${getSelectedPrice()} دينار - يقبل بطاقات فيزا وماستركارد`}
                   >
                     {loading ? (
