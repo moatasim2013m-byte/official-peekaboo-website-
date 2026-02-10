@@ -17,6 +17,10 @@ COPY frontend/ ./frontend/
 ENV CI=false
 ENV GENERATE_SOURCEMAP=false
 
+# Cache bust to force rebuild (increment to invalidate Docker layer cache)
+ARG CACHE_BUST=20260210_1
+RUN echo "CACHE_BUST=${CACHE_BUST}"
+
 # Build the React app
 RUN cd frontend && npm run build
 
