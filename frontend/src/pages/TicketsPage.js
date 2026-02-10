@@ -259,6 +259,9 @@ export default function TicketsPage() {
   const minDate = new Date();
   const maxDate = addDays(new Date(), 30);
 
+  // Check if morning is expired for selected date
+  const morningExpired = isMorningExpiredForDate(date);
+
   // Skeleton loader for slots
   const SlotsSkeleton = () => (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
