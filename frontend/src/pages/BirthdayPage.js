@@ -40,10 +40,12 @@ export default function BirthdayPage() {
     if (isAuthenticated) {
       fetchChildren();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   useEffect(() => {
     fetchSlots();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
 
   const fetchChildren = async () => {
