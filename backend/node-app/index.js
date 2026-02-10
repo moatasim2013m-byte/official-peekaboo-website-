@@ -1,4 +1,10 @@
-require('dotenv').config();
+// Safe optional dotenv load (Cloud Run uses env vars directly)
+try {
+  require('dotenv').config();
+  console.log('DOTENV_OK');
+} catch (e) {
+  console.log('DOTENV_MISSING_SKIP');
+}
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
