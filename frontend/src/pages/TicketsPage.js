@@ -63,11 +63,9 @@ export default function TicketsPage() {
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [slotsError, setSlotsError] = useState(null);
   const slotsCache = useRef(new Map());
-  
   const [children, setChildren] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [selectedChildren, setSelectedChildren] = useState([]);
-  const [selectedDuration, setSelectedDuration] = useState(2); // Default 2 hours
   const [timeMode, setTimeMode] = useState('morning'); // 'morning' or 'afternoon'
   const [customNotes, setCustomNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('card');
