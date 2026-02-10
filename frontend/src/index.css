@@ -310,7 +310,7 @@ code {
 
 /* Custom Peekaboo Styles */
 .font-heading {
-    font-family: 'Fredoka', 'Cairo', sans-serif;
+    font-family: var(--font-heading-ar);
     font-weight: 600;
 }
 
@@ -318,105 +318,102 @@ code {
     font-family: 'Cairo', sans-serif;
 }
 
-/* ===== PREMIUM BUTTON STYLES ===== */
+/* ===== WONDERLAND BUTTON STYLES ===== */
 .btn-playful {
-    font-weight: 600;
+    font-weight: 700;
     font-size: var(--font-size-base);
     letter-spacing: 0.01em;
+    border-radius: var(--radius-full);
     box-shadow: var(--shadow-btn);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-playful:hover {
-    transform: translateY(-2px);
+    transform: translateY(-3px) scale(1.02);
     box-shadow: var(--shadow-btn-hover);
 }
 
 .btn-playful:active {
-    transform: translateY(0);
+    transform: translateY(-1px) scale(1.01);
 }
 
-/* ===== COLORFUL NAV PILLS (Kids Playground Style) ===== */
+/* ===== WONDERLAND NAV PILLS ===== */
 .nav-pill {
     font-family: var(--font-heading-ar);
     font-weight: 700;
-    font-size: 1.125rem;
-    padding: 0.875rem 1.5rem;
-    border-radius: 999px;
+    font-size: 1rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: var(--radius-full);
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-    border: none;
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
 }
 
 .nav-pill:hover {
     transform: translateY(-2px);
+    box-shadow: 0 5px 16px rgba(0, 0, 0, 0.15);
 }
 
 @media (min-width: 768px) {
     .nav-pill { 
-        font-size: 1.3rem; 
-        padding: 1rem 1.75rem; 
+        font-size: 1.1rem; 
+        padding: 0.75rem 1.5rem; 
     }
 }
 
-/* Color variants - Solid gradient fills with white text */
+/* Color variants - vibrant solids */
 .nav-pill.pill-blue {
-    background: linear-gradient(135deg, var(--pk-blue), #5DADE2);
+    background: var(--pk-blue);
     color: white;
 }
 .nav-pill.pill-blue:hover,
 .nav-pill.pill-blue.active {
-    background: linear-gradient(135deg, #2980B9, var(--pk-blue));
-    box-shadow: 0 6px 24px rgba(52, 152, 219, 0.45);
-    transform: translateY(-3px);
+    background: #3498db;
+    box-shadow: 0 6px 20px rgba(69, 170, 242, 0.4);
 }
 
 .nav-pill.pill-pink {
-    background: linear-gradient(135deg, var(--pk-red), #EC7063);
+    background: var(--pk-red);
     color: white;
 }
 .nav-pill.pill-pink:hover,
 .nav-pill.pill-pink.active {
-    background: linear-gradient(135deg, #C0392B, var(--pk-red));
-    box-shadow: 0 6px 24px rgba(231, 76, 60, 0.45);
-    transform: translateY(-3px);
+    background: #e74c3c;
+    box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
 }
 
 .nav-pill.pill-yellow {
-    background: linear-gradient(135deg, var(--pk-yellow), #F7DC6F);
-    color: #6D5800;
+    background: var(--pk-yellow);
+    color: #5D4E00;
 }
 .nav-pill.pill-yellow:hover,
 .nav-pill.pill-yellow.active {
-    background: linear-gradient(135deg, #D4AC0D, var(--pk-yellow));
-    box-shadow: 0 6px 24px rgba(241, 196, 15, 0.55);
-    transform: translateY(-3px);
+    background: #f4c430;
+    box-shadow: 0 6px 20px rgba(255, 217, 61, 0.5);
 }
 
 .nav-pill.pill-green {
-    background: linear-gradient(135deg, var(--pk-green), #58D68D);
+    background: var(--pk-green);
     color: white;
 }
 .nav-pill.pill-green:hover,
 .nav-pill.pill-green.active {
-    background: linear-gradient(135deg, #1E8449, var(--pk-green));
-    box-shadow: 0 6px 24px rgba(39, 174, 96, 0.45);
-    transform: translateY(-3px);
+    background: #1abc9c;
+    box-shadow: 0 6px 20px rgba(38, 222, 129, 0.4);
 }
 
 .nav-pill.pill-orange {
-    background: linear-gradient(135deg, var(--pk-orange), #EB984E);
+    background: var(--pk-orange);
     color: white;
 }
 .nav-pill.pill-orange:hover,
 .nav-pill.pill-orange.active {
-    background: linear-gradient(135deg, #CA6F1E, var(--pk-orange));
-    box-shadow: 0 6px 24px rgba(230, 126, 34, 0.45);
-    transform: translateY(-3px);
+    background: #e67e22;
+    box-shadow: 0 6px 20px rgba(255, 159, 67, 0.4);
 }
 
 .nav-pill.pill-purple {
