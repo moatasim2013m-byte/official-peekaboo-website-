@@ -18,8 +18,11 @@ ENV CI=false
 ENV GENERATE_SOURCEMAP=false
 
 # Cache bust to force rebuild (increment to invalidate Docker layer cache)
-ARG CACHE_BUST=20260210_2
+ARG CACHE_BUST=20260210_3
 RUN echo "CACHE_BUST=${CACHE_BUST}"
+
+# TEMPORARY: Check for duplicate selectedDuration
+RUN echo "DUP_CHECK:" && grep -n "selectedDuration" frontend/src/pages/TicketsPage.js || true
 
 # Build the React app
 RUN cd frontend && npm run build
