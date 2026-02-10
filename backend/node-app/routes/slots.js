@@ -165,8 +165,12 @@ router.get('/available', async (req, res) => {
   try {
     const { date, slot_type = 'hourly', timeMode, duration } = req.query;
     
+    // Safely parse duration to number (default to 1 if invalid)
+    const parsedDuration = parseInt(duration, 10);
+    const durationHours = (isNaN(parsedDuration) || parsedDuration <= 0) ? 1 : parsedDuration;
+    
     // Debug logging - 1) Query params
-    console.log('SLOTS_AVAILABLE_HIT', { date, timeMode, duration });
+    console.log('SLOTS_AVAILABLE_HIT', { date, timeMode, duration, durationHours });
     
     if (!date) {
       return res.status(400).json({ error: 'Date is required' });
@@ -209,9 +213,6 @@ router.get('/available', async (req, res) => {
         select: 'date start_time'
       }).lean();
     }
-
-    // Duration in hours for end time calculation
-    const durationHours = parseInt(duration) || 2;
 
     // Counters for logging
     let countAfterMode = 0;
