@@ -20,15 +20,32 @@ const MORNING_PRICE_PER_HOUR = 3.5;
 const isMorningExpiredForDate = (selectedDate) => {
   if (!selectedDate) return false;
   
-  // Check if selected date is today
-  if (!isToday(selectedDate)) return false;
-  
-  // Get current hour in local timezone
+  // Check if selected date is today (in Amman timezone)
   const now = new Date();
-  const currentHour = now.getHours();
+  const ammanFormatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Amman',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  });
+  const todayInAmman = ammanFormatter.format(now); // YYYY-MM-DD format
   
-  // Morning ends at 14:00 (2 PM)
-  return currentHour >= 14;
+  // Format selected date as YYYY-MM-DD for comparison
+  const selectedDateStr = selectedDate.toISOString().split('T')[0];
+  
+  // If selected date is not today in Amman, morning is available
+  if (selectedDateStr !== todayInAmman) return false;
+  
+  // Get current hour in Asia/Amman timezone
+  const hourFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Amman',
+    hour: 'numeric',
+    hour12: false
+  });
+  const ammanHour = parseInt(hourFormatter.format(now), 10);
+  
+  // Morning ends at 14:00 (2 PM) Amman time
+  return ammanHour >= 14;
 };
 
 export default function TicketsPage() {
