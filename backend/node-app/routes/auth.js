@@ -32,6 +32,20 @@ router.post('/register', async (req, res) => {
     });
 
     await user.save();
+    
+    console.log('REGISTER_SUCCESS', user.email);
+
+    // Send registration confirmation email (non-blocking)
+    const loginUrl = `${process.env.FRONTEND_URL || 'https://peekaboojor.com'}/login`;
+    const template = emailTemplates.registrationConfirmation(loginUrl);
+    
+    try {
+      await sendEmail(user.email, template.subject, template.html);
+      console.log('REGISTER_EMAIL_SENT', user.email);
+    } catch (emailError) {
+      console.error('REGISTER_EMAIL_ERROR', emailError.message || emailError);
+      // Continue - don't block registration if email fails
+    }
 
     const token = jwt.sign({ userId: user._id }, getJwtSecret(), { expiresIn: '7d' });
 
