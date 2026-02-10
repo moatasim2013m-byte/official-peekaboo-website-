@@ -98,7 +98,6 @@ export default function TicketsPage() {
   const handleTimeModeChange = (mode) => {
     if (mode !== timeMode) {
       setTimeMode(mode);
-      setDate(null);
       setSelectedDuration(null);
       setSelectedSlot(null);
       setSlots([]);
