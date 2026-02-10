@@ -736,6 +736,7 @@ code {
             120px 60px;
     }
 }
+
 .footer-text {
     color: var(--text-secondary);
     font-size: 15px;
@@ -759,62 +760,48 @@ code {
     color: var(--brand-red);
 }
 
-/* ===== HOMEPAGE SECTION CONTAINERS ===== */
+/* ===== WONDERLAND SECTION CONTAINERS ===== */
 .section-container {
-    border-radius: 30px;
-    padding: 3rem 0;
-    margin-bottom: 1.5rem;
+    border-radius: var(--radius-2xl);
+    padding: 3.5rem 1.5rem;
+    margin-bottom: 2rem;
     position: relative;
+    overflow: hidden;
 }
 
 @media (min-width: 768px) {
     .section-container {
-        padding: 4rem 0;
-        margin-bottom: 2rem;
+        padding: 5rem 2rem;
+        margin-bottom: 3rem;
     }
 }
 
-/* Background variants using brand pastels */
+/* Background variants - soft pastels */
 .section-sky {
-    background: var(--pk-bg-sky);
+    background: rgba(255, 255, 255, 0.85);
 }
 
 .section-yellow {
-    background: var(--pk-bg-light-yellow);
+    background: rgba(255, 248, 231, 0.9);
 }
 
 .section-green {
-    background: var(--pk-bg-light-green);
+    background: rgba(232, 255, 240, 0.9);
 }
 
-/* Cloudy top edge effect */
-.section-container::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 5%;
-    right: 5%;
-    height: 20px;
-    background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.85) 0%, transparent 70%);
-    pointer-events: none;
+.section-pink {
+    background: rgba(255, 232, 240, 0.9);
 }
 
-/* Inner shadow for depth */
+/* Remove pseudo-elements for cleaner look */
+.section-container::before,
 .section-container::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 40px;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.02), transparent);
-    border-radius: 30px 30px 0 0;
-    pointer-events: none;
+    display: none;
 }
 
-/* ===== PREMIUM FOOTER ===== */
+/* ===== WONDERLAND FOOTER ===== */
 .footer-section {
-    background: var(--pk-bg-sky);
+    background: linear-gradient(180deg, transparent 0%, var(--pk-bg-cream) 100%);
 }
 
 /* Wave Divider */
