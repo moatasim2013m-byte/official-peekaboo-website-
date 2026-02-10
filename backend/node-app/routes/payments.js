@@ -16,16 +16,24 @@ console.warn('[Payments] Stripe disabled (manual payments only)');
 const MORNING_PRICE_PER_HOUR = 3.5;
 
 // Get hourly price from Settings or use defaults
-// timeMode: 'morning' = 3.5 JD/hour, 'afternoon' = standard pricing
-const getHourlyPrice = async (duration_hours = 2, timeMode = 'afternoon') => {
+const getHourlyPrice = async (duration_hours = 2, slot_start_time = null) => {
   const hours = parseInt(duration_hours) || 2;
 
-  // Morning mode: flat 3.5 JD per hour
-  if (timeMode === 'morning') {
-    return MORNING_PRICE_PER_HOUR * hours;
+  // Happy Hour logic: 10:00-13:59 => 3.5 JD per hour
+  if (slot_start_time) {
+    try {
+      const [startHour] = slot_start_time.split(':').map(Number);
+      const isHappyHour = startHour >= 10 && startHour < 14;
+      
+      if (isHappyHour) {
+        return 3.5 * hours; // Happy Hour: 3.5 JD per hour
+      }
+    } catch (err) {
+      console.error('Error parsing slot_start_time:', err);
+      // Fall through to normal pricing
+    }
   }
 
-  // Afternoon mode: standard pricing from Settings
   try {
     // Fetch pricing from Settings
     const pricing = await Settings.find({
@@ -145,6 +153,7 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
         const hours = parseInt(duration_hours) || 2;
         const childIds = req.body.child_ids || (req.body.child_id ? [req.body.child_id] : []);
         const childCount = childIds.length || 1;
+        const slotStartTime = req.body.slot_start_time || null;
 
         // Check capacity before creating checkout
         const slot = await TimeSlot.findById(reference_id);
@@ -156,12 +165,12 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
           return res.status(400).json({ error: `عذراً، المتاح ${availableSpots} مكان فقط. اخترت ${childCount} أطفال.` });
         }
 
-        // Pass timeMode to pricing function for morning/afternoon pricing
-        const basePrice = await getHourlyPrice(hours, timeMode || 'afternoon');
+        const basePrice = await getHourlyPrice(hours, slotStartTime);
         amount = basePrice * childCount;
         metadata.slot_id = reference_id;
         metadata.duration_hours = hours;
         metadata.child_ids = JSON.stringify(childIds);
+        if (slotStartTime) metadata.slot_start_time = slotStartTime;
         if (custom_notes) metadata.custom_notes = custom_notes;
         break;
       }

@@ -32,6 +32,20 @@ router.post('/register', async (req, res) => {
     });
 
     await user.save();
+    
+    console.log('REGISTER_SUCCESS', user.email);
+
+    // Send registration confirmation email (non-blocking)
+    const loginUrl = `${process.env.FRONTEND_URL || 'https://peekaboojor.com'}/login`;
+    const template = emailTemplates.registrationConfirmation(loginUrl);
+    
+    try {
+      await sendEmail(user.email, template.subject, template.html);
+      console.log('REGISTER_EMAIL_SENT', user.email);
+    } catch (emailError) {
+      console.error('REGISTER_EMAIL_ERROR', emailError.message || emailError);
+      // Continue - don't block registration if email fails
+    }
 
     const token = jwt.sign({ userId: user._id }, getJwtSecret(), { expiresIn: '7d' });
 
@@ -81,31 +95,47 @@ router.post('/login', async (req, res) => {
 // Forgot Password
 router.post('/forgot-password', async (req, res) => {
   try {
-    const { email, origin_url } = req.body;
+    const { email } = req.body;
     
     if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
+      return res.status(400).json({ ok: false, message: 'Email required' });
     }
+
+    console.log('FORGOT_START', email);
 
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
+      console.log('FORGOT_NO_USER');
       // Don't reveal if email exists
-      return res.json({ message: 'If the email exists, a reset link will be sent' });
+      return res.status(200).json({ ok: true, message: 'If the email exists, a reset link will be sent' });
     }
+
+    console.log('FORGOT_USER_FOUND');
 
     const resetToken = crypto.randomBytes(32).toString('hex');
     user.reset_token = resetToken;
-    user.reset_token_expires = new Date(Date.now() + 3600000); // 1 hour
+    user.reset_token_expires = new Date(Date.now() + 3600000); // 1 hour (60 minutes)
     await user.save();
 
-    const resetUrl = `${origin_url || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
-    const template = emailTemplates.passwordReset(resetUrl);
-    await sendEmail(user.email, template.subject, template.html);
+    const baseUrl = process.env.FRONTEND_URL; // Required env var validated at startup
+    const resetLink = `${baseUrl}/reset-password?token=${encodeURIComponent(resetToken)}`;
+    console.log('FORGOT_LINK_OK', resetLink);
+    
+    const template = emailTemplates.passwordReset(resetLink);
+    
+    try {
+      await sendEmail(user.email, template.subject, template.html);
+      console.log('FORGOT_EMAIL_SENT', user.email);
+    } catch (emailError) {
+      console.error('FORGOT_EMAIL_ERROR', emailError.message || emailError);
+      // Continue and return success to user (don't reveal email sending failure)
+    }
 
-    res.json({ message: 'If the email exists, a reset link will be sent' });
+    return res.status(200).json({ ok: true, message: 'If the email exists, a reset link will be sent' });
   } catch (error) {
-    console.error('Forgot password error:', error);
-    res.status(500).json({ error: 'Failed to process request' });
+    console.error('FORGOT_PASSWORD_UNHANDLED_ERROR', error);
+    // Always return success even on error - don't reveal system state
+    return res.status(200).json({ ok: true, message: 'If the email exists, a reset link will be sent' });
   }
 });
 
