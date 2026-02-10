@@ -28,6 +28,7 @@ export default function SubscriptionsPage() {
     if (isAuthenticated) {
       fetchChildren();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   const fetchPlans = async () => {
