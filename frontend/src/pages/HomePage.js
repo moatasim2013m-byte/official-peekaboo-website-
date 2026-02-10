@@ -65,6 +65,7 @@ export default function HomePage() {
       }
     };
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const features = [
