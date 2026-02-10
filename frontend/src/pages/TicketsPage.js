@@ -8,7 +8,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
-import { format, addDays, isToday } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { Clock, Users, Loader2, AlertCircle, Star, Sun, Moon } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import { PaymentCardIcons } from '../components/PaymentCardIcons';
