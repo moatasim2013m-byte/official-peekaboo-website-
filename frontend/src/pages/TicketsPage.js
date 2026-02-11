@@ -65,7 +65,6 @@ export default function TicketsPage() {
   const [children, setChildren] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [selectedChildren, setSelectedChildren] = useState([]);
-  const [timeMode, setTimeMode] = useState('morning'); // 'morning' or 'afternoon'
   const [customNotes, setCustomNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
