@@ -62,10 +62,10 @@ export default function TicketsPage() {
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [slotsError, setSlotsError] = useState(null);
   const slotsCache = useRef(new Map());
-  
   const [children, setChildren] = useState([]);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [selectedChildren, setSelectedChildren] = useState([]);
+  const [timeMode, setTimeMode] = useState('morning'); // 'morning' or 'afternoon'
   const [customNotes, setCustomNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
@@ -126,7 +126,7 @@ export default function TicketsPage() {
     }
   };
 
-  const fetchPricing = async (mode) => {
+  const fetchPricing = async () => {
     try {
       const response = await api.get(`/payments/hourly-pricing?timeMode=${mode}`);
       setPricing(response.data.pricing || []);
@@ -175,6 +175,27 @@ export default function TicketsPage() {
     }
   };
 
+  // Filter slots based on selected duration AND time mode
+  const getFilteredSlots = () => {
+    return slots.filter(slot => {
+      const [hours, minutes] = slot.start_time.split(':').map(Number);
+      const startMinutes = hours * 60 + minutes;
+      const endMinutes = startMinutes + (selectedDuration * 60);
+      
+      // Must not pass midnight (00:00)
+      if (endMinutes > 1440) return false;
+      
+      // Filter by time mode
+      if (timeMode === 'morning') {
+        // Morning (Happy Hour): 10:00 to 13:59
+        return hours >= 10 && hours < 14;
+      } else {
+        // Afternoon: 14:00 onwards
+        return hours >= 14;
+      }
+    });
+  };
+
   // Calculate end time for a slot based on duration
   const getEndTime = (startTime, duration) => {
     const [hours, minutes] = startTime.split(':').map(Number);
@@ -204,7 +225,10 @@ export default function TicketsPage() {
 
     setLoading(true);
     try {
-      const amount = getSelectedPrice();
+      // Calculate amount using Happy Hour logic
+      const amount = selectedSlot 
+        ? parseFloat(getSlotTotalPrice(selectedSlot.start_time)) * Math.max(1, selectedChildren.length)
+        : getSelectedPrice();
       
       if (paymentMethod === 'card') {
         // Stripe checkout flow
@@ -213,6 +237,7 @@ export default function TicketsPage() {
           reference_id: selectedSlot.id,
           child_ids: selectedChildren,
           duration_hours: selectedDuration,
+          slot_start_time: selectedSlot.start_time, // Pass slot time for Happy Hour calculation
           custom_notes: customNotes.trim(),
           origin_url: window.location.origin,
           timeMode: timeMode // Pass timeMode for server-side pricing
@@ -224,10 +249,9 @@ export default function TicketsPage() {
           slot_id: selectedSlot.id,
           child_ids: selectedChildren,
           duration_hours: selectedDuration,
+          slot_start_time: selectedSlot.start_time, // Pass slot time for Happy Hour calculation
           custom_notes: customNotes.trim(),
-          payment_method: paymentMethod,
-          amount,
-          timeMode: timeMode
+          payment_method: paymentMethod
         });
         
         // Get child name(s) for confirmation
@@ -266,6 +290,31 @@ export default function TicketsPage() {
     const selected = pricing.find(p => p.hours === selectedDuration);
     const basePrice = selected ? selected.price : 0;
     return basePrice * Math.max(1, selectedChildren.length);
+  };
+
+  // Helper function for Happy Hour pricing (10:00-14:00)
+  const getSlotPrice = (startTime) => {
+    if (!startTime) return null;
+    
+    // Parse the time string (format: "HH:mm")
+    const [hours] = startTime.split(':').map(Number);
+    
+    // Happy Hour: 10:00 to 13:59 (before 14:00)
+    const isHappyHour = hours >= 10 && hours < 14;
+    
+    if (isHappyHour) {
+      return 3.5; // Happy Hour price per hour
+    }
+    
+    // Normal price from pricing data
+    const selected = pricing.find(p => p.hours === selectedDuration);
+    return selected ? selected.price / selected.hours : null;
+  };
+
+  const getSlotTotalPrice = (startTime) => {
+    const pricePerHour = getSlotPrice(startTime);
+    if (!pricePerHour) return null;
+    return (pricePerHour * selectedDuration).toFixed(1);
   };
 
   const toggleChildSelection = (childId) => {
@@ -472,6 +521,10 @@ export default function TicketsPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {slots.filter(s => s.is_available).map((slot) => {
                     const endTime = getEndTime(slot.start_time, selectedDuration);
+                    const pricePerHour = getSlotPrice(slot.start_time);
+                    const totalPrice = getSlotTotalPrice(slot.start_time);
+                    const isHappyHour = pricePerHour === 3.5;
+                    
                     return (
                       <button
                         key={slot.id}
@@ -575,12 +628,16 @@ export default function TicketsPage() {
                   <div className="booking-summary">
                     <p className="text-sm text-muted-foreground mb-1">ملخص الحجز</p>
                     <p className="font-bold">
-                      {selectedDuration} ساعة × {selectedChildren.length || 1} طفل = {getSelectedPrice()} دينار
+                      {selectedSlot 
+                        ? `${selectedDuration} ساعة × ${selectedChildren.length || 1} طفل = ${(parseFloat(getSlotTotalPrice(selectedSlot.start_time)) * Math.max(1, selectedChildren.length)).toFixed(1)} دينار`
+                        : `${selectedDuration} ساعة × ${selectedChildren.length || 1} طفل = ${getSelectedPrice()} دينار`
+                      }
                     </p>
                   </div>
                 )}
 
-                <div className="flex justify-end">
+                {/* Sticky CTA Container */}
+                <div className="sticky bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-lg p-4 -mx-6 -mb-6 mt-6 z-50">
                   <Button
                     onClick={handleBooking}
                     disabled={!selectedSlot || selectedChildren.length === 0 || loading}

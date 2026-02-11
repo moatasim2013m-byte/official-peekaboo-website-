@@ -1,10 +1,7 @@
-// Safe optional dotenv load (Cloud Run uses env vars directly)
-try {
-  require('dotenv').config();
-  console.log('DOTENV_OK');
-} catch (e) {
-  console.log('DOTENV_MISSING_SKIP');
-}
+require('dotenv').config();
+console.log('BOOT_START');
+console.log('PORT', process.env.PORT);
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -63,48 +60,6 @@ app.use('/api/payments', paymentsRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/themes', themesRoutes);
-// ==================== START SERVER ====================
-// 2. Connect to MongoDB in the background
-console.log('⏳ Attempting to connect to MongoDB...');
-mongoose.connect(process.env.MONGO_URL, { dbName: process.env.DB_NAME })
-  .then(() => {
-    console.log('✅ Connected to MongoDB');
-  })
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err);
-  });
-
-
-// ==================== MONGODB CONNECT ====================
-const mongoUrl = process.env.MONGO_URL;
-const dbName = process.env.DB_NAME || 'peekaboo';
-
-if (!mongoUrl) {
-  console.error('❌ MONGO_URL is missing. App will run but DB features will NOT work.');
-} else {
-  console.log('⏳ Attempting to connect to MongoDB Atlas...');
-  mongoose
-    .connect(mongoUrl, { dbName })
-    .then(() => console.log('✅ Connected to MongoDB:', dbName))
-    .catch((err) => console.error('❌ MongoDB connection error:', err));
-}
-
-
-// ================= FRONTEND =================
-
-// Serve frontend build
-// ================= FRONTEND =================
-const fs = require('fs');
-const frontendBuildPath = path.join(__dirname, '../../frontend/build');
-
-console.log('[Peekaboo] Serving frontend from:', frontendBuildPath);
-
-app.use(express.static(frontendBuildPath));
-
-app.get(/^(?!\/api).*/, (req, res) => {
-  res.sendFile(path.join(frontendBuildPath, 'index.html'));
-});
-
 
 // Public settings endpoint (for homepage hero config)
 const Settings = require('./models/Settings');
@@ -132,23 +87,62 @@ app.get('/api/', (req, res) => {
   res.json({ message: 'Peekaboo API is running!' });
 });
 
-// Connect to MongoDB
-// --- NEW STARTUP CODE ---
+// ================= FRONTEND =================
+const fs = require('fs');
+const frontendBuildPath = path.join(__dirname, '../../frontend/build');
 
-// FIX: Define the PORT variable here!
+if (fs.existsSync(frontendBuildPath)) {
+  console.log('[Peekaboo] Serving frontend from:', frontendBuildPath);
+  app.use(express.static(frontendBuildPath));
+  app.get(/^(?!\/api).*/, (req, res) => {
+    res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  });
+} else {
+  console.log('[Peekaboo] Frontend build not found, serving API only');
+}
+
+// ==================== START SERVER ====================
 const PORT = process.env.PORT || 8080;
-// 1. Start the server IMMEDIATELY (Don't wait for DB)
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Server running immediately on port ${PORT}`);
+  console.log('LISTENING', PORT);
 });
 
-// 2. Connect to MongoDB in the background
-console.log('⏳ Attempting to connect to MongoDB...');
-mongoose.connect(process.env.MONGO_URL, { dbName: process.env.DB_NAME })
-  .then(() => {
-    console.log('✅ Connected to MongoDB');
-  })
-  .catch(err => {
-    console.error('❌ MongoDB connection error:', err);
-    // Keep server alive even if DB fails initially
-  });
+// ==================== ENV VALIDATION ====================
+const requiredEnvVars = ['SENDER_EMAIL', 'RESEND_API_KEY', 'MONGO_URL', 'FRONTEND_URL', 'JWT_SECRET'];
+
+console.log('=== Environment Variables Check ===');
+let hasAllVars = true;
+requiredEnvVars.forEach(varName => {
+  const isPresent = Boolean(process.env[varName]);
+  console.log(`ENV_OK ${varName} ${isPresent}`);
+  if (!isPresent) {
+    console.error(`FATAL: Required env var ${varName} is missing`);
+    hasAllVars = false;
+  }
+});
+if (hasAllVars) {
+  console.log('=== All required env vars present ===');
+}
+
+// ==================== MONGODB CONNECT ====================
+const mongoUrl = process.env.MONGO_URL;
+
+if (!mongoUrl) {
+  console.error('❌ MONGO_URL is missing. App will run but DB features will NOT work.');
+} else {
+  console.log('⏳ Attempting to connect to MongoDB...');
+  
+  const options = { serverSelectionTimeoutMS: 10000 };
+  if (process.env.DB_NAME) {
+    options.dbName = process.env.DB_NAME;
+  }
+  
+  mongoose
+    .connect(mongoUrl, options)
+    .then(() => {
+      const dbName = process.env.DB_NAME || 'from URI';
+      console.log('✅ Connected to MongoDB:', dbName);
+      console.log('DB_CONNECTED name=' + mongoose.connection.name + ' host=' + mongoose.connection.host);
+    })
+    .catch((err) => console.error('❌ MongoDB connection error:', err));
+}

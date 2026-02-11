@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -12,6 +12,11 @@ export default function BookingConfirmationPage() {
   const navigate = useNavigate();
   const [confirmation, setConfirmation] = useState(null);
   const [copied, setCopied] = useState(false);
+
+  useLayoutEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    requestAnimationFrame(() => window.scrollTo(0, 0));
+  }, []);
 
   useEffect(() => {
     // Try to get confirmation from router state first
