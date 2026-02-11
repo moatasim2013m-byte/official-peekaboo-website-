@@ -2,9 +2,16 @@ import { MapPin, Phone, Clock, MessageCircle, Mail, Map } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
-import PublicPageShell, { ContentCard, InfoBlock } from '../components/PublicPageShell';
+import PublicPageShell, { WonderSection, WonderSectionTitle } from '../components/PublicPageShell';
 
 export default function ContactPage() {
+  const contactInfo = [
+    { icon: MapPin, title: 'العنوان', value: 'ابو راشد مجمع السيف التجاري، إربد', color: 'blue' },
+    { icon: Phone, title: 'الهاتف', value: '0777775652', dir: 'ltr', color: 'yellow' },
+    { icon: Clock, title: 'ساعات العمل', value: 'يومياً من 10 صباحاً حتى 12 منتصف الليل', color: 'green' },
+    { icon: Mail, title: 'البريد الإلكتروني', value: 'support@peekaboojor.com', color: 'pink' },
+  ];
+
   return (
     <PublicPageShell
       title="تواصل معنا"
@@ -13,51 +20,25 @@ export default function ContactPage() {
     >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Contact Info */}
-        <ContentCard className="space-y-5">
-          <h2 className="font-heading text-xl font-bold text-foreground">معلومات التواصل</h2>
+        <WonderSection>
+          <WonderSectionTitle icon={Phone} iconColor="blue">معلومات التواصل</WonderSectionTitle>
           
-          <InfoBlock color="blue">
-            <div className="flex items-start gap-3">
-              <MapPin className="h-6 w-6 text-[var(--pk-blue)] flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-bold text-foreground mb-1">العنوان</h3>
-                <p className="text-sm text-muted-foreground">ابو راشد مجمع السيف التجاري، إربد</p>
+          <div className="space-y-4 mb-6">
+            {contactInfo.map((item, index) => (
+              <div key={index} className="contact-info-card">
+                <span className={`icon-badge icon-badge-${item.color}`}>
+                  <item.icon />
+                </span>
+                <div>
+                  <h3 className="font-bold text-foreground mb-0.5 text-sm">{item.title}</h3>
+                  <p className="text-muted-foreground text-sm" dir={item.dir || 'rtl'}>{item.value}</p>
+                </div>
               </div>
-            </div>
-          </InfoBlock>
-
-          <InfoBlock color="yellow">
-            <div className="flex items-start gap-3">
-              <Phone className="h-6 w-6 text-[var(--pk-yellow)] flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-bold text-foreground mb-1">الهاتف</h3>
-                <p className="text-sm text-muted-foreground" dir="ltr">0777775652</p>
-              </div>
-            </div>
-          </InfoBlock>
-
-          <InfoBlock color="green">
-            <div className="flex items-start gap-3">
-              <Clock className="h-6 w-6 text-[var(--pk-green)] flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-bold text-foreground mb-1">ساعات العمل</h3>
-                <p className="text-sm text-muted-foreground">يومياً من 10 صباحاً حتى 12 منتصف الليل</p>
-              </div>
-            </div>
-          </InfoBlock>
-
-          <InfoBlock color="pink">
-            <div className="flex items-start gap-3">
-              <Mail className="h-6 w-6 text-[var(--pk-red)] flex-shrink-0 mt-0.5" />
-              <div>
-                <h3 className="font-bold text-foreground mb-1">البريد الإلكتروني</h3>
-                <p className="text-sm text-muted-foreground">support@peekaboojor.com</p>
-              </div>
-            </div>
-          </InfoBlock>
+            ))}
+          </div>
 
           {/* Quick Contact Buttons */}
-          <div className="grid grid-cols-2 gap-3 pt-2">
+          <div className="grid grid-cols-2 gap-3 mb-4">
             <a href="https://wa.me/962777775652" target="_blank" rel="noreferrer">
               <Button className="rounded-full w-full bg-[#25D366] hover:bg-[#20BD5A]">
                 <MessageCircle className="h-4 w-4 ml-2" />
@@ -73,7 +54,7 @@ export default function ContactPage() {
           </div>
 
           {/* Map Link */}
-          <a href="https://share.google/30qIenCYvngQpVUqJ" target="_blank" rel="noreferrer" className="block">
+          <a href="https://share.google/30qIenCYvngQpVUqJ" target="_blank" rel="noreferrer" className="block mb-4">
             <Button variant="outline" className="rounded-full w-full border-2 border-[var(--pk-blue)] text-[var(--pk-blue)] hover:bg-[var(--pk-bg-light-blue)]">
               <Map className="h-4 w-4 ml-2" />
               الموقع على الخريطة
@@ -81,22 +62,22 @@ export default function ContactPage() {
           </a>
 
           {/* Social Links */}
-          <div className="pt-3 border-t border-[var(--border-light)]">
+          <div className="pt-4 border-t border-gray-100">
             <h3 className="font-bold text-foreground mb-3 text-sm">تابعنا</h3>
             <div className="flex gap-3">
-              <a href="https://www.instagram.com/peekaboo_playtime?igsh=cDc1eDQxZmVsZHM%3D&utm_source=qr" target="_blank" rel="noreferrer" className="footer-social-link">
+              <a href="https://www.instagram.com/peekaboo_playtime?igsh=cDc1eDQxZmVsZHM%3D&utm_source=qr" target="_blank" rel="noreferrer" className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-sm font-medium hover:opacity-90 transition-opacity">
                 Instagram
               </a>
-              <a href="https://www.facebook.com/profile.php?id=61573636087726" target="_blank" rel="noreferrer" className="footer-social-link">
+              <a href="https://www.facebook.com/profile.php?id=61573636087726" target="_blank" rel="noreferrer" className="px-4 py-2 bg-[#1877F2] text-white rounded-full text-sm font-medium hover:opacity-90 transition-opacity">
                 Facebook
               </a>
             </div>
           </div>
-        </ContentCard>
+        </WonderSection>
 
         {/* Contact Form */}
-        <ContentCard>
-          <h2 className="font-heading text-xl font-bold text-foreground mb-5">أرسل رسالة</h2>
+        <WonderSection>
+          <WonderSectionTitle icon={Mail} iconColor="red">أرسل رسالة</WonderSectionTitle>
           
           <form className="space-y-4">
             <div>
@@ -122,7 +103,7 @@ export default function ContactPage() {
               سنرد عليك في أقرب وقت ممكن
             </p>
           </form>
-        </ContentCard>
+        </WonderSection>
       </div>
     </PublicPageShell>
   );
