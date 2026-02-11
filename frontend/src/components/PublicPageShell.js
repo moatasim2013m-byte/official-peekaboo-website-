@@ -14,6 +14,7 @@ import { ChevronLeft } from 'lucide-react';
  * @param {React.ReactNode} children - Page content
  * @param {string} maxWidth - Max width class (default: 'max-w-4xl')
  * @param {boolean} showBackLink - Show back to home link (default: true)
+ * @param {string} variant - Visual variant: 'sky' (default) or 'plain'
  */
 export default function PublicPageShell({ 
   title, 
@@ -23,15 +24,21 @@ export default function PublicPageShell({
   iconBg = 'bg-[var(--pk-blue)]',
   children,
   maxWidth = 'max-w-4xl',
-  showBackLink = true
+  showBackLink = true,
+  variant = 'sky'
 }) {
   useEffect(() => {
     document.title = pageTitle || `${title} | بيكابو`;
   }, [title, pageTitle]);
 
+  const isSkyStyling = variant === 'sky';
+
   return (
-    <div className="min-h-screen py-8 md:py-12" dir="rtl">
-      <div className={`${maxWidth} mx-auto px-4 sm:px-6 lg:px-8`}>
+    <div className={`min-h-screen ${isSkyStyling ? 'wonder-sky-bg' : ''}`} dir="rtl">
+      {/* Decorative cloud strip at top */}
+      {isSkyStyling && <div className="cloud-strip" aria-hidden="true" />}
+      
+      <div className={`${maxWidth} mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 relative z-10`}>
         {/* Hero Header */}
         <div className="text-center mb-8">
           {Icon && (
@@ -54,24 +61,66 @@ export default function PublicPageShell({
 
         {/* Back Link */}
         {showBackLink && (
-          <div className="pt-6 text-center">
-            <Link to="/" className="inline-flex items-center gap-2 text-primary hover:underline font-medium">
+          <div className="pt-8 text-center">
+            <Link to="/" className="inline-flex items-center gap-2 text-primary hover:underline font-medium bg-white/80 px-4 py-2 rounded-full shadow-sm">
               <ChevronLeft className="h-4 w-4" />
               العودة للرئيسية
             </Link>
           </div>
         )}
       </div>
+
+      {/* Decorative wave divider at bottom */}
+      {isSkyStyling && <div className="wave-divider" aria-hidden="true" />}
     </div>
   );
 }
 
 /**
- * ContentCard - Styled card wrapper for content sections
+ * WonderSection - Styled section wrapper
+ */
+export function WonderSection({ children, className = '' }) {
+  return (
+    <div className={`wonder-section ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * WonderSectionTitle - Section title with icon badge
+ */
+export function WonderSectionTitle({ icon: Icon, iconColor = 'blue', children }) {
+  return (
+    <h2 className="wonder-section-title">
+      {Icon && (
+        <span className={`icon-badge icon-badge-${iconColor}`}>
+          <Icon />
+        </span>
+      )}
+      {children}
+    </h2>
+  );
+}
+
+/**
+ * WonderCard - Styled card component
+ */
+export function WonderCard({ children, className = '', color = '' }) {
+  const colorClass = color ? `wonder-card-${color}` : '';
+  return (
+    <div className={`wonder-card ${colorClass} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * ContentCard - Styled card wrapper for content sections (legacy support)
  */
 export function ContentCard({ children, className = '' }) {
   return (
-    <div className={`booking-card p-6 sm:p-8 ${className}`}>
+    <div className={`wonder-section ${className}`}>
       {children}
     </div>
   );
