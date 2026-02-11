@@ -23,6 +23,10 @@ export default function HomePage() {
     image: ''
   });
 
+  useEffect(() => {
+    document.title = 'بيكابو | ملعب داخلي للأطفال - إربد';
+  }, []);
+
   // Handle ESC key and body scroll
   useEffect(() => {
     const handleEsc = (e) => {
