@@ -1601,3 +1601,208 @@ code {
 @media (prefers-reduced-motion: reduce) {
   .sky-cloud, .sky-balloon, .sky-sun, .sky-sparkle { animation: none !important; }
 }
+
+
+/* =========================
+   Wonderland Public Pages
+   ========================= */
+
+/* Sky background for public pages */
+.wonder-sky-bg {
+  background: linear-gradient(180deg, #BFE9FF 0%, #EAFBFF 45%, #FFF7E6 100%);
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Cloud strip divider (top decorative band) */
+.cloud-strip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: 
+    radial-gradient(ellipse 120px 60px at 10% 100%, white 50%, transparent 51%),
+    radial-gradient(ellipse 100px 50px at 30% 100%, white 50%, transparent 51%),
+    radial-gradient(ellipse 140px 70px at 55% 100%, white 50%, transparent 51%),
+    radial-gradient(ellipse 90px 45px at 75% 100%, white 50%, transparent 51%),
+    radial-gradient(ellipse 110px 55px at 95% 100%, white 50%, transparent 51%);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* Wave divider (bottom decorative curve) */
+.wave-divider {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: 
+    radial-gradient(ellipse 50% 100% at 50% 100%, rgba(255,248,231,0.95) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Wonder section container */
+.wonder-section {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  border-radius: 24px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 20px rgba(69, 170, 242, 0.08);
+}
+
+@media (min-width: 768px) {
+  .wonder-section {
+    padding: 2rem;
+  }
+}
+
+/* Wonder section title with icon badge */
+.wonder-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  font-family: var(--font-heading-ar);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Icon badge */
+.icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.icon-badge svg {
+  width: 22px;
+  height: 22px;
+  color: white;
+}
+.icon-badge-blue { background: var(--pk-blue); }
+.icon-badge-red { background: var(--pk-red); }
+.icon-badge-yellow { background: var(--pk-yellow); }
+.icon-badge-green { background: var(--pk-green); }
+.icon-badge-pink { background: var(--pk-pink); }
+.icon-badge-orange { background: var(--pk-orange); }
+
+/* Wonder card */
+.wonder-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.wonder-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* Wonder card grid */
+.wonder-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+@media (min-width: 640px) {
+  .wonder-card-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1024px) {
+  .wonder-card-grid.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Colored card variants */
+.wonder-card-blue { background: var(--pk-bg-light-blue); border: 2px solid transparent; }
+.wonder-card-yellow { background: var(--pk-bg-light-yellow); border: 2px solid transparent; }
+.wonder-card-green { background: var(--pk-bg-light-green); border: 2px solid transparent; }
+.wonder-card-pink { background: var(--pk-bg-light-pink); border: 2px solid transparent; }
+.wonder-card-featured { border-color: var(--pk-yellow); }
+
+/* Price highlight */
+.wonder-price {
+  font-family: var(--font-heading-ar);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.wonder-price-unit {
+  font-size: 0.875rem;
+  font-weight: 500;
+  opacity: 0.8;
+}
+
+/* FAQ card style */
+.faq-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border-right: 4px solid var(--pk-blue);
+}
+.faq-card:nth-child(4n+2) { border-right-color: var(--pk-yellow); }
+.faq-card:nth-child(4n+3) { border-right-color: var(--pk-pink); }
+.faq-card:nth-child(4n+4) { border-right-color: var(--pk-green); }
+
+.faq-question {
+  font-family: var(--font-heading-ar);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+.faq-answer {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Contact info card */
+.contact-info-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.contact-info-card .icon-badge {
+  width: 40px;
+  height: 40px;
+}
+.contact-info-card .icon-badge svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Rule item */
+.rule-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  border-radius: 12px;
+  font-size: 0.875rem;
+}
+.rule-item svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.rule-item-do {
+  background: var(--pk-bg-light-green);
+}
+.rule-item-dont {
+  background: var(--pk-bg-light-pink);
+}
