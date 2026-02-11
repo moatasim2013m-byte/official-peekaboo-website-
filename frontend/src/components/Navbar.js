@@ -22,6 +22,14 @@ export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (path) => location.pathname === path;
+  const isHomePage = location.pathname === '/';
+
+  // Single source of truth for navigation items (same order for desktop & mobile)
+  const navItems = [
+    { path: '/tickets', label: 'تذاكر بالساعة', pill: 'pill-blue', testId: 'nav-tickets' },
+    { path: '/birthday', label: 'حفلات أعياد الميلاد', pill: 'pill-pink', testId: 'nav-birthday' },
+    { path: '/subscriptions', label: 'الاشتراكات', pill: 'pill-yellow', testId: 'nav-subscriptions' },
+  ];
 
   const handleLogout = () => {
     logout();
@@ -35,23 +43,26 @@ export const Navbar = () => {
     <nav className={`sticky top-0 z-50 ${isCustomerNav ? 'navbar-customer' : 'bg-white border-b border-border shadow-sm'}`} dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20 py-3">
-          {/* Logo with Pill Container */}
-          <Link to="/" className="brand-logo-pill" data-testid="nav-logo">
-            <img src={logoImg} alt="بيكابو" className="brand-logo-lg" />
-          </Link>
+          {/* Logo with Pill Container - wrapped for mobile positioning */}
+          <div className="nav-logo-wrap">
+            <Link to="/" className="brand-logo-pill" data-testid="nav-logo">
+              <img src={logoImg} alt="بيكابو" className="brand-logo-lg" />
+            </Link>
+          </div>
 
           {/* Desktop Navigation - Show only for non-admin users */}
           {!isAdmin && (
             <div className="hidden md:flex items-center gap-3">
-              <Link to="/tickets" className={`nav-pill pill-blue ${isActive('/tickets') ? 'active' : ''}`} data-testid="nav-tickets">
-                تذاكر بالساعة
-              </Link>
-              <Link to="/birthday" className={`nav-pill pill-pink ${isActive('/birthday') ? 'active' : ''}`} data-testid="nav-birthday">
-                حفلات أعياد الميلاد
-              </Link>
-              <Link to="/subscriptions" className={`nav-pill pill-yellow ${isActive('/subscriptions') ? 'active' : ''}`} data-testid="nav-subscriptions">
-                الاشتراكات
-              </Link>
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`nav-pill ${item.pill} ${isActive(item.path) ? 'active' : ''}`}
+                  data-testid={item.testId}
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
           )}
 
@@ -134,14 +145,49 @@ export const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Navigation - Pills visible on Homepage, hamburger on other pages */}
+          {!isAdmin && isHomePage && (
+            <div className="md:hidden flex items-center gap-2 overflow-x-auto scrollbar-hide">
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`nav-pill ${item.pill} ${isActive(item.path) ? 'active' : ''} whitespace-nowrap text-sm`}
+                  data-testid={`mobile-${item.testId}`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Mobile Menu Button - Only show on non-homepage or for auth actions */}
           <button
-            className="md:hidden p-2"
+            className={`md:hidden p-2 ${isHomePage && !isAdmin ? 'hidden' : ''}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             data-testid="mobile-menu-toggle"
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
+
+          {/* Mobile Auth Button on Homepage */}
+          {isHomePage && !isAdmin && (
+            <div className="md:hidden">
+              {isAuthenticated ? (
+                <Link to="/profile">
+                  <Button variant="outline" size="sm" className="rounded-full">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </Link>
+              ) : (
+                <Link to="/login">
+                  <Button size="sm" className="rounded-full btn-playful text-sm">
+                    دخول
+                  </Button>
+                </Link>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Mobile Menu */}
@@ -158,15 +204,16 @@ export const Navbar = () => {
               {/* Parent navigation - hide for admin */}
               {!isAdmin && (
                 <div className="flex flex-wrap gap-2">
-                  <Link to="/tickets" className={`nav-pill pill-blue ${isActive('/tickets') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-                    تذاكر بالساعة
-                  </Link>
-                  <Link to="/birthday" className={`nav-pill pill-pink ${isActive('/birthday') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-                    حفلات أعياد الميلاد
-                  </Link>
-                  <Link to="/subscriptions" className={`nav-pill pill-yellow ${isActive('/subscriptions') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-                    الاشتراكات
-                  </Link>
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`nav-pill ${item.pill} ${isActive(item.path) ? 'active' : ''}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
                 </div>
               )}
               <div className="border-t border-border pt-4 flex flex-col gap-2">

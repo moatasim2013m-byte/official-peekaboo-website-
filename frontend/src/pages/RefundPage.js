@@ -1,53 +1,49 @@
+import { RotateCcw, Phone, Mail } from 'lucide-react';
+import PublicPageShell, { WonderSection, WonderSectionTitle } from '../components/PublicPageShell';
+
 export default function RefundPage() {
+  const sections = [
+    { num: '1', title: 'تذاكر اللعب بالساعة', color: 'blue', items: ['لا يتم استرداد قيمة التذكرة بعد بدء الاستخدام', 'في حالات استثنائية قد يتم تعويض بجلسة بديلة'] },
+    { num: '2', title: 'الاشتراكات', color: 'yellow', items: ['الاشتراكات غير قابلة للاسترداد بعد التفعيل', 'يمكن معالجة حالات استثنائية عند وجود خطأ تقني'] },
+    { num: '3', title: 'حفلات أعياد الميلاد', color: 'pink', items: ['يمكن إعادة الجدولة قبل 48 ساعة من الموعد', 'الإلغاء المتأخر أو عدم الحضور - لا يتم الاسترداد', 'العربون لتثبيت الحجز وقد لا يكون قابلاً للاسترداد'] },
+    { num: '4', title: 'عدم الحضور (No-Show)', color: 'green', text: 'عدم الحضور دون إشعار مسبق = لا يوجد استرداد' },
+  ];
+
   return (
-    <div className="min-h-screen bg-hero-gradient py-12" dir="rtl">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="font-heading text-4xl font-bold text-foreground mb-8">سياسة الاسترجاع والاسترداد</h1>
-        
-        <div className="bg-white rounded-3xl p-8 shadow-sm space-y-6 text-muted-foreground leading-relaxed">
-          <p className="text-lg font-semibold text-foreground">سياسة الاسترجاع والاسترداد – بيكابو</p>
-          <p>توضح هذه السياسة قواعد الإلغاء وإعادة الجدولة والاسترداد للحجوزات والمدفوعات داخل بيكابو.</p>
-
-          <section>
-            <h2 className="font-heading text-xl font-semibold text-foreground mb-3">1) تذاكر اللعب بالساعة</h2>
-            <ul className="list-disc list-inside space-y-1">
-              <li>لا يتم استرداد قيمة التذكرة بعد بدء الاستخدام.</li>
-              <li>في حالات استثنائية جداً (عطل تشغيلي من طرفنا) قد يتم تعويض العميل بجلسة بديلة أو رصيد حسب تقدير الإدارة.</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="font-heading text-xl font-semibold text-foreground mb-3">2) الاشتراكات</h2>
-            <ul className="list-disc list-inside space-y-1">
-              <li>الاشتراكات غير قابلة للاسترداد بعد التفعيل/البدء باستخدامها.</li>
-              <li>يمكن معالجة حالات استثنائية فقط عند وجود خطأ تقني واضح يمنع الاستفادة، وبعد التحقق من الإدارة.</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="font-heading text-xl font-semibold text-foreground mb-3">3) حفلات أعياد الميلاد</h2>
-            <ul className="list-disc list-inside space-y-1">
-              <li>يمكن إعادة الجدولة قبل 48 ساعة على الأقل من موعد الحفل (حسب توفر المواعيد).</li>
-              <li>عند الإلغاء المتأخر أو عدم الحضور لا يتم استرداد المبلغ.</li>
-              <li>أي دفعات/عربون تعتبر لتثبيت الحجز وقد لا تكون قابلة للاسترداد حسب تفاصيل الباقة.</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="font-heading text-xl font-semibold text-foreground mb-3">4) عدم الحضور (No-Show)</h2>
-            <ul className="list-disc list-inside space-y-1">
-              <li>عدم الحضور في موعد الحجز دون إشعار مسبق ضمن المدة المحددة يعني عدم وجود استرداد.</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="font-heading text-xl font-semibold text-foreground mb-3">5) طريقة تقديم الطلب</h2>
-            <p className="mb-2">لتقديم طلب يتعلق بالاسترجاع/التعديل/الاستفسار:</p>
-            <p>الهاتف: 0777775652</p>
-            <p>البريد الإلكتروني: support2peekaboojor.com</p>
-          </section>
+    <PublicPageShell
+      title="سياسة الاسترجاع"
+      subtitle="قواعد الإلغاء وإعادة الجدولة والاسترداد"
+      icon={RotateCcw}
+      iconBg="bg-[var(--pk-orange)]"
+    >
+      <WonderSection>
+        <div className="space-y-4">
+          {sections.map((section) => (
+            <div key={section.num} className={`wonder-card wonder-card-${section.color}`}>
+              <h3 className="font-heading font-bold text-foreground mb-2">{section.num}) {section.title}</h3>
+              {section.items ? (
+                <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                  {section.items.map((item, i) => <li key={i}>{item}</li>)}
+                </ul>
+              ) : (
+                <p className="text-sm text-muted-foreground">{section.text}</p>
+              )}
+            </div>
+          ))}
         </div>
-      </div>
-    </div>
+      </WonderSection>
+
+      <WonderSection className="text-center">
+        <WonderSectionTitle icon={Phone} iconColor="orange">تقديم طلب</WonderSectionTitle>
+        <p className="text-muted-foreground mb-1">
+          <Phone className="inline h-4 w-4 ml-1" />
+          <span dir="ltr" className="font-bold">0777775652</span>
+        </p>
+        <p className="text-muted-foreground">
+          <Mail className="inline h-4 w-4 ml-1" />
+          support@peekaboojor.com
+        </p>
+      </WonderSection>
+    </PublicPageShell>
   );
 }

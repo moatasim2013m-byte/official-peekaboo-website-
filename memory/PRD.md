@@ -16,6 +16,9 @@
 - ✅ Subscriptions purchase (3 tiers)
 - ✅ Profile with children, bookings, loyalty points
 - ✅ User registration/login
+- ✅ Morning/Afternoon booking modes with distinct pricing
+- ✅ Policy pages (Terms, Privacy, Refund)
+- ✅ Payment card icons and trust badges
 
 ### Payment Methods
 - ✅ **Card**: Stripe checkout redirect
@@ -26,6 +29,16 @@
 - ✅ Admin dashboard
 - ✅ Staff check-in interface
 - ✅ QR code scanning
+
+### UI/UX (Feb 2026 Redesign)
+- ✅ Wonderland-inspired sky theme with fluffy clouds and floating balloons
+- ✅ Cleaner navbar with glass-morphism effect
+- ✅ Rounded cards with colorful icon badges
+- ✅ Improved hero section with better whitespace
+- ✅ Consistent section containers with soft pastel backgrounds
+- ✅ Mobile-responsive design with RTL support
+- ✅ PublicPageShell component for consistent informational page layouts
+- ✅ Themed informational pages (About, FAQ, Contact, Rules, Pricing)
 
 ---
 
@@ -38,13 +51,18 @@
 
 ---
 
-## Design System (FROZEN)
-- Primary: #F1C40F (Yellow)
-- Secondary: #FF6B9D (Pink)
-- Background: #E8F6FF (Sky)
+## Design System (Updated Feb 2026)
+- Primary Red: #FF4757
+- Yellow: #FFD93D
+- Blue: #45AAF2
+- Green: #26DE81
+- Orange: #FF9F43
+- Pink: #FF6B9D
+- Sky Background: #87CEEB → #FFF8E7 gradient
 - Headings: Baloo Bhaijaan 2
 - Body: Cairo
 - Language: Arabic (RTL)
+- Border Radius: 24px-40px (rounded, playful)
 
 ---
 
@@ -82,6 +100,5 @@ SENDER_EMAIL=noreply@peekaboojor.com
 
 ## Backlog (Post-Launch)
 - P1: Points Redemption Flow (QR code generation)
-- P2: Groups booking page
-- P2: Home Party page
-- P3: Design iteration/polish
+- P2: Resolve ESLint dependency warnings properly (code quality)
+- P3: Implement contact form submission backend

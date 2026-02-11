@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import axios from 'axios';
 
 const AuthContext = createContext(null);
@@ -10,35 +10,47 @@ const API_URL =
     ? ""
     : RAW_API_URL;
 
+const TOKEN_KEY = 'peekaboo_token';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('peekaboo_token'));
+  const [token, setToken] = useState(() => {
+    // Initialize from localStorage synchronously
+    try {
+      return localStorage.getItem(TOKEN_KEY);
+    } catch {
+      return null;
+    }
+  });
 
-  // Create api instance that updates when token changes
+  // Create api instance
   const api = useMemo(() => {
     const instance = axios.create({
       baseURL: API_URL ? `${API_URL}/api` : "/api",
     });
     
-    // Add interceptor to always use latest token
+    // Add interceptor to always use latest token from localStorage
     instance.interceptors.request.use((config) => {
-      const currentToken = localStorage.getItem('peekaboo_token');
-      if (currentToken) {
-        config.headers.Authorization = `Bearer ${currentToken}`;
+      try {
+        const currentToken = localStorage.getItem(TOKEN_KEY);
+        if (currentToken) {
+          config.headers.Authorization = `Bearer ${currentToken}`;
+        }
+      } catch (e) {
+        console.warn('localStorage access failed:', e);
       }
       return config;
     });
 
-    // Handle 401 responses - only for truly expired tokens, not initial auth check
+    // Handle 401 responses
     instance.interceptors.response.use(
       (response) => response,
       (error) => {
         // Don't auto-logout on /auth/me failures (handled separately)
         const isAuthCheck = error.config?.url?.includes('/auth/me');
         if (error.response?.status === 401 && !isAuthCheck) {
-          // 401 on API call - let component handle the error
+          console.warn('401 on API call:', error.config?.url);
         }
         return Promise.reject(error);
       }
@@ -50,7 +62,13 @@ export const AuthProvider = ({ children }) => {
   // Check auth on mount
   useEffect(() => {
     const checkAuth = async () => {
-      const storedToken = localStorage.getItem('peekaboo_token');
+      let storedToken = null;
+      try {
+        storedToken = localStorage.getItem(TOKEN_KEY);
+      } catch (e) {
+        console.warn('localStorage access failed:', e);
+      }
+
       if (!storedToken) {
         setLoading(false);
         return;
@@ -61,9 +79,14 @@ export const AuthProvider = ({ children }) => {
         setUser(response.data.user);
         setToken(storedToken);
       } catch (error) {
+        console.warn('Auth check failed:', error.response?.status);
         // Only clear auth on explicit 401 (invalid/expired token)
         if (error.response?.status === 401) {
-          localStorage.removeItem('peekaboo_token');
+          try {
+            localStorage.removeItem(TOKEN_KEY);
+          } catch (e) {
+            console.warn('localStorage remove failed:', e);
+          }
           setToken(null);
           setUser(null);
         }
@@ -76,41 +99,61 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, [api]);
 
-  const login = async (email, password) => {
+  const login = useCallback(async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
     const { token: newToken, user: userData } = response.data;
-    localStorage.setItem('peekaboo_token', newToken);
+    
+    // Save token to localStorage first
+    try {
+      localStorage.setItem(TOKEN_KEY, newToken);
+    } catch (e) {
+      console.error('Failed to save token:', e);
+      throw new Error('فشل حفظ بيانات الجلسة');
+    }
+    
+    // Then update state
     setToken(newToken);
     setUser(userData);
+    
     return userData;
-  };
+  }, [api]);
 
-
-  const register = async (name, email, password, phone = null) => {
+  const register = useCallback(async (name, email, password, phone = null) => {
     const response = await api.post('/auth/register', { name, email, password, phone });
     const { token: newToken, user: userData } = response.data;
-    localStorage.setItem('peekaboo_token', newToken);
+    
+    try {
+      localStorage.setItem(TOKEN_KEY, newToken);
+    } catch (e) {
+      console.error('Failed to save token:', e);
+      throw new Error('فشل حفظ بيانات الجلسة');
+    }
+    
     setToken(newToken);
     setUser(userData);
     return userData;
-  };
+  }, [api]);
 
-  const logout = () => {
-    localStorage.removeItem('peekaboo_token');
+  const logout = useCallback(() => {
+    try {
+      localStorage.removeItem(TOKEN_KEY);
+    } catch (e) {
+      console.warn('localStorage remove failed:', e);
+    }
     setToken(null);
     setUser(null);
-  };
+  }, []);
 
-  const forgotPassword = async (email) => {
+  const forgotPassword = useCallback(async (email) => {
     const origin_url = window.location.origin;
     await api.post('/auth/forgot-password', { email, origin_url });
-  };
+  }, [api]);
 
-  const resetPassword = async (resetToken, password) => {
+  const resetPassword = useCallback(async (resetToken, password) => {
     await api.post('/auth/reset-password', { token: resetToken, password });
-  };
+  }, [api]);
 
-  const value = {
+  const value = useMemo(() => ({
     user,
     token,
     loading,
@@ -123,7 +166,7 @@ export const AuthProvider = ({ children }) => {
     isAdmin: user?.role === 'admin',
     isStaff: user?.role === 'staff',
     isAuthenticated: !!user
-  };
+  }), [user, token, loading, login, register, logout, forgotPassword, resetPassword, api]);
 
   return (
     <AuthContext.Provider value={value}>

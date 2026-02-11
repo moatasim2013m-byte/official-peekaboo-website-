@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
-import { Mail, Lock, User, Loader2, Phone } from 'lucide-react';
+import { Mail, Lock, User, Loader2, Phone, CheckCircle } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 
 export default function RegisterPage() {
@@ -16,8 +16,8 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const { register } = useAuth();
-  const navigate = useNavigate();
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const { api } = useAuth();
 
   const validatePhone = (phoneNum) => {
     const cleaned = phoneNum.replace(/\s/g, '');
@@ -45,15 +45,47 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      await register(name, email, password, phone.replace(/\s/g, ''));
-      toast.success('تم إنشاء الحساب بنجاح!');
-      navigate('/profile');
+      await api.post('/auth/register', {
+        name,
+        email,
+        password,
+        phone: phone.replace(/\s/g, ''),
+        origin_url: window.location.origin
+      });
+      setRegistrationSuccess(true);
     } catch (error) {
       toast.error(error.response?.data?.error || 'فشل إنشاء الحساب');
     } finally {
       setLoading(false);
     }
   };
+
+  // Show success message after registration
+  if (registrationSuccess) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center py-12 px-4" dir="rtl">
+        <Card className="auth-card-premium w-full max-w-md">
+          <CardContent className="pt-8 pb-8 text-center">
+            <div className="flex justify-center mb-6">
+              <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center">
+                <CheckCircle className="h-12 w-12 text-green-600" />
+              </div>
+            </div>
+            <h2 className="font-heading text-2xl text-[var(--text-primary)] mb-4">تم إنشاء الحساب بنجاح!</h2>
+            <p className="text-muted-foreground mb-6 leading-relaxed">
+              تم إرسال رابط تأكيد إلى بريدك الإلكتروني.<br />
+              الرجاء التحقق من البريد الوارد أو الرسائل غير المرغوب فيها.
+            </p>
+            <Link to="/login">
+              <Button className="rounded-full btn-playful">
+                الذهاب لتسجيل الدخول
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4" dir="rtl">

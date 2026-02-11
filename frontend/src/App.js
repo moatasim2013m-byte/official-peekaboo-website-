@@ -28,6 +28,12 @@ import RefundPage from "./pages/RefundPage";
 import GroupsPage from "./pages/GroupsPage";
 import HomePartyPage from "./pages/HomePartyPage";
 import BookingConfirmationPage from "./pages/BookingConfirmationPage";
+import AboutPage from "./pages/AboutPage";
+import FAQPage from "./pages/FAQPage";
+import ContactPage from "./pages/ContactPage";
+import RulesPage from "./pages/RulesPage";
+import PricingPage from "./pages/PricingPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false, staffOnly = false, parentOnly = false }) => {
@@ -96,6 +102,7 @@ function AppRoutes() {
       <Route path="/login" element={<Layout><LoginPage /></Layout>} />
       <Route path="/staff/login" element={<StaffLoginPage />} />
       <Route path="/register" element={<Layout><RegisterPage /></Layout>} />
+      <Route path="/verify-email" element={<Layout><VerifyEmailPage /></Layout>} />
       <Route path="/forgot-password" element={<Layout><ForgotPasswordPage /></Layout>} />
       <Route path="/reset-password" element={<Layout><ResetPasswordPage /></Layout>} />
       <Route path="/tickets" element={<Layout><TicketsPage /></Layout>} />
@@ -106,6 +113,11 @@ function AppRoutes() {
       <Route path="/refund" element={<Layout><RefundPage /></Layout>} />
       <Route path="/groups" element={<Layout><GroupsPage /></Layout>} />
       <Route path="/home-party" element={<Layout><HomePartyPage /></Layout>} />
+      <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+      <Route path="/faq" element={<Layout><FAQPage /></Layout>} />
+      <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
+      <Route path="/rules" element={<Layout><RulesPage /></Layout>} />
+      <Route path="/pricing" element={<Layout><PricingPage /></Layout>} />
       
       {/* Payment Routes */}
       <Route path="/payment/success" element={<Layout><PaymentSuccessPage /></Layout>} />

@@ -6,33 +6,49 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
-import { Mail, Lock, Loader2 } from 'lucide-react';
+import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [verificationError, setVerificationError] = useState(null);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setVerificationError(null);
 
     try {
       const user = await login(email, password);
       toast.success('أهلًا بعودتك!');
       
-      if (user.role === 'admin') {
-        navigate('/admin');
-      } else if (user.role === 'staff') {
-        navigate('/staff');
-      } else {
-        navigate('/profile');
-      }
+      // Small delay to ensure state is updated before navigation
+      setTimeout(() => {
+        if (user.role === 'admin') {
+          navigate('/admin', { replace: true });
+        } else if (user.role === 'staff') {
+          navigate('/staff', { replace: true });
+        } else {
+          navigate('/profile', { replace: true });
+        }
+      }, 100);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'فشل تسجيل الدخول');
+      const status = error.response?.status;
+      const errorMessage = error.response?.data?.error 
+        || error.message 
+        || 'فشل تسجيل الدخول - تحقق من بيانات الدخول';
+      
+      // Handle email verification required (403)
+      if (status === 403) {
+        setVerificationError(errorMessage);
+      } else {
+        toast.error(errorMessage);
+      }
+      console.error('Login error:', status, errorMessage);
     } finally {
       setLoading(false);
     }
@@ -55,6 +71,17 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Email verification warning */}
+          {verificationError && (
+            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-yellow-800 font-medium text-sm">{verificationError}</p>
+                <p className="text-yellow-700 text-xs mt-1">تحقق من بريدك الوارد أو الرسائل غير المرغوب فيها.</p>
+              </div>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email">البريد الإلكتروني</Label>

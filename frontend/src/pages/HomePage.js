@@ -4,7 +4,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../i18n/useT';
-import { Clock, Cake, Star, ChevronRight, Play, Users, Home, X, ZoomIn } from 'lucide-react';
+import { Clock, Cake, Star, ChevronLeft, Play, Users, Home, X, ZoomIn, Heart } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 
 const HERO_FALLBACK = '/hero-fallback.jpg';
@@ -22,6 +22,10 @@ export default function HomePage() {
     ctaRoute: '/tickets',
     image: ''
   });
+
+  useEffect(() => {
+    document.title = 'بيكابو | ملعب داخلي للأطفال - إربد';
+  }, []);
 
   // Handle ESC key and body scroll
   useEffect(() => {
@@ -72,114 +76,153 @@ export default function HomePage() {
     {
       icon: Clock,
       title: 'اللعب بالساعة',
-      description: 'احجز جلسات لعب لأطفالك. اختر الوقت المثالي!',
+      description: 'احجز جلسات لعب لأطفالك واختر الوقت المثالي!',
       link: '/tickets',
-      color: 'bg-primary',
       buttonText: 'احجز الآن',
-      accent: 'star'
+      badgeColor: 'badge-blue',
+      accentColor: 'accent-blue'
     },
     {
       icon: Cake,
       title: 'حفلات أعياد الميلاد',
-      description: 'احتفل مع 10 ثيمات رائعة! حفلات مخصصة متاحة أيضاً.',
+      description: 'احتفل مع ثيمات رائعة وحفلات مخصصة!',
       link: '/birthday',
-      color: 'bg-accent',
       buttonText: 'خطط لحفلتك',
-      accent: 'balloon'
+      badgeColor: 'badge-pink',
+      accentColor: 'accent-pink'
     },
     {
       icon: Star,
       title: 'الاشتراكات',
-      description: 'وفّر مع باقات الزيارات. صلاحية 30 يوم، متعة بلا حدود!',
+      description: 'وفّر مع باقات الزيارات بصلاحية 30 يوم!',
       link: '/subscriptions',
-      color: 'bg-secondary',
       buttonText: 'اشترك الآن',
-      accent: 'cloud'
+      badgeColor: 'badge-yellow',
+      accentColor: 'accent-yellow'
     },
     {
       icon: Users,
       title: 'المدارس والمجموعات',
-      description: 'رحلات مدرسية ومجموعات منظمة ببرامج لعب آمنة',
+      description: 'رحلات مدرسية وبرامج لعب آمنة للمجموعات',
       link: '/groups',
-      color: 'bg-[var(--peekaboo-green)]',
       buttonText: 'تواصل معنا',
-      accent: 'star'
+      badgeColor: 'badge-green',
+      accentColor: 'accent-green'
     },
     {
       icon: Home,
       title: 'حفلتك في بيتك',
-      description: 'نأتيكم للمنزل مع ديكور، شخصيات كرتونية، واحتفال كامل',
+      description: 'نأتيكم للمنزل مع ديكور واحتفال كامل!',
       link: '/home-party',
-      color: 'bg-[var(--peekaboo-pink)]',
       buttonText: 'احجز حفلتك',
-      accent: 'balloon'
+      badgeColor: 'badge-orange',
+      accentColor: 'accent-orange'
+    },
+    {
+      icon: Heart,
+      title: 'ذوي الهمم',
+      description: 'برامج مخصصة لأصحاب الاحتياجات الخاصة',
+      link: null,
+      buttonText: 'قريباً',
+      badgeColor: 'badge-purple',
+      accentColor: 'accent-purple',
+      disabled: true
     }
   ];
 
   return (
     <div className="min-h-screen" dir="rtl">
-      {/* Hero Section */}
-      <section className="bg-hero-gradient py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="order-2 md:order-1">
-              {/* Hero Text Panel */}
+      {/* Hero Section with Sky Background */}
+      <section className="home-hero-sky py-12 md:py-20">
+        {/* Decorative Sky Layer */}
+        <div className="home-sky-layer" aria-hidden="true">
+          {/* Sun */}
+          <div className="sky-sun"></div>
+          {/* Rainbow Arc */}
+          <div className="sky-rainbow"></div>
+          {/* Clouds */}
+          <div className="sky-cloud cloud-1"></div>
+          <div className="sky-cloud cloud-2"></div>
+          <div className="sky-cloud cloud-3"></div>
+          <div className="sky-cloud cloud-4"></div>
+          <div className="sky-cloud cloud-5"></div>
+          {/* Balloons */}
+          <div className="sky-balloon balloon-1"></div>
+          <div className="sky-balloon balloon-2"></div>
+          {/* Sparkles */}
+          <div className="sky-sparkle sparkle-1"></div>
+          <div className="sky-sparkle sparkle-2"></div>
+          <div className="sky-sparkle sparkle-3"></div>
+          <div className="sky-sparkle sparkle-4"></div>
+          <div className="sky-sparkle sparkle-5"></div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
+            {/* Text Content */}
+            <div className="order-2 lg:order-1 text-center lg:text-right">
               <div className="hero-text-panel">
-                <h1 className="font-heading text-4xl md:text-6xl font-bold text-foreground mb-2" data-testid="hero-title">
+                <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight" data-testid="hero-title">
                   بيكابو يصنع السعادة
                 </h1>
-                {/* Decorative underline */}
-                <div className="hero-title-underline"></div>
-                <p className="text-lg md:text-xl text-muted-foreground mt-5 mb-6 leading-relaxed">
+                <div className="hero-title-underline mx-auto lg:mx-0"></div>
+                <p className="text-base sm:text-lg text-muted-foreground mt-6 leading-relaxed max-w-[520px] mx-auto lg:mx-0 opacity-85">
                   {heroConfig.subtitle}
                 </p>
               </div>
-              <div className="flex flex-wrap gap-4">
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link to={heroConfig.ctaRoute}>
-                  <Button size="lg" className="rounded-full btn-playful text-lg px-8" data-testid="hero-book-btn">
+                  <Button size="lg" className="rounded-full btn-playful text-base sm:text-lg px-8 py-6 w-full sm:w-auto" data-testid="hero-book-btn">
                     {heroConfig.ctaText}
-                    <ChevronRight className="mr-2 h-5 w-5 rotate-180" />
+                    <ChevronLeft className="mr-2 h-5 w-5" />
                   </Button>
                 </Link>
                 {!isAuthenticated && (
                   <Link to="/register">
-                    <Button size="lg" variant="outline" className="rounded-full text-lg px-8" data-testid="hero-signup-btn">
+                    <Button size="lg" variant="outline" className="rounded-full text-base sm:text-lg px-8 py-6 border-2 w-full sm:w-auto" data-testid="hero-signup-btn">
                       سجّل مجاناً
                     </Button>
                   </Link>
                 )}
               </div>
             </div>
-            <div className="relative order-1 md:order-2">
-              {/* Clickable Hero Image */}
+            
+            {/* Hero Image */}
+            <div className="relative order-1 lg:order-2">
               <div 
-                className="hero-image-container cursor-pointer relative group rounded-3xl bg-gradient-to-br from-white/60 to-[var(--pk-bg-sky)]/80 backdrop-blur-sm shadow-2xl overflow-hidden"
+                className="relative cursor-pointer group"
                 onClick={() => setLightboxOpen(true)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(e) => e.key === 'Enter' && setLightboxOpen(true)}
                 data-testid="hero-image-clickable"
               >
-                <img 
-                  src={heroImgSrc}
-                  alt="أطفال يلعبون في بيكابو"
-                  className="w-full aspect-[4/3] object-contain transition-transform group-hover:scale-[1.02]"
-                  onError={() => setHeroImgSrc(HERO_FALLBACK)}
-                  data-testid="hero-image"
-                />
-                {/* Hint overlay */}
-                <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-sm flex items-center gap-2 opacity-80 group-hover:opacity-100 transition-opacity">
+                <div className="rounded-3xl overflow-hidden bg-white shadow-xl">
+                  <img 
+                    src={heroImgSrc}
+                    alt="أطفال يلعبون في بيكابو"
+                    className="w-full aspect-[4/3] object-cover transition-transform duration-300 group-hover:scale-105"
+                    onError={() => setHeroImgSrc(HERO_FALLBACK)}
+                    data-testid="hero-image"
+                  />
+                </div>
+                {/* Zoom hint */}
+                <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-2 rounded-full text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <ZoomIn className="h-4 w-4" />
-                  <span>اضغط لعرض الصورة بالكامل</span>
+                  <span>اضغط للتكبير</span>
                 </div>
               </div>
-              {/* Mascot peeking */}
+              
+              {/* Mascot */}
               <img 
                 src={mascotImg}
                 alt="تميمة بيكابو"
-                className="absolute -bottom-6 -left-4 w-28 h-28 rounded-full border-4 border-white shadow-lg object-cover"
+                className="absolute -bottom-4 -left-4 w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white shadow-lg object-cover z-10"
               />
-              <div className="absolute -bottom-4 -right-4 bg-[var(--peekaboo-yellow)] text-foreground px-6 py-3 rounded-full font-heading font-bold shadow-lg">
+              
+              {/* Hours Badge */}
+              <div className="absolute -bottom-2 right-4 sm:right-8 bg-[var(--pk-yellow)] text-[var(--text-primary)] px-4 sm:px-6 py-2 sm:py-3 rounded-full font-heading font-bold shadow-lg text-sm sm:text-base">
                 مفتوح يومياً 10:00 ص - 12:00 ص
               </div>
             </div>
@@ -213,36 +256,47 @@ export default function HomePage() {
 
       {/* Features Section */}
       <section className="section-container section-yellow mx-4 md:mx-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="font-heading text-3xl md:text-5xl font-bold text-foreground mb-4" data-testid="features-title">
+            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="features-title">
               ماذا نقدم
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto">
               كل ما تحتاجه ليوم لعب مثالي!
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-5">
             {features.map((feature, index) => (
               <Card 
                 key={index} 
-                className="pk-card"
+                className={`pk-card ${feature.disabled ? 'opacity-70' : ''}`}
                 data-testid={`feature-card-${index}`}
               >
-                <div className={`pk-card-accent accent-${feature.accent === 'star' ? 'yellow' : feature.accent === 'balloon' ? 'pink' : 'blue'}`} />
-                <CardContent className="p-6 pt-8 text-center relative z-10">
-                  <div className={`pk-icon-badge badge-${feature.accent === 'star' ? 'yellow' : feature.accent === 'balloon' ? 'pink' : feature.accent === 'cloud' ? 'blue' : 'green'}`}>
+                <div className={`pk-card-accent ${feature.accentColor}`} />
+                {feature.disabled && (
+                  <div className="absolute top-3 left-3 bg-[var(--pk-purple)] text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+                    قريباً
+                  </div>
+                )}
+                <CardContent className="p-5 pt-9 text-center">
+                  <div className={`pk-icon-badge ${feature.badgeColor} ${feature.disabled ? 'grayscale' : ''}`}>
                     <feature.icon className="h-7 w-7 text-white" />
                   </div>
-                  <h3 className="pk-card-title">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm mb-5 leading-relaxed">{feature.description}</p>
-                  <Link to={feature.link}>
-                    <Button className="rounded-full btn-playful w-full text-sm" data-testid={`feature-btn-${index}`}>
+                  <h3 className="pk-card-title text-base">{feature.title}</h3>
+                  <p className="text-muted-foreground text-xs mb-5 leading-relaxed">{feature.description}</p>
+                  {feature.disabled ? (
+                    <Button disabled className="rounded-full w-full opacity-50 cursor-not-allowed" data-testid={`feature-btn-${index}`}>
                       {feature.buttonText}
-                      <ChevronRight className="mr-2 h-4 w-4 rotate-180" />
                     </Button>
-                  </Link>
+                  ) : (
+                    <Link to={feature.link}>
+                      <Button className="rounded-full btn-playful w-full text-sm" data-testid={`feature-btn-${index}`}>
+                        {feature.buttonText}
+                        <ChevronLeft className="mr-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -252,12 +306,12 @@ export default function HomePage() {
 
       {/* Gallery Section */}
       <section className="section-container section-green mx-4 md:mx-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="font-heading text-3xl md:text-5xl font-bold text-foreground mb-4" data-testid="gallery-title">
+            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="gallery-title">
               لحظات ممتعة في بيكابو
             </h2>
-            <p className="text-muted-foreground text-lg">
+            <p className="text-muted-foreground text-base sm:text-lg">
               شاهد ما يجعلنا مميزين!
             </p>
           </div>
@@ -267,7 +321,7 @@ export default function HomePage() {
               gallery.slice(0, 6).map((item, index) => (
                 <div 
                   key={item.id} 
-                  className={`relative rounded-2xl overflow-hidden ${index === 0 ? 'col-span-2 row-span-2' : ''}`}
+                  className={`relative rounded-2xl overflow-hidden shadow-md ${index === 0 ? 'col-span-2 row-span-2' : ''}`}
                   data-testid={`gallery-item-${index}`}
                 >
                   {item.type === 'video' ? (
@@ -281,7 +335,7 @@ export default function HomePage() {
                     <img 
                       src={item.url} 
                       alt={item.title || 'صورة من المعرض'} 
-                      className={`w-full object-cover ${index === 0 ? 'aspect-square' : 'aspect-square'}`}
+                      className="w-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
                     />
                   )}
                 </div>
@@ -289,25 +343,25 @@ export default function HomePage() {
             ) : (
               // Placeholder gallery items
               <>
-                <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden">
+                <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-md">
                   <img 
                     src="https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg"
                     alt="أطفال يلعبون"
-                    className="w-full h-full object-cover aspect-square"
+                    className="w-full h-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <div className="rounded-2xl overflow-hidden">
+                <div className="rounded-2xl overflow-hidden shadow-md">
                   <img 
                     src="https://images.pexels.com/photos/6148511/pexels-photo-6148511.jpeg"
                     alt="حفلة عيد ميلاد"
-                    className="w-full object-cover aspect-square"
+                    className="w-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
                   />
                 </div>
-                <div className="rounded-2xl overflow-hidden">
+                <div className="rounded-2xl overflow-hidden shadow-md">
                   <img 
                     src="https://images.pexels.com/photos/3951099/pexels-photo-3951099.png"
                     alt="متعة عائلية"
-                    className="w-full object-cover aspect-square"
+                    className="w-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
                   />
                 </div>
               </>
@@ -318,23 +372,22 @@ export default function HomePage() {
 
       {/* CTA Section */}
       {!isAuthenticated && (
-        <section className="section-container section-sky mx-4 md:mx-8 bg-primary !bg-primary">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 className="font-heading text-3xl md:text-5xl font-bold text-white mb-6" data-testid="cta-title">
+        <section className="py-16 md:py-20 mx-4 md:mx-8">
+          <div className="max-w-4xl mx-auto px-6 py-12 md:py-16 bg-[var(--pk-red)] rounded-[var(--radius-2xl)] shadow-xl text-center">
+            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6" data-testid="cta-title">
               هل أنت مستعد للمتعة؟
             </h2>
-            <p className="text-white/90 text-lg mb-8 max-w-2xl mx-auto">
+            <p className="text-white/90 text-base sm:text-lg mb-8 max-w-xl mx-auto">
               أنشئ حسابك المجاني لحجز الجلسات، تتبع نقاط الولاء، والحصول على عروض حصرية!
             </p>
             <Link to="/register">
               <Button 
                 size="lg" 
-                variant="secondary" 
-                className="rounded-full text-lg px-10 btn-playful"
+                className="rounded-full text-base sm:text-lg px-10 py-6 bg-white text-[var(--pk-red)] hover:bg-gray-100 font-bold shadow-lg"
                 data-testid="cta-signup-btn"
               >
                 سجّل الآن
-                <ChevronRight className="mr-2 h-5 w-5 rotate-180" />
+                <ChevronLeft className="mr-2 h-5 w-5" />
               </Button>
             </Link>
           </div>

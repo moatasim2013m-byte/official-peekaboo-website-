@@ -4,14 +4,24 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
 const { getJwtSecret, authMiddleware } = require('../middleware/auth');
-const { sendEmail, emailTemplates } = require('../utils/email');
+const { sendVerificationEmail, isResendConfigured, getSenderEmail, getSenderFrom } = require('../utils/email');
 
 const router = express.Router();
+
+// Email delivery diagnostic endpoint (no auth, no secrets exposed)
+router.get('/email-debug', (req, res) => {
+  res.json({
+    has_resend_key: isResendConfigured(),
+    sender_email: getSenderEmail(),
+    sender_from: getSenderFrom(),
+    frontend_url: process.env.FRONTEND_URL || null
+  });
+});
 
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, name, phone } = req.body;
+    const { email, password, name, phone, origin_url } = req.body;
     
     if (!email || !password || !name) {
       return res.status(400).json({ error: 'Email, password and name are required' });
@@ -22,13 +32,19 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Email already registered' });
     }
 
+    // Generate email verification token
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+
     const password_hash = await bcrypt.hash(password, 10);
     const user = new User({
       email: email.toLowerCase(),
       password_hash,
       name,
       phone: phone ? phone.replace(/\s/g, '') : null,
-      role: 'parent'
+      role: 'parent',
+      email_verified: false,
+      email_verify_token: verifyToken,
+      email_verify_expires: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
     });
 
     await user.save();
@@ -47,13 +63,23 @@ router.post('/register', async (req, res) => {
       // Continue - don't block registration if email fails
     }
 
-    const token = jwt.sign({ userId: user._id }, getJwtSecret(), { expiresIn: '7d' });
+    // Send verification email
+    const frontendUrl = process.env.FRONTEND_URL || origin_url || req.headers.origin || 'https://peekaboo-wonderland.preview.emergentagent.com';
+    const verifyUrl = `${frontendUrl}/verify-email?token=${verifyToken}`;
+    
+    const emailResult = await sendVerificationEmail(user.email, verifyUrl);
 
-    res.status(201).json({
-      message: 'Registration successful',
-      token,
-      user: user.toJSON()
-    });
+    if (emailResult.success) {
+      res.status(201).json({
+        message: 'تم إرسال رابط التفعيل إلى بريدك الإلكتروني',
+        email_sent: true
+      });
+    } else {
+      res.status(201).json({
+        message: 'تم إنشاء الحساب، لكن تعذر إرسال رسالة التفعيل. الرجاء المحاولة لاحقاً.',
+        email_sent: false
+      });
+    }
   } catch (error) {
     console.error('Register error:', error);
     res.status(500).json({ error: 'Registration failed' });
@@ -79,6 +105,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    // Check if email is verified (skip for admin/staff)
+    if (!user.email_verified && user.role === 'parent') {
+      return res.status(403).json({ error: 'يرجى تأكيد بريدك الإلكتروني قبل تسجيل الدخول' });
+    }
+
     const token = jwt.sign({ userId: user._id }, getJwtSecret(), { expiresIn: '7d' });
 
     res.json({
@@ -89,6 +120,37 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+// Verify Email
+router.get('/verify-email', async (req, res) => {
+  try {
+    const { token } = req.query;
+    
+    if (!token) {
+      return res.status(400).json({ error: 'الرابط غير صالح' });
+    }
+
+    const user = await User.findOne({ email_verify_token: token });
+    
+    if (!user) {
+      return res.status(400).json({ error: 'الرابط غير صالح' });
+    }
+
+    if (user.email_verify_expires && user.email_verify_expires < new Date()) {
+      return res.status(400).json({ error: 'الرابط منتهي الصلاحية' });
+    }
+
+    user.email_verified = true;
+    user.email_verify_token = null;
+    user.email_verify_expires = null;
+    await user.save();
+
+    res.json({ success: true, message: 'تم تفعيل الحساب بنجاح' });
+  } catch (error) {
+    console.error('Verify email error:', error);
+    res.status(500).json({ error: 'فشل تأكيد البريد الإلكتروني' });
   }
 });
 
