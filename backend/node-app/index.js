@@ -107,26 +107,25 @@ app.get('/api/', (req, res) => {
 
 // ================= FRONTEND =================
 const fs = require('fs');
-// Try multiple paths for frontend build (dev vs production)
+
 const frontendPaths = [
-  path.join(__dirname, '../frontend/build'),      // Cloud Run structure
-  path.join(__dirname, '../../frontend/build')    // Dev structure
+  path.join(__dirname, '../frontend/build'),      // Cloud Run
+  path.join(__dirname, '../../frontend/build')   // Local dev
 ];
+
 const frontendBuildPath = frontendPaths.find(p => fs.existsSync(p));
 
 if (frontendBuildPath) {
   console.log('[Peekaboo] Serving frontend from:', frontendBuildPath);
+
   app.use(express.static(frontendBuildPath));
-  
-  // SPA catch-all: serve index.html for non-API routes
+
+  // SPA catch-all (Express 5 safe)
   app.use((req, res, next) => {
-    // Let API routes pass through to 404 handler
-    if (req.path.startsWith('/api')) {
-      return next();
-    }
-    // Serve React app for all other routes
+    if (req.path.startsWith('/api')) return next();
     res.sendFile(path.join(frontendBuildPath, 'index.html'));
   });
+
 } else {
   console.log('[Peekaboo] Frontend build not found. Serving API only.');
 }
