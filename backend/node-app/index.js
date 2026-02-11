@@ -115,14 +115,16 @@ if (fs.existsSync(frontendBuildPath)) {
   console.log('[Peekaboo] Frontend build not found, serving API only');
 }
 
-// ==================== START SERVER ====================
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log('LISTENING', PORT);
+// ==================== GLOBAL ERROR HANDLER ====================
+app.use((err, req, res, next) => {
+  console.error('[GLOBAL_ERROR]', err.message || err);
+  console.error('[GLOBAL_ERROR_STACK]', err.stack);
+  res.status(err.status || 500).json({ error: 'حدث خطأ في الخادم' });
 });
 
-// ==================== ENV VALIDATION ====================
+// ==================== ENV VALIDATION (before server start) ====================
 const requiredEnvVars = ['SENDER_EMAIL', 'RESEND_API_KEY', 'MONGO_URL', 'FRONTEND_URL', 'JWT_SECRET'];
+const isProduction = process.env.NODE_ENV === 'production';
 
 console.log('=== Environment Variables Check ===');
 let hasAllVars = true;
@@ -134,7 +136,11 @@ requiredEnvVars.forEach(varName => {
     hasAllVars = false;
   }
 });
-if (hasAllVars) {
+
+if (!hasAllVars && isProduction) {
+  console.error('FATAL: Missing required env vars in production. Exiting.');
+  process.exit(1);
+} else if (hasAllVars) {
   console.log('=== All required env vars present ===');
 }
 
@@ -160,3 +166,9 @@ if (!mongoUrl) {
     })
     .catch((err) => console.error('❌ MongoDB connection error:', err));
 }
+
+// ==================== START SERVER ====================
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log('LISTENING', PORT);
+});
