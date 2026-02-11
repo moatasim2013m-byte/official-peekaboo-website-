@@ -11,7 +11,7 @@ const router = express.Router();
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, name, phone } = req.body;
+    const { email, password, name, phone, origin_url } = req.body;
     
     if (!email || !password || !name) {
       return res.status(400).json({ error: 'Email, password and name are required' });
@@ -22,23 +22,37 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Email already registered' });
     }
 
+    // Generate email verification token
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+
     const password_hash = await bcrypt.hash(password, 10);
     const user = new User({
       email: email.toLowerCase(),
       password_hash,
       name,
       phone: phone ? phone.replace(/\s/g, '') : null,
-      role: 'parent'
+      role: 'parent',
+      email_verified: false,
+      email_verify_token: verifyToken,
+      email_verify_expires: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
     });
 
     await user.save();
 
-    const token = jwt.sign({ userId: user._id }, getJwtSecret(), { expiresIn: '7d' });
+    // Send verification email
+    try {
+      const frontendUrl = origin_url || process.env.FRONTEND_URL || 'https://peekaboo-wonderland.preview.emergentagent.com';
+      const verifyUrl = `${frontendUrl}/verify-email?token=${verifyToken}`;
+      const template = emailTemplates.emailVerification(verifyUrl);
+      await sendEmail(user.email, template.subject, template.html);
+    } catch (emailError) {
+      console.error('Verification email send error:', emailError);
+      // Don't fail registration if email fails
+    }
 
     res.status(201).json({
-      message: 'Registration successful',
-      token,
-      user: user.toJSON()
+      message: 'تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.',
+      email_sent: true
     });
   } catch (error) {
     console.error('Register error:', error);
