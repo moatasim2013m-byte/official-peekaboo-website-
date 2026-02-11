@@ -531,6 +531,7 @@ code {
 .pk-icon-badge.badge-yellow { background: var(--pk-yellow); }
 .pk-icon-badge.badge-green { background: var(--pk-green); }
 .pk-icon-badge.badge-orange { background: var(--pk-orange); }
+.pk-icon-badge.badge-purple { background: var(--pk-purple); }
 
 /* Card title styling */
 .pk-card-title {
