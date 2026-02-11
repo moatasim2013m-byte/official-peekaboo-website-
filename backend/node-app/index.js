@@ -37,6 +37,24 @@ app.use(express.json({ limit: '1mb' }));
 app.use(helmet());
 app.use(mongoSanitize());
 
+// ==================== HEALTH CHECK (before rate limiting) ====================
+app.get('/healthz', (req, res) => {
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
+    node_version: process.version,
+    env_present: {
+      MONGO_URL: Boolean(process.env.MONGO_URL),
+      JWT_SECRET: Boolean(process.env.JWT_SECRET),
+      FRONTEND_URL: Boolean(process.env.FRONTEND_URL),
+      CORS_ORIGINS: Boolean(process.env.CORS_ORIGINS),
+      RESEND_API_KEY: Boolean(process.env.RESEND_API_KEY),
+      SENDER_EMAIL: Boolean(process.env.SENDER_EMAIL)
+    },
+    mongo_ready_state: mongoose.connection.readyState
+  });
+});
+
 // Basic API rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
