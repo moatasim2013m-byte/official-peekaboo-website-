@@ -24,15 +24,22 @@ export default function LoginPage() {
       const user = await login(email, password);
       toast.success('أهلًا بعودتك!');
       
-      if (user.role === 'admin') {
-        navigate('/admin');
-      } else if (user.role === 'staff') {
-        navigate('/staff');
-      } else {
-        navigate('/profile');
-      }
+      // Small delay to ensure state is updated before navigation
+      setTimeout(() => {
+        if (user.role === 'admin') {
+          navigate('/admin', { replace: true });
+        } else if (user.role === 'staff') {
+          navigate('/staff', { replace: true });
+        } else {
+          navigate('/profile', { replace: true });
+        }
+      }, 100);
     } catch (error) {
-      toast.error(error.response?.data?.error || 'فشل تسجيل الدخول');
+      const errorMessage = error.response?.data?.error 
+        || error.message 
+        || 'فشل تسجيل الدخول - تحقق من بيانات الدخول';
+      toast.error(errorMessage);
+      console.error('Login error:', error.response?.status, errorMessage);
     } finally {
       setLoading(false);
     }
