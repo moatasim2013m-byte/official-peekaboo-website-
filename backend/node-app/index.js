@@ -20,7 +20,7 @@ app.use(cors({
   origin: allowedOrigins.length ? allowedOrigins : true,
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 // Basic API rate limiting
 const apiLimiter = rateLimit({
