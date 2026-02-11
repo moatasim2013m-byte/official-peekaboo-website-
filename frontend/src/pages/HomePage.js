@@ -239,24 +239,37 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-5">
             {features.map((feature, index) => (
               <Card 
                 key={index} 
-                className="pk-card"
+                className={`pk-card ${feature.disabled ? 'opacity-70' : ''}`}
                 data-testid={`feature-card-${index}`}
               >
                 <div className={`pk-card-accent ${feature.accentColor}`} />
-                <CardContent className="p-6 pt-10 text-center">
-                  <div className={`pk-icon-badge ${feature.badgeColor}`}>
-                    <feature.icon className="h-8 w-8 text-white" />
+                {feature.disabled && (
+                  <div className="absolute top-3 left-3 bg-[var(--pk-purple)] text-white text-xs font-bold px-2 py-1 rounded-full z-10">
+                    قريباً
                   </div>
-                  <h3 className="pk-card-title">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm mb-6 leading-relaxed">{feature.description}</p>
-                  <Link to={feature.link}>
-                    <Button className="rounded-full btn-playful w-full" data-testid={`feature-btn-${index}`}>
+                )}
+                <CardContent className="p-5 pt-9 text-center">
+                  <div className={`pk-icon-badge ${feature.badgeColor} ${feature.disabled ? 'grayscale' : ''}`}>
+                    <feature.icon className="h-7 w-7 text-white" />
+                  </div>
+                  <h3 className="pk-card-title text-base">{feature.title}</h3>
+                  <p className="text-muted-foreground text-xs mb-5 leading-relaxed">{feature.description}</p>
+                  {feature.disabled ? (
+                    <Button disabled className="rounded-full w-full opacity-50 cursor-not-allowed" data-testid={`feature-btn-${index}`}>
                       {feature.buttonText}
-                      <ChevronLeft className="mr-2 h-4 w-4" />
+                    </Button>
+                  ) : (
+                    <Link to={feature.link}>
+                      <Button className="rounded-full btn-playful w-full text-sm" data-testid={`feature-btn-${index}`}>
+                        {feature.buttonText}
+                        <ChevronLeft className="mr-2 h-4 w-4" />
+                      </Button>
+                    </Link>
+                  )}
                     </Button>
                   </Link>
                 </CardContent>
