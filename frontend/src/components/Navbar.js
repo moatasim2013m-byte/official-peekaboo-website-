@@ -23,6 +23,13 @@ export const Navbar = () => {
 
   const isActive = (path) => location.pathname === path;
 
+  // Single source of truth for navigation items (same order for desktop & mobile)
+  const navItems = [
+    { path: '/tickets', label: 'تذاكر بالساعة', pill: 'pill-blue', testId: 'nav-tickets' },
+    { path: '/birthday', label: 'حفلات أعياد الميلاد', pill: 'pill-pink', testId: 'nav-birthday' },
+    { path: '/subscriptions', label: 'الاشتراكات', pill: 'pill-yellow', testId: 'nav-subscriptions' },
+  ];
+
   const handleLogout = () => {
     logout();
     navigate('/');
