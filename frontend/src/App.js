@@ -33,6 +33,7 @@ import FAQPage from "./pages/FAQPage";
 import ContactPage from "./pages/ContactPage";
 import RulesPage from "./pages/RulesPage";
 import PricingPage from "./pages/PricingPage";
+import VerifyEmailPage from "./pages/VerifyEmailPage";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false, staffOnly = false, parentOnly = false }) => {
