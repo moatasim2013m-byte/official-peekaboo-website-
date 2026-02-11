@@ -21,10 +21,16 @@ router.get('/email-debug', (req, res) => {
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { email, password, name, phone, origin_url } = req.body;
+    const { email, password, name, phone } = req.body;
     
     if (!email || !password || !name) {
       return res.status(400).json({ error: 'Email, password and name are required' });
+    }
+
+    // SECURITY: Require FRONTEND_URL to prevent open redirect
+    if (!process.env.FRONTEND_URL) {
+      console.error('REGISTER_ERROR: FRONTEND_URL environment variable is missing');
+      return res.status(500).json({ error: 'FRONTEND_URL missing' });
     }
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -51,25 +57,24 @@ router.post('/register', async (req, res) => {
     
     console.log('REGISTER_SUCCESS', user.email);
 
-    // Send registration confirmation email (non-blocking)
-    const loginUrl = `${process.env.FRONTEND_URL || 'https://peekaboojor.com'}/login`;
-    const template = emailTemplates.registrationConfirmation(loginUrl);
+    // Send verification email - ONLY use process.env.FRONTEND_URL (no fallbacks for security)
+    const verifyUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verifyToken}`;
     
+    let emailSent = false;
     try {
-      await sendEmail(user.email, template.subject, template.html);
-      console.log('REGISTER_EMAIL_SENT', user.email);
+      const emailResult = await sendVerificationEmail(user.email, verifyUrl);
+      emailSent = emailResult.success;
+      if (emailSent) {
+        console.log('REGISTER_VERIFY_EMAIL_SENT', user.email);
+      } else {
+        console.error('REGISTER_VERIFY_EMAIL_FAILED', emailResult.error);
+      }
     } catch (emailError) {
-      console.error('REGISTER_EMAIL_ERROR', emailError.message || emailError);
+      console.error('REGISTER_VERIFY_EMAIL_ERROR', emailError.message || emailError);
       // Continue - don't block registration if email fails
     }
 
-    // Send verification email
-    const frontendUrl = process.env.FRONTEND_URL || origin_url || req.headers.origin || 'https://financedefend.preview.emergentagent.com';
-    const verifyUrl = `${frontendUrl}/verify-email?token=${verifyToken}`;
-    
-    const emailResult = await sendVerificationEmail(user.email, verifyUrl);
-
-    if (emailResult.success) {
+    if (emailSent) {
       res.status(201).json({
         message: 'تم إرسال رابط التفعيل إلى بريدك الإلكتروني',
         email_sent: true
