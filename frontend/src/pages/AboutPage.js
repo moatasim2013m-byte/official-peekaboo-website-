@@ -1,60 +1,65 @@
-import { Heart, Shield, Sparkles, Users } from 'lucide-react';
-import PublicPageShell, { ContentCard } from '../components/PublicPageShell';
+import { Heart, Shield, Sparkles, Users, MapPin, Clock, Phone } from 'lucide-react';
+import PublicPageShell, { WonderSection, WonderSectionTitle, WonderCard } from '../components/PublicPageShell';
 import logoImg from '../assets/logo.png';
 
 export default function AboutPage() {
+  const values = [
+    { icon: Shield, title: 'السلامة أولاً', desc: 'بيئة آمنة ومعدات مطابقة للمعايير', color: 'blue' },
+    { icon: Sparkles, title: 'متعة بلا حدود', desc: 'ألعاب متنوعة وأنشطة ممتعة', color: 'yellow' },
+    { icon: Heart, title: 'حفلات مميزة', desc: 'أعياد ميلاد وحفلات لا تُنسى', color: 'pink' },
+    { icon: Users, title: 'فريق متخصص', desc: 'طاقم مدرب للإشراف والرعاية', color: 'green' },
+  ];
+
   return (
     <PublicPageShell
       title="من نحن"
       subtitle="بيكابو يصنع السعادة"
-      showBackLink={true}
     >
       {/* Logo */}
-      <div className="text-center -mt-4 mb-6">
-        <img src={logoImg} alt="بيكابو" className="h-20 mx-auto" />
+      <div className="text-center mb-6">
+        <img src={logoImg} alt="بيكابو" className="h-24 mx-auto drop-shadow-lg" />
       </div>
 
-      {/* Main Content */}
-      <ContentCard>
-        <p className="text-lg leading-relaxed text-muted-foreground mb-6">
+      {/* About Section */}
+      <WonderSection>
+        <p className="text-lg leading-relaxed text-muted-foreground text-center max-w-2xl mx-auto">
           بيكابو هو ملعب داخلي مخصص للأطفال في إربد، حيث نوفر بيئة آمنة وممتعة للعب والاستكشاف. 
           نؤمن بأن اللعب هو أساس نمو الطفل وتطوره، ونسعى لتقديم تجربة فريدة لكل عائلة تزورنا.
         </p>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="p-4 rounded-xl bg-[var(--pk-bg-light-blue)]">
-            <Shield className="h-8 w-8 text-[var(--pk-blue)] mb-2" />
-            <h3 className="font-heading font-bold text-foreground mb-1">السلامة أولاً</h3>
-            <p className="text-sm text-muted-foreground">بيئة آمنة ومعدات مطابقة للمعايير</p>
-          </div>
-          
-          <div className="p-4 rounded-xl bg-[var(--pk-bg-light-yellow)]">
-            <Sparkles className="h-8 w-8 text-[var(--pk-yellow)] mb-2" />
-            <h3 className="font-heading font-bold text-foreground mb-1">متعة بلا حدود</h3>
-            <p className="text-sm text-muted-foreground">ألعاب متنوعة وأنشطة ممتعة</p>
-          </div>
-          
-          <div className="p-4 rounded-xl bg-[var(--pk-bg-light-pink)]">
-            <Heart className="h-8 w-8 text-[var(--pk-red)] mb-2" />
-            <h3 className="font-heading font-bold text-foreground mb-1">حفلات مميزة</h3>
-            <p className="text-sm text-muted-foreground">أعياد ميلاد وحفلات لا تُنسى</p>
-          </div>
-          
-          <div className="p-4 rounded-xl bg-[var(--pk-bg-light-green)]">
-            <Users className="h-8 w-8 text-[var(--pk-green)] mb-2" />
-            <h3 className="font-heading font-bold text-foreground mb-1">فريق متخصص</h3>
-            <p className="text-sm text-muted-foreground">طاقم مدرب للإشراف والرعاية</p>
-          </div>
-        </div>
-      </ContentCard>
+      </WonderSection>
 
-      {/* Location Card */}
-      <ContentCard className="text-center">
-        <h2 className="font-heading text-xl font-bold text-foreground mb-4">موقعنا</h2>
-        <p className="text-muted-foreground mb-2">ابو راشد مجمع السيف التجاري، إربد</p>
-        <p className="text-muted-foreground mb-4">مفتوح يومياً من 10 صباحاً حتى 12 منتصف الليل</p>
-        <p className="font-bold" dir="ltr">0777775652</p>
-      </ContentCard>
+      {/* Values Grid */}
+      <WonderSection>
+        <WonderSectionTitle icon={Heart} iconColor="red">قيمنا</WonderSectionTitle>
+        <div className="wonder-card-grid">
+          {values.map((item, index) => (
+            <WonderCard key={index} color={item.color}>
+              <item.icon className={`h-8 w-8 text-[var(--pk-${item.color})] mb-3`} />
+              <h3 className="font-heading font-bold text-foreground mb-1">{item.title}</h3>
+              <p className="text-sm text-muted-foreground">{item.desc}</p>
+            </WonderCard>
+          ))}
+        </div>
+      </WonderSection>
+
+      {/* Location */}
+      <WonderSection className="text-center">
+        <WonderSectionTitle icon={MapPin} iconColor="blue">موقعنا</WonderSectionTitle>
+        <div className="space-y-3">
+          <p className="text-muted-foreground flex items-center justify-center gap-2">
+            <MapPin className="h-5 w-5 text-[var(--pk-blue)]" />
+            ابو راشد مجمع السيف التجاري، إربد
+          </p>
+          <p className="text-muted-foreground flex items-center justify-center gap-2">
+            <Clock className="h-5 w-5 text-[var(--pk-green)]" />
+            مفتوح يومياً من 10 صباحاً حتى 12 منتصف الليل
+          </p>
+          <p className="font-bold flex items-center justify-center gap-2">
+            <Phone className="h-5 w-5 text-[var(--pk-yellow)]" />
+            <span dir="ltr">0777775652</span>
+          </p>
+        </div>
+      </WonderSection>
     </PublicPageShell>
   );
 }
