@@ -29,8 +29,9 @@ const sendVerificationEmail = async (to, verifyUrl) => {
       html: template.html
     });
     
-    console.log(`[VERIFY_EMAIL_SENT] id=${result.data?.id || result.id} to=${to}`);
-    return { success: true, id: result.data?.id || result.id };
+    const emailId = result?.data?.id || result?.id || 'sent';
+    console.log(`[VERIFY_EMAIL_SENT] id=${emailId} to=${to}`);
+    return { success: true, id: emailId };
   } catch (error) {
     console.error(`[VERIFY_EMAIL_SEND_FAIL] to=${to} error=${error.message}`);
     return { success: false, error: error.message };
