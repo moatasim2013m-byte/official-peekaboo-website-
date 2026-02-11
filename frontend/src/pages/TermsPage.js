@@ -1,7 +1,12 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, FileText } from 'lucide-react';
 
 export default function TermsPage() {
+  useEffect(() => {
+    document.title = 'الشروط والأحكام | بيكابو';
+  }, []);
+
   return (
     <div className="min-h-screen py-8 md:py-12" dir="rtl">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

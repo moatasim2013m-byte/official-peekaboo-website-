@@ -1,7 +1,12 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, Shield } from 'lucide-react';
 
 export default function PrivacyPage() {
+  useEffect(() => {
+    document.title = 'سياسة الخصوصية | بيكابو';
+  }, []);
+
   return (
     <div className="min-h-screen py-8 md:py-12" dir="rtl">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

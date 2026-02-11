@@ -1,9 +1,14 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Users, Phone, MessageCircle, ChevronLeft } from 'lucide-react';
 
 export default function GroupsPage() {
+  useEffect(() => {
+    document.title = 'المدارس والمجموعات | بيكابو';
+  }, []);
+
   return (
     <div className="min-h-screen py-8 md:py-12" dir="rtl">
       <div className="max-w-2xl mx-auto px-4">
