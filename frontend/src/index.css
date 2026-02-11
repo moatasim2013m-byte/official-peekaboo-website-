@@ -112,8 +112,8 @@ body {
     font-size: var(--font-size-base);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    line-height: 1.6;
-    color: var(--text-primary);
+    line-height: 1.7;
+    color: #4B5563;
 }
 
 /* ===== PLAYFUL HEADING TYPOGRAPHY (LARGER) ===== */
@@ -121,19 +121,24 @@ h1, h2, h3, h4, h5, h6,
 .font-heading,
 .title-bubble {
     font-family: var(--font-heading-ar);
-    font-weight: 600;
-    line-height: 1.3;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    line-height: 1.25;
     color: var(--text-primary);
 }
 
 h1 { 
-    font-weight: 700;
+    font-weight: 800;
     font-size: 2.5rem; /* 40px mobile */
 }
 
 h2 { 
-    font-weight: 600;
+    font-weight: 800;
     font-size: 1.875rem; /* 30px mobile */
+}
+
+h3 {
+    font-weight: 700;
 }
 
 @media (min-width: 768px) {
