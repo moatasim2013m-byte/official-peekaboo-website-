@@ -4,16 +4,17 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
 const { getJwtSecret, authMiddleware } = require('../middleware/auth');
-const { sendEmail, sendVerificationEmail, emailTemplates, isResendConfigured, getSenderEmail } = require('../utils/email');
+const { sendVerificationEmail, isResendConfigured, getSenderEmail, getSenderFrom } = require('../utils/email');
 
 const router = express.Router();
 
-// Health check for email verification setup
-router.get('/verify-email/health', (req, res) => {
+// Email delivery diagnostic endpoint (no auth, no secrets exposed)
+router.get('/email-debug', (req, res) => {
   res.json({
-    resendConfigured: isResendConfigured(),
-    frontendUrl: process.env.FRONTEND_URL || null,
-    sender: getSenderEmail()
+    has_resend_key: isResendConfigured(),
+    sender_email: getSenderEmail(),
+    sender_from: getSenderFrom(),
+    frontend_url: process.env.FRONTEND_URL || null
   });
 });
 
