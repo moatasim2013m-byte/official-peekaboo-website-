@@ -166,15 +166,16 @@ export const Navbar = () => {
               {/* Parent navigation - hide for admin */}
               {!isAdmin && (
                 <div className="flex flex-wrap gap-2">
-                  <Link to="/tickets" className={`nav-pill pill-blue ${isActive('/tickets') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-                    تذاكر بالساعة
-                  </Link>
-                  <Link to="/birthday" className={`nav-pill pill-pink ${isActive('/birthday') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-                    حفلات أعياد الميلاد
-                  </Link>
-                  <Link to="/subscriptions" className={`nav-pill pill-yellow ${isActive('/subscriptions') ? 'active' : ''}`} onClick={() => setMobileMenuOpen(false)}>
-                    الاشتراكات
-                  </Link>
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`nav-pill ${item.pill} ${isActive(item.path) ? 'active' : ''}`}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
                 </div>
               )}
               <div className="border-t border-border pt-4 flex flex-col gap-2">
