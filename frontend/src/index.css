@@ -758,7 +758,7 @@ code {
 }
 
 .footer-text {
-    color: var(--text-secondary);
+    color: #475569;
     font-size: 15px;
     line-height: 1.7;
 }
@@ -772,7 +772,7 @@ code {
 }
 
 .footer-link {
-    color: var(--text-secondary);
+    color: #475569;
     transition: color 0.2s ease;
 }
 
