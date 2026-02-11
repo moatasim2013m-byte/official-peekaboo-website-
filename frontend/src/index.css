@@ -337,20 +337,23 @@ code {
 /* ===== WONDERLAND BUTTON STYLES ===== */
 .btn-playful {
     font-weight: 700;
-    font-size: var(--font-size-base);
+    font-size: 1rem;
     letter-spacing: 0.01em;
-    border-radius: var(--radius-full);
+    height: 52px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #ff4d5a, #ff7a5c);
     box-shadow: var(--shadow-btn);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-playful:hover {
-    transform: translateY(-3px) scale(1.02);
+    filter: brightness(1.05);
+    transform: translateY(-2px);
     box-shadow: var(--shadow-btn-hover);
 }
 
 .btn-playful:active {
-    transform: translateY(-1px) scale(1.01);
+    transform: scale(0.98);
 }
 
 /* ===== WONDERLAND NAV PILLS ===== */
