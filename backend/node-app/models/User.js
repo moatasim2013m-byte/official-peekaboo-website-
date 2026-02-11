@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
   phone: { type: String },
   role: { type: String, enum: ['parent', 'admin', 'staff'], default: 'parent' },
   loyalty_points: { type: Number, default: 0 },
+  is_disabled: { type: Boolean, default: false },
   reset_token: { type: String },
   reset_token_expires: { type: Date },
   created_at: { type: Date, default: Date.now }
