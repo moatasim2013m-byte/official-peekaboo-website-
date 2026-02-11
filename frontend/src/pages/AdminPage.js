@@ -208,6 +208,128 @@ export default function AdminPage() {
     }
   };
 
+  // ==================== CUSTOMERS FUNCTIONS ====================
+  const fetchCustomers = async (search = '') => {
+    setLoadingCustomers(true);
+    try {
+      const response = await api.get(`/admin/customers?search=${encodeURIComponent(search)}`);
+      setCustomers(response.data.customers || []);
+    } catch (error) {
+      console.error('Failed to fetch customers:', error);
+      toast.error('فشل تحميل العملاء');
+    } finally {
+      setLoadingCustomers(false);
+    }
+  };
+
+  const fetchCustomerDetails = async (customerId) => {
+    try {
+      const response = await api.get(`/admin/customers/${customerId}`);
+      setCustomerDetails(response.data);
+      setEditingCustomer({
+        name: response.data.customer.name,
+        email: response.data.customer.email,
+        phone: response.data.customer.phone || ''
+      });
+      setCustomerDetailsOpen(true);
+    } catch (error) {
+      console.error('Failed to fetch customer details:', error);
+      toast.error('فشل تحميل بيانات العميل');
+    }
+  };
+
+  const handleCreateCustomer = async (e) => {
+    e.preventDefault();
+    setSavingCustomer(true);
+    try {
+      await api.post('/admin/customers', newCustomer);
+      toast.success('تم إضافة العميل بنجاح');
+      setCustomerDialogOpen(false);
+      setNewCustomer({ name: '', email: '', phone: '' });
+      fetchCustomers(customerSearch);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'فشل إضافة العميل');
+    } finally {
+      setSavingCustomer(false);
+    }
+  };
+
+  const handleUpdateCustomer = async () => {
+    if (!customerDetails?.customer?.id) return;
+    setSavingCustomer(true);
+    try {
+      await api.put(`/admin/customers/${customerDetails.customer.id}`, editingCustomer);
+      toast.success('تم تحديث بيانات العميل');
+      fetchCustomers(customerSearch);
+      // Refresh details
+      fetchCustomerDetails(customerDetails.customer.id);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'فشل تحديث بيانات العميل');
+    } finally {
+      setSavingCustomer(false);
+    }
+  };
+
+  const handleToggleCustomerStatus = async (customerId) => {
+    try {
+      const response = await api.patch(`/admin/customers/${customerId}/disable`);
+      toast.success(response.data.message === 'Customer disabled' ? 'تم تعطيل العميل' : 'تم تفعيل العميل');
+      fetchCustomers(customerSearch);
+      if (customerDetails?.customer?.id === customerId) {
+        fetchCustomerDetails(customerId);
+      }
+    } catch (error) {
+      toast.error('فشل تغيير حالة العميل');
+    }
+  };
+
+  const handleAddChild = async (e) => {
+    e.preventDefault();
+    if (!customerDetails?.customer?.id) return;
+    try {
+      await api.post(`/admin/customers/${customerDetails.customer.id}/children`, newChild);
+      toast.success('تم إضافة الطفل');
+      setNewChild({ name: '', birthday: '' });
+      fetchCustomerDetails(customerDetails.customer.id);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'فشل إضافة الطفل');
+    }
+  };
+
+  const handleUpdateChild = async (childId) => {
+    if (!customerDetails?.customer?.id || !editingChild) return;
+    try {
+      await api.put(`/admin/customers/${customerDetails.customer.id}/children/${childId}`, editingChild);
+      toast.success('تم تحديث بيانات الطفل');
+      setEditingChild(null);
+      fetchCustomerDetails(customerDetails.customer.id);
+    } catch (error) {
+      toast.error('فشل تحديث بيانات الطفل');
+    }
+  };
+
+  const handleDeleteChild = async (childId) => {
+    if (!customerDetails?.customer?.id) return;
+    if (!window.confirm('هل أنت متأكد من حذف هذا الطفل؟')) return;
+    try {
+      await api.delete(`/admin/customers/${customerDetails.customer.id}/children/${childId}`);
+      toast.success('تم حذف الطفل');
+      fetchCustomerDetails(customerDetails.customer.id);
+    } catch (error) {
+      toast.error('فشل حذف الطفل');
+    }
+  };
+
+  // Debounced search for customers
+  useEffect(() => {
+    if (activeTab !== 'customers') return;
+    const timer = setTimeout(() => {
+      fetchCustomers(customerSearch);
+    }, 300);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customerSearch, activeTab]);
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setActiveFilter(null); // Reset filter when manually changing tabs
