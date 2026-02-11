@@ -107,17 +107,25 @@ app.get('/api/', (req, res) => {
 
 // ================= FRONTEND =================
 const fs = require('fs');
-const frontendBuildPath = path.join(__dirname, '../../frontend/build');
+// Try multiple paths for frontend build (dev vs production)
+const frontendPaths = [
+  path.join(__dirname, '../frontend/build'),      // Cloud Run structure
+  path.join(__dirname, '../../frontend/build')    // Dev structure
+];
+const frontendBuildPath = frontendPaths.find(p => fs.existsSync(p)) || frontendPaths[0];
 
-if (fs.existsSync(frontendBuildPath)) {
-  console.log('[Peekaboo] Serving frontend from:', frontendBuildPath);
-  app.use(express.static(frontendBuildPath));
-  app.get(/^(?!\/api).*/, (req, res) => {
-    res.sendFile(path.join(frontendBuildPath, 'index.html'));
-  });
-} else {
-  console.log('[Peekaboo] Frontend build not found, serving API only');
-}
+console.log('[Peekaboo] Frontend build path:', frontendBuildPath);
+console.log('[Peekaboo] Frontend exists:', fs.existsSync(frontendBuildPath));
+
+app.use(express.static(frontendBuildPath));
+
+app.get('*', (req, res) => {
+  // Skip API routes
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
+  res.sendFile(path.join(frontendBuildPath, 'index.html'));
+});
 
 // ==================== GLOBAL ERROR HANDLER ====================
 app.use((err, req, res, next) => {
