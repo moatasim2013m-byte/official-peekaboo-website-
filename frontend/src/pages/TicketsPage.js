@@ -127,13 +127,13 @@ export default function TicketsPage() {
 
   const fetchPricing = async () => {
     try {
-      const response = await api.get(`/payments/hourly-pricing?timeMode=${mode}`);
+      const response = await api.get(`/payments/hourly-pricing?timeMode=${timeMode}`);
       setPricing(response.data.pricing || []);
       setExtraHourText(response.data.extra_hour_text || '');
     } catch (error) {
       console.error('Failed to fetch pricing:', error);
       // Fallback pricing
-      if (mode === 'morning') {
+      if (timeMode === 'morning') {
         setPricing([
           { hours: 1, price: 3.5, label_ar: 'ساعة واحدة' },
           { hours: 2, price: 7, label_ar: 'ساعتان' },
