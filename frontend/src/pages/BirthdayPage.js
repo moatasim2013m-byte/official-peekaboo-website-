@@ -200,36 +200,40 @@ export default function BirthdayPage() {
   const maxDate = addDays(new Date(), 90);
 
   return (
-    <div className="min-h-screen bg-hero-gradient py-8 md:py-12" dir="rtl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-8 md:py-12" dir="rtl">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Page Header */}
         <div className="text-center mb-8">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="birthday-title">
-            <Cake className="inline-block h-10 w-10 text-accent ml-2" />
+          <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3" data-testid="birthday-title">
+            <Cake className="inline-block h-9 w-9 text-accent ml-2" />
             حفلات أعياد الميلاد
           </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            اجعل عيد ميلاد طفلك لا يُنسى! اختر من ثيماتنا الرائعة أو اطلب حفلة مخصصة.
+          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
+            اجعل عيد ميلاد طفلك لا يُنسى!
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 rounded-full p-1 bg-muted">
-            <TabsTrigger value="standard" className="rounded-full" data-testid="tab-standard">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full max-w-sm mx-auto grid-cols-2 rounded-full p-1 bg-muted h-12">
+            <TabsTrigger value="standard" className="rounded-full text-sm font-semibold" data-testid="tab-standard">
               الثيمات الجاهزة
             </TabsTrigger>
-            <TabsTrigger value="custom" className="rounded-full" data-testid="tab-custom">
+            <TabsTrigger value="custom" className="rounded-full text-sm font-semibold" data-testid="tab-custom">
               طلب مخصص
             </TabsTrigger>
           </TabsList>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Calendar */}
-            <Card className="border-2 rounded-3xl">
-              <CardHeader>
-                <CardTitle className="font-heading">اختر التاريخ</CardTitle>
-                <CardDescription>احجز قبل 3 أيام على الأقل</CardDescription>
+            <Card className="booking-card">
+              <CardHeader className="booking-card-header">
+                <CardTitle className="booking-card-title">
+                  <span className="step-badge">1</span>
+                  اختر التاريخ
+                </CardTitle>
+                <CardDescription className="text-xs mr-10">احجز قبل 3 أيام</CardDescription>
               </CardHeader>
-              <CardContent className="flex justify-center">
+              <CardContent className="flex justify-center py-4">
                 <Calendar
                   mode="single"
                   selected={date}
@@ -242,27 +246,28 @@ export default function BirthdayPage() {
             </Card>
 
             {/* Time Slots */}
-            <Card className="border-2 rounded-3xl lg:col-span-2">
-              <CardHeader>
-                <CardTitle className="font-heading">
-                  أوقات الحفلات - {format(date, 'MMMM d, yyyy')}
-                  <div className="text-sm font-normal text-muted-foreground mt-1">
-                    كل حفلة مدتها ساعتان
-                  </div>
+            <Card className="booking-card lg:col-span-2">
+              <CardHeader className="booking-card-header">
+                <CardTitle className="booking-card-title">
+                  <span className={`step-badge ${selectedSlot ? 'step-badge-complete' : ''}`}>2</span>
+                  أوقات الحفلات
                 </CardTitle>
+                <CardDescription className="text-xs mr-10">
+                  {format(date, 'MMM d')} • كل حفلة ساعتان
+                </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="py-4">
                 {loadingSlots ? (
-                  <div className="flex justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-accent" />
                   </div>
                 ) : getFilteredBirthdaySlots().length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>لا توجد أوقات متاحة للحفلات في هذا التاريخ</p>
+                  <div className="text-center py-8 text-muted-foreground">
+                    <AlertCircle className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                    <p className="text-sm">لا توجد أوقات متاحة</p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                     {getFilteredBirthdaySlots().map((slot) => {
                       const endTime = getPartyEndTime(slot.start_time);
                       return (
@@ -270,22 +275,13 @@ export default function BirthdayPage() {
                           key={slot.id}
                           onClick={() => slot.is_available && setSelectedSlot(slot)}
                           disabled={!slot.is_available}
-                          className={`p-4 rounded-2xl border-2 transition-all ${
-                            selectedSlot?.id === slot.id
-                              ? 'border-accent bg-accent/10'
-                              : slot.is_available
-                              ? 'border-border hover:border-accent/50 bg-white'
-                              : 'border-border bg-muted opacity-50 cursor-not-allowed'
-                          }`}
+                          className={`slot-btn ${selectedSlot?.id === slot.id ? 'selected-pink' : ''} ${!slot.is_available ? 'opacity-50 cursor-not-allowed' : ''}`}
                           data-testid={`party-slot-${slot.start_time}`}
                         >
-                          <div className="font-heading font-semibold text-lg">
+                          <div className="font-heading font-semibold text-sm">
                             {slot.start_time} → {endTime}
                           </div>
-                          <div className="text-xs text-muted-foreground mt-1">ساعتان</div>
-                          {!slot.is_available && (
-                            <div className="text-xs text-destructive mt-1">محجوز</div>
-                          )}
+                          {!slot.is_available && <div className="text-xs text-destructive mt-1">محجوز</div>}
                         </button>
                       );
                     })}
@@ -295,32 +291,28 @@ export default function BirthdayPage() {
             </Card>
           </div>
 
-          <TabsContent value="standard" className="space-y-8">
+          <TabsContent value="standard" className="space-y-6">
             {/* Themes Grid */}
             <div>
-              <h2 className="font-heading text-2xl font-bold mb-6">اختر الثيم</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+              <h2 className="font-heading text-xl font-bold mb-4 flex items-center gap-2">
+                <span className={`step-badge ${selectedTheme ? 'step-badge-complete' : ''}`}>3</span>
+                اختر الثيم
+              </h2>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                 {themes.map((theme, index) => (
                   <Card
                     key={theme.id}
                     onClick={() => setSelectedTheme(theme)}
-                    className={`pk-card cursor-pointer transition-all ${
-                      selectedTheme?.id === theme.id ? 'ring-4 ring-accent/30 shadow-lg' : 'hover:shadow-lg'
-                    }`}
+                    className={`pk-card cursor-pointer transition-all ${selectedTheme?.id === theme.id ? 'ring-2 ring-accent shadow-lg' : 'hover:shadow-md'}`}
                     data-testid={`theme-${theme.id}`}
                   >
                     <div className={`pk-card-accent accent-${['pink', 'blue', 'yellow', 'green', 'orange'][index % 5]}`} />
-                    <CardContent className="p-4 pt-5 text-center">
+                    <CardContent className="p-3 pt-4 text-center">
                       {theme.image_url && (
-                        <img 
-                          src={theme.image_url} 
-                          alt={theme.name_ar || theme.name}
-                          className="w-full h-24 object-cover rounded-xl mb-3"
-                        />
+                        <img src={theme.image_url} alt={theme.name_ar || theme.name} className="w-full h-20 object-cover rounded-lg mb-2" />
                       )}
-                      <h3 className="pk-card-title text-base">{theme.name_ar || theme.name}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">{theme.description_ar || theme.description}</p>
-                      <p className="text-accent font-bold mt-2">{theme.price} دينار</p>
+                      <h3 className="font-heading font-bold text-sm">{theme.name_ar || theme.name}</h3>
+                      <p className="text-accent font-bold text-sm mt-1">{theme.price} د</p>
                     </CardContent>
                   </Card>
                 ))}
@@ -329,46 +321,44 @@ export default function BirthdayPage() {
 
             {/* Booking Form */}
             {isAuthenticated && (
-              <Card className="border-2 rounded-3xl">
-                <CardHeader>
-                  <CardTitle className="font-heading">أكمل حجزك</CardTitle>
+              <Card className="booking-card">
+                <CardHeader className="booking-card-header">
+                  <CardTitle className="booking-card-title">أكمل حجزك</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <CardContent className="py-5 space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <Label>طفل عيد الميلاد</Label>
+                      <Label className="text-sm">طفل عيد الميلاد</Label>
                       <Select value={selectedChild} onValueChange={setSelectedChild}>
-                        <SelectTrigger className="rounded-xl mt-2" data-testid="birthday-child-select">
+                        <SelectTrigger className="rounded-xl mt-1.5" data-testid="birthday-child-select">
                           <SelectValue placeholder="اختر الطفل" />
                         </SelectTrigger>
                         <SelectContent>
                           {children.map((child) => (
-                            <SelectItem key={child.id} value={child.id}>
-                              {child.name}
-                            </SelectItem>
+                            <SelectItem key={child.id} value={child.id}>{child.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
 
                     <div>
-                      <Label>عدد الضيوف</Label>
+                      <Label className="text-sm">عدد الضيوف</Label>
                       <Input
                         type="number"
                         min="5"
                         max="50"
                         value={guestCount}
                         onChange={(e) => setGuestCount(parseInt(e.target.value))}
-                        className="rounded-xl mt-2"
+                        className="rounded-xl mt-1.5"
                         data-testid="guest-count"
                       />
                     </div>
 
                     <div>
-                      <Label>الثيم المختار</Label>
-                      <div className="p-3 rounded-xl bg-muted mt-2">
+                      <Label className="text-sm">الثيم المختار</Label>
+                      <div className="p-2.5 rounded-xl bg-muted mt-1.5 text-sm">
                         {selectedTheme ? (
-                          <span className="font-semibold">{selectedTheme.name_ar || selectedTheme.name} - {selectedTheme.price} دينار</span>
+                          <span className="font-semibold">{selectedTheme.name_ar || selectedTheme.name} - {selectedTheme.price} د</span>
                         ) : (
                           <span className="text-muted-foreground">لم يتم اختيار ثيم</span>
                         )}
@@ -376,35 +366,25 @@ export default function BirthdayPage() {
                     </div>
                   </div>
 
-                  {/* Payment Method */}
                   <div className="pt-4 border-t">
-                    <PaymentMethodSelector 
-                      value={paymentMethod} 
-                      onChange={setPaymentMethod} 
-                    />
+                    <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
                   </div>
 
-                  {/* Summary & Book Button */}
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t">
                     {selectedTheme && (
-                      <div className="text-center md:text-right">
-                        <p className="text-sm text-muted-foreground">الإجمالي</p>
-                        <p className="font-bold text-2xl text-accent">{selectedTheme.price} دينار</p>
-                        <p className="text-sm">طريقة الدفع: {paymentMethod === 'cash' ? 'نقداً' : paymentMethod === 'card' ? 'بطاقة' : 'CliQ'}</p>
+                      <div className="text-center sm:text-right">
+                        <p className="text-xs text-muted-foreground">الإجمالي</p>
+                        <p className="font-bold text-2xl text-accent">{selectedTheme.price} د</p>
                       </div>
                     )}
                     <Button
                       onClick={handleStandardBooking}
                       disabled={!selectedSlot || !selectedTheme || !selectedChild || loading}
-                      className="w-full md:w-auto px-8 rounded-full h-12 btn-playful bg-accent hover:bg-accent/90"
+                      className="w-full sm:w-auto px-8 rounded-full h-12 btn-playful bg-accent hover:bg-accent/90"
                       data-testid="book-party-btn"
-                      aria-label="احجز وادفع - يقبل بطاقات فيزا وماستركارد"
                     >
                       {loading ? (
-                        <>
-                          <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                          جاري المعالجة...
-                        </>
+                        <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري المعالجة...</>
                       ) : (
                         <span className="inline-flex items-center gap-2">
                           <PaymentCardIcons />
@@ -418,103 +398,89 @@ export default function BirthdayPage() {
             )}
           </TabsContent>
 
-          <TabsContent value="custom" className="space-y-8">
-            <Card className="border-2 rounded-3xl">
-              <CardHeader>
-                <CardTitle className="font-heading flex items-center gap-2">
-                  <Sparkles className="h-6 w-6 text-accent" />
+          <TabsContent value="custom" className="space-y-6">
+            <Card className="booking-card">
+              <CardHeader className="booking-card-header">
+                <CardTitle className="booking-card-title">
+                  <Sparkles className="h-5 w-5 text-accent" />
                   طلب ثيم مخصص
                 </CardTitle>
-                <CardDescription>
-                  لديك فكرة فريدة؟ أخبرنا عن حفلة أحلامك وسيتواصل فريقنا معك لمناقشة التفاصيل والأسعار.
+                <CardDescription className="text-sm mr-6">
+                  لديك فكرة فريدة؟ أخبرنا عنها وسنتواصل معك.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <CardContent className="py-5 space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <Label>طفل عيد الميلاد</Label>
+                    <Label className="text-sm">طفل عيد الميلاد</Label>
                     <Select value={selectedChild} onValueChange={setSelectedChild}>
-                      <SelectTrigger className="rounded-xl mt-2">
+                      <SelectTrigger className="rounded-xl mt-1.5">
                         <SelectValue placeholder="اختر الطفل" />
                       </SelectTrigger>
                       <SelectContent>
                         {children.map((child) => (
-                          <SelectItem key={child.id} value={child.id}>
-                            {child.name}
-                          </SelectItem>
+                          <SelectItem key={child.id} value={child.id}>{child.name}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
 
                   <div>
-                    <Label>عدد الضيوف المتوقع</Label>
+                    <Label className="text-sm">عدد الضيوف المتوقع</Label>
                     <Input
                       type="number"
                       min="5"
                       max="100"
                       value={guestCount}
                       onChange={(e) => setGuestCount(parseInt(e.target.value))}
-                      className="rounded-xl mt-2"
+                      className="rounded-xl mt-1.5"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label>صِف الثيم المخصص *</Label>
+                  <Label className="text-sm">صِف الثيم المخصص *</Label>
                   <Textarea
                     value={customRequest}
                     onChange={(e) => setCustomRequest(e.target.value)}
-                    placeholder="أخبرنا عن ثيم حفلة أحلامك، الألوان، الشخصيات، الديكورات..."
-                    className="rounded-xl mt-2 min-h-[120px]"
+                    placeholder="أخبرنا عن ثيم حفلة أحلامك..."
+                    className="rounded-xl mt-1.5 min-h-[100px]"
                     data-testid="custom-request"
                   />
                 </div>
 
                 <div>
-                  <Label>ملاحظات خاصة (اختياري)</Label>
+                  <Label className="text-sm">ملاحظات (اختياري)</Label>
                   <Textarea
                     value={specialNotes}
                     onChange={(e) => setSpecialNotes(e.target.value)}
-                    placeholder="أي حساسية، متطلبات خاصة، أو طلبات إضافية..."
-                    className="rounded-xl mt-2"
+                    placeholder="أي متطلبات خاصة..."
+                    className="rounded-xl mt-1.5"
+                    rows={2}
                   />
                 </div>
 
                 <Button
                   onClick={handleCustomRequest}
                   disabled={!selectedSlot || !selectedChild || !customRequest || loading}
-                  className="rounded-full h-12 btn-playful bg-accent hover:bg-accent/90"
+                  className="rounded-full h-11 btn-playful bg-accent hover:bg-accent/90"
                   data-testid="submit-custom-btn"
                 >
-                  {loading ? (
-                    <>
-                      <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                      جاري الإرسال...
-                    </>
-                  ) : (
-                    'إرسال الطلب المخصص'
-                  )}
+                  {loading ? <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري الإرسال...</> : 'إرسال الطلب'}
                 </Button>
-                <p className="text-sm text-muted-foreground">
-                  لا يلزم الدفع للطلبات المخصصة. سيتواصل فريقنا معك بالأسعار.
-                </p>
+                <p className="text-xs text-muted-foreground">سيتواصل فريقنا معك بالأسعار.</p>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
 
         {!isAuthenticated && (
-          <Card className="border-2 rounded-3xl mt-8 bg-accent/5">
+          <Card className="booking-card bg-accent/5 mt-6">
             <CardContent className="py-8 text-center">
-              <p className="text-lg mb-4">الرجاء تسجيل الدخول أو إنشاء حساب لحجز حفلة</p>
+              <p className="text-base mb-4">سجّل الدخول أو أنشئ حساب لحجز حفلة</p>
               <div className="flex gap-4 justify-center">
-                <Button onClick={() => navigate('/login')} variant="outline" className="rounded-full">
-                  تسجيل الدخول
-                </Button>
-                <Button onClick={() => navigate('/register')} className="rounded-full btn-playful bg-accent">
-                  إنشاء حساب
-                </Button>
+                <Button onClick={() => navigate('/login')} variant="outline" className="rounded-full">تسجيل الدخول</Button>
+                <Button onClick={() => navigate('/register')} className="rounded-full btn-playful bg-accent">إنشاء حساب</Button>
               </div>
             </CardContent>
           </Card>
