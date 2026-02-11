@@ -119,14 +119,12 @@ console.log('[Peekaboo] Frontend exists:', fs.existsSync(frontendBuildPath));
 
 if (fs.existsSync(frontendBuildPath)) {
   app.use(express.static(frontendBuildPath));
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) return next();
+  app.get(/^(?!\/api).*/, (req, res) => {
     return res.sendFile(path.join(frontendBuildPath, 'index.html'));
   });
 } else {
   console.log('[Peekaboo] Frontend build not found, serving API only');
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api')) return next();
+  app.get(/^(?!\/api).*/, (req, res) => {
     return res.status(404).json({ error: 'Frontend not available' });
   });
 }
