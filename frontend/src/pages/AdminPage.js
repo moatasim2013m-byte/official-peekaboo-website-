@@ -71,6 +71,20 @@ export default function AdminPage() {
   const [newMedia, setNewMedia] = useState({ url: '', type: 'photo', title: '', file: null });
   const [pointsAdjustment, setPointsAdjustment] = useState({ points: 0, description: '' });
 
+  // Customers state
+  const [customers, setCustomers] = useState([]);
+  const [customerSearch, setCustomerSearch] = useState('');
+  const [loadingCustomers, setLoadingCustomers] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [customerDetails, setCustomerDetails] = useState(null);
+  const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
+  const [customerDetailsOpen, setCustomerDetailsOpen] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({ name: '', email: '', phone: '' });
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [newChild, setNewChild] = useState({ name: '', birthday: '' });
+  const [editingChild, setEditingChild] = useState(null);
+  const [savingCustomer, setSavingCustomer] = useState(false);
+
   useEffect(() => {
     setLoading(false);
   }, []);
