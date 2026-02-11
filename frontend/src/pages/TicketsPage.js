@@ -80,6 +80,11 @@ export default function TicketsPage() {
   const [pricing, setPricing] = useState([]);
   const [extraHourText, setExtraHourText] = useState('');
 
+  // Set page title
+  useEffect(() => {
+    document.title = 'احجز وقت اللعب | بيكابو';
+  }, []);
+
   // Fetch children on mount
   useEffect(() => {
     if (isAuthenticated) {
