@@ -6,12 +6,31 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 
+const allowedOrigins =
+  process.env.CORS_ORIGINS === '*'
+    ? true
+    : (process.env.CORS_ORIGINS || '').split(',').filter(Boolean);
+
 // Middleware
-app.use(cors({ origin: process.env.CORS_ORIGINS === '*' ? true : process.env.CORS_ORIGINS?.split(',') }));
+app.use(cors({
+  origin: allowedOrigins.length ? allowedOrigins : true,
+  credentials: true
+}));
 app.use(express.json());
+
+// Basic API rate limiting
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+app.use('/api', apiLimiter);
 
 // Serve uploaded images
 app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
