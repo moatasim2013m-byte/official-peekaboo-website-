@@ -1,24 +1,49 @@
 const { Resend } = require('resend');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const senderEmail = process.env.SENDER_EMAIL || 'onboarding@resend.dev';
+const SENDER_EMAIL = 'support@peekaboojor.com';
+const SENDER_NAME = 'Peekaboo';
 
 // Send email using Resend
 const sendEmail = async (to, subject, html) => {
+  const result = await resend.emails.send({
+    from: `${SENDER_NAME} <${SENDER_EMAIL}>`,
+    replyTo: SENDER_EMAIL,
+    to,
+    subject,
+    html
+  });
+  return result;
+};
+
+// Send verification email with detailed logging
+const sendVerificationEmail = async (to, verifyUrl) => {
+  const template = emailTemplates.emailVerification(verifyUrl);
+  
   try {
     const result = await resend.emails.send({
-      from: senderEmail,
+      from: `${SENDER_NAME} <${SENDER_EMAIL}>`,
+      replyTo: SENDER_EMAIL,
       to,
-      subject,
-      html
+      subject: template.subject,
+      html: template.html
     });
-    console.log('Email sent:', result);
-    return result;
+    
+    console.log(`[VERIFY_EMAIL_SENT] id=${result.data?.id || result.id} to=${to}`);
+    return { success: true, id: result.data?.id || result.id };
   } catch (error) {
-    console.error('Email send error:', error);
-    throw error;
+    console.error(`[VERIFY_EMAIL_SEND_FAIL] to=${to} error=${error.message}`);
+    return { success: false, error: error.message };
   }
 };
+
+// Check if Resend is configured
+const isResendConfigured = () => {
+  return !!(process.env.RESEND_API_KEY && process.env.RESEND_API_KEY.length > 10);
+};
+
+// Get sender email
+const getSenderEmail = () => SENDER_EMAIL;
 
 // Email templates
 const emailTemplates = {
