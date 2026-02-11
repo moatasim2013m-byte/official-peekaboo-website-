@@ -617,6 +617,9 @@ export default function AdminPage() {
             <TabsTrigger value="users" className="rounded-full gap-2">
               <Users className="h-4 w-4" /> Parents
             </TabsTrigger>
+            <TabsTrigger value="customers" className="rounded-full gap-2">
+              <UserPlus className="h-4 w-4" /> العملاء
+            </TabsTrigger>
             <TabsTrigger value="hourly" className="rounded-full gap-2">
               <Clock className="h-4 w-4" /> Hourly
             </TabsTrigger>
