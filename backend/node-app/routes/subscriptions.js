@@ -69,10 +69,14 @@ router.post('/purchase', authMiddleware, async (req, res) => {
 
     // NO loyalty points for subscriptions (only hourly gets points)
 
-    // Send confirmation email
+    // Send confirmation email (non-blocking)
     const user = await User.findById(req.userId);
     const template = emailTemplates.subscriptionConfirmation(subscription, plan, child);
-    await sendEmail(user.email, template.subject, template.html);
+    try {
+      await sendEmail(user.email, template.subject, template.html);
+    } catch (emailErr) {
+      console.error('SUBSCRIPTION_EMAIL_ERROR', emailErr.message || emailErr);
+    }
 
     res.status(201).json({ subscription: subscription.toJSON() });
   } catch (error) {
@@ -116,10 +120,14 @@ router.post('/purchase/offline', authMiddleware, async (req, res) => {
 
     await subscription.save();
 
-    // Send confirmation email
+    // Send confirmation email (non-blocking)
     const user = await User.findById(req.userId);
     const template = emailTemplates.subscriptionConfirmation(subscription, plan, child);
-    await sendEmail(user.email, template.subject, template.html);
+    try {
+      await sendEmail(user.email, template.subject, template.html);
+    } catch (emailErr) {
+      console.error('SUBSCRIPTION_OFFLINE_EMAIL_ERROR', emailErr.message || emailErr);
+    }
 
     res.status(201).json({ 
       subscription: subscription.toJSON(),
