@@ -1025,6 +1025,301 @@ export default function AdminPage() {
             </Card>
           </TabsContent>
 
+          {/* Customers Management */}
+          <TabsContent value="customers">
+            <Card className="rounded-2xl">
+              <CardHeader className="pb-2">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-xl">إدارة العملاء</CardTitle>
+                    <p className="text-sm text-muted-foreground mt-1">عرض وتعديل وإدارة بيانات العملاء</p>
+                  </div>
+                  <Dialog open={customerDialogOpen} onOpenChange={setCustomerDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="rounded-full gap-2">
+                        <UserPlus className="h-4 w-4" /> إضافة عميل
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent dir="rtl">
+                      <DialogHeader>
+                        <DialogTitle>إضافة عميل جديد</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleCreateCustomer} className="space-y-4">
+                        <div>
+                          <Label>الاسم *</Label>
+                          <Input
+                            value={newCustomer.name}
+                            onChange={(e) => setNewCustomer({...newCustomer, name: e.target.value})}
+                            className="rounded-xl mt-1"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label>البريد الإلكتروني *</Label>
+                          <Input
+                            type="email"
+                            value={newCustomer.email}
+                            onChange={(e) => setNewCustomer({...newCustomer, email: e.target.value})}
+                            className="rounded-xl mt-1"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label>الهاتف</Label>
+                          <Input
+                            value={newCustomer.phone}
+                            onChange={(e) => setNewCustomer({...newCustomer, phone: e.target.value})}
+                            className="rounded-xl mt-1"
+                            dir="ltr"
+                          />
+                        </div>
+                        <Button type="submit" className="w-full rounded-full" disabled={savingCustomer}>
+                          {savingCustomer ? <Loader2 className="h-4 w-4 animate-spin ml-2" /> : null}
+                          إضافة العميل
+                        </Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Search */}
+                <div className="relative">
+                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="بحث بالاسم أو البريد أو الهاتف..."
+                    value={customerSearch}
+                    onChange={(e) => setCustomerSearch(e.target.value)}
+                    className="pr-10 rounded-xl"
+                  />
+                </div>
+
+                {/* Customers Table */}
+                {loadingCustomers ? (
+                  <div className="flex justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                  </div>
+                ) : customers.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    لا يوجد عملاء
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-right py-3 px-2 font-medium">الاسم</th>
+                          <th className="text-right py-3 px-2 font-medium">الهاتف</th>
+                          <th className="text-right py-3 px-2 font-medium">البريد</th>
+                          <th className="text-center py-3 px-2 font-medium">الأطفال</th>
+                          <th className="text-center py-3 px-2 font-medium">الحالة</th>
+                          <th className="text-center py-3 px-2 font-medium">إجراءات</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {customers.map((customer) => (
+                          <tr key={customer.id} className="border-b hover:bg-muted/50">
+                            <td className="py-3 px-2">{customer.name}</td>
+                            <td className="py-3 px-2" dir="ltr">{customer.phone || '-'}</td>
+                            <td className="py-3 px-2 text-xs">{customer.email}</td>
+                            <td className="py-3 px-2 text-center">{customer.children_count}</td>
+                            <td className="py-3 px-2 text-center">
+                              <Badge variant={customer.is_disabled ? 'destructive' : 'default'} className="text-xs">
+                                {customer.is_disabled ? 'معطّل' : 'نشط'}
+                              </Badge>
+                            </td>
+                            <td className="py-3 px-2 text-center">
+                              <div className="flex justify-center gap-1">
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-8 w-8 p-0"
+                                  onClick={() => { setSelectedCustomer(customer); fetchCustomerDetails(customer.id); }}
+                                >
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className={`h-8 w-8 p-0 ${customer.is_disabled ? 'text-green-600' : 'text-red-600'}`}
+                                  onClick={() => handleToggleCustomerStatus(customer.id)}
+                                >
+                                  {customer.is_disabled ? <Check className="h-4 w-4" /> : <Ban className="h-4 w-4" />}
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Customer Details Dialog */}
+            <Dialog open={customerDetailsOpen} onOpenChange={(open) => { setCustomerDetailsOpen(open); if (!open) { setCustomerDetails(null); setEditingChild(null); } }}>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
+                <DialogHeader>
+                  <DialogTitle>تفاصيل العميل</DialogTitle>
+                </DialogHeader>
+                {customerDetails && (
+                  <div className="space-y-6">
+                    {/* Customer Info */}
+                    <div className="space-y-4 p-4 bg-muted/30 rounded-xl">
+                      <h3 className="font-bold text-sm mb-3">بيانات العميل</h3>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <Label>الاسم</Label>
+                          <Input
+                            value={editingCustomer?.name || ''}
+                            onChange={(e) => setEditingCustomer({...editingCustomer, name: e.target.value})}
+                            className="rounded-xl mt-1"
+                          />
+                        </div>
+                        <div>
+                          <Label>الهاتف</Label>
+                          <Input
+                            value={editingCustomer?.phone || ''}
+                            onChange={(e) => setEditingCustomer({...editingCustomer, phone: e.target.value})}
+                            className="rounded-xl mt-1"
+                            dir="ltr"
+                          />
+                        </div>
+                        <div className="sm:col-span-2">
+                          <Label>البريد الإلكتروني</Label>
+                          <Input
+                            type="email"
+                            value={editingCustomer?.email || ''}
+                            onChange={(e) => setEditingCustomer({...editingCustomer, email: e.target.value})}
+                            className="rounded-xl mt-1"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2 pt-2">
+                        <Button onClick={handleUpdateCustomer} className="rounded-full" disabled={savingCustomer}>
+                          {savingCustomer ? <Loader2 className="h-4 w-4 animate-spin ml-2" /> : null}
+                          حفظ التغييرات
+                        </Button>
+                        <Button
+                          variant={customerDetails.customer.is_disabled ? 'default' : 'destructive'}
+                          onClick={() => handleToggleCustomerStatus(customerDetails.customer.id)}
+                          className="rounded-full"
+                        >
+                          {customerDetails.customer.is_disabled ? 'تفعيل' : 'تعطيل'}
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Bookings Summary */}
+                    <div className="p-4 bg-blue-50 rounded-xl">
+                      <h3 className="font-bold text-sm mb-3">ملخص الحجوزات</h3>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                        <div className="bg-white p-3 rounded-lg">
+                          <div className="text-2xl font-bold text-blue-600">{customerDetails.bookings_summary?.hourly_count || 0}</div>
+                          <div className="text-xs text-muted-foreground">حجوزات ساعية</div>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg">
+                          <div className="text-2xl font-bold text-pink-600">{customerDetails.bookings_summary?.birthday_count || 0}</div>
+                          <div className="text-xs text-muted-foreground">حفلات</div>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg">
+                          <div className="text-2xl font-bold text-green-600">{customerDetails.bookings_summary?.active_subscriptions || 0}</div>
+                          <div className="text-xs text-muted-foreground">اشتراكات نشطة</div>
+                        </div>
+                        <div className="bg-white p-3 rounded-lg">
+                          <div className="text-2xl font-bold text-yellow-600">{customerDetails.customer?.loyalty_points || 0}</div>
+                          <div className="text-xs text-muted-foreground">نقاط الولاء</div>
+                        </div>
+                      </div>
+                      {customerDetails.bookings_summary?.last_booking_date && (
+                        <p className="text-xs text-muted-foreground mt-3">
+                          آخر حجز: {format(new Date(customerDetails.bookings_summary.last_booking_date), 'yyyy-MM-dd')}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Children */}
+                    <div className="p-4 bg-yellow-50 rounded-xl">
+                      <h3 className="font-bold text-sm mb-3">الأطفال ({customerDetails.children?.length || 0})</h3>
+                      <div className="space-y-2">
+                        {customerDetails.children?.map((child) => (
+                          <div key={child.id} className="flex items-center justify-between bg-white p-3 rounded-lg">
+                            {editingChild?.id === child.id ? (
+                              <div className="flex-1 flex items-center gap-2">
+                                <Input
+                                  value={editingChild.name}
+                                  onChange={(e) => setEditingChild({...editingChild, name: e.target.value})}
+                                  className="rounded-lg h-8 text-sm"
+                                  placeholder="الاسم"
+                                />
+                                <Input
+                                  type="date"
+                                  value={editingChild.birthday?.split('T')[0] || ''}
+                                  onChange={(e) => setEditingChild({...editingChild, birthday: e.target.value})}
+                                  className="rounded-lg h-8 text-sm w-36"
+                                />
+                                <Button size="sm" className="h-8" onClick={() => handleUpdateChild(child.id)}>
+                                  <Check className="h-3 w-3" />
+                                </Button>
+                                <Button size="sm" variant="ghost" className="h-8" onClick={() => setEditingChild(null)}>
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <>
+                                <div>
+                                  <span className="font-medium">{child.name}</span>
+                                  <span className="text-xs text-muted-foreground mr-2">
+                                    ({format(new Date(child.birthday), 'yyyy-MM-dd')})
+                                  </span>
+                                </div>
+                                <div className="flex gap-1">
+                                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => setEditingChild({ id: child.id, name: child.name, birthday: child.birthday })}>
+                                    <Edit className="h-3 w-3" />
+                                  </Button>
+                                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-red-600" onClick={() => handleDeleteChild(child.id)}>
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                      {/* Add Child Form */}
+                      <form onSubmit={handleAddChild} className="mt-3 flex items-end gap-2">
+                        <div className="flex-1">
+                          <Label className="text-xs">اسم الطفل</Label>
+                          <Input
+                            value={newChild.name}
+                            onChange={(e) => setNewChild({...newChild, name: e.target.value})}
+                            className="rounded-lg h-9 text-sm"
+                            placeholder="اسم الطفل"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs">تاريخ الميلاد</Label>
+                          <Input
+                            type="date"
+                            value={newChild.birthday}
+                            onChange={(e) => setNewChild({...newChild, birthday: e.target.value})}
+                            className="rounded-lg h-9 text-sm w-36"
+                            required
+                          />
+                        </div>
+                        <Button type="submit" size="sm" className="h-9 rounded-lg">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </form>
+                    </div>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
+          </TabsContent>
+
           {/* Hourly Bookings */}
           <TabsContent value="hourly">
             <Card className="rounded-2xl">
