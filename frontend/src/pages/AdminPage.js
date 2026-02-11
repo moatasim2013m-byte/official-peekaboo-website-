@@ -330,16 +330,6 @@ export default function AdminPage() {
     }
   };
 
-  // Debounced search for customers
-  useEffect(() => {
-    if (activeTab !== 'customers') return;
-    const timer = setTimeout(() => {
-      fetchCustomers(customerSearch);
-    }, 300);
-    return () => clearTimeout(timer);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [customerSearch, activeTab]);
-
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setActiveFilter(null); // Reset filter when manually changing tabs
