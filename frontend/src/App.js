@@ -102,6 +102,7 @@ function AppRoutes() {
       <Route path="/login" element={<Layout><LoginPage /></Layout>} />
       <Route path="/staff/login" element={<StaffLoginPage />} />
       <Route path="/register" element={<Layout><RegisterPage /></Layout>} />
+      <Route path="/verify-email" element={<Layout><VerifyEmailPage /></Layout>} />
       <Route path="/forgot-password" element={<Layout><ForgotPasswordPage /></Layout>} />
       <Route path="/reset-password" element={<Layout><ResetPasswordPage /></Layout>} />
       <Route path="/tickets" element={<Layout><TicketsPage /></Layout>} />
