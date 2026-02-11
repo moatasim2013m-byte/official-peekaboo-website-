@@ -79,6 +79,11 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
+    // Check if email is verified (skip for admin/staff)
+    if (!user.email_verified && user.role === 'parent') {
+      return res.status(403).json({ error: 'يرجى تأكيد بريدك الإلكتروني قبل تسجيل الدخول' });
+    }
+
     const token = jwt.sign({ userId: user._id }, getJwtSecret(), { expiresIn: '7d' });
 
     res.json({
@@ -89,6 +94,37 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Login failed' });
+  }
+});
+
+// Verify Email
+router.get('/verify-email', async (req, res) => {
+  try {
+    const { token } = req.query;
+    
+    if (!token) {
+      return res.status(400).json({ error: 'الرابط غير صالح' });
+    }
+
+    const user = await User.findOne({ email_verify_token: token });
+    
+    if (!user) {
+      return res.status(400).json({ error: 'الرابط غير صالح' });
+    }
+
+    if (user.email_verify_expires && user.email_verify_expires < new Date()) {
+      return res.status(400).json({ error: 'الرابط منتهي الصلاحية' });
+    }
+
+    user.email_verified = true;
+    user.email_verify_token = null;
+    user.email_verify_expires = null;
+    await user.save();
+
+    res.json({ success: true, message: 'تم تفعيل الحساب بنجاح' });
+  } catch (error) {
+    console.error('Verify email error:', error);
+    res.status(500).json({ error: 'فشل تأكيد البريد الإلكتروني' });
   }
 });
 
