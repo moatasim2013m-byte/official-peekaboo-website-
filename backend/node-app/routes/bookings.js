@@ -605,10 +605,14 @@ router.post('/birthday/custom', authMiddleware, async (req, res) => {
 
     await booking.save();
 
-    // Send confirmation email
+    // Send confirmation email (non-blocking)
     const user = await User.findById(req.userId);
     const template = emailTemplates.birthdayConfirmation(booking, slot, child, null);
-    await sendEmail(user.email, template.subject, template.html);
+    try {
+      await sendEmail(user.email, template.subject, template.html);
+    } catch (emailErr) {
+      console.error('BIRTHDAY_CUSTOM_EMAIL_ERROR', emailErr.message || emailErr);
+    }
 
     res.status(201).json({ 
       booking: booking.toJSON(),
