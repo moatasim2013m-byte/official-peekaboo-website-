@@ -28,6 +28,11 @@ import RefundPage from "./pages/RefundPage";
 import GroupsPage from "./pages/GroupsPage";
 import HomePartyPage from "./pages/HomePartyPage";
 import BookingConfirmationPage from "./pages/BookingConfirmationPage";
+import AboutPage from "./pages/AboutPage";
+import FAQPage from "./pages/FAQPage";
+import ContactPage from "./pages/ContactPage";
+import RulesPage from "./pages/RulesPage";
+import PricingPage from "./pages/PricingPage";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, adminOnly = false, staffOnly = false, parentOnly = false }) => {
