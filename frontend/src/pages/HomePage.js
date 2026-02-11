@@ -113,6 +113,16 @@ export default function HomePage() {
       buttonText: 'احجز حفلتك',
       badgeColor: 'badge-orange',
       accentColor: 'accent-orange'
+    },
+    {
+      icon: Heart,
+      title: 'ذوي الهمم',
+      description: 'برامج مخصصة لأصحاب الاحتياجات الخاصة',
+      link: null,
+      buttonText: 'قريباً',
+      badgeColor: 'badge-purple',
+      accentColor: 'accent-purple',
+      disabled: true
     }
   ];
 
