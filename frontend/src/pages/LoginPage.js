@@ -71,6 +71,17 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Email verification warning */}
+          {verificationError && (
+            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl flex items-start gap-3">
+              <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-yellow-800 font-medium text-sm">{verificationError}</p>
+                <p className="text-yellow-700 text-xs mt-1">تحقق من بريدك الوارد أو الرسائل غير المرغوب فيها.</p>
+              </div>
+            </div>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="email">البريد الإلكتروني</Label>
