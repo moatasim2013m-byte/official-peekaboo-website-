@@ -291,33 +291,44 @@ export default function TicketsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-hero-gradient py-8 md:py-12" dir="rtl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-8 md:py-12" dir="rtl">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Page Header */}
         <div className="text-center mb-8">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-4">
-            احجز وقت اللعب بالساعة
+          <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3">
+            احجز وقت اللعب
           </h1>
-          <p className="text-muted-foreground text-base md:text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
             اختر التاريخ، الفترة، المدة، ثم الوقت المناسب
           </p>
+          
+          {/* Progress Indicator */}
+          <div className="booking-progress mt-6 inline-flex">
+            <div className={`booking-progress-step ${date ? 'complete' : 'active'}`}></div>
+            <div className={`booking-progress-step ${timeMode ? 'complete' : date ? 'active' : ''}`}></div>
+            <div className={`booking-progress-step ${selectedDuration ? 'complete' : timeMode ? 'active' : ''}`}></div>
+            <div className={`booking-progress-step ${selectedSlot ? 'complete' : selectedDuration ? 'active' : ''}`}></div>
+            <span className="text-sm mr-2">
+              {!date ? '1/4' : !timeMode ? '2/4' : !selectedDuration ? '3/4' : !selectedSlot ? '4/4' : '✓'}
+            </span>
+          </div>
         </div>
 
         {/* STEP 1: Date Selection */}
-        <Card className="border-2 rounded-3xl mb-8">
-          <CardHeader>
-            <CardTitle className="font-heading text-xl flex items-center gap-2">
-              <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">1</span>
+        <Card className="booking-card mb-6">
+          <CardHeader className="booking-card-header">
+            <CardTitle className="booking-card-title">
+              <span className={`step-badge ${date ? 'step-badge-complete' : ''}`}>1</span>
               اختر التاريخ
             </CardTitle>
           </CardHeader>
-          <CardContent className="flex justify-center">
+          <CardContent className="flex justify-center py-6">
             <Calendar
               mode="single"
               selected={date}
               onSelect={(d) => {
                 if (d) {
                   setDate(d);
-                  // If morning was selected but is now expired for new date, reset timeMode
                   if (timeMode === 'morning' && isMorningExpiredForDate(d)) {
                     setTimeMode(null);
                     setPricing([]);
@@ -333,44 +344,34 @@ export default function TicketsPage() {
           </CardContent>
         </Card>
 
-        {/* STEP 2: Time Mode Selection - Show only after date selected */}
+        {/* STEP 2: Time Mode Selection */}
         {date && (
-          <Card className="border-2 rounded-3xl mb-8">
-            <CardHeader>
-              <CardTitle className="font-heading text-xl flex items-center gap-2">
-                <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">2</span>
+          <Card className="booking-card mb-6">
+            <CardHeader className="booking-card-header">
+              <CardTitle className="booking-card-title">
+                <span className={`step-badge ${timeMode ? 'step-badge-complete' : ''}`}>2</span>
                 اختر الفترة
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent className="py-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <button
                   onClick={() => !morningExpired && handleTimeModeChange('morning')}
                   disabled={morningExpired}
-                  className={`relative p-6 rounded-2xl border-2 transition-all ${
-                    morningExpired
-                      ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
-                      : timeMode === 'morning'
-                        ? 'border-yellow-500 bg-yellow-50 shadow-lg'
-                        : 'border-border bg-white hover:border-yellow-300'
-                  }`}
+                  className={`option-btn ${timeMode === 'morning' ? 'selected-yellow' : ''} ${morningExpired ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2 ${
-                    morningExpired 
-                      ? 'bg-gray-400' 
-                      : 'bg-gradient-to-r from-yellow-400 to-orange-500'
-                  } text-white`}>
+                  <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2 ${morningExpired ? 'bg-gray-400' : 'bg-gradient-to-r from-yellow-400 to-orange-500'} text-white text-xs`}>
                     Happy Hour
                   </Badge>
-                  <div className="flex items-center justify-center gap-3">
+                  <div className="flex items-center justify-center gap-3 pt-2">
                     <Sun className={`h-8 w-8 ${morningExpired ? 'text-gray-400' : 'text-yellow-500'}`} />
                     <div className="text-right">
-                      <div className={`font-heading text-2xl font-bold ${morningExpired ? 'text-gray-400' : ''}`}>صباحي</div>
-                      <div className="text-sm text-muted-foreground">10 صباحاً - 2 ظهراً</div>
+                      <div className={`font-heading text-xl font-bold ${morningExpired ? 'text-gray-400' : ''}`}>صباحي</div>
+                      <div className="text-sm text-muted-foreground">10 ص - 2 م</div>
                       {morningExpired ? (
-                        <div className="text-sm text-red-500 mt-1">غير متاح اليوم (انتهى وقت الفترة الصباحية)</div>
+                        <div className="text-xs text-red-500 mt-1">غير متاح اليوم</div>
                       ) : (
-                        <div className="text-lg font-bold text-yellow-600 mt-1">3.5 دينار/ساعة</div>
+                        <div className="text-base font-bold text-yellow-600 mt-1">3.5 د/ساعة</div>
                       )}
                     </div>
                   </div>
@@ -378,18 +379,14 @@ export default function TicketsPage() {
                 
                 <button
                   onClick={() => handleTimeModeChange('afternoon')}
-                  className={`p-6 rounded-2xl border-2 transition-all ${
-                    timeMode === 'afternoon'
-                      ? 'border-indigo-500 bg-indigo-50 shadow-lg'
-                      : 'border-border bg-white hover:border-indigo-300'
-                  }`}
+                  className={`option-btn ${timeMode === 'afternoon' ? 'selected' : ''}`}
                 >
                   <div className="flex items-center justify-center gap-3">
                     <Moon className="h-8 w-8 text-indigo-500" />
                     <div className="text-right">
-                      <div className="font-heading text-2xl font-bold">مسائي</div>
-                      <div className="text-sm text-muted-foreground">2 ظهراً - منتصف الليل</div>
-                      <div className="text-lg font-bold text-indigo-600 mt-1">7-13 دينار</div>
+                      <div className="font-heading text-xl font-bold">مسائي</div>
+                      <div className="text-sm text-muted-foreground">2 م - 12 ص</div>
+                      <div className="text-base font-bold text-indigo-600 mt-1">7-13 دينار</div>
                     </div>
                   </div>
                 </button>
@@ -398,18 +395,18 @@ export default function TicketsPage() {
           </Card>
         )}
 
-        {/* STEP 3: Duration Selection - Show only after timeMode selected */}
+        {/* STEP 3: Duration Selection */}
         {date && timeMode && (
-          <Card className="border-2 rounded-3xl mb-8">
-            <CardHeader>
-              <CardTitle className="font-heading text-xl flex items-center gap-2">
-                <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">3</span>
+          <Card className="booking-card mb-6">
+            <CardHeader className="booking-card-header">
+              <CardTitle className="booking-card-title">
+                <span className={`step-badge ${selectedDuration ? 'step-badge-complete' : ''}`}>3</span>
                 اختر مدة اللعب
               </CardTitle>
-              <CardDescription className="text-sm">{extraHourText}</CardDescription>
+              {extraHourText && <CardDescription className="text-sm mt-1 mr-10">{extraHourText}</CardDescription>}
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <CardContent className="py-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {pricing.map((option) => (
                   <button
                     key={option.hours}
@@ -417,26 +414,19 @@ export default function TicketsPage() {
                       setSelectedDuration(option.hours);
                       setSelectedSlot(null);
                     }}
-                    className={`relative p-6 rounded-2xl border-2 transition-all ${
-                      selectedDuration === option.hours
-                        ? timeMode === 'morning' 
-                          ? 'border-yellow-500 bg-yellow-50 shadow-lg'
-                          : 'border-primary bg-primary/10 shadow-lg'
-                        : 'border-border bg-white hover:border-primary/50'
-                    }`}
+                    className={`option-btn ${selectedDuration === option.hours ? (timeMode === 'morning' ? 'selected-yellow' : 'selected') : ''}`}
                   >
                     {option.best_value && (
-                      <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white">
-                        <Star className="h-3 w-3 mr-1" />
+                      <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-xs">
+                        <Star className="h-3 w-3 ml-1" />
                         أفضل قيمة
                       </Badge>
                     )}
-                    <div className="text-center">
-                      <div className="font-heading text-3xl font-bold mb-2">{option.label_ar}</div>
-                      <div className={`text-2xl font-bold mb-1 ${timeMode === 'morning' ? 'text-yellow-600' : 'text-primary'}`}>
+                    <div className="pt-1">
+                      <div className="font-heading text-2xl font-bold mb-1">{option.label_ar}</div>
+                      <div className={`text-xl font-bold ${timeMode === 'morning' ? 'text-yellow-600' : 'text-primary'}`}>
                         {option.price} دينار
                       </div>
-                      <div className="text-sm text-muted-foreground">{option.price} JD</div>
                     </div>
                   </button>
                 ))}
@@ -445,58 +435,50 @@ export default function TicketsPage() {
           </Card>
         )}
 
-        {/* STEP 4: Time Slots - Show only after duration selected, lazy load */}
+        {/* STEP 4: Time Slots */}
         {timeMode && date && selectedDuration && (
-          <Card className="border-2 rounded-3xl mb-8">
-            <CardHeader>
-              <CardTitle className="font-heading flex items-center gap-2">
-                <span className="bg-primary text-white w-7 h-7 rounded-full flex items-center justify-center text-sm">4</span>
+          <Card className="booking-card mb-6">
+            <CardHeader className="booking-card-header">
+              <CardTitle className="booking-card-title">
+                <span className={`step-badge ${selectedSlot ? 'step-badge-complete' : ''}`}>4</span>
                 <Clock className="h-5 w-5 text-primary" />
-                الأوقات المتاحة - {format(date, 'MMMM d, yyyy')}
+                الأوقات المتاحة
               </CardTitle>
-              <CardDescription>
-                {timeMode === 'morning' 
-                  ? 'الفترة الصباحية: 10:00 ص - 2:00 م' 
-                  : 'الفترة المسائية: 2:00 م - منتصف الليل'}
+              <CardDescription className="mr-10 text-sm">
+                {format(date, 'MMMM d')} • {timeMode === 'morning' ? '10 ص - 2 م' : '2 م - 12 ص'}
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="py-6">
               {slotsLoading ? (
                 <div>
                   <p className="text-center text-muted-foreground mb-4">جاري تحميل الأوقات...</p>
                   <SlotsSkeleton />
                 </div>
               ) : slotsError ? (
-                <div className="text-center py-12 text-destructive">
-                  <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                <div className="text-center py-8 text-destructive">
+                  <AlertCircle className="h-10 w-10 mx-auto mb-3 opacity-50" />
                   <p>{slotsError}</p>
                 </div>
               ) : slots.filter(s => s.is_available).length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <AlertCircle className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>لا توجد أوقات متاحة لهذه الفترة والمدة</p>
+                <div className="text-center py-8 text-muted-foreground">
+                  <AlertCircle className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                  <p>لا توجد أوقات متاحة لهذه الفترة</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {slots.filter(s => s.is_available).map((slot) => {
                     const endTime = getEndTime(slot.start_time, selectedDuration);
                     return (
                       <button
                         key={slot.id}
                         onClick={() => setSelectedSlot(slot)}
-                        className={`p-4 rounded-2xl border-2 transition-all ${
-                          selectedSlot?.id === slot.id
-                            ? timeMode === 'morning'
-                              ? 'border-yellow-500 bg-yellow-50'
-                              : 'border-primary bg-primary/10'
-                            : 'border-border hover:border-primary/50 bg-white'
-                        }`}
+                        className={`slot-btn ${selectedSlot?.id === slot.id ? (timeMode === 'morning' ? 'selected-yellow' : 'selected') : ''}`}
                       >
-                        <div className="font-heading font-semibold text-lg">
+                        <div className="font-heading font-semibold">
                           {slot.start_time} → {endTime}
                         </div>
-                        <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground mt-1">
-                          <Users className="h-4 w-4" />
+                        <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mt-1">
+                          <Users className="h-3 w-3" />
                           {slot.available_spots} متاح
                         </div>
                       </button>
@@ -510,24 +492,19 @@ export default function TicketsPage() {
 
         {/* Booking Summary */}
         {isAuthenticated && selectedSlot && (
-          <Card className="border-2 rounded-3xl mt-8">
-            <CardHeader>
-              <CardTitle className="font-heading">أكمل حجزك</CardTitle>
+          <Card className="booking-card">
+            <CardHeader className="booking-card-header">
+              <CardTitle className="booking-card-title">أكمل حجزك</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 gap-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <CardContent className="py-6">
+              <div className="grid grid-cols-1 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   <div>
                     <Label className="block text-sm font-medium mb-2">اختر الأطفال</Label>
                     {children.length === 0 ? (
                       <div className="text-muted-foreground">
-                        <p className="mb-2">لم يتم إضافة أطفال بعد</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => navigate('/profile')}
-                          className="rounded-full"
-                        >
+                        <p className="mb-2 text-sm">لم يتم إضافة أطفال بعد</p>
+                        <Button variant="outline" size="sm" onClick={() => navigate('/profile')} className="rounded-full">
                           إضافة طفل
                         </Button>
                       </div>
@@ -537,9 +514,7 @@ export default function TicketsPage() {
                           <label 
                             key={child.id} 
                             className={`flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                              selectedChildren.includes(child.id) 
-                                ? 'border-primary bg-primary/10' 
-                                : 'border-border hover:border-primary/50'
+                              selectedChildren.includes(child.id) ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50'
                             }`}
                           >
                             <input
@@ -551,83 +526,52 @@ export default function TicketsPage() {
                             <span className="font-medium">{child.name}</span>
                           </label>
                         ))}
-                        {selectedChildren.length > 0 && (
-                          <p className="text-sm text-muted-foreground mt-2">
-                            تم اختيار {selectedChildren.length} طفل
-                          </p>
-                        )}
                       </div>
                     )}
                   </div>
 
                   <div>
                     <Label className="block text-sm font-medium mb-2">الوقت المختار</Label>
-                    <div className="p-3 rounded-xl bg-muted">
-                      <span className="font-semibold">
-                        {format(date, 'MMM d')} في {selectedSlot.start_time}
-                      </span>
-                      <div className="text-sm text-muted-foreground mt-1">
-                        {timeMode === 'morning' ? '☀️ فترة صباحية' : '🌙 فترة مسائية'}
+                    <div className="p-3 rounded-xl bg-muted text-sm">
+                      <span className="font-semibold">{format(date, 'MMM d')} في {selectedSlot.start_time}</span>
+                      <div className="text-muted-foreground mt-1">
+                        {timeMode === 'morning' ? '☀️ صباحية' : '🌙 مسائية'}
                       </div>
                     </div>
                   </div>
 
                   <div>
                     <Label className="block text-sm font-medium mb-2">المدة والسعر</Label>
-                    <div className={`p-3 rounded-xl border-2 ${
-                      timeMode === 'morning' 
-                        ? 'bg-yellow-50 border-yellow-500' 
-                        : 'bg-primary/10 border-primary'
-                    }`}>
-                      <div className={`font-bold text-lg ${
-                        timeMode === 'morning' ? 'text-yellow-700' : 'text-primary'
-                      }`}>
-                        {selectedDuration} ساعة - {getSelectedPrice()} دينار
+                    <div className={`p-3 rounded-xl border-2 ${timeMode === 'morning' ? 'bg-yellow-50 border-yellow-400' : 'bg-primary/10 border-primary'}`}>
+                      <div className={`font-bold text-lg ${timeMode === 'morning' ? 'text-yellow-700' : 'text-primary'}`}>
+                        {selectedDuration} ساعة - {getSelectedPrice()} د
                       </div>
-                      {timeMode === 'morning' && (
-                        <div className="text-xs text-yellow-600 mt-1">عرض الصباح الخاص</div>
-                      )}
+                      {timeMode === 'morning' && <div className="text-xs text-yellow-600 mt-1">عرض الصباح</div>}
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <Label htmlFor="custom-notes" className="block text-sm font-medium mb-2">
-                    ملاحظات / طلب خاص (اختياري)
-                  </Label>
+                  <Label htmlFor="custom-notes" className="block text-sm font-medium mb-2">ملاحظات (اختياري)</Label>
                   <Textarea
                     id="custom-notes"
                     value={customNotes}
                     onChange={(e) => setCustomNotes(e.target.value)}
                     placeholder="أي ملاحظات أو طلبات خاصة..."
                     className="rounded-xl resize-none"
-                    rows={3}
+                    rows={2}
                   />
                 </div>
 
-                {/* Payment Method Selection */}
                 <div className="pt-4 border-t">
-                  <PaymentMethodSelector 
-                    value={paymentMethod} 
-                    onChange={setPaymentMethod} 
-                  />
+                  <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
                 </div>
 
-                {/* Booking Summary */}
                 {paymentMethod && (
-                  <div className={`p-4 rounded-xl border ${
-                    timeMode === 'morning' ? 'bg-yellow-50/50' : 'bg-muted/50'
-                  }`}>
+                  <div className="booking-summary">
                     <p className="text-sm text-muted-foreground mb-1">ملخص الحجز</p>
                     <p className="font-bold">
                       {selectedDuration} ساعة × {selectedChildren.length || 1} طفل = {getSelectedPrice()} دينار
-                    </p>
-                    <p className="text-sm mt-1">
-                      الفترة: <span className="font-bold">{timeMode === 'morning' ? 'صباحية' : 'مسائية'}</span>
-                      {' | '}
-                      طريقة الدفع: <span className="font-bold">
-                        {paymentMethod === 'cash' ? 'نقداً' : paymentMethod === 'card' ? 'بطاقة' : 'CliQ'}
-                      </span>
                     </p>
                   </div>
                 )}
@@ -636,22 +580,17 @@ export default function TicketsPage() {
                   <Button
                     onClick={handleBooking}
                     disabled={!selectedSlot || selectedChildren.length === 0 || loading}
-                    className={`w-full md:w-auto px-8 rounded-full h-12 text-lg ${
-                      timeMode === 'morning' 
-                        ? 'bg-yellow-500 hover:bg-yellow-600 text-white' 
-                        : 'btn-playful'
-                    }`}
-                    aria-label={`احجز وادفع ${getSelectedPrice()} دينار - يقبل بطاقات فيزا وماستركارد`}
+                    className={`w-full md:w-auto px-8 rounded-full h-12 text-base ${timeMode === 'morning' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : 'btn-playful'}`}
                   >
                     {loading ? (
                       <>
-                        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                        <Loader2 className="ml-2 h-5 w-5 animate-spin" />
                         جاري المعالجة...
                       </>
                     ) : (
                       <span className="inline-flex items-center gap-2">
                         <PaymentCardIcons />
-                        <span>{`احجز وادفع - ${getSelectedPrice()} دينار`}</span>
+                        <span>احجز - {getSelectedPrice()} د</span>
                       </span>
                     )}
                   </Button>
@@ -662,9 +601,9 @@ export default function TicketsPage() {
         )}
 
         {!isAuthenticated && (
-          <Card className="border-2 rounded-3xl mt-8 bg-primary/5">
+          <Card className="booking-card bg-primary/5">
             <CardContent className="py-8 text-center">
-              <p className="text-lg mb-4">الرجاء تسجيل الدخول أو إنشاء حساب للحجز</p>
+              <p className="text-lg mb-4">سجّل الدخول أو أنشئ حساب للحجز</p>
               <div className="flex gap-4 justify-center">
                 <Button onClick={() => navigate('/login')} variant="outline" className="rounded-full">
                   تسجيل الدخول
