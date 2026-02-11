@@ -6,19 +6,21 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
-import { Mail, Lock, Loader2 } from 'lucide-react';
+import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [verificationError, setVerificationError] = useState(null);
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setVerificationError(null);
 
     try {
       const user = await login(email, password);
@@ -35,11 +37,18 @@ export default function LoginPage() {
         }
       }, 100);
     } catch (error) {
+      const status = error.response?.status;
       const errorMessage = error.response?.data?.error 
         || error.message 
         || 'فشل تسجيل الدخول - تحقق من بيانات الدخول';
-      toast.error(errorMessage);
-      console.error('Login error:', error.response?.status, errorMessage);
+      
+      // Handle email verification required (403)
+      if (status === 403) {
+        setVerificationError(errorMessage);
+      } else {
+        toast.error(errorMessage);
+      }
+      console.error('Login error:', status, errorMessage);
     } finally {
       setLoading(false);
     }
