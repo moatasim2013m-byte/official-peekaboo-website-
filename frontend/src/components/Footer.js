@@ -14,7 +14,7 @@ export const Footer = () => {
       <div className="footer-card">
         <div className="footer-gradient-border"></div>
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative">
           {/* Decorative Mascot */}
           <img 
             src={mascotImg} 
@@ -22,85 +22,94 @@ export const Footer = () => {
             className="footer-mascot"
           />
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-10">
             
-            {/* Column 1: Contact Info */}
+            {/* Column 1: Brand & Contact */}
             <div>
-              <Link to="/" className="inline-block mb-5">
-                <img src={logoImg} alt="بيكابو" className="h-14" />
+              <Link to="/" className="inline-block mb-4">
+                <img src={logoImg} alt="بيكابو" className="h-12" />
               </Link>
-              <h4 className="footer-heading footer-heading-blue">معلومات التواصل</h4>
+              <p className="text-sm text-[var(--text-secondary)] mb-4 leading-relaxed">
+                أفضل ملعب داخلي للأطفال في إربد. احجز جلسات اللعب وحفلات أعياد الميلاد!
+              </p>
               
-              {/* Address */}
-              <div className="mb-5">
-                <span className="footer-address-label">
-                  <MapPin className="h-4 w-4" />
-                  العنوان
-                </span>
-                <p className="text-[var(--text-secondary)] mt-2 leading-relaxed">
-                  ابو راشد مجمع السيف التجاري,<br />
-                  Wasfi At-Tal St., Irbid 11225
-                </p>
-              </div>
-              
-              {/* Phone & WhatsApp - Big buttons */}
-              <div className="flex flex-col gap-3">
-                <a href="tel:0777775652" className="footer-btn-new footer-btn-phone-new">
-                  <Phone className="h-5 w-5" />
-                  <span className="ltr-text" dir="ltr">0777775652</span>
+              {/* Social Links */}
+              <div className="flex gap-3">
+                <a href="https://www.instagram.com/peekaboo.jor" target="_blank" rel="noopener noreferrer" className="footer-social-link">
+                  Instagram
                 </a>
-                <a href="https://wa.me/962777775652" target="_blank" rel="noopener noreferrer" className="footer-btn-new footer-btn-whatsapp-new">
-                  <MessageCircle className="h-5 w-5" />
-                  <span>واتساب</span>
+                <a href="https://www.facebook.com/peekaboo.jor" target="_blank" rel="noopener noreferrer" className="footer-social-link">
+                  Facebook
                 </a>
               </div>
             </div>
 
             {/* Column 2: Quick Links */}
             <div>
-              <h4 className="footer-heading footer-heading-red">روابط سريعة</h4>
-              <ul className="space-y-3">
+              <h4 className="footer-heading footer-heading-blue">روابط سريعة</h4>
+              <ul className="space-y-2">
+                <li><Link to="/" className="footer-link-new">الرئيسية</Link></li>
                 <li><Link to="/tickets" className="footer-link-new">تذاكر بالساعة</Link></li>
                 <li><Link to="/birthday" className="footer-link-new">حفلات أعياد الميلاد</Link></li>
                 <li><Link to="/subscriptions" className="footer-link-new">الاشتراكات</Link></li>
+                <li><Link to="/groups" className="footer-link-new">المدارس والمجموعات</Link></li>
               </ul>
-              
-              <h4 className="footer-heading footer-heading-red mt-6">السياسات</h4>
-              <ul className="space-y-3">
+            </div>
+
+            {/* Column 3: Policies */}
+            <div>
+              <h4 className="footer-heading footer-heading-red">السياسات</h4>
+              <ul className="space-y-2">
                 <li><Link to="/terms" className="footer-link-new">الشروط والأحكام</Link></li>
                 <li><Link to="/privacy" className="footer-link-new">سياسة الخصوصية</Link></li>
                 <li><Link to="/refund" className="footer-link-new">سياسة الاسترجاع</Link></li>
               </ul>
+              
+              <Link to="/staff/login" className="text-xs text-[var(--text-muted)] hover:text-[var(--pk-blue)] mt-4 inline-block">
+                تسجيل دخول الإدارة
+              </Link>
             </div>
 
-            {/* Column 3: Hours */}
+            {/* Column 4: Contact & Hours */}
             <div>
-              <h4 className="footer-heading footer-heading-green">ساعات العمل</h4>
-              <div className="footer-hours-new">
-                <Clock className="h-7 w-7 text-[var(--pk-green)]" />
-                <div>
-                  <p className="font-bold text-[var(--text-primary)]">مفتوح يومياً</p>
-                  <p className="text-lg font-heading text-[var(--pk-blue)] ltr-text" dir="ltr">10:00 AM - 12:00 AM</p>
+              <h4 className="footer-heading footer-heading-green">تواصل معنا</h4>
+              
+              {/* Address */}
+              <div className="mb-4">
+                <div className="flex items-start gap-2 text-sm text-[var(--text-secondary)]">
+                  <MapPin className="h-4 w-4 mt-0.5 text-[var(--pk-blue)]" />
+                  <span>ابو راشد مجمع السيف التجاري, إربد</span>
                 </div>
               </div>
               
-              <Link to="/staff/login" className="text-sm text-[var(--text-muted)] hover:text-[var(--pk-blue)] mt-6 inline-block">
-                تسجيل دخول الإدارة
-              </Link>
+              {/* Phone & WhatsApp */}
+              <div className="flex flex-col gap-2 mb-4">
+                <a href="tel:0777775652" className="footer-btn-new footer-btn-phone-new text-sm">
+                  <Phone className="h-4 w-4" />
+                  <span className="ltr-text" dir="ltr">0777775652</span>
+                </a>
+                <a href="https://wa.me/962777775652" target="_blank" rel="noopener noreferrer" className="footer-btn-new footer-btn-whatsapp-new text-sm">
+                  <MessageCircle className="h-4 w-4" />
+                  <span>واتساب</span>
+                </a>
+              </div>
+              
+              {/* Hours */}
+              <div className="flex items-center gap-2 text-sm">
+                <Clock className="h-4 w-4 text-[var(--pk-green)]" />
+                <span className="text-[var(--text-secondary)]">يومياً: <span className="ltr-text font-medium" dir="ltr">10AM - 12AM</span></span>
+              </div>
             </div>
           </div>
 
           {/* Footer Bottom */}
-          <div className="border-t border-[var(--border-light)] mt-10 pt-8 text-center">
-            <p className="text-[var(--text-secondary)]">&copy; {new Date().getFullYear()} بيكابو. جميع الحقوق محفوظة.</p>
-            <p className="font-heading text-lg text-[var(--pk-orange)] mt-2">بيكابو يصنع السعادة ✨</p>
+          <div className="border-t border-[var(--border-light)] mt-8 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-[var(--text-secondary)]">&copy; {new Date().getFullYear()} بيكابو. جميع الحقوق محفوظة.</p>
             
             {/* Trust Badge - Payment Methods */}
-            <div className="mt-6 flex justify-center">
-              <div className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)] bg-white/80 px-4 py-2 rounded-full shadow-sm">
-                <PaymentCardIcons className="order-1 rtl:order-2 [&_svg]:h-6 [&_svg]:w-auto" />
-                <span className="order-2 rtl:order-1 font-medium">نقبل فيزا وماستركارد</span>
-              </div>
+            <div className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+              <PaymentCardIcons className="[&_svg]:h-5 [&_svg]:w-auto" />
+              <span className="font-medium">نقبل فيزا وماستركارد</span>
             </div>
           </div>
         </div>
