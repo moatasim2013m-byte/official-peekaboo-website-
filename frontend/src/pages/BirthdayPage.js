@@ -20,6 +20,11 @@ export default function BirthdayPage() {
   const { isAuthenticated, api } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    document.title = 'حفلات أعياد الميلاد | بيكابو';
+  }, []);
+  
   const [date, setDate] = useState(addDays(new Date(), 7));
   const [slots, setSlots] = useState([]);
   const [themes, setThemes] = useState([]);

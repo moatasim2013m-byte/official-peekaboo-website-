@@ -13,6 +13,13 @@ import { Clock, Users, Loader2, AlertCircle, Star, Sun, Moon } from 'lucide-reac
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import { PaymentCardIcons } from '../components/PaymentCardIcons';
 
+// Set page title
+const usePageTitle = () => {
+  useEffect(() => {
+    document.title = 'احجز وقت اللعب | بيكابو';
+  }, []);
+};
+
 // Morning pricing constant
 const MORNING_PRICE_PER_HOUR = 3.5;
 

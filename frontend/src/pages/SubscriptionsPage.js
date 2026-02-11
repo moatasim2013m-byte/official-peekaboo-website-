@@ -15,6 +15,11 @@ export default function SubscriptionsPage() {
   const { isAuthenticated, api } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  
+  useEffect(() => {
+    document.title = 'باقات الاشتراك | بيكابو';
+  }, []);
+  
   const [plans, setPlans] = useState([]);
   const [children, setChildren] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
