@@ -143,14 +143,49 @@ export const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Navigation - Pills visible on Homepage, hamburger on other pages */}
+          {!isAdmin && isHomePage && (
+            <div className="md:hidden flex items-center gap-2 overflow-x-auto scrollbar-hide">
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`nav-pill ${item.pill} ${isActive(item.path) ? 'active' : ''} whitespace-nowrap text-sm`}
+                  data-testid={`mobile-${item.testId}`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {/* Mobile Menu Button - Only show on non-homepage or for auth actions */}
           <button
-            className="md:hidden p-2"
+            className={`md:hidden p-2 ${isHomePage && !isAdmin ? 'hidden' : ''}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             data-testid="mobile-menu-toggle"
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
+
+          {/* Mobile Auth Button on Homepage */}
+          {isHomePage && !isAdmin && (
+            <div className="md:hidden">
+              {isAuthenticated ? (
+                <Link to="/profile">
+                  <Button variant="outline" size="sm" className="rounded-full">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </Link>
+              ) : (
+                <Link to="/login">
+                  <Button size="sm" className="rounded-full btn-playful text-sm">
+                    دخول
+                  </Button>
+                </Link>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Mobile Menu */}
