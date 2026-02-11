@@ -161,8 +161,12 @@ if (frontendBuildPath) {
 
 // ==================== GLOBAL ERROR HANDLER ====================
 app.use((err, req, res, next) => {
-  console.error('[GLOBAL_ERROR]', err.message || err);
-  console.error('[GLOBAL_ERROR_STACK]', err.stack);
+  console.error('[GLOBAL_ERROR]', {
+    method: req.method,
+    url: req.originalUrl,
+    message: err.message,
+    stack: err.stack
+  });
   res.status(err.status || 500).json({ error: 'حدث خطأ في الخادم' });
 });
 
