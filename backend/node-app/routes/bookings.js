@@ -106,7 +106,8 @@ const awardLoyaltyPoints = async (userId, paymentId, source) => {
 // Create hourly booking (after payment confirmed) - supports multiple children
 router.post('/hourly', authMiddleware, async (req, res) => {
   try {
-    const { slot_id, child_ids, child_id, payment_id, amount, duration_hours, custom_notes } = req.body;
+    const { slot_id, child_ids, child_id, payment_id, duration_hours, custom_notes } = req.body;
+    // NOTE: req.body.amount is intentionally IGNORED for security - price computed server-side
     
     // Support both child_ids array and legacy child_id
     const childIdList = child_ids || (child_id ? [child_id] : []);
@@ -144,9 +145,21 @@ router.post('/hourly', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'طفل غير صالح' });
     }
 
+    // SECURITY: Compute price server-side using slot start_time for Happy Hour pricing
+    const hours = parseInt(duration_hours) || 2;
+    const basePrice = await getHourlyPrice(hours, slot.start_time);
+    const totalAmount = basePrice * childIdList.length;
+    
+    // Safety check: computed amount must be valid
+    if (!totalAmount || isNaN(totalAmount) || totalAmount <= 0) {
+      await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: -childIdList.length } });
+      return res.status(400).json({ error: 'خطأ في حساب السعر' });
+    }
+    
+    const pricePerChild = totalAmount / childIdList.length;
+
     // Create a booking for each child
     const bookings = [];
-    const pricePerChild = amount / childIdList.length;
     
     for (const cid of childIdList) {
       const booking_code = `PK-H-${randomUUID().substring(0, 8).toUpperCase()}`;
