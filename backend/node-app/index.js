@@ -30,6 +30,16 @@ const apiLimiter = rateLimit({
   legacyHeaders: false
 });
 
+// Strict rate limiting for auth endpoints (login, forgot-password)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // 10 requests per 15 minutes per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.method === 'OPTIONS', // Allow CORS preflight
+  message: { error: 'محاولات كثيرة جداً، الرجاء المحاولة بعد 15 دقيقة' }
+});
+
 app.use('/api', apiLimiter);
 
 // Serve uploaded images
