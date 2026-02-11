@@ -197,11 +197,11 @@ h2 {
 }
 
 .brand-logo-lg {
-    height: 48px;
+    height: 56px;
 }
 
 @media (min-width: 768px) {
-    .brand-logo-lg { height: 56px; }
+    .brand-logo-lg { height: 72px; }
 }
 
 /* Customer Navbar - Clean white with subtle cloud feel */
