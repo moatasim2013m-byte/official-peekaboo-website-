@@ -14,7 +14,6 @@ import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
 import { Cake, Users, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
-import { PaymentCardIcons } from '../components/PaymentCardIcons';
 
 export default function BirthdayPage() {
   const { isAuthenticated, api } = useAuth();

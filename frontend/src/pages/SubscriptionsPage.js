@@ -9,7 +9,6 @@ import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
 import { Star, Check, Loader2 } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
-import { PaymentCardIcons } from '../components/PaymentCardIcons';
 
 export default function SubscriptionsPage() {
   const { isAuthenticated, api } = useAuth();

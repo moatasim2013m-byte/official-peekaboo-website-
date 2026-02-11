@@ -11,7 +11,6 @@ import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
 import { Clock, Users, Loader2, AlertCircle, Star, Sun, Moon } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
-import { PaymentCardIcons } from '../components/PaymentCardIcons';
 
 // Morning pricing constant
 const MORNING_PRICE_PER_HOUR = 3.5;
