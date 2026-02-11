@@ -59,6 +59,10 @@ const profileRoutes = require('./routes/profile');
 const themesRoutes = require('./routes/themes');
 
 // Routes
+// Apply strict auth limiter to sensitive endpoints
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/forgot-password', authLimiter);
+
 app.use('/api/auth', authRoutes);
 app.use('/api/slots', slotsRoutes);
 app.use('/api/bookings', bookingsRoutes);
