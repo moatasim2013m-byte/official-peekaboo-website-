@@ -8,6 +8,9 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ['parent', 'admin', 'staff'], default: 'parent' },
   loyalty_points: { type: Number, default: 0 },
   is_disabled: { type: Boolean, default: false },
+  email_verified: { type: Boolean, default: false },
+  email_verify_token: { type: String, default: null },
+  email_verify_expires: { type: Date, default: null },
   reset_token: { type: String },
   reset_token_expires: { type: Date },
   created_at: { type: Date, default: Date.now }
@@ -22,6 +25,8 @@ userSchema.set('toJSON', {
     delete ret.password_hash;
     delete ret.reset_token;
     delete ret.reset_token_expires;
+    delete ret.email_verify_token;
+    delete ret.email_verify_expires;
     return ret;
   }
 });
