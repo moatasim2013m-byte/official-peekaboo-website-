@@ -197,9 +197,16 @@ router.post('/consume', authMiddleware, async (req, res) => {
   try {
     const { child_id } = req.body;
     
-    // Find subscription that is pending or active
+    // SECURITY: Verify child belongs to authenticated parent
+    const child = await Child.findOne({ _id: child_id, parent_id: req.userId });
+    if (!child) {
+      return res.status(403).json({ error: 'غير مصرح: الطفل لا ينتمي لحسابك' });
+    }
+    
+    // Find subscription that is pending or active AND belongs to this parent
     const subscription = await UserSubscription.findOne({
       child_id,
+      user_id: req.userId, // SECURITY: Ensure subscription belongs to authenticated user
       status: { $in: ['pending', 'active'] },
       remaining_visits: { $gt: 0 },
       $or: [
@@ -209,7 +216,7 @@ router.post('/consume', authMiddleware, async (req, res) => {
     }).populate('plan_id').populate('child_id');
 
     if (!subscription) {
-      return res.status(400).json({ error: 'No active subscription found for this child' });
+      return res.status(404).json({ error: 'لا يوجد اشتراك فعال لهذا الطفل' });
     }
 
     // If this is the first check-in (pending status), activate and set expiry
