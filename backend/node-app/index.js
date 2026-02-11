@@ -2,6 +2,17 @@ require('dotenv').config();
 console.log('BOOT_START');
 console.log('PORT', process.env.PORT);
 
+// ==================== PROCESS ERROR HANDLERS ====================
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[UNHANDLED_REJECTION]', reason);
+  console.error('[UNHANDLED_REJECTION_STACK]', reason?.stack || 'no stack');
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('[UNCAUGHT_EXCEPTION]', err.message);
+  console.error('[UNCAUGHT_EXCEPTION_STACK]', err.stack);
+});
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
