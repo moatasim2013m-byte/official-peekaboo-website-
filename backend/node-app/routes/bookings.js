@@ -459,10 +459,14 @@ router.post('/birthday', authMiddleware, async (req, res) => {
     
     // Capacity already incremented atomically
 
-    // Send confirmation email
+    // Send confirmation email (non-blocking)
     const user = await User.findById(req.userId);
     const template = emailTemplates.birthdayConfirmation(booking, slot, child, theme);
-    await sendEmail(user.email, template.subject, template.html);
+    try {
+      await sendEmail(user.email, template.subject, template.html);
+    } catch (emailErr) {
+      console.error('BIRTHDAY_BOOKING_EMAIL_ERROR', emailErr.message || emailErr);
+    }
 
     res.status(201).json({ booking: booking.toJSON() });
   } catch (error) {
@@ -533,10 +537,14 @@ router.post('/birthday/offline', authMiddleware, async (req, res) => {
 
     await booking.save();
 
-    // Send confirmation email
+    // Send confirmation email (non-blocking)
     const user = await User.findById(req.userId);
     const template = emailTemplates.birthdayConfirmation(booking, slot, child, theme);
-    await sendEmail(user.email, template.subject, template.html);
+    try {
+      await sendEmail(user.email, template.subject, template.html);
+    } catch (emailErr) {
+      console.error('BIRTHDAY_OFFLINE_EMAIL_ERROR', emailErr.message || emailErr);
+    }
 
     res.status(201).json({ 
       booking: booking.toJSON(),
