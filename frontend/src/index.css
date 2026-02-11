@@ -502,17 +502,17 @@ code {
 /* ===== WONDERLAND CARDS ===== */
 .pk-card {
     background: white;
-    border-radius: var(--radius-xl) !important;
-    box-shadow: var(--shadow-card);
+    border-radius: 22px !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     border: none !important;
     overflow: hidden;
     position: relative;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .pk-card:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.12);
 }
 
 /* Colorful top accent strip - thicker */
