@@ -27,6 +27,11 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Email, password and name are required' });
     }
 
+    // Password minimum length validation
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل' });
+    }
+
     // SECURITY: Require FRONTEND_URL to prevent open redirect
     if (!process.env.FRONTEND_URL) {
       console.error('REGISTER_ERROR: FRONTEND_URL environment variable is missing');
