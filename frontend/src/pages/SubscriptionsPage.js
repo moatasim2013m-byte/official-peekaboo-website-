@@ -122,25 +122,27 @@ export default function SubscriptionsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-hero-gradient py-8 md:py-12" dir="rtl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="font-heading text-4xl md:text-5xl font-bold text-foreground mb-4" data-testid="subscriptions-title">
-            <Star className="inline-block h-10 w-10 text-secondary ml-2" />
+    <div className="min-h-screen py-8 md:py-12" dir="rtl">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Page Header */}
+        <div className="text-center mb-10">
+          <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3" data-testid="subscriptions-title">
+            <Star className="inline-block h-9 w-9 text-secondary ml-2" />
             باقات الاشتراك
           </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            وفّر أكثر مع باقات الزيارات. كل باقة صالحة لمدة 30 يومًا ويمكن استخدامها لأي طفل.
+          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
+            وفّر أكثر مع باقات الزيارات. صالحة لمدة 30 يومًا.
           </p>
         </div>
 
         {loadingPlans ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 mb-12">
+            {/* Plans Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 mb-10">
               {plans.map((plan, index) => {
                 const tier = getPlanTier(index);
                 const isPopular = index === 1;
@@ -150,55 +152,52 @@ export default function SubscriptionsPage() {
                     key={plan.id}
                     onClick={() => setSelectedPlan(plan)}
                     className={`pk-card cursor-pointer transition-all relative ${
-                      selectedPlan?.id === plan.id 
-                        ? 'ring-4 ring-[#FFD93B]/30 shadow-lg' 
-                        : 'hover:shadow-lg'
-                    } ${isPopular ? 'md:-mt-6 md:mb-6 shadow-xl' : ''}`}
+                      selectedPlan?.id === plan.id ? 'ring-2 ring-[#FFD93B] shadow-lg' : 'hover:shadow-lg'
+                    } ${isPopular ? 'md:-mt-4 md:mb-4' : ''}`}
                     data-testid={`plan-${plan.id}`}
                   >
-                    <div className={`pk-card-accent ${isPopular ? 'accent-rainbow' : tier === 'basic' ? 'accent-green' : tier === 'standard' ? 'accent-yellow' : 'accent-orange'}`} />
+                    <div className={`pk-card-accent ${isPopular ? 'accent-rainbow' : tier === 'basic' ? 'accent-green' : 'accent-orange'}`} />
                     {isPopular && (
-                      <div className="absolute top-2 left-0 right-0 bg-gradient-to-r from-[#FFD93B] to-[#FF924C] text-white text-center py-2 text-sm font-bold rounded-t-[20px]">
+                      <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-[#FFD93B] to-[#FF924C] text-white text-center py-1.5 text-xs font-bold rounded-t-[22px]">
                         ⭐ الأكثر شعبية
                       </div>
                     )}
-                    <CardHeader className={`text-center pb-4 ${isPopular ? 'pt-14' : 'pt-8'}`}>
-                      <CardTitle className="pk-card-title text-2xl">
+                    <CardHeader className={`text-center pb-3 ${isPopular ? 'pt-10' : 'pt-6'}`}>
+                      <CardTitle className="font-heading text-xl font-bold">
                         {plan.name_ar || t(plan.name) || plan.name}
                       </CardTitle>
-                      <CardDescription className="text-slate-500">
+                      <CardDescription className="text-xs">
                         {plan.description_ar || t(plan.description) || plan.description}
                       </CardDescription>
                     </CardHeader>
-                    <CardContent className="text-center">
-                      <div className="mb-6">
-                        <span className="text-4xl md:text-5xl font-heading font-bold text-slate-800">{plan.price}</span>
-                        <span className="text-lg text-slate-500 mr-1">JD</span>
+                    <CardContent className="text-center pb-6">
+                      <div className="mb-4">
+                        <span className="text-4xl font-heading font-bold text-slate-800">{plan.price}</span>
+                        <span className="text-sm text-slate-500 mr-1">دينار</span>
                       </div>
                       
-                      <div className="bg-gradient-to-r from-[#FFD93B]/20 to-[#FF924C]/20 rounded-2xl p-4 mb-6">
-                        <span className="text-3xl font-heading font-bold text-[#FF924C]">{plan.visits}</span>
-                        <span className="text-slate-600 mr-2">زيارة</span>
+                      <div className="bg-gradient-to-r from-[#FFD93B]/20 to-[#FF924C]/20 rounded-xl p-3 mb-4">
+                        <span className="text-2xl font-heading font-bold text-[#FF924C]">{plan.visits}</span>
+                        <span className="text-slate-600 mr-1 text-sm">زيارة</span>
                       </div>
 
                       {/* Validity Days Notice */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 mb-4 text-center">
-                        <p className="text-sm font-bold text-blue-700">صالحة من الأحد إلى الخميس فقط</p>
-                        <p className="text-xs text-blue-600 mt-1">لا تشمل الجمعة والسبت</p>
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mb-4 text-center">
+                        <p className="text-xs font-bold text-blue-700">صالحة من الأحد إلى الخميس</p>
                       </div>
 
-                      <ul className="space-y-3 text-right" dir="rtl">
-                        {planFeatures[tier]?.map((feature, i) => (
-                          <li key={i} className="flex items-center gap-2">
-                            <Check className="h-5 w-5 text-[#8AC926] flex-shrink-0" />
-                            <span className="text-sm text-slate-600">{feature}</span>
+                      <ul className="space-y-2 text-right mb-4" dir="rtl">
+                        {planFeatures[tier]?.slice(0, 3).map((feature, i) => (
+                          <li key={i} className="flex items-center gap-2 text-xs">
+                            <Check className="h-4 w-4 text-[#8AC926] flex-shrink-0" />
+                            <span className="text-slate-600">{feature}</span>
                           </li>
                         ))}
                       </ul>
 
                       <Button
                         variant={selectedPlan?.id === plan.id ? 'default' : 'outline'}
-                        className={`w-full rounded-full mt-6 h-12 text-base font-semibold ${
+                        className={`w-full rounded-full h-10 text-sm font-semibold ${
                           selectedPlan?.id === plan.id 
                             ? 'bg-[#FFD93B] hover:bg-[#FFD93B]/90 text-slate-800' 
                             : 'border-2 hover:border-[#FFD93B] hover:bg-[#FFD93B]/10'
@@ -214,22 +213,17 @@ export default function SubscriptionsPage() {
 
             {/* Purchase Section */}
             {isAuthenticated ? (
-              <Card className="border-2 rounded-3xl max-w-2xl mx-auto">
-                <CardHeader>
-                  <CardTitle className="font-heading">أكمل عملية الشراء</CardTitle>
+              <Card className="booking-card max-w-xl mx-auto">
+                <CardHeader className="booking-card-header">
+                  <CardTitle className="booking-card-title">أكمل عملية الشراء</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-6">
+                <CardContent className="py-5 space-y-5">
                   <div>
                     <label className="block text-sm font-medium mb-2">اختر الطفل</label>
                     {children.length === 0 ? (
-                      <div className="text-muted-foreground">
+                      <div className="text-muted-foreground text-sm">
                         <p className="mb-2">لم يتم إضافة أطفال بعد</p>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => navigate('/profile')}
-                          className="rounded-full"
-                        >
+                        <Button variant="outline" size="sm" onClick={() => navigate('/profile')} className="rounded-full">
                           إضافة طفل
                         </Button>
                       </div>
@@ -240,45 +234,33 @@ export default function SubscriptionsPage() {
                         </SelectTrigger>
                         <SelectContent>
                           {children.map((child) => (
-                            <SelectItem key={child.id} value={child.id}>
-                              {child.name}
-                            </SelectItem>
+                            <SelectItem key={child.id} value={child.id}>{child.name}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     )}
                   </div>
 
-                  {/* Payment Method */}
                   <div className="pt-4 border-t">
-                    <PaymentMethodSelector 
-                      value={paymentMethod} 
-                      onChange={setPaymentMethod} 
-                    />
+                    <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
                   </div>
 
-                  {/* Summary & Purchase */}
-                  <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-4 border-t">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t">
                     {selectedPlan && (
-                      <div className="text-center md:text-right">
-                        <p className="text-sm text-muted-foreground">الباقة المختارة</p>
-                        <p className="font-bold text-xl">{selectedPlan.name_ar || selectedPlan.name}</p>
-                        <p className="font-bold text-2xl text-secondary">{selectedPlan.price} دينار</p>
-                        <p className="text-sm">طريقة الدفع: {paymentMethod === 'cash' ? 'نقداً' : paymentMethod === 'card' ? 'بطاقة' : 'CliQ'}</p>
+                      <div className="text-center sm:text-right">
+                        <p className="text-xs text-muted-foreground">الباقة المختارة</p>
+                        <p className="font-bold">{selectedPlan.name_ar || selectedPlan.name}</p>
+                        <p className="font-bold text-xl text-secondary">{selectedPlan.price} د</p>
                       </div>
                     )}
                     <Button
                       onClick={handlePurchase}
                       disabled={!selectedPlan || !selectedChild || loading}
-                      className="w-full md:w-auto px-8 rounded-full h-12 btn-playful bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                      className="w-full sm:w-auto px-8 rounded-full h-11 btn-playful bg-secondary hover:bg-secondary/90 text-secondary-foreground"
                       data-testid="purchase-btn"
-                      aria-label="اشترِ الآن - يقبل بطاقات فيزا وماستركارد"
                     >
                       {loading ? (
-                        <>
-                          <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                          جاري المعالجة...
-                        </>
+                        <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري المعالجة...</>
                       ) : (
                         <span className="inline-flex items-center gap-2">
                           <PaymentCardIcons />
@@ -290,16 +272,12 @@ export default function SubscriptionsPage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="border-2 rounded-3xl max-w-2xl mx-auto bg-secondary/5">
+              <Card className="booking-card max-w-xl mx-auto bg-secondary/5">
                 <CardContent className="py-8 text-center">
-                  <p className="text-lg mb-4">الرجاء تسجيل الدخول أو إنشاء حساب لإتمام الشراء</p>
+                  <p className="text-base mb-4">سجّل الدخول أو أنشئ حساب لإتمام الشراء</p>
                   <div className="flex gap-4 justify-center">
-                    <Button onClick={() => navigate('/login')} variant="outline" className="rounded-full">
-                      تسجيل الدخول
-                    </Button>
-                    <Button onClick={() => navigate('/register')} className="rounded-full btn-playful bg-secondary text-secondary-foreground">
-                      إنشاء حساب
-                    </Button>
+                    <Button onClick={() => navigate('/login')} variant="outline" className="rounded-full">تسجيل الدخول</Button>
+                    <Button onClick={() => navigate('/register')} className="rounded-full btn-playful bg-secondary text-secondary-foreground">إنشاء حساب</Button>
                   </div>
                 </CardContent>
               </Card>
