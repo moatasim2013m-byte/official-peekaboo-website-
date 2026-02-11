@@ -22,6 +22,7 @@ export const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isActive = (path) => location.pathname === path;
+  const isHomePage = location.pathname === '/';
 
   // Single source of truth for navigation items (same order for desktop & mobile)
   const navItems = [
