@@ -187,11 +187,15 @@ router.post('/hourly', authMiddleware, async (req, res) => {
       await awardLoyaltyPoints(req.userId, payment_id, 'hourly');
     }
 
-    // Send confirmation email
+    // Send confirmation email (non-blocking)
     const user = await User.findById(req.userId);
     const childNames = validChildren.map(c => c.name).join(', ');
     const template = emailTemplates.bookingConfirmation(bookings[0], slot, { name: childNames });
-    await sendEmail(user.email, template.subject, template.html);
+    try {
+      await sendEmail(user.email, template.subject, template.html);
+    } catch (emailErr) {
+      console.error('HOURLY_BOOKING_EMAIL_ERROR', emailErr.message || emailErr);
+    }
 
     res.status(201).json({ bookings: bookings.map(b => b.toJSON()) });
   } catch (error) {
@@ -285,11 +289,15 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
       bookings.push(booking);
     }
 
-    // Send confirmation email
+    // Send confirmation email (non-blocking)
     const user = await User.findById(req.userId);
     const childNames = validChildren.map(c => c.name).join(', ');
     const template = emailTemplates.bookingConfirmation(bookings[0], slot, { name: childNames });
-    await sendEmail(user.email, template.subject, template.html);
+    try {
+      await sendEmail(user.email, template.subject, template.html);
+    } catch (emailErr) {
+      console.error('HOURLY_OFFLINE_EMAIL_ERROR', emailErr.message || emailErr);
+    }
 
     res.status(201).json({ 
       bookings: bookings.map(b => b.toJSON()),
