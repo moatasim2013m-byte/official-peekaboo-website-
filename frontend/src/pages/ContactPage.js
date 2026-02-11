@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -6,6 +7,10 @@ import { Textarea } from '../components/ui/textarea';
 import { ChevronLeft, MapPin, Phone, Clock, MessageCircle, Mail } from 'lucide-react';
 
 export default function ContactPage() {
+  useEffect(() => {
+    document.title = 'تواصل معنا | بيكابو';
+  }, []);
+
   return (
     <div className="min-h-screen py-8 md:py-12" dir="rtl">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">

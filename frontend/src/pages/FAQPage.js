@@ -1,8 +1,13 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/card';
 import { ChevronLeft, HelpCircle } from 'lucide-react';
 
 export default function FAQPage() {
+  useEffect(() => {
+    document.title = 'الأسئلة الشائعة | بيكابو';
+  }, []);
+
   const faqs = [
     {
       q: 'ما هي ساعات العمل؟',

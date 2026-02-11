@@ -1,8 +1,13 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/card';
 import { ChevronLeft, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 
 export default function RulesPage() {
+  useEffect(() => {
+    document.title = 'قواعد المركز | بيكابو';
+  }, []);
+
   const mustDo = [
     'ارتداء جوارب نظيفة داخل منطقة اللعب',
     'بقاء أحد الوالدين أو مرافق بالغ مع الطفل',

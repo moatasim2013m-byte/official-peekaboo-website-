@@ -1,9 +1,14 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/card';
 import { ChevronLeft, Heart, Shield, Sparkles, Users } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 
 export default function AboutPage() {
+  useEffect(() => {
+    document.title = 'من نحن | بيكابو';
+  }, []);
+
   return (
     <div className="min-h-screen py-8 md:py-12" dir="rtl">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
