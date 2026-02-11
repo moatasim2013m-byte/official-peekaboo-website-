@@ -88,7 +88,7 @@ const emailTemplates = {
   }),
 
   emailVerification: (verifyUrl) => ({
-    subject: '✉️ تأكيد حسابك في بيكابو',
+    subject: 'تأكيد حسابك في بيكابو',
     html: `
       <!DOCTYPE html>
       <html dir="rtl" lang="ar">
@@ -102,6 +102,7 @@ const emailTemplates = {
           .content { background: #E8F6FF; border-radius: 16px; padding: 20px; margin: 20px 0; text-align: center; color: #2C3E50; }
           .btn { display: inline-block; background: #26de81; color: white; padding: 16px 32px; border-radius: 50px; text-decoration: none; margin: 20px 0; font-weight: bold; }
           .note { font-size: 14px; color: #7F8C8D; text-align: center; margin-top: 16px; }
+          .link-fallback { font-size: 12px; color: #7F8C8D; word-break: break-all; margin-top: 12px; }
           .footer { text-align: center; color: #7F8C8D; font-size: 14px; margin-top: 24px; padding-top: 20px; border-top: 1px solid #EAEDED; }
         </style>
       </head>
@@ -116,6 +117,7 @@ const emailTemplates = {
           <p style="text-align: center;">
             <a href="${verifyUrl}" class="btn">تأكيد البريد الإلكتروني</a>
           </p>
+          <p class="link-fallback">أو انسخ الرابط التالي:<br/>${verifyUrl}</p>
           <p class="note">⚠️ سينتهي هذا الرابط خلال 24 ساعة.</p>
           <div class="footer">
             <p>فريق بيكابو 🎪</p>
