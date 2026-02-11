@@ -535,22 +535,22 @@ code {
 
 /* Icon badge - circular with shadow */
 .pk-icon-badge {
-    width: 72px;
-    height: 72px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 auto 1.25rem;
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
 }
 
-.pk-icon-badge.badge-blue { background: var(--pk-blue); }
-.pk-icon-badge.badge-pink { background: var(--pk-red); }
-.pk-icon-badge.badge-yellow { background: var(--pk-yellow); }
-.pk-icon-badge.badge-green { background: var(--pk-green); }
-.pk-icon-badge.badge-orange { background: var(--pk-orange); }
-.pk-icon-badge.badge-purple { background: var(--pk-purple); }
+.pk-icon-badge.badge-blue { background: linear-gradient(135deg, #45aaf2, #2d98da); }
+.pk-icon-badge.badge-pink { background: linear-gradient(135deg, #ff6b81, #ff4757); }
+.pk-icon-badge.badge-yellow { background: linear-gradient(135deg, #ffd93d, #f0c419); }
+.pk-icon-badge.badge-green { background: linear-gradient(135deg, #26de81, #20bf6b); }
+.pk-icon-badge.badge-orange { background: linear-gradient(135deg, #ff9f43, #ee8b2f); }
+.pk-icon-badge.badge-purple { background: linear-gradient(135deg, #a55eea, #8854d0); }
 
 /* Card title styling */
 .pk-card-title {
