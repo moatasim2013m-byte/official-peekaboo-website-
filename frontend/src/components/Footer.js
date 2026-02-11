@@ -35,10 +35,10 @@ export const Footer = () => {
               
               {/* Social Links */}
               <div className="flex gap-3">
-                <a href="https://www.instagram.com/peekaboo.jor" target="_blank" rel="noopener noreferrer" className="footer-social-link">
+                <a href="https://www.instagram.com/peekaboo_playtime?igsh=cDc1eDQxZmVsZHM%3D&utm_source=qr" target="_blank" rel="noreferrer" className="footer-social-link">
                   Instagram
                 </a>
-                <a href="https://www.facebook.com/peekaboo.jor" target="_blank" rel="noopener noreferrer" className="footer-social-link">
+                <a href="https://www.facebook.com/profile.php?id=61573636087726" target="_blank" rel="noreferrer" className="footer-social-link">
                   Facebook
                 </a>
               </div>
@@ -78,7 +78,9 @@ export const Footer = () => {
               <div className="mb-4">
                 <div className="flex items-start gap-2 text-sm text-[var(--text-secondary)]">
                   <MapPin className="h-4 w-4 mt-0.5 text-[var(--pk-blue)]" />
-                  <span>ابو راشد مجمع السيف التجاري, إربد</span>
+                  <a href="https://share.google/30qIenCYvngQpVUqJ" target="_blank" rel="noreferrer" className="hover:text-[var(--pk-blue)] hover:underline">
+                    ابو راشد مجمع السيف التجاري, إربد
+                  </a>
                 </div>
               </div>
               
