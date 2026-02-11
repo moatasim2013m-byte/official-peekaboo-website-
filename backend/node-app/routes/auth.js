@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
 const { getJwtSecret, authMiddleware } = require('../middleware/auth');
-const { sendVerificationEmail, isResendConfigured, getSenderEmail, getSenderFrom } = require('../utils/email');
+const { sendVerificationEmail, sendEmail, emailTemplates, isResendConfigured, getSenderEmail, getSenderFrom } = require('../utils/email');
 
 const router = express.Router();
 
@@ -64,7 +64,7 @@ router.post('/register', async (req, res) => {
     }
 
     // Send verification email
-    const frontendUrl = process.env.FRONTEND_URL || origin_url || req.headers.origin || 'https://peekaboo-wonderland.preview.emergentagent.com';
+    const frontendUrl = process.env.FRONTEND_URL || origin_url || req.headers.origin || 'https://financedefend.preview.emergentagent.com';
     const verifyUrl = `${frontendUrl}/verify-email?token=${verifyToken}`;
     
     const emailResult = await sendVerificationEmail(user.email, verifyUrl);
