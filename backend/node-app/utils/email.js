@@ -11,8 +11,10 @@ const SENDER_FROM = `${SENDER_NAME} <${SENDER_EMAIL}>`;
 /**
  * Send email using Resend - SINGLE function for ALL emails (bookings + verification)
  * This is the working pipeline used by booking confirmations
+ * Returns full Resend response including id
  */
 const sendEmail = async (to, subject, html) => {
+  console.log(`[EMAIL_SENDING] to=${to} from=${SENDER_FROM} subject=${subject.substring(0, 50)}`);
   const result = await resend.emails.send({
     from: SENDER_FROM,
     replyTo: SENDER_EMAIL,
@@ -20,7 +22,27 @@ const sendEmail = async (to, subject, html) => {
     subject,
     html
   });
+  const emailId = result?.data?.id || result?.id || null;
+  console.log(`[EMAIL_SENT] to=${to} id=${emailId}`);
   return result;
+};
+
+/**
+ * Get email status from Resend by id
+ * Returns status data or error message if API not supported
+ */
+const getEmailStatus = async (id) => {
+  try {
+    // Resend SDK supports .get() to retrieve email by id
+    const result = await resend.emails.get(id);
+    return { success: true, data: result?.data || result };
+  } catch (error) {
+    // If .get() is not available or fails
+    if (error.message?.includes('is not a function')) {
+      return { success: false, error: 'status_api_not_supported' };
+    }
+    return { success: false, error: error.message };
+  }
 };
 
 /**
