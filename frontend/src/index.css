@@ -928,6 +928,24 @@ code {
     transform: translateY(-2px);
 }
 
+/* Footer Social Links */
+.footer-social-link {
+    display: inline-block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--pk-blue);
+    padding: 0.375rem 0.75rem;
+    border-radius: var(--radius-full);
+    background: var(--pk-bg-light-blue);
+    transition: all 0.2s ease;
+}
+
+.footer-social-link:hover {
+    background: var(--pk-blue);
+    color: white;
+    transform: translateY(-1px);
+}
+
 /* Footer Hours Box */
 .footer-hours-new {
     display: flex;
