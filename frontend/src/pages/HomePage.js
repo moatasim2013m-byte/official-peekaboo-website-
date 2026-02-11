@@ -166,7 +166,7 @@ export default function HomePage() {
                   بيكابو يصنع السعادة
                 </h1>
                 <div className="hero-title-underline mx-auto lg:mx-0"></div>
-                <p className="text-base sm:text-lg text-muted-foreground mt-6 leading-relaxed max-w-lg mx-auto lg:mx-0">
+                <p className="text-base sm:text-lg text-muted-foreground mt-6 leading-relaxed max-w-[520px] mx-auto lg:mx-0 opacity-85">
                   {heroConfig.subtitle}
                 </p>
               </div>
