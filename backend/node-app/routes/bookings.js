@@ -250,6 +250,13 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
     const hours = parseInt(duration_hours) || 2;
     const basePrice = await getHourlyPrice(hours, slot_start_time);
     const totalAmount = basePrice * childIdList.length;
+    
+    // Safety check: computed amount must be valid
+    if (!totalAmount || isNaN(totalAmount) || totalAmount <= 0) {
+      await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: -childIdList.length } });
+      return res.status(400).json({ error: 'خطأ في حساب السعر' });
+    }
+    
     const pricePerChild = totalAmount / childIdList.length;
 
     // Create a booking for each child
