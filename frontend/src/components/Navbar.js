@@ -43,10 +43,12 @@ export const Navbar = () => {
     <nav className={`sticky top-0 z-50 ${isCustomerNav ? 'navbar-customer' : 'bg-white border-b border-border shadow-sm'}`} dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20 py-3">
-          {/* Logo with Pill Container */}
-          <Link to="/" className="brand-logo-pill" data-testid="nav-logo">
-            <img src={logoImg} alt="بيكابو" className="brand-logo-lg" />
-          </Link>
+          {/* Logo with Pill Container - wrapped for mobile positioning */}
+          <div className="nav-logo-wrap">
+            <Link to="/" className="brand-logo-pill" data-testid="nav-logo">
+              <img src={logoImg} alt="بيكابو" className="brand-logo-lg" />
+            </Link>
+          </div>
 
           {/* Desktop Navigation - Show only for non-admin users */}
           {!isAdmin && (
