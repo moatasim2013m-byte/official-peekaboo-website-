@@ -691,4 +691,248 @@ router.delete('/blackouts/:id', async (req, res) => {
   }
 });
 
+// ==================== CUSTOMERS MANAGEMENT ====================
+
+// Get all customers (parents) with search
+router.get('/customers', async (req, res) => {
+  try {
+    const { search, page = 1, limit = 50 } = req.query;
+    const query = { role: 'parent' };
+    
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+        { phone: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    const customers = await User.find(query)
+      .select('name email phone loyalty_points is_disabled created_at')
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .sort({ created_at: -1 });
+
+    // Get children count for each customer
+    const customerIds = customers.map(c => c._id);
+    const childrenCounts = await Child.aggregate([
+      { $match: { parent_id: { $in: customerIds } } },
+      { $group: { _id: '$parent_id', count: { $sum: 1 } } }
+    ]);
+    
+    const childCountMap = {};
+    childrenCounts.forEach(c => { childCountMap[c._id.toString()] = c.count; });
+
+    const total = await User.countDocuments(query);
+
+    res.json({
+      customers: customers.map(c => ({
+        ...c.toJSON(),
+        children_count: childCountMap[c._id.toString()] || 0
+      })),
+      total,
+      page: parseInt(page),
+      pages: Math.ceil(total / limit)
+    });
+  } catch (error) {
+    console.error('Get customers error:', error);
+    res.status(500).json({ error: 'Failed to get customers' });
+  }
+});
+
+// Get single customer details with related data
+router.get('/customers/:id', async (req, res) => {
+  try {
+    const customer = await User.findOne({ _id: req.params.id, role: 'parent' });
+    if (!customer) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    // Get children
+    const children = await Child.find({ parent_id: req.params.id });
+    
+    // Get booking summaries
+    const hourlyCount = await HourlyBooking.countDocuments({ user_id: req.params.id });
+    const birthdayCount = await BirthdayBooking.countDocuments({ user_id: req.params.id });
+    
+    // Get last booking date
+    const lastHourly = await HourlyBooking.findOne({ user_id: req.params.id }).sort({ created_at: -1 });
+    const lastBirthday = await BirthdayBooking.findOne({ user_id: req.params.id }).sort({ created_at: -1 });
+    
+    let lastBookingDate = null;
+    if (lastHourly && lastBirthday) {
+      lastBookingDate = lastHourly.created_at > lastBirthday.created_at ? lastHourly.created_at : lastBirthday.created_at;
+    } else {
+      lastBookingDate = lastHourly?.created_at || lastBirthday?.created_at || null;
+    }
+
+    // Get active subscriptions
+    const activeSubscriptions = await UserSubscription.countDocuments({ user_id: req.params.id, status: 'active' });
+
+    res.json({
+      customer: customer.toJSON(),
+      children: children.map(c => c.toJSON()),
+      bookings_summary: {
+        hourly_count: hourlyCount,
+        birthday_count: birthdayCount,
+        active_subscriptions: activeSubscriptions,
+        last_booking_date: lastBookingDate
+      }
+    });
+  } catch (error) {
+    console.error('Get customer error:', error);
+    res.status(500).json({ error: 'Failed to get customer' });
+  }
+});
+
+// Create new customer
+router.post('/customers', async (req, res) => {
+  try {
+    const { name, email, phone } = req.body;
+    
+    if (!name || !email) {
+      return res.status(400).json({ error: 'Name and email are required' });
+    }
+
+    const existing = await User.findOne({ email: email.toLowerCase() });
+    if (existing) {
+      return res.status(400).json({ error: 'Email already exists' });
+    }
+
+    // Generate random password
+    const randomPassword = Math.random().toString(36).slice(-10);
+    const password_hash = await bcrypt.hash(randomPassword, 10);
+    
+    const customer = new User({
+      email: email.toLowerCase(),
+      password_hash,
+      name,
+      phone: phone || null,
+      role: 'parent'
+    });
+    await customer.save();
+
+    res.status(201).json({ customer: customer.toJSON() });
+  } catch (error) {
+    console.error('Create customer error:', error);
+    res.status(500).json({ error: 'Failed to create customer' });
+  }
+});
+
+// Update customer
+router.put('/customers/:id', async (req, res) => {
+  try {
+    const { name, email, phone } = req.body;
+    
+    const customer = await User.findOne({ _id: req.params.id, role: 'parent' });
+    if (!customer) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    // Check email uniqueness if changed
+    if (email && email.toLowerCase() !== customer.email) {
+      const existing = await User.findOne({ email: email.toLowerCase() });
+      if (existing) {
+        return res.status(400).json({ error: 'Email already exists' });
+      }
+      customer.email = email.toLowerCase();
+    }
+
+    if (name) customer.name = name;
+    if (phone !== undefined) customer.phone = phone || null;
+    
+    await customer.save();
+    res.json({ customer: customer.toJSON() });
+  } catch (error) {
+    console.error('Update customer error:', error);
+    res.status(500).json({ error: 'Failed to update customer' });
+  }
+});
+
+// Toggle customer disabled status
+router.patch('/customers/:id/disable', async (req, res) => {
+  try {
+    const customer = await User.findOne({ _id: req.params.id, role: 'parent' });
+    if (!customer) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    customer.is_disabled = !customer.is_disabled;
+    await customer.save();
+    
+    res.json({ 
+      customer: customer.toJSON(),
+      message: customer.is_disabled ? 'Customer disabled' : 'Customer enabled'
+    });
+  } catch (error) {
+    console.error('Toggle customer status error:', error);
+    res.status(500).json({ error: 'Failed to update customer status' });
+  }
+});
+
+// Add child to customer
+router.post('/customers/:id/children', async (req, res) => {
+  try {
+    const { name, birthday } = req.body;
+    
+    if (!name || !birthday) {
+      return res.status(400).json({ error: 'Name and birthday are required' });
+    }
+
+    const customer = await User.findOne({ _id: req.params.id, role: 'parent' });
+    if (!customer) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    const child = new Child({
+      parent_id: req.params.id,
+      name,
+      birthday: new Date(birthday)
+    });
+    await child.save();
+
+    res.status(201).json({ child: child.toJSON() });
+  } catch (error) {
+    console.error('Add child error:', error);
+    res.status(500).json({ error: 'Failed to add child' });
+  }
+});
+
+// Update child
+router.put('/customers/:id/children/:childId', async (req, res) => {
+  try {
+    const { name, birthday } = req.body;
+    
+    const child = await Child.findOne({ _id: req.params.childId, parent_id: req.params.id });
+    if (!child) {
+      return res.status(404).json({ error: 'Child not found' });
+    }
+
+    if (name) child.name = name;
+    if (birthday) child.birthday = new Date(birthday);
+    
+    await child.save();
+    res.json({ child: child.toJSON() });
+  } catch (error) {
+    console.error('Update child error:', error);
+    res.status(500).json({ error: 'Failed to update child' });
+  }
+});
+
+// Delete child
+router.delete('/customers/:id/children/:childId', async (req, res) => {
+  try {
+    const child = await Child.findOne({ _id: req.params.childId, parent_id: req.params.id });
+    if (!child) {
+      return res.status(404).json({ error: 'Child not found' });
+    }
+
+    await Child.deleteOne({ _id: req.params.childId });
+    res.json({ message: 'Child deleted' });
+  } catch (error) {
+    console.error('Delete child error:', error);
+    res.status(500).json({ error: 'Failed to delete child' });
+  }
+});
+
 module.exports = router;
