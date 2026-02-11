@@ -50,15 +50,16 @@ export const Navbar = () => {
           {/* Desktop Navigation - Show only for non-admin users */}
           {!isAdmin && (
             <div className="hidden md:flex items-center gap-3">
-              <Link to="/tickets" className={`nav-pill pill-blue ${isActive('/tickets') ? 'active' : ''}`} data-testid="nav-tickets">
-                تذاكر بالساعة
-              </Link>
-              <Link to="/birthday" className={`nav-pill pill-pink ${isActive('/birthday') ? 'active' : ''}`} data-testid="nav-birthday">
-                حفلات أعياد الميلاد
-              </Link>
-              <Link to="/subscriptions" className={`nav-pill pill-yellow ${isActive('/subscriptions') ? 'active' : ''}`} data-testid="nav-subscriptions">
-                الاشتراكات
-              </Link>
+              {navItems.map((item) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`nav-pill ${item.pill} ${isActive(item.path) ? 'active' : ''}`}
+                  data-testid={item.testId}
+                >
+                  {item.label}
+                </Link>
+              ))}
             </div>
           )}
 
