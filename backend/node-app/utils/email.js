@@ -197,7 +197,7 @@ const emailTemplates = {
   }),
 
   // Birthday booking confirmation
-  birthdayConfirmation: (booking) => ({
+  birthdayConfirmation: (booking, slot, child, theme) => ({
     subject: '🎂 تأكيد حجز حفلة عيد الميلاد',
     html: `
       <!DOCTYPE html>
@@ -218,11 +218,12 @@ const emailTemplates = {
           <div class="logo">🎈 بيكابو</div>
           <h1 class="header">🎂 تم تأكيد حجز الحفلة</h1>
           <div class="content">
-            <p><strong>اسم الطفل:</strong> ${booking?.child_name || 'غير محدد'}</p>
-            <p><strong>التاريخ:</strong> ${booking?.date || 'غير محدد'}</p>
-            <p><strong>الباقة:</strong> ${booking?.package_name || 'غير محدد'}</p>
-            <p><strong>عدد الأطفال:</strong> ${booking?.guest_count || 0}</p>
-            <p><strong>المبلغ:</strong> ${booking?.amount || 0} دينار</p>
+            <p><strong>اسم الطفل:</strong> ${child?.name || booking?.child_name || 'طفل'}</p>
+            <p><strong>التاريخ:</strong> ${slot?.date || booking?.date || ''}</p>
+            <p><strong>الوقت:</strong> ${slot?.start_time || ''}</p>
+            <p><strong>الثيم:</strong> ${theme?.name || (booking?.is_custom ? 'طلب مخصص' : '')}</p>
+            <p><strong>عدد الضيوف:</strong> ${booking?.guest_count || 0}</p>
+            <p><strong>المبلغ:</strong> ${booking?.amount || theme?.price || 0} دينار</p>
           </div>
           <div class="footer">
             <p>فريق بيكابو 🎪</p>
@@ -234,7 +235,7 @@ const emailTemplates = {
   }),
 
   // Subscription confirmation
-  subscriptionConfirmation: (subscription, plan) => ({
+  subscriptionConfirmation: (subscription, plan, child) => ({
     subject: '⭐ تأكيد اشتراكك في بيكابو',
     html: `
       <!DOCTYPE html>
@@ -255,9 +256,10 @@ const emailTemplates = {
           <div class="logo">🎈 بيكابو</div>
           <h1 class="header">⭐ تم تفعيل اشتراكك</h1>
           <div class="content">
-            <p><strong>الباقة:</strong> ${plan?.name || 'غير محدد'}</p>
+            <p><strong>الطفل:</strong> ${child?.name || 'طفل'}</p>
+            <p><strong>الباقة:</strong> ${plan?.name || ''}</p>
             <p><strong>عدد الزيارات:</strong> ${plan?.visits || subscription?.remaining_visits || 0}</p>
-            <p><strong>صالح حتى:</strong> ${subscription?.expires_at ? new Date(subscription.expires_at).toLocaleDateString('ar-EG') : 'غير محدد'}</p>
+            <p><strong>صالح حتى:</strong> ${subscription?.expires_at ? new Date(subscription.expires_at).toLocaleDateString('ar-EG') : ''}</p>
             <p><strong>المبلغ:</strong> ${subscription?.amount || plan?.price || 0} دينار</p>
           </div>
           <div class="footer">
