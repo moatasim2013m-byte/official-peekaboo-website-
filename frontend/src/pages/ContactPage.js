@@ -4,7 +4,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
-import { ChevronLeft, MapPin, Phone, Clock, MessageCircle, Mail } from 'lucide-react';
+import { ChevronLeft, MapPin, Phone, Clock, MessageCircle, Mail, Map } from 'lucide-react';
 
 export default function ContactPage() {
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function ContactPage() {
 
               {/* Quick Contact Buttons */}
               <div className="grid grid-cols-2 gap-3 pt-2">
-                <a href="https://wa.me/962777775652" target="_blank" rel="noopener noreferrer">
+                <a href="https://wa.me/962777775652" target="_blank" rel="noreferrer">
                   <Button className="rounded-full w-full bg-[#25D366] hover:bg-[#20BD5A]">
                     <MessageCircle className="h-4 w-4 ml-2" />
                     واتساب
@@ -72,6 +72,27 @@ export default function ContactPage() {
                     اتصل بنا
                   </Button>
                 </a>
+              </div>
+
+              {/* Map Link */}
+              <a href="https://share.google/30qIenCYvngQpVUqJ" target="_blank" rel="noreferrer" className="block">
+                <Button variant="outline" className="rounded-full w-full border-2 border-[var(--pk-blue)] text-[var(--pk-blue)] hover:bg-[var(--pk-bg-light-blue)]">
+                  <Map className="h-4 w-4 ml-2" />
+                  الموقع على الخريطة
+                </Button>
+              </a>
+
+              {/* Social Links */}
+              <div className="pt-3 border-t border-[var(--border-light)]">
+                <h3 className="font-bold text-foreground mb-3 text-sm">تابعنا</h3>
+                <div className="flex gap-3">
+                  <a href="https://www.instagram.com/peekaboo_playtime?igsh=cDc1eDQxZmVsZHM%3D&utm_source=qr" target="_blank" rel="noreferrer" className="footer-social-link">
+                    Instagram
+                  </a>
+                  <a href="https://www.facebook.com/profile.php?id=61573636087726" target="_blank" rel="noreferrer" className="footer-social-link">
+                    Facebook
+                  </a>
+                </div>
               </div>
             </CardContent>
           </Card>
