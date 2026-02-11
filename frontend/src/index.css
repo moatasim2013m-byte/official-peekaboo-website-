@@ -149,13 +149,14 @@ h3 {
 /* Hero title - extra large */
 .title-xl {
     font-family: var(--font-heading-ar);
-    font-weight: 700;
-    font-size: 2.5rem;
+    font-weight: 800;
+    font-size: 1.9rem;
     line-height: 1.2;
+    letter-spacing: 0.2px;
 }
 
 @media (min-width: 768px) {
-    .title-xl { font-size: 3.75rem; } /* 60px */
+    .title-xl { font-size: 2.8rem; }
 }
 
 /* Navbar links - bubble font + larger */
