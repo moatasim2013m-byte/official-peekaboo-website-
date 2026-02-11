@@ -111,6 +111,11 @@ function AppRoutes() {
       <Route path="/refund" element={<Layout><RefundPage /></Layout>} />
       <Route path="/groups" element={<Layout><GroupsPage /></Layout>} />
       <Route path="/home-party" element={<Layout><HomePartyPage /></Layout>} />
+      <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+      <Route path="/faq" element={<Layout><FAQPage /></Layout>} />
+      <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
+      <Route path="/rules" element={<Layout><RulesPage /></Layout>} />
+      <Route path="/pricing" element={<Layout><PricingPage /></Layout>} />
       
       {/* Payment Routes */}
       <Route path="/payment/success" element={<Layout><PaymentSuccessPage /></Layout>} />
