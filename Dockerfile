@@ -1,5 +1,5 @@
-# Use Node.js 18
-FROM node:18-alpine
+# Use Node.js 20.19 (required by mongodb, mongoose, resend)
+FROM node:20.19-alpine
 
 # Set working directory
 WORKDIR /app
