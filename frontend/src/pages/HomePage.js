@@ -4,7 +4,7 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../i18n/useT';
-import { Clock, Cake, Star, ChevronLeft, Play, Users, Home, X, ZoomIn } from 'lucide-react';
+import { Clock, Cake, Star, ChevronLeft, Play, Users, Home, X, ZoomIn, Heart } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 
 const HERO_FALLBACK = '/hero-fallback.jpg';
