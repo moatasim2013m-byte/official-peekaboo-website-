@@ -162,4 +162,4 @@ const emailTemplates = {
   })
 };
 
-module.exports = { sendEmail, emailTemplates };
+module.exports = { sendEmail, sendVerificationEmail, emailTemplates, isResendConfigured, getSenderEmail };
