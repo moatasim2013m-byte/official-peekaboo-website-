@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Clock, Cake, Star, Sun, Moon, ChevronLeft } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import PublicPageShell, { ContentCard } from '../components/PublicPageShell';
+import PublicPageShell, { WonderSection, WonderSectionTitle, WonderCard } from '../components/PublicPageShell';
 
 export default function PricingPage() {
   return (
@@ -11,34 +11,33 @@ export default function PricingPage() {
       maxWidth="max-w-5xl"
     >
       {/* Hourly Play */}
-      <ContentCard>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-full bg-[var(--pk-blue)] flex items-center justify-center">
-            <Clock className="h-6 w-6 text-white" />
-          </div>
-          <h2 className="font-heading text-2xl font-bold text-foreground">اللعب بالساعة</h2>
-        </div>
+      <WonderSection>
+        <WonderSectionTitle icon={Clock} iconColor="blue">اللعب بالساعة</WonderSectionTitle>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="wonder-card-grid mb-6">
           {/* Morning */}
-          <div className="p-5 rounded-xl bg-[var(--pk-bg-light-yellow)] border-2 border-[var(--pk-yellow)]">
+          <WonderCard color="yellow" className="wonder-card-featured">
             <div className="flex items-center gap-2 mb-3">
               <Sun className="h-6 w-6 text-[var(--pk-yellow)]" />
               <span className="font-heading font-bold text-lg">صباحي (Happy Hour)</span>
             </div>
-            <p className="text-sm text-muted-foreground mb-2">10 صباحاً - 2 ظهراً</p>
-            <p className="text-3xl font-bold text-[var(--pk-yellow)]">3.5 <span className="text-base">دينار/ساعة</span></p>
-          </div>
+            <p className="text-sm text-muted-foreground mb-3">10 صباحاً - 2 ظهراً</p>
+            <p className="wonder-price text-[var(--pk-yellow)]">
+              3.5 <span className="wonder-price-unit">دينار/ساعة</span>
+            </p>
+          </WonderCard>
 
           {/* Afternoon */}
-          <div className="p-5 rounded-xl bg-[var(--pk-bg-light-blue)] border-2 border-[var(--pk-blue)]">
+          <WonderCard color="blue">
             <div className="flex items-center gap-2 mb-3">
               <Moon className="h-6 w-6 text-[var(--pk-blue)]" />
               <span className="font-heading font-bold text-lg">مسائي</span>
             </div>
-            <p className="text-sm text-muted-foreground mb-2">2 ظهراً - 12 منتصف الليل</p>
-            <p className="text-3xl font-bold text-[var(--pk-blue)]">7-13 <span className="text-base">دينار</span></p>
-          </div>
+            <p className="text-sm text-muted-foreground mb-3">2 ظهراً - 12 منتصف الليل</p>
+            <p className="wonder-price text-[var(--pk-blue)]">
+              7-13 <span className="wonder-price-unit">دينار</span>
+            </p>
+          </WonderCard>
         </div>
 
         <Link to="/tickets">
@@ -47,30 +46,25 @@ export default function PricingPage() {
             <ChevronLeft className="mr-2 h-4 w-4" />
           </Button>
         </Link>
-      </ContentCard>
+      </WonderSection>
 
       {/* Birthday */}
-      <ContentCard>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-full bg-[var(--pk-red)] flex items-center justify-center">
-            <Cake className="h-6 w-6 text-white" />
-          </div>
-          <h2 className="font-heading text-2xl font-bold text-foreground">حفلات أعياد الميلاد</h2>
-        </div>
+      <WonderSection>
+        <WonderSectionTitle icon={Cake} iconColor="red">حفلات أعياد الميلاد</WonderSectionTitle>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div className="p-4 rounded-xl bg-[var(--pk-bg-light-pink)] text-center">
-            <p className="font-heading font-bold text-lg mb-1">باقة برونزية</p>
-            <p className="text-2xl font-bold text-[var(--pk-red)]">80 د</p>
-          </div>
-          <div className="p-4 rounded-xl bg-[var(--pk-bg-light-yellow)] text-center border-2 border-[var(--pk-yellow)]">
-            <p className="font-heading font-bold text-lg mb-1">باقة فضية</p>
-            <p className="text-2xl font-bold text-[var(--pk-yellow)]">120 د</p>
-          </div>
-          <div className="p-4 rounded-xl bg-[var(--pk-bg-light-blue)] text-center">
-            <p className="font-heading font-bold text-lg mb-1">باقة ذهبية</p>
-            <p className="text-2xl font-bold text-[var(--pk-blue)]">160 د</p>
-          </div>
+        <div className="wonder-card-grid grid-3 mb-6">
+          <WonderCard color="pink">
+            <p className="font-heading font-bold text-lg mb-2 text-center">باقة برونزية</p>
+            <p className="wonder-price text-[var(--pk-red)] text-center">80 <span className="wonder-price-unit">د</span></p>
+          </WonderCard>
+          <WonderCard color="yellow" className="wonder-card-featured">
+            <p className="font-heading font-bold text-lg mb-2 text-center">باقة فضية</p>
+            <p className="wonder-price text-[var(--pk-yellow)] text-center">120 <span className="wonder-price-unit">د</span></p>
+          </WonderCard>
+          <WonderCard color="blue">
+            <p className="font-heading font-bold text-lg mb-2 text-center">باقة ذهبية</p>
+            <p className="wonder-price text-[var(--pk-blue)] text-center">160 <span className="wonder-price-unit">د</span></p>
+          </WonderCard>
         </div>
 
         <Link to="/birthday">
@@ -79,32 +73,26 @@ export default function PricingPage() {
             <ChevronLeft className="mr-2 h-4 w-4" />
           </Button>
         </Link>
-      </ContentCard>
+      </WonderSection>
 
       {/* Subscriptions */}
-      <ContentCard>
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-12 h-12 rounded-full bg-[var(--pk-green)] flex items-center justify-center">
-            <Star className="h-6 w-6 text-white" />
-          </div>
-          <h2 className="font-heading text-2xl font-bold text-foreground">الاشتراكات</h2>
-        </div>
-
+      <WonderSection>
+        <WonderSectionTitle icon={Star} iconColor="green">الاشتراكات</WonderSectionTitle>
         <p className="text-muted-foreground mb-4">باقات زيارات بأسعار مخفضة - صالحة لمدة 30 يوم</p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-          <div className="p-4 rounded-xl bg-[var(--pk-bg-light-green)] text-center">
-            <p className="font-heading font-bold text-lg mb-1">5 زيارات</p>
-            <p className="text-2xl font-bold text-[var(--pk-green)]">30 د</p>
-          </div>
-          <div className="p-4 rounded-xl bg-[var(--pk-bg-light-yellow)] text-center border-2 border-[var(--pk-yellow)]">
-            <p className="font-heading font-bold text-lg mb-1">10 زيارات</p>
-            <p className="text-2xl font-bold text-[var(--pk-yellow)]">55 د</p>
-          </div>
-          <div className="p-4 rounded-xl bg-[var(--pk-bg-light-blue)] text-center">
-            <p className="font-heading font-bold text-lg mb-1">20 زيارة</p>
-            <p className="text-2xl font-bold text-[var(--pk-blue)]">100 د</p>
-          </div>
+        <div className="wonder-card-grid grid-3 mb-4">
+          <WonderCard color="green">
+            <p className="font-heading font-bold text-lg mb-2 text-center">5 زيارات</p>
+            <p className="wonder-price text-[var(--pk-green)] text-center">30 <span className="wonder-price-unit">د</span></p>
+          </WonderCard>
+          <WonderCard color="yellow" className="wonder-card-featured">
+            <p className="font-heading font-bold text-lg mb-2 text-center">10 زيارات</p>
+            <p className="wonder-price text-[var(--pk-yellow)] text-center">55 <span className="wonder-price-unit">د</span></p>
+          </WonderCard>
+          <WonderCard color="blue">
+            <p className="font-heading font-bold text-lg mb-2 text-center">20 زيارة</p>
+            <p className="wonder-price text-[var(--pk-blue)] text-center">100 <span className="wonder-price-unit">د</span></p>
+          </WonderCard>
         </div>
 
         <p className="text-xs text-muted-foreground mb-4">* صالحة من الأحد إلى الخميس فقط</p>
@@ -115,7 +103,7 @@ export default function PricingPage() {
             <ChevronLeft className="mr-2 h-4 w-4" />
           </Button>
         </Link>
-      </ContentCard>
+      </WonderSection>
     </PublicPageShell>
   );
 }
