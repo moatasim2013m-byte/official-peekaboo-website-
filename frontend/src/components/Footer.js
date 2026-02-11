@@ -14,7 +14,7 @@ export const Footer = () => {
       <div className="footer-card">
         <div className="footer-gradient-border"></div>
         
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 relative">
           {/* Decorative Mascot */}
           <img 
             src={mascotImg} 
