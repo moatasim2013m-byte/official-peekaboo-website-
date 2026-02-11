@@ -23,6 +23,8 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json({ limit: '1mb' }));
+app.use(helmet());
+app.use(mongoSanitize());
 
 // Basic API rate limiting
 const apiLimiter = rateLimit({
