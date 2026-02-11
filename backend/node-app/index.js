@@ -117,15 +117,19 @@ const frontendBuildPath = frontendPaths.find(p => fs.existsSync(p)) || frontendP
 console.log('[Peekaboo] Frontend build path:', frontendBuildPath);
 console.log('[Peekaboo] Frontend exists:', fs.existsSync(frontendBuildPath));
 
-app.use(express.static(frontendBuildPath));
-
-app.get('*', (req, res) => {
-  // Skip API routes
-  if (req.path.startsWith('/api')) {
-    return res.status(404).json({ error: 'API endpoint not found' });
-  }
-  res.sendFile(path.join(frontendBuildPath, 'index.html'));
-});
+if (fs.existsSync(frontendBuildPath)) {
+  app.use(express.static(frontendBuildPath));
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    return res.sendFile(path.join(frontendBuildPath, 'index.html'));
+  });
+} else {
+  console.log('[Peekaboo] Frontend build not found, serving API only');
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    return res.status(404).json({ error: 'Frontend not available' });
+  });
+}
 
 // ==================== GLOBAL ERROR HANDLER ====================
 app.use((err, req, res, next) => {
