@@ -4,9 +4,18 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const User = require('../models/User');
 const { getJwtSecret, authMiddleware } = require('../middleware/auth');
-const { sendEmail, emailTemplates } = require('../utils/email');
+const { sendEmail, sendVerificationEmail, emailTemplates, isResendConfigured, getSenderEmail } = require('../utils/email');
 
 const router = express.Router();
+
+// Health check for email verification setup
+router.get('/verify-email/health', (req, res) => {
+  res.json({
+    resendConfigured: isResendConfigured(),
+    frontendUrl: process.env.FRONTEND_URL || null,
+    sender: getSenderEmail()
+  });
+});
 
 // Register
 router.post('/register', async (req, res) => {
@@ -40,20 +49,22 @@ router.post('/register', async (req, res) => {
     await user.save();
 
     // Send verification email
-    try {
-      const frontendUrl = origin_url || process.env.FRONTEND_URL || 'https://peekaboo-wonderland.preview.emergentagent.com';
-      const verifyUrl = `${frontendUrl}/verify-email?token=${verifyToken}`;
-      const template = emailTemplates.emailVerification(verifyUrl);
-      await sendEmail(user.email, template.subject, template.html);
-    } catch (emailError) {
-      console.error('Verification email send error:', emailError);
-      // Don't fail registration if email fails
-    }
+    const frontendUrl = process.env.FRONTEND_URL || origin_url || req.headers.origin || 'https://peekaboo-wonderland.preview.emergentagent.com';
+    const verifyUrl = `${frontendUrl}/verify-email?token=${verifyToken}`;
+    
+    const emailResult = await sendVerificationEmail(user.email, verifyUrl);
 
-    res.status(201).json({
-      message: 'تم إنشاء الحساب بنجاح. يرجى التحقق من بريدك الإلكتروني لتفعيل الحساب.',
-      email_sent: true
-    });
+    if (emailResult.success) {
+      res.status(201).json({
+        message: 'تم إرسال رابط التفعيل إلى بريدك الإلكتروني',
+        email_sent: true
+      });
+    } else {
+      res.status(201).json({
+        message: 'تم إنشاء الحساب، لكن تعذر إرسال رسالة التفعيل. الرجاء المحاولة لاحقاً.',
+        email_sent: false
+      });
+    }
   } catch (error) {
     console.error('Register error:', error);
     res.status(500).json({ error: 'Registration failed' });
