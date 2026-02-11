@@ -267,10 +267,7 @@ export default function SubscriptionsPage() {
                       {loading ? (
                         <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري المعالجة...</>
                       ) : (
-                        <span className="inline-flex items-center gap-2">
-                          <PaymentCardIcons />
-                          <span>اشترِ الآن</span>
-                        </span>
+                        <span>اشترِ الآن</span>
                       )}
                     </Button>
                   </div>

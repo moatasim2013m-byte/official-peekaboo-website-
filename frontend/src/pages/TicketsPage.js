@@ -593,10 +593,7 @@ export default function TicketsPage() {
                         جاري المعالجة...
                       </>
                     ) : (
-                      <span className="inline-flex items-center gap-2">
-                        <PaymentCardIcons />
-                        <span>احجز - {getSelectedPrice()} د</span>
-                      </span>
+                      <span>احجز - {getSelectedPrice()} د</span>
                     )}
                   </Button>
                 </div>

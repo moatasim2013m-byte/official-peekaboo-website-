@@ -391,10 +391,7 @@ export default function BirthdayPage() {
                       {loading ? (
                         <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري المعالجة...</>
                       ) : (
-                        <span className="inline-flex items-center gap-2">
-                          <PaymentCardIcons />
-                          <span>احجز وادفع</span>
-                        </span>
+                        <span>احجز وادفع</span>
                       )}
                     </Button>
                   </div>
