@@ -37,6 +37,8 @@
 - ✅ Improved hero section with better whitespace
 - ✅ Consistent section containers with soft pastel backgrounds
 - ✅ Mobile-responsive design with RTL support
+- ✅ PublicPageShell component for consistent informational page layouts
+- ✅ Themed informational pages (About, FAQ, Contact, Rules, Pricing)
 
 ---
 
