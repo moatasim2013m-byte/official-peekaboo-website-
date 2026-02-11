@@ -100,7 +100,5 @@ SENDER_EMAIL=noreply@peekaboojor.com
 
 ## Backlog (Post-Launch)
 - P1: Points Redemption Flow (QR code generation)
-- P1: Add "ذو الهمم" (People of Determination) service item
-- P2: Groups booking page
-- P2: Home Party page
-- P3: Resolve ESLint dependency warnings properly
+- P2: Resolve ESLint dependency warnings properly (code quality)
+- P3: Implement contact form submission backend
