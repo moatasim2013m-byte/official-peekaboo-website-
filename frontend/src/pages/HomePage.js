@@ -270,8 +270,6 @@ export default function HomePage() {
                       </Button>
                     </Link>
                   )}
-                    </Button>
-                  </Link>
                 </CardContent>
               </Card>
             ))}
