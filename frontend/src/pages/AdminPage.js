@@ -212,6 +212,7 @@ export default function AdminPage() {
     setActiveTab(tab);
     setActiveFilter(null); // Reset filter when manually changing tabs
     if (tab === 'users') fetchUsers();
+    if (tab === 'customers') fetchCustomers();
     if (tab === 'hourly') fetchHourlyBookings();
     if (tab === 'birthday') fetchBirthdayBookings();
     if (tab === 'subscriptions') fetchSubscriptions();
