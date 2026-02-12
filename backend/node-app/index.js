@@ -35,6 +35,16 @@ const mongoSanitize = require('express-mongo-sanitize');
 
 const app = express();
 
+// ==================== REQUEST ID MIDDLEWARE ====================
+app.use((req, res, next) => {
+  const id = (crypto.randomUUID && typeof crypto.randomUUID === 'function')
+    ? crypto.randomUUID()
+    : crypto.randomBytes(16).toString('hex');
+  req.req_id = id;
+  res.setHeader('X-Request-Id', id);
+  return next();
+});
+
 const allowedOrigins =
   process.env.CORS_ORIGINS === '*'
     ? true
