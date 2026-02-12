@@ -1,6 +1,18 @@
 require('dotenv').config();
-console.log('BOOT_START');
-console.log('PORT', process.env.PORT);
+const crypto = require('crypto');
+
+// ==================== BOOT DIAGNOSTICS ====================
+console.log("[BOOT] node:", process.version);
+console.log("[BOOT] env:", process.env.NODE_ENV || "undefined");
+console.log("[BOOT] port:", process.env.PORT || "undefined");
+console.log("[BOOT] env_present:", {
+  MONGO_URL: !!process.env.MONGO_URL,
+  JWT_SECRET: !!process.env.JWT_SECRET,
+  FRONTEND_URL: !!process.env.FRONTEND_URL,
+  CORS_ORIGINS: !!process.env.CORS_ORIGINS,
+  RESEND_API_KEY: !!process.env.RESEND_API_KEY,
+  SENDER_EMAIL: !!process.env.SENDER_EMAIL
+});
 
 // ==================== PROCESS ERROR HANDLERS ====================
 process.on('unhandledRejection', (reason, promise) => {
