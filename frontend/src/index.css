@@ -970,12 +970,15 @@ code {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
+    gap: 0.5rem;
+    padding: 0.55rem 1rem;
     color: white;
     border-radius: var(--radius-full);
     transition: all 0.2s ease;
     box-shadow: 0 3px 12px rgba(0, 0, 0, 0.16);
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1;
 }
 
 .footer-social-instagram {
@@ -989,6 +992,10 @@ code {
 .footer-social-link:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+}
+
+.footer-social-label {
+    white-space: nowrap;
 }
 
 /* Footer Hours Box */
