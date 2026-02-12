@@ -9,6 +9,12 @@ const { toZonedTime } = require('date-fns-tz');
 const router = express.Router();
 const TIMEZONE = 'Asia/Amman';
 const BOOKING_CUTOFF_MINUTES = 30;
+const SLOTS_CACHE_TTL_MS = 60 * 1000;
+const slotsAvailabilityCache = new Map();
+
+const getSlotsCacheKey = ({ date, slotType, timeMode, durationHours }) => (
+  `${date}|${slotType}|${timeMode || 'all'}|${durationHours}`
+);
 
 // HOURLY: 10:00 AM to 12:00 AM (midnight), every 10 minutes, session = 60 min
 // Last entry at 23:00 (session ends at midnight)
@@ -176,6 +182,17 @@ router.get('/available', async (req, res) => {
       return res.status(400).json({ error: 'Date is required' });
     }
 
+    const cacheKey = getSlotsCacheKey({
+      date,
+      slotType: slot_type,
+      timeMode,
+      durationHours
+    });
+    const cachedEntry = slotsAvailabilityCache.get(cacheKey);
+    if (cachedEntry && cachedEntry.expiresAt > Date.now()) {
+      return res.json(cachedEntry.payload);
+    }
+
     // Generate slots if they don't exist
     if (slot_type === 'hourly') {
       await generateHourlySlotsForDate(date);
@@ -280,7 +297,13 @@ router.get('/available', async (req, res) => {
       ? availableSlots.filter(s => s.is_available || s.is_past)
       : availableSlots;
 
-    res.json({ slots: filteredSlots });
+    const payload = { slots: filteredSlots };
+    slotsAvailabilityCache.set(cacheKey, {
+      payload,
+      expiresAt: Date.now() + SLOTS_CACHE_TTL_MS
+    });
+
+    res.json(payload);
   } catch (error) {
     console.error('Get available slots error:', error);
     res.status(500).json({ error: 'Failed to get slots' });
