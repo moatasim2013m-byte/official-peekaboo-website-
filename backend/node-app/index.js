@@ -34,7 +34,10 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json({ limit: '1mb' }));
-app.use(helmet());
+app.use(helmet({
+  xXssProtection: false,
+  contentSecurityPolicy: false
+}));
 app.use(mongoSanitize());
 
 // ==================== HEALTH CHECK (before rate limiting) ====================
