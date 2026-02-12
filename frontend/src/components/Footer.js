@@ -3,6 +3,7 @@ import { MessageCircle, Phone, MapPin, Clock } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 import mascotImg from '../assets/mascot.png';
 import { PaymentCardIcons } from './PaymentCardIcons';
+import { FacebookLogoIcon, InstagramLogoIcon } from './SocialBrandIcons';
 
 export const Footer = () => {
   return (
@@ -35,11 +36,13 @@ export const Footer = () => {
               
               {/* Social Links */}
               <div className="flex gap-3">
-                <a href="https://www.instagram.com/peekaboo_playtime?igsh=cDc1eDQxZmVsZHM%3D&utm_source=qr" target="_blank" rel="noreferrer" className="footer-social-link">
-                  Instagram
+                <a href="https://www.instagram.com/peekaboo_playtime?igsh=cDc1eDQxZmVsZHM%3D&utm_source=qr" target="_blank" rel="noreferrer" className="footer-social-link footer-social-instagram" aria-label="Instagram">
+                  <InstagramLogoIcon className="h-4 w-4" />
+                  <span className="sr-only">Instagram</span>
                 </a>
-                <a href="https://www.facebook.com/profile.php?id=61573636087726" target="_blank" rel="noreferrer" className="footer-social-link">
-                  Facebook
+                <a href="https://www.facebook.com/profile.php?id=61573636087726" target="_blank" rel="noreferrer" className="footer-social-link footer-social-facebook" aria-label="Facebook">
+                  <FacebookLogoIcon className="h-4 w-4" />
+                  <span className="sr-only">Facebook</span>
                 </a>
               </div>
             </div>

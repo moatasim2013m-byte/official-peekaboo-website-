@@ -3,6 +3,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import PublicPageShell, { WonderSection, WonderSectionTitle } from '../components/PublicPageShell';
+import { FacebookLogoIcon, InstagramLogoIcon } from '../components/SocialBrandIcons';
 
 export default function ContactPage() {
   const contactInfo = [
@@ -65,11 +66,23 @@ export default function ContactPage() {
           <div className="pt-4 border-t border-gray-100">
             <h3 className="font-bold text-foreground mb-3 text-sm">تابعنا</h3>
             <div className="flex gap-3">
-              <a href="https://www.instagram.com/peekaboo_playtime?igsh=cDc1eDQxZmVsZHM%3D&utm_source=qr" target="_blank" rel="noreferrer" className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-sm font-medium hover:opacity-90 transition-opacity">
-                Instagram
+              <a
+                href="https://www.instagram.com/peekaboo_playtime?igsh=cDc1eDQxZmVsZHM%3D&utm_source=qr"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Instagram"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-white shadow-sm transition-transform hover:-translate-y-0.5"
+              >
+                <InstagramLogoIcon className="h-5 w-5" />
               </a>
-              <a href="https://www.facebook.com/profile.php?id=61573636087726" target="_blank" rel="noreferrer" className="px-4 py-2 bg-[#1877F2] text-white rounded-full text-sm font-medium hover:opacity-90 transition-opacity">
-                Facebook
+              <a
+                href="https://www.facebook.com/profile.php?id=61573636087726"
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Facebook"
+                className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1877F2] text-white shadow-sm transition-transform hover:-translate-y-0.5"
+              >
+                <FacebookLogoIcon className="h-5 w-5" />
               </a>
             </div>
           </div>
