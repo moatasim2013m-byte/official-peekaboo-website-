@@ -155,7 +155,7 @@ export default function HomePage() {
         <div className="sky-sparkle sparkle-5"></div>
       </div>
 
-      <section className="home-hero-sky py-14 md:py-24">
+      <section className="home-hero-sky pb-hero pb-section py-14 md:py-24">
 
         <div className="page-shell px-2 sm:px-4 lg:px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
@@ -173,7 +173,7 @@ export default function HomePage() {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link to={heroConfig.ctaRoute}>
-                  <Button size="lg" className="rounded-full btn-playful text-base sm:text-lg px-8 py-6 w-full sm:w-auto" data-testid="hero-book-btn">
+                  <Button size="lg" className="rounded-full btn-playful pb-btn text-base sm:text-lg px-8 py-6 w-full sm:w-auto" data-testid="hero-book-btn">
                     {heroConfig.ctaText}
                     <ChevronLeft className="mr-2 h-5 w-5" />
                   </Button>
@@ -255,7 +255,7 @@ export default function HomePage() {
       )}
 
       {/* Features Section */}
-      <section className="section-container home-page-section page-shell page-section-gap">
+      <section className="section-container home-page-section pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="features-title">
@@ -270,7 +270,7 @@ export default function HomePage() {
             {features.map((feature, index) => (
               <Card 
                 key={index} 
-                className={`pk-card ${feature.disabled ? 'opacity-70' : ''}`}
+                className={`pk-card pb-card ${feature.disabled ? 'opacity-70' : ''}`}
                 data-testid={`feature-card-${index}`}
               >
                 <div className={`pk-card-accent ${feature.accentColor}`} />
@@ -291,7 +291,7 @@ export default function HomePage() {
                     </Button>
                   ) : (
                     <Link to={feature.link}>
-                      <Button className="rounded-full btn-playful w-full text-sm" data-testid={`feature-btn-${index}`}>
+                      <Button className="rounded-full btn-playful pb-btn w-full text-sm" data-testid={`feature-btn-${index}`}>
                         {feature.buttonText}
                         <ChevronLeft className="mr-2 h-4 w-4" />
                       </Button>
@@ -305,7 +305,7 @@ export default function HomePage() {
       </section>
 
       {/* Gallery Section */}
-      <section className="section-container home-page-section page-shell page-section-gap">
+      <section className="section-container home-page-section pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="gallery-title">
@@ -372,7 +372,7 @@ export default function HomePage() {
 
       {/* CTA Section */}
       {!isAuthenticated && (
-        <section className="py-16 md:py-20 page-shell page-section-gap">
+        <section className="pb-section py-16 md:py-20 page-shell page-section-gap">
           <div className="max-w-4xl mx-auto px-6 py-12 md:py-16 bg-[var(--pk-red)] rounded-[var(--radius-2xl)] shadow-xl text-center">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6" data-testid="cta-title">
               هل أنت مستعد للمتعة؟
@@ -383,7 +383,7 @@ export default function HomePage() {
             <Link to="/register">
               <Button 
                 size="lg" 
-                className="rounded-full text-base sm:text-lg px-10 py-6 bg-white text-[var(--pk-red)] hover:bg-gray-100 font-bold shadow-lg"
+                className="rounded-full pb-btn text-base sm:text-lg px-10 py-6 bg-white text-[var(--pk-red)] hover:bg-gray-100 font-bold shadow-lg"
                 data-testid="cta-signup-btn"
               >
                 سجّل الآن
