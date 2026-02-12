@@ -716,52 +716,52 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-muted/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8">
           <div className="flex items-center gap-3">
             <img src={mascotImg} alt="" className="h-12 w-12 rounded-full border-2 border-[var(--peekaboo-green)] shadow" />
-            <h1 className="font-heading text-3xl font-bold" data-testid="admin-title">
+            <h1 className="font-heading text-2xl sm:text-3xl font-bold leading-tight" data-testid="admin-title">
               <LayoutDashboard className="inline-block h-8 w-8 text-primary mr-2" />
               Admin Panel
             </h1>
           </div>
-          <Button onClick={() => navigate('/reception')} className="rounded-full gap-2 bg-[var(--peekaboo-green)] hover:bg-[var(--peekaboo-green)]/90">
+          <Button onClick={() => navigate('/reception')} className="w-full sm:w-auto rounded-full gap-2 bg-[var(--peekaboo-green)] hover:bg-[var(--peekaboo-green)]/90">
             Reception Scanner
           </Button>
         </div>
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-6">
-          <TabsList className="bg-white border rounded-full p-1 flex-wrap">
-            <TabsTrigger value="dashboard" className="rounded-full gap-2">
+          <TabsList className="bg-white border rounded-2xl sm:rounded-full p-1 flex-wrap gap-1 h-auto">
+            <TabsTrigger value="dashboard" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <LayoutDashboard className="h-4 w-4" /> Dashboard
             </TabsTrigger>
-            <TabsTrigger value="pricing" className="rounded-full gap-2">
+            <TabsTrigger value="pricing" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <DollarSign className="h-4 w-4" /> Pricing
             </TabsTrigger>
-            <TabsTrigger value="users" className="rounded-full gap-2">
+            <TabsTrigger value="users" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <Users className="h-4 w-4" /> Parents
             </TabsTrigger>
-            <TabsTrigger value="customers" className="rounded-full gap-2">
+            <TabsTrigger value="customers" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <UserPlus className="h-4 w-4" /> العملاء
             </TabsTrigger>
-            <TabsTrigger value="hourly" className="rounded-full gap-2">
+            <TabsTrigger value="hourly" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <Clock className="h-4 w-4" /> Hourly
             </TabsTrigger>
-            <TabsTrigger value="birthday" className="rounded-full gap-2">
+            <TabsTrigger value="birthday" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <Cake className="h-4 w-4" /> Birthday
             </TabsTrigger>
-            <TabsTrigger value="subscriptions" className="rounded-full gap-2">
+            <TabsTrigger value="subscriptions" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <Star className="h-4 w-4" /> Subscriptions
             </TabsTrigger>
-            <TabsTrigger value="themes" className="rounded-full gap-2">
+            <TabsTrigger value="themes" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <Cake className="h-4 w-4" /> Themes
             </TabsTrigger>
-            <TabsTrigger value="gallery" className="rounded-full gap-2">
+            <TabsTrigger value="gallery" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <Image className="h-4 w-4" /> Gallery
             </TabsTrigger>
-            <TabsTrigger value="homepage" className="rounded-full gap-2">
+            <TabsTrigger value="homepage" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <Home className="h-4 w-4" /> الصفحة الرئيسية
             </TabsTrigger>
-            <TabsTrigger value="settings" className="rounded-full gap-2">
+            <TabsTrigger value="settings" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <Settings className="h-4 w-4" /> Settings
             </TabsTrigger>
           </TabsList>
@@ -1029,14 +1029,14 @@ export default function AdminPage() {
           <TabsContent value="customers">
             <Card className="rounded-2xl">
               <CardHeader className="pb-2">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                   <div>
                     <CardTitle className="text-xl">إدارة العملاء</CardTitle>
                     <p className="text-sm text-muted-foreground mt-1">عرض وتعديل وإدارة بيانات العملاء</p>
                   </div>
                   <Dialog open={customerDialogOpen} onOpenChange={setCustomerDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button className="rounded-full gap-2">
+                      <Button className="w-full sm:w-auto rounded-full gap-2">
                         <UserPlus className="h-4 w-4" /> إضافة عميل
                       </Button>
                     </DialogTrigger>
@@ -1090,7 +1090,7 @@ export default function AdminPage() {
                     placeholder="بحث بالاسم أو البريد أو الهاتف..."
                     value={customerSearch}
                     onChange={(e) => setCustomerSearch(e.target.value)}
-                    className="pr-10 rounded-xl"
+                    className="pr-10 rounded-xl text-sm sm:text-base"
                   />
                 </div>
 
@@ -1105,7 +1105,7 @@ export default function AdminPage() {
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
+                    <table className="w-full min-w-[640px] text-sm">
                       <thead>
                         <tr className="border-b">
                           <th className="text-right py-3 px-2 font-medium">الاسم</th>
