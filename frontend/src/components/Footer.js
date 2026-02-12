@@ -35,14 +35,14 @@ export const Footer = () => {
               </p>
               
               {/* Social Links */}
-              <div className="flex gap-3">
-                <a href="https://www.instagram.com/peekaboo_playtime?igsh=cDc1eDQxZmVsZHM%3D&utm_source=qr" target="_blank" rel="noreferrer" className="footer-social-link footer-social-instagram" aria-label="Instagram">
-                  <InstagramLogoIcon className="h-4 w-4" />
-                  <span className="sr-only">Instagram</span>
+              <div className="flex flex-wrap gap-3">
+                <a href="https://www.instagram.com/peekaboo_playtime?igsh=cDc1eDQxZmVsZHM%3D&utm_source=qr" target="_blank" rel="noopener noreferrer" className="footer-social-link footer-social-instagram" aria-label="Instagram">
+                  <InstagramLogoIcon className="h-5 w-5" />
+                  <span className="footer-social-label">Instagram</span>
                 </a>
-                <a href="https://www.facebook.com/profile.php?id=61573636087726" target="_blank" rel="noreferrer" className="footer-social-link footer-social-facebook" aria-label="Facebook">
-                  <FacebookLogoIcon className="h-4 w-4" />
-                  <span className="sr-only">Facebook</span>
+                <a href="https://www.facebook.com/profile.php?id=61573636087726" target="_blank" rel="noopener noreferrer" className="footer-social-link footer-social-facebook" aria-label="Facebook">
+                  <FacebookLogoIcon className="h-5 w-5" />
+                  <span className="footer-social-label">Facebook</span>
                 </a>
               </div>
             </div>
