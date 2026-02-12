@@ -12,6 +12,11 @@ steps:
      "--image=gcr.io/$PROJECT_ID/peekaboo",
      "--region=us-west1",
      "--platform=managed",
+     "--min-instances=1",
+     "--no-cpu-throttling",
+     "--concurrency=60",
+     "--cpu=1",
+     "--memory=512Mi",
      "--allow-unauthenticated"]
 
 images:
