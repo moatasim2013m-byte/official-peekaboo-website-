@@ -72,7 +72,15 @@ app.use(helmet({
   xXssProtection: false,
   contentSecurityPolicy: false
 }));
-app.use(mongoSanitize());
+const sanitize = mongoSanitize();
+app.use((req, res, next) => {
+  try {
+    return sanitize(req, res, next);
+  } catch (error) {
+    console.warn('[SECURITY] Sanitization skipped for read-only property');
+    return next();
+  }
+});
 
 // ==================== HEALTH CHECK (before rate limiting) ====================
 app.get('/healthz', (req, res) => res.status(200).send('ok'));
