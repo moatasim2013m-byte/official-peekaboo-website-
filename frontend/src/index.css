@@ -1906,3 +1906,44 @@ code {
 .rule-item-dont {
   background: var(--pk-bg-light-pink);
 }
+
+:root {
+  --pb-sky: #7FD3F7;
+  --pb-pink: #FF7EB6;
+  --pb-yellow: #FFD93B;
+  --pb-orange: #FF9F45;
+  --pb-mint: #7CF0C5;
+}
+
+.pb-card {
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  padding: 20px;
+}
+
+.pb-hero {
+  background: linear-gradient(180deg, var(--pb-sky), #EAF9FF);
+  border-radius: 0 0 40px 40px;
+}
+
+.pb-btn {
+  border-radius: 999px;
+  padding: 14px 26px;
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(135deg, var(--pb-pink), var(--pb-orange));
+  border: none;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+}
+
+.pb-section {
+  margin-top: 20px;
+}
+
+.pb-badge {
+  background: var(--pb-yellow);
+  border-radius: 16px;
+  padding: 6px 14px;
+  font-weight: 700;
+}
