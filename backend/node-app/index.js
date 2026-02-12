@@ -177,13 +177,10 @@ if (frontendBuildPath && fs.existsSync(indexHtmlPath)) {
 
 // ==================== GLOBAL ERROR HANDLER ====================
 app.use((err, req, res, next) => {
-  console.error('[GLOBAL_ERROR]', {
-    method: req.method,
-    url: req.originalUrl,
-    message: err.message,
-    stack: err.stack
-  });
-  res.status(err.status || 500).json({ error: 'حدث خطأ في الخادم' });
+  const rid = (req && req.req_id) ? req.req_id : "no_req_id";
+  console.error(`[GLOBAL_ERROR][${rid}]`, err.message || err);
+  console.error(`[GLOBAL_ERROR_STACK][${rid}]`, err.stack);
+  res.status(err.status || 500).json({ error: 'حدث خطأ في الخادم', req_id: rid });
 });
 
 // ==================== ENV VALIDATION (before server start) ====================
