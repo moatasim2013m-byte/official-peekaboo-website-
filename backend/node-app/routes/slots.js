@@ -297,7 +297,29 @@ router.get('/available', async (req, res) => {
       ? availableSlots.filter(s => s.is_available || s.is_past)
       : availableSlots;
 
-    const payload = { slots: filteredSlots };
+    // Same-day safety filter (Jordan time): only allow slots >= now + 60 minutes
+    const jordanOffsetMs = 3 * 60 * 60 * 1000;
+    const jordanNow = new Date(Date.now() + jordanOffsetMs);
+    const jordanToday = `${jordanNow.getUTCFullYear()}-${String(jordanNow.getUTCMonth() + 1).padStart(2, '0')}-${String(jordanNow.getUTCDate()).padStart(2, '0')}`;
+    const isJordanTodayRequest = date === jordanToday;
+
+    const slotsAfterJordanCutoff = isJordanTodayRequest
+      ? (() => {
+          const cutoffMinutes = (jordanNow.getUTCHours() * 60) + jordanNow.getUTCMinutes() + 60;
+          return filteredSlots.filter((slot) => {
+            const rawStart = slot.start_time || slot.startTime;
+            if (typeof rawStart !== 'string') return false;
+
+            const [h, m] = rawStart.split(':').map(Number);
+            if (Number.isNaN(h) || Number.isNaN(m)) return false;
+
+            const slotStartMinutes = (h * 60) + m;
+            return slotStartMinutes >= cutoffMinutes;
+          });
+        })()
+      : filteredSlots;
+
+    const payload = { slots: slotsAfterJordanCutoff };
     slotsAvailabilityCache.set(cacheKey, {
       payload,
       expiresAt: Date.now() + SLOTS_CACHE_TTL_MS
