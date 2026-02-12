@@ -35,6 +35,9 @@ const mongoSanitize = require('express-mongo-sanitize');
 
 const app = express();
 
+// Ignore favicon early to avoid middleware crashes
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // ==================== REQUEST ID MIDDLEWARE ====================
 app.use((req, res, next) => {
   const id = (crypto.randomUUID && typeof crypto.randomUUID === 'function')
