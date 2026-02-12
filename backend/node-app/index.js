@@ -26,13 +26,19 @@ const app = express();
 const allowedOrigins =
   process.env.CORS_ORIGINS === '*'
     ? true
-    : (process.env.CORS_ORIGINS || '').split(',').filter(Boolean);
+    : (process.env.CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+
+const corsOrigin =
+  allowedOrigins === true
+    ? true
+    : (allowedOrigins.length ? allowedOrigins : true);
 
 // Middleware
 app.use(cors({
-  origin: allowedOrigins.length ? allowedOrigins : true,
+  origin: corsOrigin,
   credentials: true
 }));
+
 app.use(express.json({ limit: '1mb' }));
 app.use(helmet({
   xXssProtection: false,
