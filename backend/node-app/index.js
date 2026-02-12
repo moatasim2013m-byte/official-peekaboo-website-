@@ -77,7 +77,12 @@ app.use((req, res, next) => {
   try {
     return sanitize(req, res, next);
   } catch (error) {
-    console.warn('[SECURITY] Sanitization skipped for read-only property');
+    console.warn('[SECURITY] Sanitization skipped for read-only property', {
+      req_id: req.req_id,
+      method: req.method,
+      path: req.originalUrl,
+      error: error?.message
+    });
     return next();
   }
 });
