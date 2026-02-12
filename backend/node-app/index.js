@@ -123,25 +123,31 @@ app.get('/api/', (req, res) => {
 const fs = require('fs');
 
 const frontendPaths = [
-  path.join(__dirname, '../frontend/build'),      // Cloud Run
-  path.join(__dirname, '../../frontend/build')   // Local dev
+  '/app/frontend/build',                          // Cloud Run absolute path
+  path.join(__dirname, '../../frontend/build'),   // fallback
+  path.join(__dirname, '../frontend/build')       // fallback
 ];
 
 const frontendBuildPath = frontendPaths.find(p => fs.existsSync(p));
+const indexHtmlPath = frontendBuildPath
+  ? path.join(frontendBuildPath, 'index.html')
+  : null;
 
-if (frontendBuildPath) {
+if (frontendBuildPath && fs.existsSync(indexHtmlPath)) {
   console.log('[Peekaboo] Serving frontend from:', frontendBuildPath);
+  console.log('[Peekaboo] index.html exists:', indexHtmlPath);
 
   app.use(express.static(frontendBuildPath));
 
-  // SPA catch-all (Express 5 safe)
+  // SPA catch-all
   app.use((req, res, next) => {
     if (req.path.startsWith('/api')) return next();
-    res.sendFile(path.join(frontendBuildPath, 'index.html'));
+    res.sendFile(indexHtmlPath);
   });
 
 } else {
-  console.log('[Peekaboo] Frontend build not found. Serving API only.');
+  console.log('[Peekaboo] Frontend build not found or missing index.html');
+  console.log('[Peekaboo] checked paths:', frontendPaths);
 }
 
 // ==================== GLOBAL ERROR HANDLER ====================
