@@ -203,9 +203,20 @@ export default function BirthdayPage() {
   const minDate = addDays(new Date(), 3);
   const maxDate = addDays(new Date(), 90);
 
+  const BirthdaySlotsSkeleton = () => (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" aria-hidden="true">
+      {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+        <div key={i} className="calendar-skeleton p-4">
+          <div className="h-4 bg-muted/70 rounded w-20 mx-auto mb-2"></div>
+          <div className="h-4 bg-muted/70 rounded w-16 mx-auto"></div>
+        </div>
+      ))}
+    </div>
+  );
+
   return (
     <div className="min-h-screen py-8 md:py-12" dir="rtl">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="page-shell max-w-6xl px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="text-center mb-8">
           <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3" data-testid="birthday-title">
@@ -262,11 +273,14 @@ export default function BirthdayPage() {
               </CardHeader>
               <CardContent className="py-4">
                 {loadingSlots ? (
-                  <div className="flex justify-center py-8">
-                    <Loader2 className="h-8 w-8 animate-spin text-accent" />
+                  <div className="soft-loading-state py-6">
+                    <div className="flex justify-center mb-4">
+                      <Loader2 className="h-8 w-8 animate-spin text-accent" />
+                    </div>
+                    <BirthdaySlotsSkeleton />
                   </div>
                 ) : getFilteredBirthdaySlots().length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
+                  <div className="soft-loading-state text-center py-8 text-muted-foreground">
                     <AlertCircle className="h-10 w-10 mx-auto mb-3 opacity-50" />
                     <p className="text-sm">لا توجد أوقات متاحة</p>
                   </div>

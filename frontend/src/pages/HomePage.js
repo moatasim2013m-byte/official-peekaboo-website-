@@ -155,9 +155,9 @@ export default function HomePage() {
         <div className="sky-sparkle sparkle-5"></div>
       </div>
 
-      <section className="home-hero-sky py-12 md:py-20">
+      <section className="home-hero-sky py-14 md:py-24">
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="page-shell px-2 sm:px-4 lg:px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
             {/* Text Content */}
             <div className="order-2 lg:order-1 text-center lg:text-right">
@@ -255,7 +255,7 @@ export default function HomePage() {
       )}
 
       {/* Features Section */}
-      <section className="section-container home-page-section mx-4 md:mx-8">
+      <section className="section-container home-page-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="features-title">
@@ -305,7 +305,7 @@ export default function HomePage() {
       </section>
 
       {/* Gallery Section */}
-      <section className="section-container home-page-section mx-4 md:mx-8">
+      <section className="section-container home-page-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="gallery-title">
@@ -372,7 +372,7 @@ export default function HomePage() {
 
       {/* CTA Section */}
       {!isAuthenticated && (
-        <section className="py-16 md:py-20 mx-4 md:mx-8">
+        <section className="py-16 md:py-20 page-shell page-section-gap">
           <div className="max-w-4xl mx-auto px-6 py-12 md:py-16 bg-[var(--pk-red)] rounded-[var(--radius-2xl)] shadow-xl text-center">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6" data-testid="cta-title">
               هل أنت مستعد للمتعة؟
