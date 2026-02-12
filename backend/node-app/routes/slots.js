@@ -11,9 +11,29 @@ const TIMEZONE = 'Asia/Amman';
 const BOOKING_CUTOFF_MINUTES = 30;
 const SLOTS_CACHE_TTL_MS = 60 * 1000;
 const slotsAvailabilityCache = new Map();
+const jordanDateTimeFormatter = new Intl.DateTimeFormat('en-CA', {
+  timeZone: TIMEZONE,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false
+});
 
-const getSlotsCacheKey = ({ date, slotType, timeMode, durationHours }) => (
-  `${date}|${slotType}|${timeMode || 'all'}|${durationHours}`
+const getJordanDateTimeParts = (date = new Date()) => {
+  const parts = jordanDateTimeFormatter.formatToParts(date);
+  const getPart = (type) => parts.find((part) => part.type === type)?.value;
+
+  return {
+    date: `${getPart('year')}-${getPart('month')}-${getPart('day')}`,
+    hour: Number(getPart('hour')),
+    minute: Number(getPart('minute'))
+  };
+};
+
+const getSlotsCacheKey = ({ date, slotType, timeMode, durationHours, sameDayBucket }) => (
+  `${date}|${slotType}|${timeMode || 'all'}|${durationHours}|${sameDayBucket || 'na'}`
 );
 
 // HOURLY: 10:00 AM to 12:00 AM (midnight), every 10 minutes, session = 60 min
@@ -182,11 +202,18 @@ router.get('/available', async (req, res) => {
       return res.status(400).json({ error: 'Date is required' });
     }
 
+    const jordanNowParts = getJordanDateTimeParts();
+    const isJordanTodayRequest = date === jordanNowParts.date;
+    const sameDayBucket = isJordanTodayRequest
+      ? `${jordanNowParts.date}-${String(jordanNowParts.hour).padStart(2, '0')}:${String(jordanNowParts.minute).padStart(2, '0')}`
+      : undefined;
+
     const cacheKey = getSlotsCacheKey({
       date,
       slotType: slot_type,
       timeMode,
-      durationHours
+      durationHours,
+      sameDayBucket
     });
     const cachedEntry = slotsAvailabilityCache.get(cacheKey);
     if (cachedEntry && cachedEntry.expiresAt > Date.now()) {
@@ -298,14 +325,15 @@ router.get('/available', async (req, res) => {
       : availableSlots;
 
     // Same-day safety filter (Jordan time): only allow slots >= now + 60 minutes
-    const jordanOffsetMs = 3 * 60 * 60 * 1000;
-    const jordanNow = new Date(Date.now() + jordanOffsetMs);
-    const jordanToday = `${jordanNow.getUTCFullYear()}-${String(jordanNow.getUTCMonth() + 1).padStart(2, '0')}-${String(jordanNow.getUTCDate()).padStart(2, '0')}`;
-    const isJordanTodayRequest = date === jordanToday;
+    const jordanCutoffParts = getJordanDateTimeParts(addMinutes(new Date(), 60));
+    const cutoffMinutes = (jordanCutoffParts.hour * 60) + jordanCutoffParts.minute;
 
     const slotsAfterJordanCutoff = isJordanTodayRequest
       ? (() => {
-          const cutoffMinutes = (jordanNow.getUTCHours() * 60) + jordanNow.getUTCMinutes() + 60;
+          if (date < jordanCutoffParts.date) {
+            return [];
+          }
+
           return filteredSlots.filter((slot) => {
             const rawStart = slot.start_time || slot.startTime;
             if (typeof rawStart !== 'string') return false;
