@@ -113,7 +113,8 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.7;
-    color: #4B5563;
+    color: #5F6B7A;
+    background: #f7f9fc;
 }
 
 /* ===== PLAYFUL HEADING TYPOGRAPHY (LARGER) ===== */
@@ -356,8 +357,8 @@ code {
     font-weight: 700;
     font-size: 1rem;
     letter-spacing: 0.01em;
-    height: 52px;
-    border-radius: 999px;
+    height: 50px;
+    border-radius: 14px;
     background: linear-gradient(135deg, #ff4d5a, #ff7a5c);
     box-shadow: var(--shadow-btn);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -519,9 +520,9 @@ code {
 /* ===== WONDERLAND CARDS ===== */
 .pk-card {
     background: white;
-    border-radius: 22px !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-    border: none !important;
+    border-radius: 16px !important;
+    box-shadow: 0 8px 24px rgba(24, 39, 75, 0.08);
+    border: 1px solid rgba(69, 170, 242, 0.12) !important;
     overflow: hidden;
     position: relative;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
@@ -529,7 +530,7 @@ code {
 
 .pk-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+    box-shadow: 0 12px 28px rgba(24, 39, 75, 0.12);
 }
 
 /* Colorful top accent strip - thicker */
@@ -641,15 +642,7 @@ code {
 
 /* ===== WONDERLAND SKY THEME ===== */
 .sky-theme {
-    background: 
-        linear-gradient(180deg, 
-            #87CEEB 0%,
-            #B4E4FF 20%,
-            #D6F0FF 40%,
-            #E8F7FF 60%,
-            #FFF8E7 100%
-        );
-    background-attachment: fixed;
+    background: linear-gradient(180deg, #f8fbff 0%, #f6faff 58%, #fffaf1 100%);
     min-height: 100vh;
     position: relative;
 }
@@ -658,7 +651,7 @@ code {
 .sky-theme::before,
 .sky-theme::after {
     content: '';
-    position: fixed;
+    position: absolute;
     left: 0;
     right: 0;
     pointer-events: none;
@@ -685,7 +678,7 @@ code {
         250px 100px,
         160px 80px;
     background-repeat: no-repeat;
-    opacity: 0.9;
+    opacity: 0.3;
     animation: cloudsDrift 60s linear infinite;
 }
 
@@ -714,7 +707,7 @@ code {
         40px 64px,
         42px 68px;
     background-repeat: no-repeat;
-    opacity: 0.5;
+    opacity: 0.2;
     animation: balloonsFloat 20s ease-in-out infinite;
 }
 
@@ -800,16 +793,19 @@ code {
 /* ===== WONDERLAND SECTION CONTAINERS ===== */
 .section-container {
     border-radius: var(--radius-2xl);
-    padding: 3.5rem 1.5rem;
+    padding: 4rem 1.5rem;
     margin-bottom: 2rem;
     position: relative;
     overflow: hidden;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(69, 170, 242, 0.12);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
 }
 
 @media (min-width: 768px) {
     .section-container {
-        padding: 5rem 2rem;
-        margin-bottom: 3rem;
+        padding: 5rem 2.5rem;
+        margin-bottom: 3.5rem;
     }
 }
 
@@ -1160,15 +1156,15 @@ code {
 /* Booking card container */
 .booking-card {
     background: white;
-    border-radius: 22px !important;
-    border: none !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    border-radius: 16px !important;
+    border: 1px solid rgba(69, 170, 242, 0.12) !important;
+    box-shadow: 0 8px 24px rgba(24, 39, 75, 0.08);
     overflow: visible;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .booking-card:hover {
-    box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+    box-shadow: 0 12px 28px rgba(24, 39, 75, 0.12);
 }
 
 .booking-card-header {
@@ -1231,11 +1227,11 @@ code {
 /* Time slot grid button */
 .slot-btn {
     min-height: var(--touch-min);
-    border-radius: var(--radius-lg);
+    border-radius: 14px;
     transition: all 0.2s ease;
     border: 2px solid var(--border-light);
     background: white;
-    padding: 0.75rem 1rem;
+    padding: 0.9rem 1rem;
 }
 
 .slot-btn:hover:not(:disabled) {
@@ -1504,7 +1500,7 @@ code {
   position: relative;
   overflow: hidden;
   min-height: 100vh;
-  background: linear-gradient(180deg, #BFE9FF 0%, #EAFBFF 45%, #FFF7E6 100%);
+  background: linear-gradient(180deg, #f7fbff 0%, #f9fcff 45%, #fffaf2 100%);
   -webkit-background-size: 100% 100%;
   background-size: 100% 100%;
 }
@@ -1523,7 +1519,42 @@ code {
 }
 
 .home-page-section {
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.page-shell {
+  width: min(1120px, 100% - 2rem);
+  margin-inline: auto;
+}
+
+.page-section-gap {
+  margin-top: 1.75rem;
+}
+
+@media (min-width: 768px) {
+  .page-section-gap {
+    margin-top: 2.25rem;
+  }
+}
+
+.soft-loading-state {
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(248, 251, 255, 0.95), rgba(255, 255, 255, 0.95));
+  border: 1px solid rgba(69, 170, 242, 0.16);
+  padding: 1rem;
+}
+
+.calendar-skeleton {
+  border-radius: 12px;
+  height: 64px;
+  background: linear-gradient(100deg, rgba(226, 237, 248, 0.7) 20%, rgba(239, 246, 255, 0.95) 50%, rgba(226, 237, 248, 0.7) 80%);
+  background-size: 220% 100%;
+  animation: calendarPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes calendarPulse {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 
 /* Clouds */

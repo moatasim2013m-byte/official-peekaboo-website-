@@ -332,11 +332,11 @@ export default function TicketsPage() {
 
   // Skeleton loader for slots
   const SlotsSkeleton = () => (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-3" aria-hidden="true">
       {[1, 2, 3, 4, 5, 6].map((i) => (
-        <div key={i} className="p-4 rounded-2xl border-2 border-border bg-muted/30 animate-pulse">
-          <div className="h-5 bg-muted rounded w-24 mx-auto mb-2"></div>
-          <div className="h-4 bg-muted rounded w-16 mx-auto"></div>
+        <div key={i} className="calendar-skeleton p-4">
+          <div className="h-5 bg-muted/70 rounded w-24 mx-auto mb-2"></div>
+          <div className="h-4 bg-muted/70 rounded w-16 mx-auto"></div>
         </div>
       ))}
     </div>
@@ -344,7 +344,7 @@ export default function TicketsPage() {
 
   return (
     <div className="min-h-screen py-8 md:py-12" dir="rtl">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="page-shell max-w-5xl px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="text-center mb-8">
           <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3">
@@ -502,17 +502,17 @@ export default function TicketsPage() {
             </CardHeader>
             <CardContent className="py-6">
               {slotsLoading ? (
-                <div>
+                <div className="soft-loading-state">
                   <p className="text-center text-muted-foreground mb-4">جاري تحميل الأوقات...</p>
                   <SlotsSkeleton />
                 </div>
               ) : slotsError ? (
-                <div className="text-center py-8 text-destructive">
+                <div className="soft-loading-state text-center py-8 text-destructive">
                   <AlertCircle className="h-10 w-10 mx-auto mb-3 opacity-50" />
                   <p>{slotsError}</p>
                 </div>
               ) : slots.filter(s => s.is_available).length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
+                <div className="soft-loading-state text-center py-8 text-muted-foreground">
                   <AlertCircle className="h-10 w-10 mx-auto mb-3 opacity-50" />
                   <p>لا توجد أوقات متاحة لهذه الفترة</p>
                 </div>
