@@ -1,6 +1,18 @@
 require('dotenv').config();
-console.log('BOOT_START');
-console.log('PORT', process.env.PORT);
+const crypto = require('crypto');
+
+// ==================== BOOT DIAGNOSTICS ====================
+console.log("[BOOT] node:", process.version);
+console.log("[BOOT] env:", process.env.NODE_ENV || "undefined");
+console.log("[BOOT] port:", process.env.PORT || "undefined");
+console.log("[BOOT] env_present:", {
+  MONGO_URL: !!process.env.MONGO_URL,
+  JWT_SECRET: !!process.env.JWT_SECRET,
+  FRONTEND_URL: !!process.env.FRONTEND_URL,
+  CORS_ORIGINS: !!process.env.CORS_ORIGINS,
+  RESEND_API_KEY: !!process.env.RESEND_API_KEY,
+  SENDER_EMAIL: !!process.env.SENDER_EMAIL
+});
 
 // ==================== PROCESS ERROR HANDLERS ====================
 process.on('unhandledRejection', (reason, promise) => {
@@ -22,6 +34,16 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 
 const app = express();
+
+// ==================== REQUEST ID MIDDLEWARE ====================
+app.use((req, res, next) => {
+  const id = (crypto.randomUUID && typeof crypto.randomUUID === 'function')
+    ? crypto.randomUUID()
+    : crypto.randomBytes(16).toString('hex');
+  req.req_id = id;
+  res.setHeader('X-Request-Id', id);
+  return next();
+});
 
 const allowedOrigins =
   process.env.CORS_ORIGINS === '*'
@@ -161,13 +183,10 @@ if (frontendBuildPath && fs.existsSync(indexHtmlPath)) {
 
 // ==================== GLOBAL ERROR HANDLER ====================
 app.use((err, req, res, next) => {
-  console.error('[GLOBAL_ERROR]', {
-    method: req.method,
-    url: req.originalUrl,
-    message: err.message,
-    stack: err.stack
-  });
-  res.status(err.status || 500).json({ error: 'حدث خطأ في الخادم' });
+  const rid = (req && req.req_id) ? req.req_id : "no_req_id";
+  console.error(`[GLOBAL_ERROR][${rid}]`, err.message || err);
+  console.error(`[GLOBAL_ERROR_STACK][${rid}]`, err.stack);
+  res.status(err.status || 500).json({ error: 'حدث خطأ في الخادم', req_id: rid });
 });
 
 // ==================== ENV VALIDATION (before server start) ====================
