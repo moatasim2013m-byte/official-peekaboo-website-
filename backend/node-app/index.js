@@ -38,6 +38,9 @@ const app = express();
 // Ignore favicon early to avoid middleware crashes
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
+// Block .git requests (security scan noise reduction)
+app.use('/.git', (req, res) => res.status(404).end());
+
 // ==================== REQUEST ID MIDDLEWARE ====================
 app.use((req, res, next) => {
   const id = (crypto.randomUUID && typeof crypto.randomUUID === 'function')
