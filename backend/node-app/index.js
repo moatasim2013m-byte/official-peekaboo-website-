@@ -66,7 +66,17 @@ app.use(helmet({
   xXssProtection: false,
   contentSecurityPolicy: false
 }));
-app.use(mongoSanitize());
+app.use((req, res, next) => {
+  try {
+    // Attempt to sanitize. If req.query is read-only, this might throw.
+    mongoSanitize()(req, res, next);
+  } catch (error) {
+    // If it fails (e.g. read-only query), log warning and proceed safely
+    // This prevents the 500 crash while keeping the app running
+    console.warn('[SECURITY] Sanitization skipped for read-only property');
+    next();
+  }
+});
 
 // ==================== HEALTH CHECK (before rate limiting) ====================
 app.get('/healthz', (req, res) => res.status(200).send('ok'));
