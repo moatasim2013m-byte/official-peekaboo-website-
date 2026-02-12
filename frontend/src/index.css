@@ -1496,8 +1496,17 @@ code {
    ========================= */
 .home-hero-sky {
   position: relative;
+  overflow: visible;
+  background: transparent;
+}
+
+.home-page {
+  position: relative;
   overflow: hidden;
+  min-height: 100vh;
   background: linear-gradient(180deg, #BFE9FF 0%, #EAFBFF 45%, #FFF7E6 100%);
+  -webkit-background-size: 100% 100%;
+  background-size: 100% 100%;
 }
 
 .home-sky-layer {
@@ -1508,9 +1517,13 @@ code {
 }
 
 /* Keep hero content above decorations */
-.home-hero-sky > *:not(.home-sky-layer) {
+.home-page > *:not(.home-sky-layer) {
   position: relative;
   z-index: 1;
+}
+
+.home-page-section {
+  background: rgba(255, 255, 255, 0.72);
 }
 
 /* Clouds */

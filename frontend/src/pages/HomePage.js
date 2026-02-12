@@ -131,31 +131,31 @@ export default function HomePage() {
   ];
 
   return (
-    <div className="min-h-screen" dir="rtl">
-      {/* Hero Section with Sky Background */}
+    <div className="home-page" dir="rtl">
+      {/* Decorative Sky Layer (applies to whole page) */}
+      <div className="home-sky-layer" aria-hidden="true">
+        {/* Sun */}
+        <div className="sky-sun"></div>
+        {/* Rainbow Arc */}
+        <div className="sky-rainbow"></div>
+        {/* Clouds */}
+        <div className="sky-cloud cloud-1"></div>
+        <div className="sky-cloud cloud-2"></div>
+        <div className="sky-cloud cloud-3"></div>
+        <div className="sky-cloud cloud-4"></div>
+        <div className="sky-cloud cloud-5"></div>
+        {/* Balloons */}
+        <div className="sky-balloon balloon-1"></div>
+        <div className="sky-balloon balloon-2"></div>
+        {/* Sparkles */}
+        <div className="sky-sparkle sparkle-1"></div>
+        <div className="sky-sparkle sparkle-2"></div>
+        <div className="sky-sparkle sparkle-3"></div>
+        <div className="sky-sparkle sparkle-4"></div>
+        <div className="sky-sparkle sparkle-5"></div>
+      </div>
+
       <section className="home-hero-sky py-12 md:py-20">
-        {/* Decorative Sky Layer */}
-        <div className="home-sky-layer" aria-hidden="true">
-          {/* Sun */}
-          <div className="sky-sun"></div>
-          {/* Rainbow Arc */}
-          <div className="sky-rainbow"></div>
-          {/* Clouds */}
-          <div className="sky-cloud cloud-1"></div>
-          <div className="sky-cloud cloud-2"></div>
-          <div className="sky-cloud cloud-3"></div>
-          <div className="sky-cloud cloud-4"></div>
-          <div className="sky-cloud cloud-5"></div>
-          {/* Balloons */}
-          <div className="sky-balloon balloon-1"></div>
-          <div className="sky-balloon balloon-2"></div>
-          {/* Sparkles */}
-          <div className="sky-sparkle sparkle-1"></div>
-          <div className="sky-sparkle sparkle-2"></div>
-          <div className="sky-sparkle sparkle-3"></div>
-          <div className="sky-sparkle sparkle-4"></div>
-          <div className="sky-sparkle sparkle-5"></div>
-        </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
@@ -255,7 +255,7 @@ export default function HomePage() {
       )}
 
       {/* Features Section */}
-      <section className="section-container section-yellow mx-4 md:mx-8">
+      <section className="section-container home-page-section mx-4 md:mx-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="features-title">
@@ -305,7 +305,7 @@ export default function HomePage() {
       </section>
 
       {/* Gallery Section */}
-      <section className="section-container section-green mx-4 md:mx-8">
+      <section className="section-container home-page-section mx-4 md:mx-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="gallery-title">
