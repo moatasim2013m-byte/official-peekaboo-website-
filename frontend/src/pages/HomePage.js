@@ -105,7 +105,8 @@ export default function HomePage() {
   const { t } = useTranslation();
   const [gallery, setGallery] = useState([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [heroImgSrc, setHeroImgSrc] = useState(HERO_FALLBACK);
+  const [heroImgSrc, setHeroImgSrc] = useState('');
+  const [heroImageReady, setHeroImageReady] = useState(false);
   const [heroConfig, setHeroConfig] = useState({
     title: 'حيث يلعب الأطفال ويحتفلون 🎈',
     subtitle: 'أفضل تجربة ملعب داخلي! احجز جلسات اللعب، أقم حفلات أعياد ميلاد لا تُنسى، ووفّر مع باقات الاشتراك',
@@ -151,12 +152,13 @@ export default function HomePage() {
           ctaRoute: s.hero_cta_route || heroConfig.ctaRoute,
           image: s.hero_image || ''
         });
-        // Set hero image src (prefer admin image, fallback if empty)
-        if (s.hero_image) {
-          setHeroImgSrc(resolveMediaUrl(s.hero_image));
-        }
+        // Set hero image src only after settings load to avoid initial image flicker.
+        setHeroImgSrc(s.hero_image ? resolveMediaUrl(s.hero_image) : HERO_FALLBACK);
       } catch (error) {
         console.error('Failed to fetch data:', error);
+        setHeroImgSrc(HERO_FALLBACK);
+      } finally {
+        setHeroImageReady(true);
       }
     };
     fetchData();
@@ -297,13 +299,17 @@ export default function HomePage() {
                 data-testid="hero-image-clickable"
               >
                 <div className="rounded-3xl overflow-hidden bg-white shadow-xl">
-                  <img 
-                    src={heroImgSrc}
-                    alt="أطفال يلعبون في بيكابو"
-                    className="w-full aspect-[4/3] object-cover transition-transform duration-300 group-hover:scale-105"
-                    onError={() => setHeroImgSrc(HERO_FALLBACK)}
-                    data-testid="hero-image"
-                  />
+                  {heroImageReady && heroImgSrc ? (
+                    <img 
+                      src={heroImgSrc}
+                      alt="أطفال يلعبون في بيكابو"
+                      className="w-full aspect-[4/3] object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={() => setHeroImgSrc(HERO_FALLBACK)}
+                      data-testid="hero-image"
+                    />
+                  ) : (
+                    <div className="w-full aspect-[4/3] bg-slate-100 animate-pulse" aria-hidden="true" />
+                  )}
                 </div>
                 {/* Zoom hint */}
                 <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-2 rounded-full text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -319,10 +325,6 @@ export default function HomePage() {
                 className="absolute -bottom-4 -left-4 w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white shadow-lg object-cover z-10"
               />
               
-              {/* Hours Badge */}
-              <div className="absolute -bottom-2 right-4 sm:right-8 bg-[var(--pk-yellow)] text-[var(--text-primary)] px-4 sm:px-6 py-2 sm:py-3 rounded-full font-heading font-bold shadow-lg text-sm sm:text-base">
-                مفتوح يومياً
-              </div>
             </div>
           </div>
         </div>
@@ -412,6 +414,9 @@ export default function HomePage() {
             <p className="text-muted-foreground text-base sm:text-lg">
               شاهد ما يجعلنا مميزين!
             </p>
+            <div className="mt-4 inline-flex items-center bg-[var(--pk-yellow)] text-[var(--text-primary)] px-4 sm:px-6 py-2 rounded-full font-heading font-bold shadow-sm text-sm sm:text-base">
+              مفتوح يومياً
+            </div>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
