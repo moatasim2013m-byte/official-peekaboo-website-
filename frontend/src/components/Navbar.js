@@ -162,9 +162,9 @@ export const Navbar = () => {
             </div>
           )}
 
-          {/* Mobile Menu Button - Only show on non-homepage or for auth actions */}
+          {/* Mobile Menu Button - hidden on homepage to avoid duplicate navigation */}
           <button
-            className={`md:hidden playful-menu-button ${isHomePage && isCustomerNav ? 'hidden' : ''}`}
+            className={`md:hidden playful-menu-button ${isHomePage ? 'hidden' : ''}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             data-testid="mobile-menu-toggle"
             aria-label={mobileMenuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
@@ -184,9 +184,9 @@ export const Navbar = () => {
             </span>
           </button>
 
-          {/* Mobile Auth Button on Homepage */}
+          {/* Mobile Auth Buttons on Homepage */}
           {isHomePage && !isAdmin && (
-            <div className="order-2 md:hidden">
+            <div className="order-2 md:hidden flex items-center gap-2">
               {isAuthenticated ? (
                 <Link to="/profile">
                   <Button variant="outline" size="sm" className="rounded-full">
@@ -194,11 +194,18 @@ export const Navbar = () => {
                   </Button>
                 </Link>
               ) : (
-                <Link to="/login">
-                  <Button size="sm" className="rounded-full btn-playful text-sm">
-                    دخول
-                  </Button>
-                </Link>
+                <>
+                  <Link to="/register">
+                    <Button variant="outline" size="sm" className="rounded-full text-sm">
+                      إنشاء حساب
+                    </Button>
+                  </Link>
+                  <Link to="/login">
+                    <Button size="sm" className="rounded-full btn-playful text-sm">
+                      دخول
+                    </Button>
+                  </Link>
+                </>
               )}
             </div>
           )}
