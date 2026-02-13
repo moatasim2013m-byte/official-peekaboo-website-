@@ -80,7 +80,8 @@ export default function HomePage() {
       link: '/tickets',
       buttonText: 'احجز الآن',
       badgeColor: 'badge-blue',
-      accentColor: 'accent-blue'
+      accentColor: 'accent-blue',
+      buttonVariant: 'btn-sunrise'
     },
     {
       icon: Cake,
@@ -89,7 +90,8 @@ export default function HomePage() {
       link: '/birthday',
       buttonText: 'خطط لحفلتك',
       badgeColor: 'badge-pink',
-      accentColor: 'accent-pink'
+      accentColor: 'accent-pink',
+      buttonVariant: 'btn-cotton-candy'
     },
     {
       icon: Star,
@@ -98,7 +100,8 @@ export default function HomePage() {
       link: '/subscriptions',
       buttonText: 'اشترك الآن',
       badgeColor: 'badge-yellow',
-      accentColor: 'accent-yellow'
+      accentColor: 'accent-yellow',
+      buttonVariant: 'btn-sunshine'
     },
     {
       icon: Users,
@@ -107,7 +110,8 @@ export default function HomePage() {
       link: '/groups',
       buttonText: 'تواصل معنا',
       badgeColor: 'badge-green',
-      accentColor: 'accent-green'
+      accentColor: 'accent-green',
+      buttonVariant: 'btn-ocean'
     },
     {
       icon: Home,
@@ -116,7 +120,8 @@ export default function HomePage() {
       link: '/home-party',
       buttonText: 'احجز حفلتك',
       badgeColor: 'badge-orange',
-      accentColor: 'accent-orange'
+      accentColor: 'accent-orange',
+      buttonVariant: 'btn-sunrise'
     },
     {
       icon: Heart,
@@ -126,6 +131,7 @@ export default function HomePage() {
       buttonText: 'قريباً',
       badgeColor: 'badge-purple',
       accentColor: 'accent-purple',
+      buttonVariant: 'btn-cotton-candy',
       disabled: true
     }
   ];
@@ -133,7 +139,7 @@ export default function HomePage() {
   return (
     <div className="home-page" dir="rtl">
       {/* Decorative Sky Layer (applies to whole page) */}
-      <div className="home-sky-layer" aria-hidden="true">
+      <div className="home-sky-layer cloud-layer" aria-hidden="true">
         {/* Sun */}
         <div className="sky-sun"></div>
         {/* Rainbow Arc */}
@@ -279,19 +285,19 @@ export default function HomePage() {
                     قريباً
                   </div>
                 )}
-                <CardContent className="p-0 text-center">
+                <CardContent className="feature-card-content text-center">
                   <div className={`pk-icon-badge ${feature.badgeColor} ${feature.disabled ? 'grayscale' : ''}`}>
                     <feature.icon className="h-7 w-7 text-white" />
                   </div>
-                  <h3 className="pk-card-title text-base">{feature.title}</h3>
-                  <p className="text-muted-foreground text-xs mb-5 leading-relaxed">{feature.description}</p>
+                  <h3 className="pk-card-title text-base feature-title">{feature.title}</h3>
+                  <p className="text-muted-foreground text-xs leading-relaxed feature-description">{feature.description}</p>
                   {feature.disabled ? (
-                    <Button disabled className="playful-btn w-full opacity-50 cursor-not-allowed" data-testid={`feature-btn-${index}`}>
+                    <Button disabled className={`playful-btn ${feature.buttonVariant} w-full opacity-50 cursor-not-allowed feature-cta`} data-testid={`feature-btn-${index}`}>
                       {feature.buttonText}
                     </Button>
                   ) : (
-                    <Link to={feature.link}>
-                      <Button className="playful-btn w-full text-sm" data-testid={`feature-btn-${index}`}>
+                    <Link to={feature.link} className="feature-cta-link">
+                      <Button className={`playful-btn ${feature.buttonVariant} w-full text-sm feature-cta`} data-testid={`feature-btn-${index}`}>
                         {feature.buttonText}
                         <ChevronLeft className="mr-2 h-4 w-4" />
                       </Button>
