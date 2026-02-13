@@ -90,6 +90,16 @@ app.use((req, res, next) => {
 // ==================== HEALTH CHECK (before rate limiting) ====================
 app.get('/healthz', (req, res) => res.status(200).send('ok'));
 
+app.get('/health', (req, res) => {
+  const isDbConnected = mongoose?.connection?.readyState === 1;
+
+  res.status(200).json({
+    status: 'ok',
+    service: 'peekaboo',
+    db: isDbConnected ? 'connected' : 'disconnected'
+  });
+});
+
 // Basic API rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
