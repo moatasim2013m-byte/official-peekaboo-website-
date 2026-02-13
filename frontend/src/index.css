@@ -608,7 +608,7 @@ code {
     background: white;
     border-radius: 16px !important;
     box-shadow: 0 8px 24px rgba(24, 39, 75, 0.08);
-    border: 1px solid rgba(69, 170, 242, 0.12) !important;
+    border: 2px solid rgba(69, 170, 242, 0.32) !important;
     overflow: hidden;
     position: relative;
     transition: transform 0.25s ease, box-shadow 0.25s ease;
