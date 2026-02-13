@@ -2168,16 +2168,94 @@ code {
 }
 
 .home-cta-panel {
-  background: linear-gradient(135deg, var(--pk-red) 0%, var(--pk-orange) 34%, var(--pk-yellow) 58%, var(--pk-green) 78%, var(--pk-blue) 100%);
+  position: relative;
+  isolation: isolate;
+  background: #ffffff;
+  border: 2px solid rgba(255, 174, 0, 0.28);
+  box-shadow: 0 20px 48px rgba(39, 74, 122, 0.12);
+}
+
+.home-cta-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 14% 82%, rgba(240, 82, 76, 0.16), transparent 24%),
+    radial-gradient(circle at 78% 14%, rgba(255, 214, 10, 0.2), transparent 28%),
+    radial-gradient(circle at 95% 85%, rgba(65, 169, 224, 0.18), transparent 26%),
+    radial-gradient(circle at 6% 24%, rgba(87, 204, 102, 0.16), transparent 24%);
 }
 
 .home-cta-signup-btn {
-  background: white;
-  color: var(--pk-red);
+  background: linear-gradient(135deg, var(--pk-yellow) 0%, var(--pk-orange) 38%, var(--pk-red) 72%, var(--pk-blue) 100%);
+  color: white;
 }
 
 .home-cta-signup-btn:hover {
-  background: #fff7fb;
+  filter: brightness(1.04);
+}
+
+.cta-cloud-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cta-cloud {
+  position: absolute;
+  width: 90px;
+  height: 54px;
+  background: rgba(255, 255, 255, 0.86);
+  border-radius: 999px;
+  box-shadow: 0 8px 20px rgba(18, 54, 102, 0.08);
+  animation: cloudDriftSlow 30s linear infinite;
+}
+
+.cta-cloud::before,
+.cta-cloud::after {
+  content: "";
+  position: absolute;
+  background: inherit;
+  border-radius: inherit;
+}
+
+.cta-cloud::before {
+  width: 54px;
+  height: 44px;
+  left: 14px;
+  top: -20px;
+}
+
+.cta-cloud::after {
+  width: 64px;
+  height: 46px;
+  right: 10px;
+  top: -16px;
+}
+
+.cta-cloud-1 {
+  top: 16%;
+  left: -16%;
+  opacity: 0.85;
+}
+
+.cta-cloud-2 {
+  top: 36%;
+  left: 24%;
+  transform: scale(0.82);
+  animation-duration: 36s;
+  opacity: 0.72;
+}
+
+.cta-cloud-3 {
+  top: 12%;
+  left: 72%;
+  transform: scale(0.74);
+  animation-duration: 26s;
+  opacity: 0.7;
 }
 
 .pb-section {
