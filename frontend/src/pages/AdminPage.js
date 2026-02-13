@@ -1924,6 +1924,26 @@ export default function AdminPage() {
                       className="rounded-xl mt-2"
                     />
                   </div>
+                  <div className="md:col-span-2">
+                    <Label>وصف الفوتر (قابل للتعديل في الموقع)</Label>
+                    <Input
+                      type="text"
+                      defaultValue={settings.footer_description || 'أفضل ملعب داخلي للأطفال في إربد. احجز جلسات اللعب وحفلات أعياد الميلاد!'}
+                      onBlur={(e) => handleUpdateSettings('footer_description', e.target.value.trim())}
+                      className="rounded-xl mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label>ارتفاع شعار الفوتر (بكسل)</Label>
+                    <Input
+                      type="number"
+                      min={80}
+                      max={220}
+                      defaultValue={settings.footer_logo_height || 112}
+                      onBlur={(e) => handleUpdateSettings('footer_logo_height', parseInt(e.target.value))}
+                      className="rounded-xl mt-2"
+                    />
+                  </div>
                 </div>
 
                 <div className="border-t pt-6">
