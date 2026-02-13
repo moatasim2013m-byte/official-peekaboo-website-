@@ -4,7 +4,7 @@ const HourlyBooking = require('../models/HourlyBooking');
 const Settings = require('../models/Settings');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { format, addDays, parse, isBefore, subMinutes, addMinutes } = require('date-fns');
-const { toZonedTime } = require('date-fns-tz');
+const { fromZonedTime } = require('date-fns-tz');
 
 const router = express.Router();
 const TIMEZONE = 'Asia/Amman';
@@ -227,9 +227,8 @@ router.get('/available', async (req, res) => {
       await generateBirthdaySlotsForDate(date);
     }
 
-    // Get current time in Amman timezone
-    const nowInAmman = toZonedTime(new Date(), TIMEZONE);
-    const cutoffTime = addMinutes(nowInAmman, BOOKING_CUTOFF_MINUTES);
+    // Keep cutoff at now + BOOKING_CUTOFF_MINUTES while comparing absolute instants
+    const cutoffTime = addMinutes(new Date(), BOOKING_CUTOFF_MINUTES);
 
     // Determine closing time based on day of week (Thu=4, Fri=5)
     const dateObj = new Date(date);
@@ -264,10 +263,10 @@ router.get('/available', async (req, res) => {
 
     // Process slots with availability (now using in-memory calculation)
     const availableSlots = slots.map((slot) => {
-      const slotDateTime = parse(`${slot.date} ${slot.start_time}`, 'yyyy-MM-dd HH:mm', new Date());
-      const slotInAmman = toZonedTime(slotDateTime, TIMEZONE);
-      
-      const isPast = isBefore(slotInAmman, cutoffTime);
+      const slotDateTimeInAmman = parse(`${slot.date} ${slot.start_time}`, 'yyyy-MM-dd HH:mm', new Date());
+      const slotDateTime = fromZonedTime(slotDateTimeInAmman, TIMEZONE);
+
+      const isPast = isBefore(slotDateTime, cutoffTime);
       
       // Parse start time
       const [startHour, startMinute] = slot.start_time.split(':').map(Number);
