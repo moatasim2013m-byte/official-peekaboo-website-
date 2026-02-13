@@ -533,14 +533,19 @@ export default function HomePage() {
       {!isAuthenticated && (
         <section className="pb-section py-16 md:py-20 page-shell page-section-gap">
           <div className="relative overflow-hidden max-w-4xl mx-auto px-6 py-12 md:py-16 home-cta-panel rounded-[var(--radius-2xl)] shadow-xl text-center">
+            <div className="cta-cloud-layer" aria-hidden="true">
+              <div className="cta-cloud cta-cloud-1"></div>
+              <div className="cta-cloud cta-cloud-2"></div>
+              <div className="cta-cloud cta-cloud-3"></div>
+            </div>
             <div className="flex justify-center mb-4">
               <img src={logoImg} alt="شعار بيكابو" className="h-16 sm:h-20 drop-shadow-lg" />
             </div>
             <img src={mascotImg} alt="تميمة بيكابو" className="hidden sm:block absolute bottom-3 left-4 w-20 h-20 lg:w-24 lg:h-24 object-contain drop-shadow-lg" />
-            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6" data-testid="cta-title">
+            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--text-primary)] mb-6" data-testid="cta-title">
               هل أنت مستعد للمتعة؟
             </h2>
-            <p className="text-white/90 text-base sm:text-lg mb-8 max-w-xl mx-auto">
+            <p className="text-[var(--text-secondary)] text-base sm:text-lg mb-8 max-w-xl mx-auto">
               أنشئ حسابك المجاني لحجز الجلسات، تتبع نقاط الولاء، والحصول على عروض حصرية!
             </p>
             <Link to="/register">
