@@ -215,21 +215,28 @@ export default function BirthdayPage() {
   );
 
   return (
-    <div className="min-h-screen py-8 md:py-12" dir="rtl">
+    <div className="birthday-page min-h-screen py-8 md:py-12" dir="rtl">
       <div className="page-shell max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="birthday-page-decoration" aria-hidden="true">
+          <span className="birthday-confetti birthday-confetti--pink" />
+          <span className="birthday-confetti birthday-confetti--blue" />
+          <span className="birthday-confetti birthday-confetti--yellow" />
+          <span className="birthday-confetti birthday-confetti--green" />
+        </div>
+
         {/* Page Header */}
         <div className="text-center mb-8">
-          <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3" data-testid="birthday-title">
+          <h1 className="birthday-page-title font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3" data-testid="birthday-title">
             <Cake className="inline-block h-9 w-9 text-accent ml-2" />
             حفلات أعياد الميلاد
           </h1>
-          <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
+          <p className="birthday-page-subtitle text-base md:text-lg max-w-xl mx-auto">
             اجعل عيد ميلاد طفلك لا يُنسى!
           </p>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full max-w-sm mx-auto grid-cols-2 rounded-full p-1 bg-muted h-12">
+          <TabsList className="birthday-tabs-list grid w-full max-w-sm mx-auto grid-cols-2 rounded-full p-1 h-12">
             <TabsTrigger value="standard" className="rounded-full text-sm font-semibold" data-testid="tab-standard">
               الثيمات الجاهزة
             </TabsTrigger>
