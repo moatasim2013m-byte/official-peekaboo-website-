@@ -1,18 +1,20 @@
 require('dotenv').config();
 const crypto = require('crypto');
+const initialEnvPresence = {
+  MONGO_URL: Boolean(process.env.MONGO_URL),
+  JWT_SECRET: Boolean(process.env.JWT_SECRET),
+  FRONTEND_URL: Boolean(process.env.FRONTEND_URL),
+  CORS_ORIGINS: Boolean(process.env.CORS_ORIGINS),
+  RESEND_API_KEY: Boolean(process.env.RESEND_API_KEY),
+  SENDER_EMAIL: Boolean(process.env.SENDER_EMAIL)
+};
+
 
 // ==================== BOOT DIAGNOSTICS ====================
 console.log("[BOOT] node:", process.version);
 console.log("[BOOT] env:", process.env.NODE_ENV || "undefined");
 console.log("[BOOT] port:", process.env.PORT || "undefined");
-console.log("[BOOT] env_present:", {
-  MONGO_URL: !!process.env.MONGO_URL,
-  JWT_SECRET: !!process.env.JWT_SECRET,
-  FRONTEND_URL: !!process.env.FRONTEND_URL,
-  CORS_ORIGINS: !!process.env.CORS_ORIGINS,
-  RESEND_API_KEY: !!process.env.RESEND_API_KEY,
-  SENDER_EMAIL: !!process.env.SENDER_EMAIL
-});
+console.log("[BOOT] env_present:", initialEnvPresence);
 
 // ==================== PROCESS ERROR HANDLERS ====================
 process.on('unhandledRejection', (reason, promise) => {
@@ -24,6 +26,10 @@ process.on('uncaughtException', (err) => {
   console.error('[UNCAUGHT_EXCEPTION]', err.message);
   console.error('[UNCAUGHT_EXCEPTION_STACK]', err.stack);
 });
+
+if (!process.env.RESEND_API_KEY) {
+  process.env.RESEND_API_KEY = 're_placeholder_disabled';
+}
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -219,24 +225,33 @@ app.use((err, req, res, next) => {
 });
 
 // ==================== ENV VALIDATION (before server start) ====================
-const requiredEnvVars = ['SENDER_EMAIL', 'RESEND_API_KEY', 'MONGO_URL', 'FRONTEND_URL', 'JWT_SECRET'];
+const requiredEnvVars = ['MONGO_URL', 'JWT_SECRET'];
+const optionalEnvVars = ['FRONTEND_URL', 'CORS_ORIGINS', 'RESEND_API_KEY', 'SENDER_EMAIL'];
 const isProduction = process.env.NODE_ENV === 'production';
 
 console.log('=== Environment Variables Check ===');
-let hasAllVars = true;
+let hasAllRequiredVars = true;
 requiredEnvVars.forEach(varName => {
-  const isPresent = Boolean(process.env[varName]);
-  console.log(`ENV_OK ${varName} ${isPresent}`);
+  const isPresent = initialEnvPresence[varName];
+  console.log(`ENV_REQUIRED ${varName} ${isPresent}`);
   if (!isPresent) {
-    console.error(`FATAL: Required env var ${varName} is missing`);
-    hasAllVars = false;
+    console.error(`ERROR: Required env var ${varName} is missing`);
+    hasAllRequiredVars = false;
   }
 });
 
-if (!hasAllVars && isProduction) {
+optionalEnvVars.forEach(varName => {
+  const isPresent = initialEnvPresence[varName];
+  console.log(`ENV_OPTIONAL ${varName} ${isPresent}`);
+  if (!isPresent) {
+    console.warn(`WARN: Optional env var ${varName} is missing`);
+  }
+});
+
+if (!hasAllRequiredVars && isProduction) {
   console.error('FATAL: Missing required env vars in production. Exiting.');
   process.exit(1);
-} else if (hasAllVars) {
+} else if (hasAllRequiredVars) {
   console.log('=== All required env vars present ===');
 }
 
