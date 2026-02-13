@@ -1304,6 +1304,70 @@ code {
 
 /* ===== WONDERLAND BOOKING PAGE STYLES ===== */
 
+.birthday-page {
+    position: relative;
+    background:
+        radial-gradient(circle at 10% 20%, rgba(255, 126, 185, 0.24) 0%, rgba(255, 126, 185, 0) 36%),
+        radial-gradient(circle at 90% 15%, rgba(255, 211, 102, 0.26) 0%, rgba(255, 211, 102, 0) 35%),
+        radial-gradient(circle at 90% 80%, rgba(0, 187, 249, 0.22) 0%, rgba(0, 187, 249, 0) 32%),
+        radial-gradient(circle at 10% 75%, rgba(90, 214, 122, 0.18) 0%, rgba(90, 214, 122, 0) 34%),
+        linear-gradient(180deg, #fdfcff 0%, #f6f9ff 100%);
+}
+
+.birthday-page-decoration {
+    position: relative;
+    width: 100%;
+    height: 0;
+}
+
+.birthday-confetti {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    opacity: 0.6;
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0.45);
+}
+
+.birthday-confetti--pink {
+    top: 52px;
+    right: 6%;
+    background: var(--pk-red);
+}
+
+.birthday-confetti--blue {
+    top: 120px;
+    left: 5%;
+    background: var(--pk-blue);
+}
+
+.birthday-confetti--yellow {
+    top: 290px;
+    right: 3%;
+    background: var(--pk-yellow);
+}
+
+.birthday-confetti--green {
+    top: 330px;
+    left: 2%;
+    background: var(--pk-green);
+}
+
+.birthday-page-title {
+    color: #1f2b43;
+    text-shadow: 0 2px 0 rgba(255, 255, 255, 0.6);
+}
+
+.birthday-page-subtitle {
+    color: #51607a;
+    font-weight: 600;
+}
+
+.birthday-tabs-list {
+    background: linear-gradient(90deg, rgba(255, 126, 185, 0.2) 0%, rgba(255, 211, 102, 0.24) 35%, rgba(0, 187, 249, 0.2) 100%);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
 /* Step indicator badge */
 .step-badge {
     display: inline-flex;
@@ -1445,6 +1509,12 @@ code {
 .slot-btn.selected {
     border-color: var(--pk-blue);
     background: var(--pk-bg-light-blue);
+}
+
+.slot-btn.selected-pink {
+    border-color: #ff7eb9;
+    background: linear-gradient(135deg, rgba(255, 126, 185, 0.18), rgba(255, 211, 102, 0.2));
+    box-shadow: 0 8px 20px rgba(255, 126, 185, 0.25);
 }
 
 .slot-btn:disabled {
