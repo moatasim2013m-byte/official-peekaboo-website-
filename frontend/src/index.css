@@ -534,15 +534,59 @@ code {
     flex-direction: column;
     justify-content: space-between;
     padding: 24px 18px;
+    min-height: 100%;
 }
 
 .feature-card h3,
 .feature-card p {
+    overflow-wrap: anywhere;
     word-break: break-word;
+    hyphens: auto;
+}
+
+.feature-card .pk-card-title {
+    font-size: clamp(1rem, 2.8vw, 1.2rem);
+    line-height: 1.45;
+}
+
+.feature-card-desc {
+    line-height: 1.8;
+    font-size: clamp(0.8rem, 2.35vw, 0.92rem);
+    overflow-wrap: anywhere;
+}
+
+.feature-card-link {
+    width: 100%;
+}
+
+.feature-card-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 48px;
+    line-height: 1.45;
+    white-space: normal;
+    text-wrap: balance;
+    text-align: center;
+    overflow-wrap: anywhere;
+    font-size: clamp(0.82rem, 2.4vw, 0.95rem);
+    padding-inline: 1rem;
+  }
+
+[dir="rtl"] .feature-card,
+[dir="rtl"] .feature-card .pk-card-title,
+[dir="rtl"] .feature-card-desc,
+[dir="rtl"] .feature-card-btn {
+    text-align: right;
+}
+
+[dir="rtl"] .feature-card-btn {
+    justify-content: center;
 }
 
 .playful-btn {
-    background: linear-gradient(135deg, #FFD93B, #FF9F1C, #6BCB77, #4D96FF);
+    background: linear-gradient(135deg, #FFD93B 0%, #FF924C 35%, #FF5DA2 70%, #00BBF9 100%);
     color: #fff;
     border: none;
     border-radius: 999px;
@@ -1523,11 +1567,13 @@ code {
   position: relative;
   overflow: visible;
   background: transparent;
+  isolation: isolate;
 }
 
 .home-page {
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
   min-height: 100vh;
   background: linear-gradient(180deg, #f7fbff 0%, #f9fcff 45%, #fffaf2 100%);
   -webkit-background-size: 100% 100%;
@@ -1539,6 +1585,15 @@ code {
   inset: 0;
   pointer-events: none;
   z-index: 0;
+}
+
+.hero-cloud-layer {
+  position: absolute;
+  inset: 0;
+  top: -36px;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
 }
 
 /* Keep hero content above decorations */
@@ -1612,6 +1667,12 @@ code {
 .cloud-3 { top: 8%;  left: 55%; transform: scale(1.15); animation-duration: 52s; opacity: 0.9; }
 .cloud-4 { top: 26%; left: 75%; transform: scale(0.75); animation: cloudDriftFast 28s linear infinite; opacity: 0.85; }
 .cloud-5 { top: 32%; left: -20%; transform: scale(0.65); animation: cloudDriftFast 30s linear infinite; opacity: 0.8; }
+
+.hero-cloud-layer .cloud-1 { top: 2%; }
+.hero-cloud-layer .cloud-2 { top: 8%; }
+.hero-cloud-layer .cloud-3 { top: 1%; }
+.hero-cloud-layer .cloud-4 { top: 15%; }
+.hero-cloud-layer .cloud-5 { top: 22%; }
 
 /* Sun */
 .sky-sun {
@@ -1961,9 +2022,26 @@ code {
   padding: 14px 26px;
   font-weight: 700;
   color: white;
-  background: linear-gradient(135deg, var(--pb-pink), var(--pb-orange));
+  background: linear-gradient(135deg, #FFD93B 0%, #FF924C 38%, #FF5DA2 72%, #00BBF9 100%);
   border: none;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+  box-shadow: 0 8px 20px rgba(255, 93, 162, 0.28);
+}
+
+.pb-btn:hover {
+  box-shadow: 0 12px 24px rgba(0, 187, 249, 0.25);
+}
+
+.home-cta-panel {
+  background: linear-gradient(135deg, #FF924C 0%, #FF5DA2 52%, #00BBF9 100%);
+}
+
+.home-cta-signup-btn {
+  background: white;
+  color: #ff5da2;
+}
+
+.home-cta-signup-btn:hover {
+  background: #fff7fb;
 }
 
 .pb-section {
