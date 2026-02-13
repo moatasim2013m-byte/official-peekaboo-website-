@@ -311,6 +311,16 @@ h3 {
     min-height: 1.1rem;
 }
 
+.mobile-home-headlines {
+    padding-top: 0.1rem;
+}
+
+.mobile-home-headlines .nav-pill {
+    min-width: 8.8rem;
+    font-size: 0.95rem;
+    padding: 0.56rem 0.9rem;
+}
+
 .menu-bar {
     display: block;
     height: 3px;

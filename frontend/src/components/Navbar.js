@@ -42,7 +42,7 @@ export const Navbar = () => {
   return (
     <nav className={`sticky top-0 z-50 ${isCustomerNav ? 'navbar-customer' : 'bg-white border-b border-border shadow-sm'}`} dir="rtl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20 py-3">
+        <div className={`flex justify-between items-center py-3 ${isHomePage && isCustomerNav ? 'min-h-20 flex-wrap gap-y-2' : 'h-20'}`}>
           {/* Logo with Pill Container - wrapped for mobile positioning */}
           <div className="nav-logo-wrap">
             <Link to="/" className="brand-logo-pill" data-testid="nav-logo">
@@ -147,12 +147,12 @@ export const Navbar = () => {
 
           {/* Mobile Navigation - Pills visible on Homepage, hamburger on other pages */}
           {!isAdmin && isHomePage && (
-            <div className="md:hidden flex items-center gap-2 overflow-x-auto scrollbar-hide">
+            <div className="mobile-home-headlines order-3 basis-full md:hidden flex flex-wrap items-center justify-center gap-2">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`nav-pill ${item.pill} ${isActive(item.path) ? 'active' : ''} whitespace-nowrap text-sm`}
+                  className={`nav-pill ${item.pill} ${isActive(item.path) ? 'active' : ''}`}
                   data-testid={`mobile-${item.testId}`}
                 >
                   {item.label}
@@ -163,13 +163,13 @@ export const Navbar = () => {
 
           {/* Mobile Menu Button - Only show on non-homepage or for auth actions */}
           <button
-            className={`md:hidden playful-menu-button ${isHomePage && !isAdmin ? 'hidden' : ''}`}
+            className={`md:hidden playful-menu-button ${isHomePage && isCustomerNav ? 'hidden' : ''}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             data-testid="mobile-menu-toggle"
             aria-label={mobileMenuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
             aria-expanded={mobileMenuOpen}
           >
-            <span className="playful-menu-label">القائمة</span>
+            <span className="sr-only">القائمة</span>
             <span className="playful-menu-bars" aria-hidden="true">
               {mobileMenuOpen ? (
                 <X className="h-5 w-5 text-slate-700" />
@@ -185,7 +185,7 @@ export const Navbar = () => {
 
           {/* Mobile Auth Button on Homepage */}
           {isHomePage && !isAdmin && (
-            <div className="md:hidden">
+            <div className="order-2 md:hidden">
               {isAuthenticated ? (
                 <Link to="/profile">
                   <Button variant="outline" size="sm" className="rounded-full">
