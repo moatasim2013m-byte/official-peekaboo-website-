@@ -149,6 +149,10 @@ export const AuthProvider = ({ children }) => {
     await api.post('/auth/forgot-password', { email, origin_url });
   }, [api]);
 
+  const resendVerificationEmail = useCallback(async (email) => {
+    return api.post('/auth/resend-verification', { email });
+  }, [api]);
+
   const resetPassword = useCallback(async (resetToken, password) => {
     await api.post('/auth/reset-password', { token: resetToken, password });
   }, [api]);
@@ -161,12 +165,13 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     forgotPassword,
+    resendVerificationEmail,
     resetPassword,
     api,
     isAdmin: user?.role === 'admin',
     isStaff: user?.role === 'staff',
     isAuthenticated: !!user
-  }), [user, token, loading, login, register, logout, forgotPassword, resetPassword, api]);
+  }), [user, token, loading, login, register, logout, forgotPassword, resendVerificationEmail, resetPassword, api]);
 
   return (
     <AuthContext.Provider value={value}>
