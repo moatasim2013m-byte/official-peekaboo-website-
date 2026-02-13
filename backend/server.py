@@ -64,6 +64,7 @@ threading.Thread(target=start_node_server, daemon=True).start()
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest
 
 stripe_api_key = os.environ.get('STRIPE_API_KEY', 'sk_test_emergent')
+payment_provider = os.environ.get('PAYMENT_PROVIDER', 'stripe').lower()
 
 class CheckoutRequest(BaseModel):
     type: str
@@ -79,10 +80,27 @@ async def health_check():
 
 @app.post("/api/payments/create-checkout")
 async def create_checkout(request: Request, checkout_req: CheckoutRequest):
-    """Handle Stripe checkout via emergentintegrations"""
+    """Handle checkout via configured provider."""
     try:
-        # Get auth header and forward to Node to validate and get user info
         auth_header = request.headers.get("authorization", "")
+
+        # For non-Stripe providers, delegate checkout orchestration to Node routes.
+        if payment_provider != 'stripe':
+            async with httpx.AsyncClient() as client:
+                node_resp = await client.post(
+                    f"http://localhost:{NODE_PORT}/api/payments/create-checkout",
+                    json=checkout_req.dict(),
+                    headers={"Authorization": auth_header},
+                    timeout=30.0
+                )
+
+            if node_resp.status_code >= 400:
+                raise HTTPException(status_code=node_resp.status_code, detail=node_resp.text)
+
+            return node_resp.json()
+
+        # Stripe flow in Python (legacy/default)
+        # Get auth header and forward to Node to validate and get user info
         
         # First, validate the user with Node
         async with httpx.AsyncClient() as client:
@@ -189,8 +207,23 @@ async def create_checkout(request: Request, checkout_req: CheckoutRequest):
 
 @app.get("/api/payments/status/{session_id}")
 async def get_checkout_status(request: Request, session_id: str):
-    """Get Stripe checkout status via emergentintegrations"""
+    """Get checkout status via configured provider."""
     try:
+        auth_header = request.headers.get("authorization", "")
+
+        if payment_provider != 'stripe':
+            async with httpx.AsyncClient() as client:
+                node_resp = await client.get(
+                    f"http://localhost:{NODE_PORT}/api/payments/status/{session_id}",
+                    headers={"Authorization": auth_header},
+                    timeout=30.0
+                )
+
+            if node_resp.status_code >= 400:
+                raise HTTPException(status_code=node_resp.status_code, detail=node_resp.text)
+
+            return node_resp.json()
+
         host_url = str(request.base_url).rstrip('/')
         webhook_url = f"{host_url}/api/webhook/stripe"
         
@@ -213,6 +246,9 @@ async def get_checkout_status(request: Request, session_id: str):
 async def stripe_webhook(request: Request):
     """Handle Stripe webhooks"""
     try:
+        if payment_provider != 'stripe':
+            return {"received": False, "error": "Stripe provider is not active"}
+
         body = await request.body()
         signature = request.headers.get("Stripe-Signature", "")
         

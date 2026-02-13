@@ -10,6 +10,7 @@ const paymentTransactionSchema = new mongoose.Schema({
   payment_status: { type: String },
   type: { type: String, enum: ['hourly', 'birthday', 'subscription'], required: true },
   reference_id: { type: String }, // booking_id or subscription_id
+  provider: { type: String, enum: ['manual', 'stripe', 'capital_bank'], default: 'manual' },
   metadata: { type: Object },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }
