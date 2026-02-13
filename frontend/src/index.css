@@ -708,7 +708,7 @@ code {
 [dir="rtl"] .feature-card .pk-card-title,
 [dir="rtl"] .feature-card-desc,
 [dir="rtl"] .feature-card-btn {
-    text-align: right;
+    text-align: center;
 }
 
 [dir="rtl"] .feature-card-btn {
