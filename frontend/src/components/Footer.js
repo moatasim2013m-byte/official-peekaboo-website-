@@ -1,11 +1,38 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MessageCircle, Phone, MapPin, Clock } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 import mascotImg from '../assets/mascot.png';
 import { PaymentCardIcons } from './PaymentCardIcons';
 import { FacebookLogoIcon, InstagramLogoIcon } from './SocialBrandIcons';
+import { useAuth } from '../context/AuthContext';
 
 export const Footer = () => {
+  const { api } = useAuth();
+  const [footerSettings, setFooterSettings] = useState({
+    description: 'أفضل ملعب داخلي للأطفال في إربد. احجز جلسات اللعب وحفلات أعياد الميلاد!',
+    logoHeight: 112
+  });
+
+  useEffect(() => {
+    const fetchFooterSettings = async () => {
+      try {
+        const res = await api.get('/settings');
+        const s = res.data.settings || {};
+        const logoHeight = Number(s.footer_logo_height);
+
+        setFooterSettings((prev) => ({
+          description: s.footer_description || prev.description,
+          logoHeight: Number.isFinite(logoHeight) && logoHeight >= 80 && logoHeight <= 220 ? logoHeight : prev.logoHeight
+        }));
+      } catch (error) {
+        console.error('Failed to load footer settings:', error);
+      }
+    };
+
+    fetchFooterSettings();
+  }, [api]);
+
   return (
     <footer className="footer-section mt-auto" dir="rtl">
       {/* Wave Divider */}
@@ -28,10 +55,15 @@ export const Footer = () => {
             {/* Column 1: Brand & Contact */}
             <div>
               <Link to="/" className="inline-block mb-4">
-                <img src={logoImg} alt="بيكابو" className="h-16 sm:h-20 drop-shadow-md" />
+                <img
+                  src={logoImg}
+                  alt="بيكابو"
+                  className="w-auto drop-shadow-md"
+                  style={{ height: `${footerSettings.logoHeight}px` }}
+                />
               </Link>
-              <p className="text-sm text-[var(--text-secondary)] mb-4 leading-relaxed">
-                أفضل ملعب داخلي للأطفال في إربد. احجز جلسات اللعب وحفلات أعياد الميلاد!
+              <p className="footer-description-bubbly mb-4">
+                {footerSettings.description}
               </p>
               
               {/* Social Links */}
