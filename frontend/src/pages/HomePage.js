@@ -475,8 +475,8 @@ export default function HomePage() {
             <p className="text-muted-foreground text-base sm:text-lg">
               شاهد ما يجعلنا مميزين!
             </p>
-            <div className="mt-4 inline-flex items-center bg-[var(--pk-yellow)] text-[var(--text-primary)] px-4 sm:px-6 py-2 rounded-full font-heading font-bold shadow-sm text-sm sm:text-base">
-              مفتوح يومياً
+            <div className="mt-4 inline-flex items-center bg-red-500 text-white px-4 sm:px-6 py-2 rounded-full font-heading font-bold shadow-sm text-sm sm:text-base">
+              مفتوح يومياً من 10 صباحاً حتى 12 منتصف الليل
             </div>
           </div>
 
