@@ -421,10 +421,8 @@ export default function TicketsPage() {
                     <div className="text-right">
                       <div className={`font-heading text-xl font-bold ${morningExpired ? 'text-gray-400' : ''}`}>صباحي</div>
                       <div className="text-sm text-muted-foreground">10 ص - 2 م</div>
-                      {morningExpired ? (
+                      {morningExpired && (
                         <div className="text-xs text-red-500 mt-1">غير متاح اليوم</div>
-                      ) : (
-                        <div className="text-base font-bold text-yellow-600 mt-1">3.5 د/ساعة</div>
                       )}
                     </div>
                   </div>
@@ -439,7 +437,6 @@ export default function TicketsPage() {
                     <div className="text-right">
                       <div className="font-heading text-xl font-bold">مسائي</div>
                       <div className="text-sm text-muted-foreground">2 م - 12 ص</div>
-                      <div className="text-base font-bold text-indigo-600 mt-1">7-13 دينار</div>
                     </div>
                   </div>
                 </button>
