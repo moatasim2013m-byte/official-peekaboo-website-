@@ -41,36 +41,38 @@ export function PaymentMethodSelector({ value, onChange, showCliqInfo = true }) 
 
   return (
     <div className="space-y-4">
-      <Label className="block text-lg font-bold mb-3">طريقة الدفع</Label>
+      <Label className="block text-base font-bold mb-2">طريقة الدفع</Label>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {PAYMENT_METHODS.map((method) => (
-          <button
-            key={method.id}
-            type="button"
-            onClick={() => onChange(method.id)}
-            className={`relative p-4 rounded-2xl border-2 transition-all text-right ${
-              value === method.id
-                ? 'border-primary bg-primary/10 shadow-md'
-                : 'border-border bg-white hover:border-primary/50'
-            }`}
-          >
-            <div className="flex items-center gap-3">
-              <div className={`${method.color} w-10 h-10 rounded-xl flex items-center justify-center`}>
-                <method.icon className="h-5 w-5 text-white" />
+      <div className="rounded-2xl border border-border bg-white p-2 sm:p-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {PAYMENT_METHODS.map((method) => (
+            <button
+              key={method.id}
+              type="button"
+              onClick={() => onChange(method.id)}
+              className={`relative p-2.5 rounded-xl border transition-all text-right ${
+                value === method.id
+                  ? 'border-primary bg-primary/10 shadow-sm'
+                  : 'border-border/80 bg-white hover:border-primary/50'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <div className={`${method.color} w-8 h-8 rounded-lg flex items-center justify-center`}>
+                  <method.icon className="h-4 w-4 text-white" />
+                </div>
+                <div>
+                  <p className="font-bold text-sm leading-tight">{method.label}</p>
+                  <p className="text-[11px] text-muted-foreground leading-tight">{method.labelEn}</p>
+                </div>
               </div>
-              <div>
-                <p className="font-bold text-base">{method.label}</p>
-                <p className="text-xs text-muted-foreground">{method.labelEn}</p>
-              </div>
-            </div>
-            {value === method.id && (
-              <div className="absolute top-2 left-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
-                <Check className="h-3 w-3 text-white" />
-              </div>
-            )}
-          </button>
-        ))}
+              {value === method.id && (
+                <div className="absolute top-1.5 left-1.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
+                  <Check className="h-2.5 w-2.5 text-white" />
+                </div>
+              )}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* CliQ Info Box */}
