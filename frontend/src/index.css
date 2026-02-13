@@ -220,13 +220,16 @@ h3 {
 }
 
 .brand-logo-pill {
-    background: var(--pk-white);
-    padding: 0.45rem 0.9rem;
-    border-radius: 1.4rem;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    background: #ffffff;
+    padding: 0.8rem 1.4rem;
+    border-radius: 1.3rem;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
     display: inline-flex;
     align-items: center;
-    border: 2px solid rgba(255, 217, 61, 0.45);
+    justify-content: center;
+    border: 2px solid #ffffff;
+    min-width: clamp(170px, 16vw, 220px);
+    min-height: clamp(84px, 8vw, 108px);
     transition: transform 0.24s ease, box-shadow 0.24s ease;
     flex: 0 0 auto;
 }
@@ -236,12 +239,14 @@ h3 {
 }
 
 .brand-logo-lg {
-    height: clamp(58px, 8vw, 72px);
-    filter: drop-shadow(0 1px 8px rgba(255,217,59,0.65));
+    width: clamp(135px, 13vw, 182px);
+    height: auto;
+    max-width: 100%;
+    filter: none;
 }
 
 @media (min-width: 768px) {
-    .brand-logo-lg { height: clamp(76px, 9vw, 96px); }
+    .brand-logo-lg { width: clamp(160px, 14vw, 210px); }
 }
 
 @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
