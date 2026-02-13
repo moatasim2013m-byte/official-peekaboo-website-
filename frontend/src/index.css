@@ -219,46 +219,38 @@ h3 {
     }
 }
 
-.brand-logo-pill {
-    background: #ffffff;
-    padding: 0.8rem 1.4rem;
-    border-radius: 1.3rem;
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+.brand-logo-link {
+    padding: 0.2rem 0.4rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 2px solid #ffffff;
-    min-width: clamp(170px, 16vw, 220px);
-    min-height: clamp(84px, 8vw, 108px);
-    transition: transform 0.24s ease, box-shadow 0.24s ease;
+    min-width: clamp(155px, 15vw, 205px);
+    min-height: clamp(62px, 6.4vw, 86px);
+    transition: transform 0.24s ease;
     flex: 0 0 auto;
 }
 
-.brand-logo-pill:hover {
-    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.14);
-}
-
 .brand-logo-lg {
-    width: clamp(135px, 13vw, 182px);
+    width: clamp(128px, 12vw, 175px);
     height: auto;
     max-width: 100%;
     filter: none;
 }
 
 @media (min-width: 768px) {
-    .brand-logo-lg { width: clamp(160px, 14vw, 210px); }
+    .brand-logo-lg { width: clamp(148px, 13vw, 195px); }
 }
 
 @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
-    .brand-logo-pill:hover {
+    .brand-logo-link:hover {
         animation: logo-float-bounce 900ms ease-in-out infinite alternate;
         transform: scale(1.06) rotate(-2deg);
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .brand-logo-pill,
-    .brand-logo-pill:hover {
+    .brand-logo-link,
+    .brand-logo-link:hover {
         animation: none !important;
         transform: none !important;
     }
@@ -275,11 +267,48 @@ h3 {
 
 /* Customer Navbar - Clean white with subtle cloud feel */
 .navbar-customer {
+    position: relative;
+    overflow: hidden;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border-bottom: none;
     box-shadow: 0 10px 26px rgba(80, 91, 132, 0.13);
     border-radius: 0 0 1.25rem 1.25rem;
+}
+
+.navbar-corner-sun {
+    position: absolute;
+    left: clamp(1rem, 3.5vw, 3rem);
+    bottom: clamp(0.35rem, 1vw, 1rem);
+    width: clamp(48px, 4.5vw, 70px);
+    height: clamp(48px, 4.5vw, 70px);
+    border-radius: 999px;
+    background: radial-gradient(circle at 35% 35%, #fff8b8 0%, #ffe56a 45%, #fbbf24 100%);
+    box-shadow: 0 0 0 8px rgba(255, 214, 10, 0.18), 0 0 22px rgba(251, 191, 36, 0.42);
+    z-index: 0;
+}
+
+.navbar-corner-sun::before {
+    content: '';
+    position: absolute;
+    inset: -10px;
+    border-radius: 999px;
+    border: 3px dashed rgba(251, 191, 36, 0.5);
+    animation: sunPulse 6s ease-in-out infinite;
+}
+
+.navbar-customer > .max-w-7xl {
+    position: relative;
+    z-index: 1;
+}
+
+@media (max-width: 767px) {
+    .navbar-corner-sun {
+        left: 0.75rem;
+        bottom: 0.2rem;
+        width: 42px;
+        height: 42px;
+    }
 }
 
 .playful-menu-button {
