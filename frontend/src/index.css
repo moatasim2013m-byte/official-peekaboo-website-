@@ -541,6 +541,48 @@ code {
 .feature-card p {
     overflow-wrap: anywhere;
     word-break: break-word;
+    hyphens: auto;
+}
+
+.feature-card .pk-card-title {
+    font-size: clamp(1rem, 2.8vw, 1.2rem);
+    line-height: 1.45;
+}
+
+.feature-card-desc {
+    line-height: 1.8;
+    font-size: clamp(0.8rem, 2.35vw, 0.92rem);
+    overflow-wrap: anywhere;
+}
+
+.feature-card-link {
+    width: 100%;
+}
+
+.feature-card-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 48px;
+    line-height: 1.45;
+    white-space: normal;
+    text-wrap: balance;
+    text-align: center;
+    overflow-wrap: anywhere;
+    font-size: clamp(0.82rem, 2.4vw, 0.95rem);
+    padding-inline: 1rem;
+  }
+
+[dir="rtl"] .feature-card,
+[dir="rtl"] .feature-card .pk-card-title,
+[dir="rtl"] .feature-card-desc,
+[dir="rtl"] .feature-card-btn {
+    text-align: right;
+}
+
+[dir="rtl"] .feature-card-btn {
+    justify-content: center;
 }
 
 .feature-card-content {
@@ -1569,6 +1611,7 @@ code {
   position: relative;
   overflow: visible;
   background: transparent;
+  isolation: isolate;
 }
 
 .home-page {
@@ -1590,6 +1633,15 @@ code {
   overflow: visible;
   pointer-events: none;
   z-index: 0;
+}
+
+.hero-cloud-layer {
+  position: absolute;
+  inset: 0;
+  top: -36px;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
 }
 
 /* Keep hero content above decorations */
@@ -2020,9 +2072,26 @@ code {
   padding: 14px 26px;
   font-weight: 700;
   color: white;
-  background: linear-gradient(135deg, var(--pb-pink), var(--pb-orange));
+  background: linear-gradient(135deg, #FFD93B 0%, #FF924C 38%, #FF5DA2 72%, #00BBF9 100%);
   border: none;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+  box-shadow: 0 8px 20px rgba(255, 93, 162, 0.28);
+}
+
+.pb-btn:hover {
+  box-shadow: 0 12px 24px rgba(0, 187, 249, 0.25);
+}
+
+.home-cta-panel {
+  background: linear-gradient(135deg, #FF924C 0%, #FF5DA2 52%, #00BBF9 100%);
+}
+
+.home-cta-signup-btn {
+  background: white;
+  color: #ff5da2;
+}
+
+.home-cta-signup-btn:hover {
+  background: #fff7fb;
 }
 
 .pb-section {
