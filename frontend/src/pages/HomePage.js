@@ -309,10 +309,20 @@ export default function HomePage() {
         </div>
 
         <div className="page-shell px-2 sm:px-4 lg:px-6 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
-            {/* Text Content */}
-            <div className="order-2 lg:order-1 text-center lg:text-right">
-              <div className="hero-text-panel">
+          <div className="hero-content-stack">
+            <div
+              className={`hero-image-section group ${heroImageReady && heroImgSrc ? 'is-ready' : 'is-loading'}`}
+              onClick={() => setLightboxOpen(true)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && setLightboxOpen(true)}
+              data-testid="hero-image-clickable"
+              style={heroImageReady && heroImgSrc ? { backgroundImage: `url(${heroImgSrc})` } : undefined}
+            >
+              <span className="sr-only" data-testid="hero-image">أطفال يلعبون في بيكابو</span>
+              <div className="hero-overlay" aria-hidden="true"></div>
+              {!heroImageReady && <div className="hero-image-placeholder" aria-hidden="true" />}
+              <div className="hero-text-card text-center lg:text-right">
                 <div className="hero-brand-row mx-auto lg:mx-0">
                   <img src={logoImg} alt="شعار بيكابو" className="hero-brand-logo" />
                   <div className="hero-sun-badge" aria-hidden="true">
@@ -327,62 +337,35 @@ export default function HomePage() {
                   {heroConfig.subtitle}
                 </p>
               </div>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Link to={heroConfig.ctaRoute}>
-                  <Button size="lg" className="rounded-full btn-playful pb-btn primary-btn text-base sm:text-lg px-8 py-6 w-full sm:w-auto" data-testid="hero-book-btn">
-                    {heroConfig.ctaText}
-                    <ChevronLeft className="mr-2 h-5 w-5" />
+              {/* Zoom hint */}
+              <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-2 rounded-full text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                <ZoomIn className="h-4 w-4" />
+                <span>اضغط للتكبير</span>
+              </div>
+            </div>
+
+            <div className="hero-cta-row flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to={heroConfig.ctaRoute}>
+                <Button size="lg" className="rounded-full btn-playful pb-btn primary-btn text-base sm:text-lg px-8 py-6 w-full sm:w-auto" data-testid="hero-book-btn">
+                  {heroConfig.ctaText}
+                  <ChevronLeft className="mr-2 h-5 w-5" />
+                </Button>
+              </Link>
+              {!isAuthenticated && (
+                <Link to="/register">
+                  <Button size="lg" variant="outline" className="rounded-full text-base sm:text-lg px-8 py-6 border-2 w-full sm:w-auto" data-testid="hero-signup-btn">
+                    سجّل مجاناً
                   </Button>
                 </Link>
-                {!isAuthenticated && (
-                  <Link to="/register">
-                    <Button size="lg" variant="outline" className="rounded-full text-base sm:text-lg px-8 py-6 border-2 w-full sm:w-auto" data-testid="hero-signup-btn">
-                      سجّل مجاناً
-                    </Button>
-                  </Link>
-                )}
-              </div>
+              )}
             </div>
-            
-            {/* Hero Image */}
-            <div className="relative order-1 lg:order-2">
-              <div 
-                className="relative cursor-pointer group"
-                onClick={() => setLightboxOpen(true)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === 'Enter' && setLightboxOpen(true)}
-                data-testid="hero-image-clickable"
-              >
-                <div className="rounded-3xl overflow-hidden bg-white shadow-xl">
-                  {heroImageReady && heroImgSrc ? (
-                    <img 
-                      src={heroImgSrc}
-                      alt="أطفال يلعبون في بيكابو"
-                      className="w-full aspect-[4/3] object-contain bg-white transition-transform duration-300 group-hover:scale-105"
-                      onError={() => setHeroImgSrc(HERO_FALLBACK)}
-                      data-testid="hero-image"
-                    />
-                  ) : (
-                    <div className="w-full aspect-[4/3] bg-slate-100 animate-pulse" aria-hidden="true" />
-                  )}
-                </div>
-                {/* Zoom hint */}
-                <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-2 rounded-full text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <ZoomIn className="h-4 w-4" />
-                  <span>اضغط للتكبير</span>
-                </div>
-              </div>
-              
-              {/* Mascot */}
-              <img 
-                src={mascotImg}
-                alt="تميمة بيكابو"
-                className="absolute -bottom-4 -left-4 w-24 h-24 sm:w-28 sm:h-28 rounded-full border-4 border-white shadow-lg object-cover z-10"
-              />
-              
-            </div>
+
+            {/* Mascot */}
+            <img
+              src={mascotImg}
+              alt="تميمة بيكابو"
+              className="hero-mascot"
+            />
           </div>
         </div>
       </section>
