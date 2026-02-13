@@ -452,6 +452,25 @@ export default function AdminPage() {
     return subscriptions;
   };
 
+  const handleUpdateBirthdayBookingStatus = async (bookingId, status) => {
+    try {
+      const response = await api.put(`/admin/bookings/birthday/${bookingId}`, { status });
+      const updatedBooking = response.data?.booking;
+
+      if (updatedBooking) {
+        setBirthdayBookings((prev) => prev.map((booking) => (
+          booking.id === bookingId ? { ...booking, ...updatedBooking } : booking
+        )));
+      } else {
+        fetchBirthdayBookings();
+      }
+
+      toast.success(status === 'confirmed' ? 'تم تأكيد الحجز بنجاح' : 'تم تحديث حالة الحجز');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'فشل تحديث حالة الحجز');
+    }
+  };
+
   const handleCreateTheme = async (e) => {
     e.preventDefault();
     try {
@@ -1489,7 +1508,18 @@ export default function AdminPage() {
                           <p className="text-sm text-purple-600 mt-1">Request: {booking.custom_request}</p>
                         )}
                       </div>
-                      <p className="font-bold">{booking.amount ? `$${booking.amount}` : 'Pending'}</p>
+                      <div className="flex flex-col items-end gap-2">
+                        <p className="font-bold">{booking.amount ? `$${booking.amount}` : 'Pending'}</p>
+                        {(booking.status === 'custom_pending' || booking.status === 'pending') && (
+                          <Button
+                            size="sm"
+                            className="h-8 rounded-full"
+                            onClick={() => handleUpdateBirthdayBookingStatus(booking.id, 'confirmed')}
+                          >
+                            Confirm Order
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
