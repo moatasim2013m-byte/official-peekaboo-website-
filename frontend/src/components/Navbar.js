@@ -41,7 +41,6 @@ export const Navbar = () => {
 
   return (
     <nav className={`sticky top-0 z-50 ${isCustomerNav ? 'navbar-customer' : 'bg-white border-b border-border shadow-sm'}`} dir="rtl">
-      {isHomePage && isCustomerNav && <div className="navbar-corner-sun" aria-hidden="true" />}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className={`flex justify-between items-center py-2 ${isHomePage && isCustomerNav ? 'min-h-16 flex-wrap md:flex-nowrap gap-y-1' : 'h-20'}`}>
           {/* Logo with Pill Container - wrapped for mobile positioning */}
