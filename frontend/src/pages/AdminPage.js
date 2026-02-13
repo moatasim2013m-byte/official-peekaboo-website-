@@ -64,6 +64,7 @@ export default function AdminPage() {
     hero_image: ''
   });
   const [heroImagePreview, setHeroImagePreview] = useState(null);
+  const [heroPreviewObjectUrl, setHeroPreviewObjectUrl] = useState(null);
   const [savingHero, setSavingHero] = useState(false);
 
   // Dialog states
@@ -106,6 +107,14 @@ export default function AdminPage() {
   useEffect(() => {
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (heroPreviewObjectUrl) {
+        URL.revokeObjectURL(heroPreviewObjectUrl);
+      }
+    };
+  }, [heroPreviewObjectUrl]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -718,13 +727,17 @@ export default function AdminPage() {
       return;
     }
 
-    // Preview
-    const reader = new FileReader();
-    reader.onload = (ev) => setHeroImagePreview(ev?.target?.result || '');
-    reader.onerror = () => {
-      toast.error('تعذر قراءة الصورة قبل الرفع');
-    };
-    reader.readAsDataURL(file);
+    // Preview (object URL is lighter than base64 for large photos)
+    try {
+      if (heroPreviewObjectUrl) {
+        URL.revokeObjectURL(heroPreviewObjectUrl);
+      }
+      const objectUrl = URL.createObjectURL(file);
+      setHeroPreviewObjectUrl(objectUrl);
+      setHeroImagePreview(objectUrl);
+    } catch {
+      toast.error('تعذر تجهيز معاينة الصورة');
+    }
 
     // Upload
     const formData = new FormData();
@@ -745,6 +758,11 @@ export default function AdminPage() {
     } catch (error) {
       const backendMessage = error?.response?.data?.error;
       toast.error(backendMessage || 'فشل رفع الصورة');
+      if (heroPreviewObjectUrl) {
+        URL.revokeObjectURL(heroPreviewObjectUrl);
+        setHeroPreviewObjectUrl(null);
+      }
+      setHeroImagePreview(null);
     } finally {
       setUploadingImage(false);
     }
