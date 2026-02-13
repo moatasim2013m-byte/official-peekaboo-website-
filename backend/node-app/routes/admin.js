@@ -26,8 +26,11 @@ const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   fileFilter: (req, file, cb) => {
-    const allowed = ['image/png', 'image/jpeg', 'image/webp'];
-    cb(null, allowed.includes(file.mimetype));
+    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    if (allowed.includes(file.mimetype)) {
+      return cb(null, true);
+    }
+    return cb(new Error('Unsupported file type. Use PNG, JPG, or WEBP.'));
   }
 });
 
@@ -35,7 +38,19 @@ const upload = multer({
 router.use(authMiddleware, adminMiddleware);
 
 // ==================== IMAGE UPLOAD ====================
-router.post('/upload-image', upload.single('image'), async (req, res) => {
+router.post('/upload-image', (req, res) => {
+  upload.single('image')(req, res, async (uploadErr) => {
+    if (uploadErr instanceof multer.MulterError) {
+      if (uploadErr.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'Image is too large. Max size is 10MB.' });
+      }
+      return res.status(400).json({ error: uploadErr.message || 'Upload failed.' });
+    }
+
+    if (uploadErr) {
+      return res.status(400).json({ error: uploadErr.message || 'Invalid upload payload.' });
+    }
+
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No image provided' });
@@ -56,6 +71,7 @@ router.post('/upload-image', upload.single('image'), async (req, res) => {
     console.error('Upload error:', error);
     res.status(500).json({ error: 'Failed to upload image' });
   }
+  });
 });
 
 // ==================== DASHBOARD ====================
