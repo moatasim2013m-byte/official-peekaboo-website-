@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
-import { User, LogOut, Settings, LayoutDashboard, Menu, X, Users } from 'lucide-react';
+import { User, LogOut, LayoutDashboard, X, Users } from 'lucide-react';
 import { useState } from 'react';
 import logoImg from '../assets/logo.png';
 import mascotImg from '../assets/mascot.png';
@@ -163,11 +163,24 @@ export const Navbar = () => {
 
           {/* Mobile Menu Button - Only show on non-homepage or for auth actions */}
           <button
-            className={`md:hidden p-2 ${isHomePage && !isAdmin ? 'hidden' : ''}`}
+            className={`md:hidden playful-menu-button ${isHomePage && !isAdmin ? 'hidden' : ''}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             data-testid="mobile-menu-toggle"
+            aria-label={mobileMenuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
+            aria-expanded={mobileMenuOpen}
           >
-            {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            <span className="playful-menu-label">القائمة</span>
+            <span className="playful-menu-bars" aria-hidden="true">
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5 text-slate-700" />
+              ) : (
+                <>
+                  <span className="menu-bar menu-bar-1" />
+                  <span className="menu-bar menu-bar-2" />
+                  <span className="menu-bar menu-bar-3" />
+                </>
+              )}
+            </span>
           </button>
 
           {/* Mobile Auth Button on Homepage */}
