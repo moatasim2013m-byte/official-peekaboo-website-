@@ -528,6 +528,35 @@ code {
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
+.feature-card {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 24px 18px;
+}
+
+.feature-card h3,
+.feature-card p {
+    word-break: break-word;
+}
+
+.playful-btn {
+    background: linear-gradient(135deg, #FFD93B, #FF9F1C, #6BCB77, #4D96FF);
+    color: #fff;
+    border: none;
+    border-radius: 999px;
+    padding: 12px 22px;
+    font-weight: 600;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.playful-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.2);
+}
+
 .pk-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 12px 28px rgba(24, 39, 75, 0.12);
