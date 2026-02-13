@@ -9,6 +9,17 @@ import mascotImg from '../assets/mascot.png';
 import logoImg from '../assets/logo.png';
 
 const HERO_FALLBACK = '/hero-fallback.jpg';
+const RAW_BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').trim();
+const BACKEND_ORIGIN =
+  !RAW_BACKEND_URL || RAW_BACKEND_URL === 'undefined' || RAW_BACKEND_URL === 'null'
+    ? ''
+    : RAW_BACKEND_URL.replace(/\/+$/, '');
+
+const resolveMediaUrl = (url) => {
+  if (!url) return '';
+  if (/^(https?:\/\/|data:|blob:)/i.test(url)) return url;
+  return `${BACKEND_ORIGIN}${url.startsWith('/') ? '' : '/'}${url}`;
+};
 
 function PlayfulClockIcon({ className }) {
   return (
@@ -142,7 +153,7 @@ export default function HomePage() {
         });
         // Set hero image src (prefer admin image, fallback if empty)
         if (s.hero_image) {
-          setHeroImgSrc(s.hero_image);
+          setHeroImgSrc(resolveMediaUrl(s.hero_image));
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
