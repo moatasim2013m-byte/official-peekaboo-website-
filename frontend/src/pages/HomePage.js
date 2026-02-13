@@ -270,7 +270,7 @@ export default function HomePage() {
             {features.map((feature, index) => (
               <Card 
                 key={index} 
-                className={`pk-card pb-card ${feature.disabled ? 'opacity-70' : ''}`}
+                className={`pk-card pb-card feature-card ${feature.disabled ? 'opacity-70' : ''}`}
                 data-testid={`feature-card-${index}`}
               >
                 <div className={`pk-card-accent ${feature.accentColor}`} />
@@ -279,19 +279,19 @@ export default function HomePage() {
                     قريباً
                   </div>
                 )}
-                <CardContent className="p-5 pt-9 text-center">
+                <CardContent className="p-0 text-center">
                   <div className={`pk-icon-badge ${feature.badgeColor} ${feature.disabled ? 'grayscale' : ''}`}>
                     <feature.icon className="h-7 w-7 text-white" />
                   </div>
                   <h3 className="pk-card-title text-base">{feature.title}</h3>
                   <p className="text-muted-foreground text-xs mb-5 leading-relaxed">{feature.description}</p>
                   {feature.disabled ? (
-                    <Button disabled className="rounded-full w-full opacity-50 cursor-not-allowed" data-testid={`feature-btn-${index}`}>
+                    <Button disabled className="playful-btn w-full opacity-50 cursor-not-allowed" data-testid={`feature-btn-${index}`}>
                       {feature.buttonText}
                     </Button>
                   ) : (
                     <Link to={feature.link}>
-                      <Button className="rounded-full btn-playful pb-btn w-full text-sm" data-testid={`feature-btn-${index}`}>
+                      <Button className="playful-btn w-full text-sm" data-testid={`feature-btn-${index}`}>
                         {feature.buttonText}
                         <ChevronLeft className="mr-2 h-4 w-4" />
                       </Button>
