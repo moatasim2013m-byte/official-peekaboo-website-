@@ -16,8 +16,19 @@ const SUBSCRIPTION_DAYS = 30;
 // Get all subscription plans
 router.get('/plans', async (req, res) => {
   try {
-    const plans = await SubscriptionPlan.find({ is_active: true }).sort({ price: 1 });
-    res.json({ plans: plans.map(p => p.toJSON()) });
+    const plans = await SubscriptionPlan.find({ is_active: true })
+      .select('name name_ar description description_ar visits price is_daily_pass valid_days created_at')
+      .sort({ price: 1 })
+      .lean();
+
+    // Short-lived cache header to reduce repeated DB reads from anonymous traffic
+    res.set('Cache-Control', 'public, max-age=60');
+    res.json({
+      plans: plans.map((plan) => {
+        const { _id, __v, ...rest } = plan;
+        return { ...rest, id: _id.toString() };
+      })
+    });
   } catch (error) {
     console.error('Get plans error:', error);
     res.status(500).json({ error: 'Failed to get plans' });
