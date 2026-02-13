@@ -8,7 +8,6 @@ import { ChevronLeft, Play, X, ZoomIn } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 import logoImg from '../assets/logo.png';
 
-const HERO_FALLBACK = '/hero-fallback.jpg';
 const RAW_BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').trim();
 const BACKEND_ORIGIN =
   !RAW_BACKEND_URL || RAW_BACKEND_URL === 'undefined' || RAW_BACKEND_URL === 'null'
@@ -125,6 +124,7 @@ export default function HomePage() {
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [heroImgSrc, setHeroImgSrc] = useState('');
   const [heroImageReady, setHeroImageReady] = useState(false);
+  const [heroImageError, setHeroImageError] = useState(false);
   const [heroConfig, setHeroConfig] = useState({
     title: 'حيث يلعب الأطفال ويحتفلون 🎈',
     subtitle: 'أفضل تجربة ملعب داخلي! احجز جلسات اللعب، أقم حفلات أعياد ميلاد لا تُنسى، ووفّر مع باقات الاشتراك',
@@ -171,10 +171,12 @@ export default function HomePage() {
           image: s.hero_image || ''
         });
         // Set hero image src only after settings load to avoid initial image flicker.
-        setHeroImgSrc(s.hero_image ? resolveMediaUrl(s.hero_image) : HERO_FALLBACK);
+        setHeroImgSrc(s.hero_image ? resolveMediaUrl(s.hero_image) : '');
+        setHeroImageError(false);
       } catch (error) {
         console.error('Failed to fetch data:', error);
-        setHeroImgSrc(HERO_FALLBACK);
+        setHeroImgSrc('');
+        setHeroImageError(false);
       } finally {
         setHeroImageReady(true);
       }
@@ -280,6 +282,9 @@ export default function HomePage() {
     }
   ];
 
+  const showHeroImage = heroImageReady && !!heroImgSrc && !heroImageError;
+  const canOpenLightbox = showHeroImage;
+
   return (
     <div className="home-page" dir="rtl">
       {/* Decorative Sky Layer (applies to whole page) */}
@@ -310,18 +315,36 @@ export default function HomePage() {
 
         <div className="page-shell px-2 sm:px-4 lg:px-6 relative z-10">
           <div className="hero-content-stack">
-            <div
-              className={`hero-image-section group ${heroImageReady && heroImgSrc ? 'is-ready' : 'is-loading'}`}
-              onClick={() => setLightboxOpen(true)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && setLightboxOpen(true)}
-              data-testid="hero-image-clickable"
-              style={heroImageReady && heroImgSrc ? { backgroundImage: `url(${heroImgSrc})` } : undefined}
-            >
-              <span className="sr-only" data-testid="hero-image">أطفال يلعبون في بيكابو</span>
-              <div className="hero-overlay" aria-hidden="true"></div>
-              {!heroImageReady && <div className="hero-image-placeholder" aria-hidden="true" />}
+            <div className="hero-image-section">
+              <div
+                className={`hero-image-panel group ${canOpenLightbox ? 'is-clickable' : ''}`}
+                onClick={() => canOpenLightbox && setLightboxOpen(true)}
+                role={canOpenLightbox ? 'button' : undefined}
+                tabIndex={canOpenLightbox ? 0 : -1}
+                onKeyDown={(e) => canOpenLightbox && e.key === 'Enter' && setLightboxOpen(true)}
+                data-testid="hero-image-clickable"
+              >
+                <span className="sr-only" data-testid="hero-image">أطفال يلعبون في بيكابو</span>
+                {!heroImageReady && <div className="hero-image-placeholder" aria-hidden="true" />}
+                {showHeroImage && (
+                  <img
+                    src={heroImgSrc}
+                    alt="أطفال يلعبون في بيكابو"
+                    className="hero-photo"
+                    onError={() => setHeroImageError(true)}
+                  />
+                )}
+                {heroImageReady && !showHeroImage && <div className="hero-image-fallback" aria-hidden="true" />}
+
+                {/* Zoom hint */}
+                {canOpenLightbox && (
+                  <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-2 rounded-full text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                    <ZoomIn className="h-4 w-4" />
+                    <span>اضغط للتكبير</span>
+                  </div>
+                )}
+              </div>
+
               <div className="hero-text-card text-center lg:text-right">
                 <div className="hero-brand-row mx-auto lg:mx-0">
                   <img src={logoImg} alt="شعار بيكابو" className="hero-brand-logo" />
@@ -336,11 +359,6 @@ export default function HomePage() {
                 <p className="text-base sm:text-lg text-muted-foreground mt-6 leading-relaxed max-w-[520px] mx-auto lg:mx-0 opacity-85">
                   {heroConfig.subtitle}
                 </p>
-              </div>
-              {/* Zoom hint */}
-              <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-2 rounded-full text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                <ZoomIn className="h-4 w-4" />
-                <span>اضغط للتكبير</span>
               </div>
             </div>
 
