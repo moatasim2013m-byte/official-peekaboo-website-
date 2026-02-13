@@ -230,26 +230,31 @@ export default function HomePage() {
   const whyPeekabooFeatures = [
     {
       icon: '💖',
+      badgeColor: 'badge-red',
       title: 'رعاية خاصة',
       description: 'فريقنا يتعامل مع الأطفال باهتمام وصبر.'
     },
     {
       icon: '🧼',
+      badgeColor: 'badge-orange',
       title: 'نظافة وتعقيم مستمر',
       description: 'تعقيم يومي للألعاب والمناطق لضمان بيئة آمنة.'
     },
     {
       icon: '🎲',
+      badgeColor: 'badge-yellow',
       title: 'لعب وتعليم',
       description: 'نتعلم من خلال اللعب وتنمية المهارات الاجتماعية.'
     },
     {
       icon: '🛡️',
+      badgeColor: 'badge-blue',
       title: 'مناطق آمنة ومناسبة للعمر',
       description: 'تقسيمات واضحة تناسب أعمار مختلفة.'
     },
     {
       icon: '👨‍👩‍👧‍👦',
+      badgeColor: 'badge-green',
       title: 'متابعة وراحة للأهل',
       description: 'جلسات مريحة للأهل ومتابعة للأطفال داخل اللعب.'
     }
@@ -396,7 +401,7 @@ export default function HomePage() {
             {whyPeekabooFeatures.map((feature, index) => (
               <Card key={index} className="pk-card pb-card feature-card">
                 <CardContent className="feature-card-content text-center">
-                  <div className="pk-icon-badge badge-purple text-2xl" aria-hidden="true">
+                  <div className={`pk-icon-badge ${feature.badgeColor} text-2xl`} aria-hidden="true">
                     {feature.icon}
                   </div>
                   <h3 className="pk-card-title text-base feature-title">{feature.title}</h3>
