@@ -18,6 +18,18 @@ import {
 } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 
+const RAW_BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').trim();
+const BACKEND_ORIGIN =
+  !RAW_BACKEND_URL || RAW_BACKEND_URL === 'undefined' || RAW_BACKEND_URL === 'null'
+    ? ''
+    : RAW_BACKEND_URL.replace(/\/+$/, '');
+
+const resolveMediaUrl = (url) => {
+  if (!url) return '';
+  if (/^(https?:\/\/|data:|blob:)/i.test(url)) return url;
+  return `${BACKEND_ORIGIN}${url.startsWith('/') ? '' : '/'}${url}`;
+};
+
 export default function AdminPage() {
   const { api, isAdmin, user } = useAuth();
   const navigate = useNavigate();
@@ -1774,7 +1786,7 @@ export default function AdminPage() {
                     <div className="w-64 h-40 rounded-xl border-2 border-dashed border-border overflow-hidden bg-muted flex items-center justify-center">
                       {heroImagePreview || heroSettings.hero_image ? (
                         <img 
-                          src={heroImagePreview || heroSettings.hero_image} 
+                          src={heroImagePreview || resolveMediaUrl(heroSettings.hero_image)} 
                           alt="Hero preview" 
                           className="w-full h-full object-cover"
                         />
