@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../i18n/useT';
 import { Clock, Cake, Star, ChevronLeft, Play, Users, Home, X, ZoomIn, Heart } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
+import logoImg from '../assets/logo.png';
 
 const HERO_FALLBACK = '/hero-fallback.jpg';
 
@@ -380,7 +381,11 @@ export default function HomePage() {
       {/* CTA Section */}
       {!isAuthenticated && (
         <section className="pb-section py-16 md:py-20 page-shell page-section-gap">
-          <div className="max-w-4xl mx-auto px-6 py-12 md:py-16 home-cta-panel rounded-[var(--radius-2xl)] shadow-xl text-center">
+          <div className="relative overflow-hidden max-w-4xl mx-auto px-6 py-12 md:py-16 home-cta-panel rounded-[var(--radius-2xl)] shadow-xl text-center">
+            <div className="flex justify-center mb-4">
+              <img src={logoImg} alt="شعار بيكابو" className="h-16 sm:h-20 drop-shadow-lg" />
+            </div>
+            <img src={mascotImg} alt="تميمة بيكابو" className="hidden sm:block absolute bottom-3 left-4 w-20 h-20 lg:w-24 lg:h-24 object-contain drop-shadow-lg" />
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6" data-testid="cta-title">
               هل أنت مستعد للمتعة؟
             </h2>
