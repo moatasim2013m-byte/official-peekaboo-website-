@@ -4,10 +4,89 @@ import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../i18n/useT';
-import { Clock, Cake, Star, ChevronLeft, Play, Users, Home, X, ZoomIn, Heart } from 'lucide-react';
+import { ChevronLeft, Play, X, ZoomIn } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 
 const HERO_FALLBACK = '/hero-fallback.jpg';
+
+function PlayfulClockIcon({ className }) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
+      <circle cx="32" cy="34" r="19" fill="#FFFFFF" />
+      <circle cx="32" cy="34" r="13" stroke="#60A5FA" strokeWidth="3" />
+      <path d="M32 34V26" stroke="#F97316" strokeWidth="3" strokeLinecap="round" />
+      <path d="M32 34L38 38" stroke="#F97316" strokeWidth="3" strokeLinecap="round" />
+      <path d="M20 18L14 13" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
+      <path d="M44 18L50 13" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function PlayfulCakeIcon({ className }) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
+      <rect x="16" y="31" width="32" height="17" rx="8" fill="#FFFFFF" />
+      <path d="M16 37C20 33 24 41 28 37C32 33 36 41 40 37C44 33 48 41 48 37" stroke="#F472B6" strokeWidth="3" strokeLinecap="round" />
+      <path d="M32 21V31" stroke="#FDE047" strokeWidth="3" strokeLinecap="round" />
+      <path d="M29.5 22.5C29.5 20.2 31.5 18.5 32 16C32.5 18.5 34.5 20.2 34.5 22.5C34.5 24 33.4 25.2 32 25.2C30.6 25.2 29.5 24 29.5 22.5Z" fill="#FB923C" />
+      <circle cx="24" cy="41" r="2" fill="#60A5FA" />
+      <circle cx="32" cy="42" r="2" fill="#34D399" />
+      <circle cx="40" cy="41" r="2" fill="#FACC15" />
+    </svg>
+  );
+}
+
+function PlayfulCrownIcon({ className }) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
+      <path d="M16 43L19 23L30 33L32 19L34 33L45 23L48 43H16Z" fill="#FFFFFF" />
+      <path d="M16 43H48" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" />
+      <circle cx="19" cy="22" r="3" fill="#60A5FA" />
+      <circle cx="32" cy="18" r="3" fill="#F472B6" />
+      <circle cx="45" cy="22" r="3" fill="#34D399" />
+      <path d="M23 37H41" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function PlayfulBusIcon({ className }) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
+      <rect x="14" y="20" width="36" height="26" rx="8" fill="#FFFFFF" />
+      <rect x="19" y="25" width="10" height="8" rx="2" fill="#60A5FA" />
+      <rect x="33" y="25" width="12" height="8" rx="2" fill="#34D399" />
+      <circle cx="22" cy="47" r="4" fill="#1F2937" />
+      <circle cx="42" cy="47" r="4" fill="#1F2937" />
+      <path d="M50 30H54" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
+      <circle cx="17" cy="35" r="2" fill="#F97316" />
+    </svg>
+  );
+}
+
+function PlayfulHomePartyIcon({ className }) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
+      <path d="M15 31L32 17L49 31" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="20" y="30" width="24" height="19" rx="4" fill="#FFFFFF" />
+      <rect x="29" y="38" width="6" height="11" rx="2" fill="#F59E0B" />
+      <ellipse cx="50" cy="20" rx="5" ry="7" fill="#F472B6" />
+      <ellipse cx="42" cy="17" rx="5" ry="7" fill="#60A5FA" />
+      <path d="M46 27V34" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function PlayfulHeartHandsIcon({ className }) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
+      <path d="M32 32L27 27C24 24 24 20.5 27 18.5C29.2 17 31.7 17.6 32.9 19.5C34.1 17.6 36.7 17 38.9 18.5C41.9 20.5 41.9 24 38.9 27L32 32Z" fill="#F472B6" />
+      <path d="M18 39C18 36.8 19.8 35 22 35H30C31.7 35 33 36.3 33 38C33 39.7 31.7 41 30 41H25" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" />
+      <path d="M46 39C46 36.8 44.2 35 42 35H34C32.3 35 31 36.3 31 38C31 39.7 32.3 41 34 41H39" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" />
+      <path d="M19 46H28" stroke="#FDE047" strokeWidth="4" strokeLinecap="round" />
+      <path d="M36 46H45" stroke="#FDE047" strokeWidth="4" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 export default function HomePage() {
   const { isAuthenticated, api } = useAuth();
@@ -74,7 +153,7 @@ export default function HomePage() {
 
   const features = [
     {
-      icon: Clock,
+      icon: PlayfulClockIcon,
       title: 'اللعب بالساعة',
       description: 'احجز جلسات لعب لأطفالك واختر الوقت المثالي!',
       link: '/tickets',
@@ -84,7 +163,7 @@ export default function HomePage() {
       buttonVariant: 'btn-sunrise'
     },
     {
-      icon: Cake,
+      icon: PlayfulCakeIcon,
       title: 'حفلات أعياد الميلاد',
       description: 'احتفل مع ثيمات رائعة وحفلات مخصصة!',
       link: '/birthday',
@@ -94,7 +173,7 @@ export default function HomePage() {
       buttonVariant: 'btn-cotton-candy'
     },
     {
-      icon: Star,
+      icon: PlayfulCrownIcon,
       title: 'الاشتراكات',
       description: 'وفّر مع باقات الزيارات بصلاحية 30 يوم!',
       link: '/subscriptions',
@@ -104,7 +183,7 @@ export default function HomePage() {
       buttonVariant: 'btn-sunshine'
     },
     {
-      icon: Users,
+      icon: PlayfulBusIcon,
       title: 'المدارس والمجموعات',
       description: 'رحلات مدرسية وبرامج لعب آمنة للمجموعات',
       link: '/groups',
@@ -114,7 +193,7 @@ export default function HomePage() {
       buttonVariant: 'btn-ocean'
     },
     {
-      icon: Home,
+      icon: PlayfulHomePartyIcon,
       title: 'حفلتك في بيتك',
       description: 'نأتيكم للمنزل مع ديكور واحتفال كامل!',
       link: '/home-party',
@@ -124,7 +203,7 @@ export default function HomePage() {
       buttonVariant: 'btn-sunrise'
     },
     {
-      icon: Heart,
+      icon: PlayfulHeartHandsIcon,
       title: 'ذوي الهمم',
       description: 'برامج مخصصة لأصحاب الاحتياجات الخاصة',
       link: null,
