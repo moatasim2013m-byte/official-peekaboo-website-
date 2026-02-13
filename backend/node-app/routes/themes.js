@@ -1,8 +1,24 @@
 const express = require('express');
+const fs = require('fs/promises');
+const path = require('path');
+const rateLimit = require('express-rate-limit');
 const Theme = require('../models/Theme');
+const AITheme = require('../models/AITheme');
+const { generateThemeImage } = require('../utils/geminiImage');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
+
+const aiGenerateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: (req) => req.method === 'OPTIONS',
+  message: { error: 'محاولات كثيرة جداً، الرجاء المحاولة بعد 15 دقيقة' }
+});
+
+const SAFETY_SUFFIX = 'kid-friendly birthday party theme, no text, no logos, no brands, no real people';
 
 // Get all active themes
 router.get('/', async (req, res) => {
@@ -12,6 +28,64 @@ router.get('/', async (req, res) => {
   } catch (error) {
     console.error('Get themes error:', error);
     res.status(500).json({ error: 'Failed to get themes' });
+  }
+});
+
+router.post('/ai-generate', aiGenerateLimiter, async (req, res) => {
+  if (!process.env.GEMINI_API_KEY) {
+    return res.status(503).json({ error: 'خدمة توليد الصور غير متاحة حالياً' });
+  }
+
+  const rawPrompt = typeof req.body?.prompt === 'string' ? req.body.prompt.trim() : '';
+  const aspectRatio = typeof req.body?.aspectRatio === 'string' ? req.body.aspectRatio.trim() : undefined;
+
+  if (rawPrompt.length < 10 || rawPrompt.length > 300) {
+    return res.status(400).json({ error: 'النص يجب أن يكون بين 10 و 300 حرف' });
+  }
+
+  const prompt = `${rawPrompt}. ${SAFETY_SUFFIX}`;
+  let aiTheme;
+
+  try {
+    aiTheme = await AITheme.create({
+      prompt: rawPrompt,
+      aspect_ratio: aspectRatio || null,
+      status: 'pending'
+    });
+
+    const { imageBuffer, mimeType } = await generateThemeImage({ prompt, aspectRatio });
+
+    const extension = mimeType && mimeType.includes('jpeg') ? 'jpg' : 'png';
+    const relativePath = `ai-themes/${aiTheme._id}.${extension}`;
+    const uploadDir = path.join(__dirname, '../uploads/ai-themes');
+    const absolutePath = path.join(__dirname, '../uploads', relativePath);
+
+    await fs.mkdir(uploadDir, { recursive: true });
+    await fs.writeFile(absolutePath, imageBuffer);
+
+    const imageUrl = `/api/uploads/${relativePath}`;
+
+    aiTheme.status = 'generated';
+    aiTheme.image_url = imageUrl;
+    aiTheme.error_message = null;
+    await aiTheme.save();
+
+    return res.json({ imageUrl, requestId: aiTheme._id.toString() });
+  } catch (error) {
+    console.error('AI theme generation error:', error);
+
+    if (aiTheme) {
+      aiTheme.status = 'failed';
+      aiTheme.error_message = 'generation_failed';
+      await aiTheme.save();
+    }
+
+    const statusCode = error?.code === 'MISSING_API_KEY' ? 503 : 502;
+    const message = error?.code === 'MISSING_API_KEY'
+      ? 'خدمة توليد الصور غير متاحة حالياً'
+      : 'تعذر توليد الصورة حالياً، الرجاء المحاولة لاحقاً';
+
+    return res.status(statusCode).json({ error: message });
   }
 });
 
