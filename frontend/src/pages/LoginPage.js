@@ -14,7 +14,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [verificationError, setVerificationError] = useState(null);
-  const { login } = useAuth();
+  const [resendLoading, setResendLoading] = useState(false);
+  const { login, resendVerificationEmail } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -54,6 +55,25 @@ export default function LoginPage() {
     }
   };
 
+
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      toast.error('يرجى إدخال البريد الإلكتروني أولاً');
+      return;
+    }
+
+    setResendLoading(true);
+    try {
+      const response = await resendVerificationEmail(email);
+      toast.success(response?.data?.message || 'تم إرسال رسالة التفعيل');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'تعذر إعادة إرسال رسالة التفعيل');
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-[80vh] flex items-center justify-center py-12 px-4" dir="rtl">
       <Card className="auth-card-premium w-full max-w-md">
@@ -78,6 +98,15 @@ export default function LoginPage() {
               <div>
                 <p className="text-yellow-800 font-medium text-sm">{verificationError}</p>
                 <p className="text-yellow-700 text-xs mt-1">تحقق من بريدك الوارد أو الرسائل غير المرغوب فيها.</p>
+                <Button
+                  type="button"
+                  variant="link"
+                  onClick={handleResendVerification}
+                  disabled={resendLoading}
+                  className="p-0 h-auto mt-2 text-yellow-800 font-semibold"
+                >
+                  {resendLoading ? 'جاري إعادة الإرسال...' : 'إعادة إرسال رابط التفعيل'}
+                </Button>
               </div>
             </div>
           )}

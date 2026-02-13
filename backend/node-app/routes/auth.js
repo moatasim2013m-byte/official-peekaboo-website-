@@ -164,6 +164,55 @@ router.get('/verify-email', async (req, res) => {
   }
 });
 
+// Resend verification email
+router.post('/resend-verification', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: 'البريد الإلكتروني مطلوب' });
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    // Do not reveal whether account exists
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: 'إذا كان الحساب موجودًا، فسيتم إرسال رسالة تفعيل جديدة.'
+      });
+    }
+
+    if (user.email_verified) {
+      return res.status(400).json({ error: 'هذا البريد الإلكتروني مفعل بالفعل' });
+    }
+
+    // SECURITY: Require FRONTEND_URL to prevent open redirect
+    if (!process.env.FRONTEND_URL) {
+      console.error('RESEND_VERIFY_ERROR: FRONTEND_URL environment variable is missing');
+      return res.status(500).json({ error: 'FRONTEND_URL missing' });
+    }
+
+    const verifyToken = crypto.randomBytes(32).toString('hex');
+    user.email_verify_token = verifyToken;
+    user.email_verify_expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await user.save();
+
+    const verifyUrl = `${process.env.FRONTEND_URL}/verify-email?token=${verifyToken}`;
+    const emailResult = await sendVerificationEmail(user.email, verifyUrl);
+
+    if (!emailResult.success) {
+      console.error('RESEND_VERIFY_EMAIL_FAILED', emailResult.error);
+      return res.status(500).json({ error: 'تعذر إرسال رسالة التفعيل، حاول مرة أخرى لاحقًا' });
+    }
+
+    return res.json({ success: true, message: 'تم إرسال رسالة تفعيل جديدة إلى بريدك الإلكتروني' });
+  } catch (error) {
+    console.error('Resend verification error:', error);
+    return res.status(500).json({ error: 'تعذر إعادة إرسال رسالة التفعيل' });
+  }
+});
+
 // Forgot Password
 router.post('/forgot-password', async (req, res) => {
   try {
