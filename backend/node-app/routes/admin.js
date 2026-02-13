@@ -886,6 +886,66 @@ router.patch('/customers/:id/disable', async (req, res) => {
   }
 });
 
+// Delete customer (safe-delete: blocked if customer has booking/subscription history)
+router.delete('/customers/:id', async (req, res) => {
+  try {
+    const customer = await User.findOne({ _id: req.params.id, role: 'parent' });
+    if (!customer) {
+      return res.status(404).json({ error: 'Customer not found' });
+    }
+
+    const [hourlyCount, birthdayCount, subscriptionCount] = await Promise.all([
+      HourlyBooking.countDocuments({ user_id: req.params.id }),
+      BirthdayBooking.countDocuments({ user_id: req.params.id }),
+      UserSubscription.countDocuments({ user_id: req.params.id })
+    ]);
+
+    if (hourlyCount > 0 || birthdayCount > 0 || subscriptionCount > 0) {
+      return res.status(400).json({
+        error: 'Cannot delete customer with booking/subscription history. Disable the customer instead.'
+      });
+    }
+
+    await Promise.all([
+      Child.deleteMany({ parent_id: req.params.id }),
+      User.deleteOne({ _id: req.params.id })
+    ]);
+
+    res.json({ message: 'Customer deleted' });
+  } catch (error) {
+    console.error('Delete customer error:', error);
+    res.status(500).json({ error: 'Failed to delete customer' });
+  }
+});
+
+// Change current admin password
+router.put('/change-password', async (req, res) => {
+  try {
+    const { current_password, new_password } = req.body;
+
+    if (!current_password || !new_password) {
+      return res.status(400).json({ error: 'Current password and new password are required' });
+    }
+
+    if (new_password.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    }
+
+    const isValid = await bcrypt.compare(current_password, req.user.password_hash);
+    if (!isValid) {
+      return res.status(400).json({ error: 'Current password is incorrect' });
+    }
+
+    req.user.password_hash = await bcrypt.hash(new_password, 10);
+    await req.user.save();
+
+    res.json({ message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('Change admin password error:', error);
+    res.status(500).json({ error: 'Failed to change password' });
+  }
+});
+
 // Add child to customer
 router.post('/customers/:id/children', async (req, res) => {
   try {

@@ -84,6 +84,12 @@ export default function AdminPage() {
   const [newChild, setNewChild] = useState({ name: '', birthday: '' });
   const [editingChild, setEditingChild] = useState(null);
   const [savingCustomer, setSavingCustomer] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    current_password: '',
+    new_password: '',
+    confirm_password: ''
+  });
 
   useEffect(() => {
     setLoading(false);
@@ -303,6 +309,49 @@ export default function AdminPage() {
       fetchCustomerDetails(customerDetails.customer.id);
     } catch (error) {
       toast.error(error.response?.data?.error || 'فشل إضافة الطفل');
+    }
+  };
+
+  const handleDeleteCustomer = async (customerId) => {
+    if (!window.confirm('هل أنت متأكد من حذف هذا العميل؟ لا يمكن التراجع.')) return;
+    try {
+      await api.delete(`/admin/customers/${customerId}`);
+      toast.success('تم حذف العميل');
+      fetchCustomers(customerSearch);
+
+      if (customerDetails?.customer?.id === customerId) {
+        setCustomerDetailsOpen(false);
+        setCustomerDetails(null);
+        setEditingCustomer(null);
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'فشل حذف العميل');
+    }
+  };
+
+  const handleChangeAdminPassword = async (e) => {
+    e.preventDefault();
+    if (passwordForm.new_password.length < 8) {
+      toast.error('كلمة المرور الجديدة يجب أن تكون 8 أحرف على الأقل');
+      return;
+    }
+    if (passwordForm.new_password !== passwordForm.confirm_password) {
+      toast.error('تأكيد كلمة المرور غير مطابق');
+      return;
+    }
+
+    setChangingPassword(true);
+    try {
+      await api.put('/admin/change-password', {
+        current_password: passwordForm.current_password,
+        new_password: passwordForm.new_password
+      });
+      toast.success('تم تغيير كلمة مرور المدير بنجاح');
+      setPasswordForm({ current_password: '', new_password: '', confirm_password: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'فشل تغيير كلمة المرور');
+    } finally {
+      setChangingPassword(false);
     }
   };
 
@@ -1170,6 +1219,14 @@ export default function AdminPage() {
                                 >
                                   {customer.is_disabled ? <Check className="h-4 w-4" /> : <Ban className="h-4 w-4" />}
                                 </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-8 w-8 p-0 text-red-600"
+                                  onClick={() => handleDeleteCustomer(customer.id)}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
                               </div>
                             </td>
                           </tr>
@@ -1231,6 +1288,13 @@ export default function AdminPage() {
                           className="rounded-full"
                         >
                           {customerDetails.customer.is_disabled ? 'تفعيل' : 'تعطيل'}
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={() => handleDeleteCustomer(customerDetails.customer.id)}
+                          className="rounded-full"
+                        >
+                          <Trash2 className="h-4 w-4 ml-1" /> حذف العميل
                         </Button>
                       </div>
                     </div>
@@ -1848,6 +1912,50 @@ export default function AdminPage() {
                       className="rounded-xl mt-2"
                     />
                   </div>
+                </div>
+
+                <div className="border-t pt-6">
+                  <h3 className="font-semibold mb-3">تغيير كلمة مرور المدير</h3>
+                  <form onSubmit={handleChangeAdminPassword} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                      <Label>كلمة المرور الحالية</Label>
+                      <Input
+                        type="password"
+                        value={passwordForm.current_password}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, current_password: e.target.value })}
+                        className="rounded-xl mt-2"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label>كلمة المرور الجديدة</Label>
+                      <Input
+                        type="password"
+                        value={passwordForm.new_password}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
+                        className="rounded-xl mt-2"
+                        required
+                        minLength={8}
+                      />
+                    </div>
+                    <div>
+                      <Label>تأكيد كلمة المرور الجديدة</Label>
+                      <Input
+                        type="password"
+                        value={passwordForm.confirm_password}
+                        onChange={(e) => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })}
+                        className="rounded-xl mt-2"
+                        required
+                        minLength={8}
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <Button type="submit" className="rounded-full" disabled={changingPassword}>
+                        {changingPassword ? <Loader2 className="h-4 w-4 animate-spin ml-2" /> : null}
+                        حفظ كلمة المرور الجديدة
+                      </Button>
+                    </div>
+                  </form>
                 </div>
               </CardContent>
             </Card>
