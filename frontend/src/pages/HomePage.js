@@ -360,7 +360,7 @@ export default function HomePage() {
                     <img 
                       src={heroImgSrc}
                       alt="أطفال يلعبون في بيكابو"
-                      className="w-full aspect-[4/3] object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="w-full aspect-[4/3] object-contain bg-white transition-transform duration-300 group-hover:scale-105"
                       onError={() => setHeroImgSrc(HERO_FALLBACK)}
                       data-testid="hero-image"
                     />
