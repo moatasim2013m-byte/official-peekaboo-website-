@@ -1084,8 +1084,8 @@ code {
     position: absolute;
     bottom: 20px;
     left: 20px;
-    width: 104px;
-    height: 104px;
+    width: 148px;
+    height: 148px;
     transform: rotate(-5deg);
     opacity: 0.8;
     z-index: 0;
@@ -1109,6 +1109,16 @@ code {
 .footer-heading-blue { color: var(--pk-blue); }
 .footer-heading-red { color: var(--pk-red); }
 .footer-heading-green { color: var(--pk-green); }
+
+.footer-description-bubbly {
+    color: var(--text-secondary);
+    font-family: var(--font-heading-ar);
+    font-weight: 700;
+    font-size: clamp(1.12rem, 2.8vw, 1.35rem);
+    line-height: 1.85;
+    letter-spacing: 0.01em;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.9), 0 3px 10px rgba(96, 165, 250, 0.10);
+}
 
 /* Address Label Pill */
 .footer-address-label {
