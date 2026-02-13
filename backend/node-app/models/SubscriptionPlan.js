@@ -13,6 +13,9 @@ const subscriptionPlanSchema = new mongoose.Schema({
   created_at: { type: Date, default: Date.now }
 });
 
+// Optimize common read path for public subscriptions page
+subscriptionPlanSchema.index({ is_active: 1, price: 1 });
+
 subscriptionPlanSchema.set('toJSON', {
   transform: (doc, ret) => {
     ret.id = ret._id.toString();
