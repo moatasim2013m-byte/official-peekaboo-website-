@@ -306,7 +306,7 @@ export default function HomePage() {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link to={heroConfig.ctaRoute}>
-                  <Button size="lg" className="rounded-full btn-playful pb-btn text-base sm:text-lg px-8 py-6 w-full sm:w-auto" data-testid="hero-book-btn">
+                  <Button size="lg" className="rounded-full btn-playful pb-btn primary-btn text-base sm:text-lg px-8 py-6 w-full sm:w-auto" data-testid="hero-book-btn">
                     {heroConfig.ctaText}
                     <ChevronLeft className="mr-2 h-5 w-5" />
                   </Button>
@@ -427,7 +427,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-5">
+          <div className="features-grid">
             {features.map((feature, index) => (
               <Card 
                 key={index} 
@@ -447,12 +447,12 @@ export default function HomePage() {
                   <h3 className="pk-card-title text-base feature-title">{feature.title}</h3>
                   <p className="text-muted-foreground text-xs leading-relaxed feature-description">{feature.description}</p>
                   {feature.disabled ? (
-                    <Button disabled className={`playful-btn ${feature.buttonVariant} w-full opacity-50 cursor-not-allowed feature-cta`} data-testid={`feature-btn-${index}`}>
+                    <Button disabled className={`playful-btn primary-btn ${feature.buttonVariant} w-full opacity-50 cursor-not-allowed feature-cta`} data-testid={`feature-btn-${index}`}>
                       {feature.buttonText}
                     </Button>
                   ) : (
                     <Link to={feature.link} className="feature-cta-link">
-                      <Button className={`playful-btn ${feature.buttonVariant} w-full text-sm feature-cta`} data-testid={`feature-btn-${index}`}>
+                      <Button className={`playful-btn primary-btn ${feature.buttonVariant} w-full text-sm feature-cta`} data-testid={`feature-btn-${index}`}>
                         {feature.buttonText}
                         <ChevronLeft className="mr-2 h-4 w-4" />
                       </Button>
@@ -556,7 +556,7 @@ export default function HomePage() {
             <Link to="/register">
               <Button 
                 size="lg" 
-                className="rounded-full pb-btn home-cta-signup-btn text-base sm:text-lg px-10 py-6 font-bold shadow-lg"
+                className="rounded-full pb-btn home-cta home-cta-signup-btn primary-btn text-base sm:text-lg px-10 py-6 font-bold shadow-lg"
                 data-testid="cta-signup-btn"
               >
                 سجّل الآن
