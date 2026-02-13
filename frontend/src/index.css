@@ -699,6 +699,18 @@ code {
     margin-top: auto;
 }
 
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .features-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
 .playful-btn {
     background: linear-gradient(135deg, #ff91a4, #ffb347);
     color: #fff;
@@ -2236,6 +2248,14 @@ code {
 
 .pb-btn:hover {
   box-shadow: 0 12px 24px rgba(0, 187, 249, 0.25);
+}
+
+.primary-btn,
+button.primary,
+.home-cta {
+  background: #FFD93B !important;
+  color: #000 !important;
+  border: none;
 }
 
 .home-cta-panel {
