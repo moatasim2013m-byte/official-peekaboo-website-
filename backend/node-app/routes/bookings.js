@@ -15,6 +15,55 @@ const { addMinutes, isBefore, isAfter } = require('date-fns');
 
 const router = express.Router();
 const LOYALTY_POINTS_PER_ORDER = 10;
+const JORDAN_TIMEZONE = 'Asia/Amman';
+
+const jordanDateTimeFormatter = new Intl.DateTimeFormat('en-CA', {
+  timeZone: JORDAN_TIMEZONE,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false
+});
+
+const getJordanDateTimeParts = (date = new Date()) => {
+  const parts = jordanDateTimeFormatter.formatToParts(date);
+  const getPart = (type) => Number(parts.find((p) => p.type === type)?.value || 0);
+
+  return {
+    year: getPart('year'),
+    month: getPart('month'),
+    day: getPart('day'),
+    hour: getPart('hour'),
+    minute: getPart('minute')
+  };
+};
+
+const formatDateParts = ({ year, month, day }) => (
+  `${String(year).padStart(4, '0')}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+);
+
+const isTomorrowInJordan = (slotDate) => {
+  const now = getJordanDateTimeParts();
+  const tomorrowUTC = new Date(Date.UTC(now.year, now.month - 1, now.day));
+  tomorrowUTC.setUTCDate(tomorrowUTC.getUTCDate() + 1);
+
+  return slotDate === formatDateParts({
+    year: tomorrowUTC.getUTCFullYear(),
+    month: tomorrowUTC.getUTCMonth() + 1,
+    day: tomorrowUTC.getUTCDate()
+  });
+};
+
+const canBookBirthdayDate = (slotDate) => {
+  if (!isTomorrowInJordan(slotDate)) {
+    return true;
+  }
+
+  const now = getJordanDateTimeParts();
+  return now.hour < 18;
+};
 
 // Helper function for Happy Hour pricing
 const getHourlyPrice = async (duration_hours = 2, slot_start_time = null) => {
@@ -401,6 +450,15 @@ router.post('/hourly/checkin', authMiddleware, async (req, res) => {
 router.post('/birthday', authMiddleware, async (req, res) => {
   try {
     const { slot_id, child_id, theme_id, is_custom, custom_request, guest_count, special_notes, payment_id, amount } = req.body;
+
+    const requestedSlot = await TimeSlot.findById(slot_id).select('date slot_type');
+    if (!requestedSlot || requestedSlot.slot_type !== 'birthday') {
+      return res.status(400).json({ error: 'Invalid birthday slot' });
+    }
+
+    if (!canBookBirthdayDate(requestedSlot.date)) {
+      return res.status(400).json({ error: 'يمكن حجز حفلة اليوم التالي قبل الساعة 6:00 مساءً فقط. الرجاء اختيار يوم آخر.' });
+    }
     
     // ATOMIC capacity check for birthday slots
     const slot = await TimeSlot.findOneAndUpdate(
@@ -485,6 +543,15 @@ router.post('/birthday/offline', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'طريقة دفع غير صالحة' });
     }
     
+    const requestedSlot = await TimeSlot.findById(slot_id).select('date slot_type');
+    if (!requestedSlot || requestedSlot.slot_type !== 'birthday') {
+      return res.status(400).json({ error: 'Invalid birthday slot' });
+    }
+
+    if (!canBookBirthdayDate(requestedSlot.date)) {
+      return res.status(400).json({ error: 'يمكن حجز حفلة اليوم التالي قبل الساعة 6:00 مساءً فقط. الرجاء اختيار يوم آخر.' });
+    }
+
     // ATOMIC capacity check for birthday slots
     const slot = await TimeSlot.findOneAndUpdate(
       { 
@@ -582,6 +649,10 @@ router.post('/birthday/custom', authMiddleware, async (req, res) => {
     const slot = await TimeSlot.findById(slot_id);
     if (!slot || slot.slot_type !== 'birthday') {
       return res.status(400).json({ error: 'Invalid birthday slot' });
+    }
+
+    if (!canBookBirthdayDate(slot.date)) {
+      return res.status(400).json({ error: 'يمكن حجز حفلة اليوم التالي قبل الساعة 6:00 مساءً فقط. الرجاء اختيار يوم آخر.' });
     }
 
     const child = await Child.findOne({ _id: child_id, parent_id: req.userId });

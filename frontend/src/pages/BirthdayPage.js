@@ -11,7 +11,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
-import { format, addDays } from 'date-fns';
+import { format, addDays, startOfDay } from 'date-fns';
 import { Cake, Users, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 
@@ -24,7 +24,8 @@ export default function BirthdayPage() {
     document.title = 'حفلات أعياد الميلاد | بيكابو';
   }, []);
   
-  const [date, setDate] = useState(addDays(new Date(), 7));
+  const getBirthdayMinLeadDays = () => (new Date().getHours() < 18 ? 1 : 2);
+  const [date, setDate] = useState(addDays(startOfDay(new Date()), getBirthdayMinLeadDays()));
   const [slots, setSlots] = useState([]);
   const [themes, setThemes] = useState([]);
   const [children, setChildren] = useState([]);
@@ -200,8 +201,9 @@ export default function BirthdayPage() {
     }
   };
 
-  const minDate = addDays(new Date(), 3);
-  const maxDate = addDays(new Date(), 90);
+  const minDate = addDays(startOfDay(new Date()), getBirthdayMinLeadDays());
+  const maxDate = addDays(startOfDay(new Date()), 90);
+  const canBookTomorrow = getBirthdayMinLeadDays() === 1;
 
   const BirthdaySlotsSkeleton = () => (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3" aria-hidden="true">
@@ -253,7 +255,11 @@ export default function BirthdayPage() {
                   <span className="step-badge">1</span>
                   اختر التاريخ
                 </CardTitle>
-                <CardDescription className="text-xs mr-10">احجز قبل 3 أيام</CardDescription>
+                <CardDescription className="text-xs mr-10">
+                  {canBookTomorrow
+                    ? 'يمكن الحجز لليوم التالي قبل 6:00 مساءً'
+                    : 'انتهى وقت حجز اليوم التالي (بعد 6:00 مساءً)'}
+                </CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center py-4">
                 <Calendar
