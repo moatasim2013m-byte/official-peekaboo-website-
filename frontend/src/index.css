@@ -1863,6 +1863,64 @@ button.primary,
   overflow: visible;
 }
 
+.hero-brand-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  margin-bottom: 1rem;
+  position: relative;
+  padding: 0.45rem 0.65rem;
+}
+
+.hero-brand-row::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 999px;
+  box-shadow: 0 8px 24px rgba(105, 140, 170, 0.18);
+  z-index: -1;
+}
+
+.hero-brand-row::after {
+  content: "";
+  position: absolute;
+  width: 46px;
+  height: 30px;
+  left: -18px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 999px;
+  box-shadow: 20px 0 0 rgba(255, 255, 255, 0.9);
+  z-index: -2;
+}
+
+.hero-brand-logo {
+  height: clamp(54px, 7vw, 72px);
+  width: auto;
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: drop-shadow(0 5px 10px rgba(249, 115, 22, 0.22));
+}
+
+.hero-sun-badge {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 34%, #fff6b0 5%, #ffe46e 44%, #ffc038 100%);
+  box-shadow: 0 0 0 7px rgba(255, 209, 64, 0.22), 0 6px 14px rgba(244, 153, 37, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-sun-icon {
+  width: 40px;
+  height: 40px;
+}
+
 /* Keep hero content above decorations */
 .home-page > *:not(.home-sky-layer) {
   position: relative;
@@ -2045,6 +2103,20 @@ button.primary,
   .sky-rainbow { width: 360px; height: 180px; bottom: -70px; left: 6%; opacity: 0.55; }
   .sky-sparkle { display: none; }
   .sky-sun { width: 72px; height: 72px; top: 8%; right: 6%; }
+  .hero-brand-row {
+    gap: 0.65rem;
+  }
+  .hero-brand-logo {
+    height: 52px;
+  }
+  .hero-sun-badge {
+    width: 46px;
+    height: 46px;
+  }
+  .hero-sun-icon {
+    width: 34px;
+    height: 34px;
+  }
 }
 
 /* Respect reduced motion */

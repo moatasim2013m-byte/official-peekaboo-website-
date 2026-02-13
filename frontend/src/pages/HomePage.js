@@ -100,6 +100,24 @@ function PlayfulHeartHandsIcon({ className }) {
   );
 }
 
+function PlayfulSunIcon({ className }) {
+  return (
+    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
+      <circle cx="32" cy="32" r="15" fill="#FACC15" />
+      <circle cx="32" cy="32" r="10" fill="#FDBA74" opacity="0.7" />
+      <circle cx="32" cy="32" r="16.5" stroke="#FB923C" strokeWidth="2.5" />
+      <path d="M32 8V16" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
+      <path d="M32 48V56" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
+      <path d="M8 32H16" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
+      <path d="M48 32H56" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
+      <path d="M15 15L20.5 20.5" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
+      <path d="M43.5 43.5L49 49" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
+      <path d="M49 15L43.5 20.5" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
+      <path d="M20.5 43.5L15 49" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export default function HomePage() {
   const { isAuthenticated, api } = useAuth();
   const { t } = useTranslation();
@@ -295,6 +313,12 @@ export default function HomePage() {
             {/* Text Content */}
             <div className="order-2 lg:order-1 text-center lg:text-right">
               <div className="hero-text-panel">
+                <div className="hero-brand-row mx-auto lg:mx-0">
+                  <img src={logoImg} alt="شعار بيكابو" className="hero-brand-logo" />
+                  <div className="hero-sun-badge" aria-hidden="true">
+                    <PlayfulSunIcon className="hero-sun-icon" />
+                  </div>
+                </div>
                 <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight" data-testid="hero-title">
                   بيكابو يصنع السعادة
                 </h1>
