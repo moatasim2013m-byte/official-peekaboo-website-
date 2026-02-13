@@ -138,12 +138,6 @@ export default function HomePage() {
         <div className="sky-sun"></div>
         {/* Rainbow Arc */}
         <div className="sky-rainbow"></div>
-        {/* Clouds */}
-        <div className="sky-cloud cloud-1"></div>
-        <div className="sky-cloud cloud-2"></div>
-        <div className="sky-cloud cloud-3"></div>
-        <div className="sky-cloud cloud-4"></div>
-        <div className="sky-cloud cloud-5"></div>
         {/* Balloons */}
         <div className="sky-balloon balloon-1"></div>
         <div className="sky-balloon balloon-2"></div>
@@ -156,6 +150,13 @@ export default function HomePage() {
       </div>
 
       <section className="home-hero-sky pb-hero pb-section py-14 md:py-24">
+        <div className="hero-cloud-layer" aria-hidden="true">
+          <div className="sky-cloud cloud-1"></div>
+          <div className="sky-cloud cloud-2"></div>
+          <div className="sky-cloud cloud-3"></div>
+          <div className="sky-cloud cloud-4"></div>
+          <div className="sky-cloud cloud-5"></div>
+        </div>
 
         <div className="page-shell px-2 sm:px-4 lg:px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
@@ -284,14 +285,14 @@ export default function HomePage() {
                     <feature.icon className="h-7 w-7 text-white" />
                   </div>
                   <h3 className="pk-card-title text-base">{feature.title}</h3>
-                  <p className="text-muted-foreground text-xs mb-5 leading-relaxed">{feature.description}</p>
+                  <p className="text-muted-foreground text-xs mb-5 leading-relaxed feature-card-desc">{feature.description}</p>
                   {feature.disabled ? (
-                    <Button disabled className="playful-btn w-full opacity-50 cursor-not-allowed" data-testid={`feature-btn-${index}`}>
+                    <Button disabled className="playful-btn feature-card-btn w-full opacity-50 cursor-not-allowed" data-testid={`feature-btn-${index}`}>
                       {feature.buttonText}
                     </Button>
                   ) : (
-                    <Link to={feature.link}>
-                      <Button className="playful-btn w-full text-sm" data-testid={`feature-btn-${index}`}>
+                    <Link to={feature.link} className="feature-card-link">
+                      <Button className="playful-btn feature-card-btn w-full" data-testid={`feature-btn-${index}`}>
                         {feature.buttonText}
                         <ChevronLeft className="mr-2 h-4 w-4" />
                       </Button>
@@ -373,7 +374,7 @@ export default function HomePage() {
       {/* CTA Section */}
       {!isAuthenticated && (
         <section className="pb-section py-16 md:py-20 page-shell page-section-gap">
-          <div className="max-w-4xl mx-auto px-6 py-12 md:py-16 bg-[var(--pk-red)] rounded-[var(--radius-2xl)] shadow-xl text-center">
+          <div className="max-w-4xl mx-auto px-6 py-12 md:py-16 home-cta-panel rounded-[var(--radius-2xl)] shadow-xl text-center">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6" data-testid="cta-title">
               هل أنت مستعد للمتعة؟
             </h2>
@@ -383,7 +384,7 @@ export default function HomePage() {
             <Link to="/register">
               <Button 
                 size="lg" 
-                className="rounded-full pb-btn text-base sm:text-lg px-10 py-6 bg-white text-[var(--pk-red)] hover:bg-gray-100 font-bold shadow-lg"
+                className="rounded-full pb-btn home-cta-signup-btn text-base sm:text-lg px-10 py-6 font-bold shadow-lg"
                 data-testid="cta-signup-btn"
               >
                 سجّل الآن
