@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const { Resend } = require('resend');
 
 // Initialize Resend with API key
@@ -7,6 +9,20 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const SENDER_EMAIL = 'support@peekaboojor.com';
 const SENDER_NAME = 'Peekaboo';
 const SENDER_FROM = `${SENDER_NAME} <${SENDER_EMAIL}>`;
+
+
+const toDataUri = (absolutePath, mimeType = 'image/png') => {
+  try {
+    if (!fs.existsSync(absolutePath)) return '';
+    const base64 = fs.readFileSync(absolutePath, 'base64');
+    return `data:${mimeType};base64,${base64}`;
+  } catch (error) {
+    return '';
+  }
+};
+
+const BRAND_LOGO_SRC = toDataUri(path.join(__dirname, '../../../frontend/src/assets/logo.png'));
+const BRAND_MASCOT_SRC = toDataUri(path.join(__dirname, '../../../frontend/src/assets/mascot.png'));
 
 /**
  * Send email using Resend - SINGLE function for ALL emails (bookings + verification)
@@ -86,7 +102,9 @@ const emailTemplates = {
         <style>
           body { font-family: 'Cairo', 'Segoe UI', Arial, sans-serif; background: #E8F6FF; padding: 20px; direction: rtl; }
           .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 24px; padding: 32px; box-shadow: 0 10px 40px rgba(52, 152, 219, 0.1); }
-          .logo { text-align: center; font-size: 32px; font-weight: bold; color: #2C3E50; margin-bottom: 10px; }
+          .logo { text-align: center; margin-bottom: 10px; }
+          .brand-logo { width: 220px; max-width: 90%; height: auto; }
+          .mascot { display: block; margin: 0 auto 8px; width: 82px; height: auto; }
           .header { text-align: center; color: #26de81; font-size: 24px; margin-bottom: 20px; }
           .content { background: #E8F6FF; border-radius: 16px; padding: 20px; margin: 20px 0; text-align: center; color: #2C3E50; }
           .btn { display: inline-block; background: #26de81; color: white; padding: 16px 32px; border-radius: 50px; text-decoration: none; margin: 20px 0; font-weight: bold; }
@@ -97,7 +115,8 @@ const emailTemplates = {
       </head>
       <body>
         <div class="container">
-          <div class="logo">🎈 بيكابو</div>
+          <img src="${BRAND_MASCOT_SRC}" alt="Peekaboo Mascot" class="mascot"/>
+          <div class="logo"><img src="${BRAND_LOGO_SRC}" alt="Peekaboo" class="brand-logo"/></div>
           <h1 class="header">👋 أهلاً بك في بيكابو</h1>
           <div class="content">
             <p>شكراً لتسجيلك في بيكابو!</p>
@@ -129,7 +148,9 @@ const emailTemplates = {
         <style>
           body { font-family: 'Cairo', 'Segoe UI', Arial, sans-serif; background: #E8F6FF; padding: 20px; direction: rtl; }
           .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 24px; padding: 32px; box-shadow: 0 10px 40px rgba(52, 152, 219, 0.1); }
-          .logo { text-align: center; font-size: 32px; font-weight: bold; color: #2C3E50; margin-bottom: 10px; }
+          .logo { text-align: center; margin-bottom: 10px; }
+          .brand-logo { width: 220px; max-width: 90%; height: auto; }
+          .mascot { display: block; margin: 0 auto 8px; width: 82px; height: auto; }
           .header { text-align: center; color: #F1C40F; font-size: 24px; margin-bottom: 20px; }
           .content { background: #FFF9E6; border-radius: 16px; padding: 20px; margin: 20px 0; text-align: center; color: #2C3E50; }
           .btn { display: inline-block; background: #F1C40F; color: #2C3E50; padding: 16px 32px; border-radius: 50px; text-decoration: none; margin: 20px 0; font-weight: bold; }
@@ -139,7 +160,8 @@ const emailTemplates = {
       </head>
       <body>
         <div class="container">
-          <div class="logo">🎈 بيكابو</div>
+          <img src="${BRAND_MASCOT_SRC}" alt="Peekaboo Mascot" class="mascot"/>
+          <div class="logo"><img src="${BRAND_LOGO_SRC}" alt="Peekaboo" class="brand-logo"/></div>
           <h1 class="header">🔐 إعادة تعيين كلمة المرور</h1>
           <div class="content">
             <p>لقد طلبت إعادة تعيين كلمة المرور لحسابك في بيكابو.</p>
@@ -167,25 +189,106 @@ const emailTemplates = {
       <html dir="rtl" lang="ar">
       <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <style>
-          body { font-family: 'Cairo', 'Segoe UI', Arial, sans-serif; background: #E8F6FF; padding: 20px; direction: rtl; }
-          .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 24px; padding: 32px; }
-          .logo { text-align: center; font-size: 32px; font-weight: bold; color: #2C3E50; margin-bottom: 10px; }
-          .header { text-align: center; color: #F1C40F; font-size: 24px; margin-bottom: 20px; }
-          .content { background: #FFF9E6; border-radius: 16px; padding: 20px; margin: 20px 0; }
-          .footer { text-align: center; color: #7F8C8D; font-size: 14px; margin-top: 24px; }
+          body {
+            margin: 0;
+            padding: 24px 12px;
+            font-family: 'Cairo', 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #e8f6ff 0%, #f3ecff 100%);
+            direction: rtl;
+            color: #1f2d3d;
+          }
+          .container {
+            max-width: 620px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 16px 45px rgba(39, 90, 179, 0.16);
+          }
+          .hero {
+            padding: 28px 28px 20px;
+            text-align: center;
+            background: linear-gradient(125deg, #0ea5e9 0%, #6366f1 55%, #a855f7 100%);
+            color: #ffffff;
+          }
+          .logo { margin-bottom: 8px; }
+          .brand-logo { width: 240px; max-width: 90%; height: auto; }
+          .mascot { display: block; margin: 0 auto 8px; width: 90px; height: auto; }
+          .header {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 800;
+            color: #ffffff;
+          }
+          .subheader {
+            margin: 10px 0 0;
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.92);
+          }
+          .body {
+            padding: 24px;
+          }
+          .content {
+            background: linear-gradient(180deg, #fef9d7 0%, #fffef5 100%);
+            border: 1px solid #fde68a;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 16px;
+          }
+          .row {
+            margin: 0;
+            padding: 11px 0;
+            border-bottom: 1px dashed #f6d76b;
+            font-size: 16px;
+          }
+          .row:last-child {
+            border-bottom: none;
+          }
+          .label {
+            font-weight: 700;
+            color: #334155;
+          }
+          .value {
+            color: #0f172a;
+          }
+          .note {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e3a8a;
+            border-radius: 14px;
+            padding: 12px 14px;
+            font-size: 14px;
+            line-height: 1.7;
+          }
+          .footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 18px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+          }
         </style>
       </head>
       <body>
         <div class="container">
-          <div class="logo">🎈 بيكابو</div>
-          <h1 class="header">🎉 تم تأكيد حجزك</h1>
-          <div class="content">
-            <p><strong>الطفل:</strong> ${child?.name || 'غير محدد'}</p>
-            <p><strong>التاريخ:</strong> ${slot?.date || booking?.date || 'غير محدد'}</p>
-            <p><strong>الوقت:</strong> ${slot?.start_time || 'غير محدد'}</p>
-            <p><strong>المدة:</strong> ${booking?.duration_hours || 1} ساعة</p>
-            <p><strong>المبلغ:</strong> ${booking?.amount || 0} دينار</p>
+          <div class="hero">
+            <img src="${BRAND_MASCOT_SRC}" alt="Peekaboo Mascot" class="mascot"/>
+            <div class="logo"><img src="${BRAND_LOGO_SRC}" alt="Peekaboo" class="brand-logo"/></div>
+            <h1 class="header">🎉 تم تأكيد حجزك</h1>
+            <p class="subheader">نحن متحمسون لاستقبالكم في تجربة لعب ممتعة وآمنة.</p>
+          </div>
+          <div class="body">
+            <div class="content">
+              <p class="row"><span class="label">الطفل:</span> <span class="value">${child?.name || 'غير محدد'}</span></p>
+              <p class="row"><span class="label">التاريخ:</span> <span class="value">${slot?.date || booking?.date || 'غير محدد'}</span></p>
+              <p class="row"><span class="label">الوقت:</span> <span class="value">${slot?.start_time || 'غير محدد'}</span></p>
+              <p class="row"><span class="label">المدة:</span> <span class="value">${booking?.duration_hours || 1} ساعة</span></p>
+              <p class="row"><span class="label">المبلغ:</span> <span class="value">${booking?.amount || 0} دينار</span></p>
+            </div>
+            <div class="note">يرجى الحضور قبل موعد الجلسة بـ 10 دقائق. لأي استفسار يمكنكم التواصل معنا عبر نفس البريد أو رقم خدمة العملاء.</div>
           </div>
           <div class="footer">
             <p>فريق بيكابو 🎪</p>
@@ -207,7 +310,9 @@ const emailTemplates = {
         <style>
           body { font-family: 'Cairo', 'Segoe UI', Arial, sans-serif; background: #FFE8F0; padding: 20px; direction: rtl; }
           .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 24px; padding: 32px; }
-          .logo { text-align: center; font-size: 32px; font-weight: bold; color: #2C3E50; margin-bottom: 10px; }
+          .logo { text-align: center; margin-bottom: 10px; }
+          .brand-logo { width: 220px; max-width: 90%; height: auto; }
+          .mascot { display: block; margin: 0 auto 8px; width: 82px; height: auto; }
           .header { text-align: center; color: #E74C3C; font-size: 24px; margin-bottom: 20px; }
           .content { background: #FFF0F3; border-radius: 16px; padding: 20px; margin: 20px 0; }
           .footer { text-align: center; color: #7F8C8D; font-size: 14px; margin-top: 24px; }
@@ -215,7 +320,8 @@ const emailTemplates = {
       </head>
       <body>
         <div class="container">
-          <div class="logo">🎈 بيكابو</div>
+          <img src="${BRAND_MASCOT_SRC}" alt="Peekaboo Mascot" class="mascot"/>
+          <div class="logo"><img src="${BRAND_LOGO_SRC}" alt="Peekaboo" class="brand-logo"/></div>
           <h1 class="header">🎂 تم تأكيد حجز الحفلة</h1>
           <div class="content">
             <p><strong>اسم الطفل:</strong> ${child?.name || booking?.child_name || 'طفل'}</p>
@@ -245,7 +351,9 @@ const emailTemplates = {
         <style>
           body { font-family: 'Cairo', 'Segoe UI', Arial, sans-serif; background: #E8FFE8; padding: 20px; direction: rtl; }
           .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 24px; padding: 32px; }
-          .logo { text-align: center; font-size: 32px; font-weight: bold; color: #2C3E50; margin-bottom: 10px; }
+          .logo { text-align: center; margin-bottom: 10px; }
+          .brand-logo { width: 220px; max-width: 90%; height: auto; }
+          .mascot { display: block; margin: 0 auto 8px; width: 82px; height: auto; }
           .header { text-align: center; color: #27AE60; font-size: 24px; margin-bottom: 20px; }
           .content { background: #F0FFF0; border-radius: 16px; padding: 20px; margin: 20px 0; }
           .footer { text-align: center; color: #7F8C8D; font-size: 14px; margin-top: 24px; }
@@ -253,7 +361,8 @@ const emailTemplates = {
       </head>
       <body>
         <div class="container">
-          <div class="logo">🎈 بيكابو</div>
+          <img src="${BRAND_MASCOT_SRC}" alt="Peekaboo Mascot" class="mascot"/>
+          <div class="logo"><img src="${BRAND_LOGO_SRC}" alt="Peekaboo" class="brand-logo"/></div>
           <h1 class="header">⭐ تم تفعيل اشتراكك</h1>
           <div class="content">
             <p><strong>الطفل:</strong> ${child?.name || 'طفل'}</p>
