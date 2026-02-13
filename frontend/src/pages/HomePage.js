@@ -403,11 +403,11 @@ export default function HomePage() {
             {whyPeekabooFeatures.map((feature, index) => (
               <Card key={index} className="pk-card pb-card feature-card">
                 <CardContent className="feature-card-content text-center">
-                  <div className={`pk-icon-badge ${feature.badgeColor} text-2xl`} aria-hidden="true">
+                  <div className={`pk-icon-badge ${feature.badgeColor}`} aria-hidden="true">
                     {feature.icon}
                   </div>
                   <h3 className="pk-card-title text-base feature-title">{feature.title}</h3>
-                  <p className="text-muted-foreground text-xs leading-relaxed feature-description">{feature.description}</p>
+                  <p className="text-muted-foreground text-sm leading-relaxed feature-description">{feature.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -442,10 +442,10 @@ export default function HomePage() {
                 )}
                 <CardContent className="feature-card-content text-center">
                   <div className={`pk-icon-badge ${feature.badgeColor} ${feature.disabled ? 'grayscale' : ''}`}>
-                    <feature.icon className="h-7 w-7 text-white" />
+                    <feature.icon className="feature-icon-svg text-white" />
                   </div>
                   <h3 className="pk-card-title text-base feature-title">{feature.title}</h3>
-                  <p className="text-muted-foreground text-xs leading-relaxed feature-description">{feature.description}</p>
+                  <p className="text-muted-foreground text-sm leading-relaxed feature-description">{feature.description}</p>
                   {feature.disabled ? (
                     <Button disabled className={`playful-btn primary-btn ${feature.buttonVariant} w-full opacity-50 cursor-not-allowed feature-cta`} data-testid={`feature-btn-${index}`}>
                       {feature.buttonText}
