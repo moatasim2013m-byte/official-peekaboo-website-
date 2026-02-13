@@ -1,4 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&family=Changa:wght@400;500;600;700;800&display=swap');
+
+@font-face {
+    font-family: 'Kidzhood Arabic';
+    src: local('Kidzhood Arabic'), local('KidzhoodArabic');
+    font-weight: 400 800;
+    font-style: normal;
+}
 
 @tailwind base;
 @tailwind components;
@@ -21,13 +28,13 @@
 :root {
     /* ===== PEEKABOO BRAND COLORS (Wonderland-Inspired) ===== */
     /* Primary brand colors - vibrant and playful */
-    --pk-red: #FF4757;           /* Bright playful red */
-    --pk-yellow: #FFD93D;        /* Sunny golden yellow */
-    --pk-green: #26DE81;         /* Fresh mint green */
-    --pk-blue: #45AAF2;          /* Friendly sky blue */
-    --pk-orange: #FF9F43;        /* Warm sunset orange */
-    --pk-pink: #FF6B9D;          /* Playful pink */
-    --pk-purple: #A55EEA;        /* Fun purple */
+    --pk-red: #D9232E;           /* Logo red */
+    --pk-yellow: #F2E533;        /* Logo yellow */
+    --pk-green: #97C64A;         /* Logo green */
+    --pk-blue: #66A9E9;          /* Logo blue */
+    --pk-orange: #E59B35;        /* Logo orange */
+    --pk-pink: #F08E3C;          /* Brand warm accent */
+    --pk-purple: #4C88D9;        /* Brand cool accent */
     --pk-white: #FFFFFF;         /* Pure white */
     
     /* Background colors - dreamy and soft */
@@ -93,8 +100,8 @@
     --font-size-xl: 20px;
     
     /* ===== FONT FAMILIES ===== */
-    --font-heading-ar: 'Baloo Bhaijaan 2', 'Cairo', sans-serif;
-    --font-body-ar: 'Cairo', sans-serif;
+    --font-heading-ar: 'Kidzhood Arabic', 'Changa', 'Baloo Bhaijaan 2', 'Cairo', sans-serif;
+    --font-body-ar: 'Kidzhood Arabic', 'Changa', 'Cairo', sans-serif;
 
     /* Peekaboo color classes for tailwind */
     --peekaboo-red: var(--pk-red);
@@ -359,7 +366,7 @@ code {
     letter-spacing: 0.01em;
     height: 50px;
     border-radius: 14px;
-    background: linear-gradient(135deg, #ff4d5a, #ff7a5c);
+    background: linear-gradient(135deg, var(--pk-red), var(--pk-orange), var(--pk-yellow));
     box-shadow: var(--shadow-btn);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -454,13 +461,13 @@ code {
 }
 
 .nav-pill.pill-purple {
-    background: linear-gradient(135deg, #9C27B0, #BA68C8);
+    background: linear-gradient(135deg, var(--pk-blue), var(--pk-green));
     color: white;
 }
 .nav-pill.pill-purple:hover,
 .nav-pill.pill-purple.active {
-    background: linear-gradient(135deg, #7B1FA2, #9C27B0);
-    box-shadow: 0 6px 24px rgba(156, 39, 176, 0.45);
+    background: linear-gradient(135deg, #4f98de, #88b83b);
+    box-shadow: 0 6px 24px rgba(102, 169, 233, 0.45);
     transform: translateY(-3px);
 }
 
@@ -985,8 +992,8 @@ code {
     position: absolute;
     bottom: 20px;
     left: 20px;
-    width: 64px;
-    height: 64px;
+    width: 104px;
+    height: 104px;
     transform: rotate(-5deg);
     opacity: 0.8;
     z-index: 0;
@@ -2049,7 +2056,7 @@ code {
 
 :root {
   --pb-sky: #7FD3F7;
-  --pb-pink: #FF7EB6;
+  --pb-pink: #E59B35;
   --pb-yellow: #FFD93B;
   --pb-orange: #FF9F45;
   --pb-mint: #7CF0C5;
@@ -2072,7 +2079,7 @@ code {
   padding: 14px 26px;
   font-weight: 700;
   color: white;
-  background: linear-gradient(135deg, #FFD93B 0%, #FF924C 38%, #FF5DA2 72%, #00BBF9 100%);
+  background: linear-gradient(135deg, var(--pk-yellow) 0%, var(--pk-orange) 38%, var(--pk-red) 72%, var(--pk-blue) 100%);
   border: none;
   box-shadow: 0 8px 20px rgba(255, 93, 162, 0.28);
 }
@@ -2082,12 +2089,12 @@ code {
 }
 
 .home-cta-panel {
-  background: linear-gradient(135deg, #FF924C 0%, #FF5DA2 52%, #00BBF9 100%);
+  background: linear-gradient(135deg, var(--pk-red) 0%, var(--pk-orange) 34%, var(--pk-yellow) 58%, var(--pk-green) 78%, var(--pk-blue) 100%);
 }
 
 .home-cta-signup-btn {
   background: white;
-  color: #ff5da2;
+  color: var(--pk-red);
 }
 
 .home-cta-signup-btn:hover {

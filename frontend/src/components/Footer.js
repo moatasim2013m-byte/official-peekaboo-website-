@@ -28,7 +28,7 @@ export const Footer = () => {
             {/* Column 1: Brand & Contact */}
             <div>
               <Link to="/" className="inline-block mb-4">
-                <img src={logoImg} alt="بيكابو" className="h-12" />
+                <img src={logoImg} alt="بيكابو" className="h-16 sm:h-20 drop-shadow-md" />
               </Link>
               <p className="text-sm text-[var(--text-secondary)] mb-4 leading-relaxed">
                 أفضل ملعب داخلي للأطفال في إربد. احجز جلسات اللعب وحفلات أعياد الميلاد!
