@@ -324,7 +324,8 @@ export default function TicketsPage() {
     );
   };
 
-  const minDate = new Date();
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
   const maxDate = addDays(new Date(), 30);
 
   // Check if morning is expired for selected date
@@ -390,7 +391,7 @@ export default function TicketsPage() {
                   setSlots([]);
                 }
               }}
-              disabled={(d) => d < minDate || d > maxDate}
+              disabled={(d) => d < todayStart || d > maxDate}
               className="rounded-xl"
             />
           </CardContent>
