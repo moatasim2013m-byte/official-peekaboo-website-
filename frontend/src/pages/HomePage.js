@@ -310,7 +310,7 @@ export default function HomePage() {
               
               {/* Hours Badge */}
               <div className="absolute -bottom-2 right-4 sm:right-8 bg-[var(--pk-yellow)] text-[var(--text-primary)] px-4 sm:px-6 py-2 sm:py-3 rounded-full font-heading font-bold shadow-lg text-sm sm:text-base">
-                مفتوح يومياً 10:00 ص - 12:00 ص
+                مفتوح يومياً
               </div>
             </div>
           </div>
