@@ -642,9 +642,27 @@ export default function AdminPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
+    const maxSizeBytes = 10 * 1024 * 1024;
+
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('صيغة الصورة غير مدعومة. استخدم PNG أو JPG أو WEBP');
+      e.target.value = '';
+      return;
+    }
+
+    if (file.size > maxSizeBytes) {
+      toast.error('حجم الصورة كبير جداً. الحد الأقصى 10MB');
+      e.target.value = '';
+      return;
+    }
+
     // Preview
     const reader = new FileReader();
-    reader.onload = (ev) => setHeroImagePreview(ev.target.result);
+    reader.onload = (ev) => setHeroImagePreview(ev?.target?.result || '');
+    reader.onerror = () => {
+      toast.error('تعذر قراءة الصورة قبل الرفع');
+    };
     reader.readAsDataURL(file);
 
     // Upload
@@ -656,10 +674,16 @@ export default function AdminPage() {
       const uploadRes = await api.post('/admin/upload-image', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      setHeroSettings({ ...heroSettings, hero_image: uploadRes.data.image_url });
+
+      if (!uploadRes?.data?.image_url) {
+        throw new Error('Invalid upload response');
+      }
+
+      setHeroSettings((prev) => ({ ...prev, hero_image: uploadRes.data.image_url }));
       toast.success('تم رفع الصورة');
     } catch (error) {
-      toast.error('فشل رفع الصورة');
+      const backendMessage = error?.response?.data?.error;
+      toast.error(backendMessage || 'فشل رفع الصورة');
     } finally {
       setUploadingImage(false);
     }
