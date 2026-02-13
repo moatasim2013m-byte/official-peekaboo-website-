@@ -227,6 +227,34 @@ export default function HomePage() {
     }
   ];
 
+  const whyPeekabooFeatures = [
+    {
+      icon: '💖',
+      title: 'رعاية خاصة',
+      description: 'فريقنا يتعامل مع الأطفال باهتمام وصبر.'
+    },
+    {
+      icon: '🧼',
+      title: 'نظافة وتعقيم مستمر',
+      description: 'تعقيم يومي للألعاب والمناطق لضمان بيئة آمنة.'
+    },
+    {
+      icon: '🎲',
+      title: 'لعب وتعليم',
+      description: 'نتعلم من خلال اللعب وتنمية المهارات الاجتماعية.'
+    },
+    {
+      icon: '🛡️',
+      title: 'مناطق آمنة ومناسبة للعمر',
+      description: 'تقسيمات واضحة تناسب أعمار مختلفة.'
+    },
+    {
+      icon: '👨‍👩‍👧‍👦',
+      title: 'متابعة وراحة للأهل',
+      description: 'جلسات مريحة للأهل ومتابعة للأطفال داخل اللعب.'
+    }
+  ];
+
   return (
     <div className="home-page" dir="rtl">
       {/* Decorative Sky Layer (applies to whole page) */}
@@ -351,6 +379,34 @@ export default function HomePage() {
           />
         </div>
       )}
+
+      {/* Features Section */}
+      <section className="section-container home-page-section pb-section page-shell page-section-gap">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
+              لماذا بيكابو مميز؟
+            </h2>
+            <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
+              لأننا نهتم بالتفاصيل التي تصنع تجربة آمنة وممتعة لطفلك.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+            {whyPeekabooFeatures.map((feature, index) => (
+              <Card key={index} className="pk-card pb-card feature-card">
+                <CardContent className="feature-card-content text-center">
+                  <div className="pk-icon-badge badge-purple text-2xl" aria-hidden="true">
+                    {feature.icon}
+                  </div>
+                  <h3 className="pk-card-title text-base feature-title">{feature.title}</h3>
+                  <p className="text-muted-foreground text-xs leading-relaxed feature-description">{feature.description}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Features Section */}
       <section className="section-container home-page-section pb-section page-shell page-section-gap">
