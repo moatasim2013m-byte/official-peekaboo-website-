@@ -72,7 +72,11 @@ router.post('/ai-generate', aiGenerateLimiter, async (req, res) => {
 
     return res.json({ imageUrl, requestId: aiTheme._id.toString() });
   } catch (error) {
-    console.error('AI theme generation error:', error);
+    console.error('AI theme generation error:', {
+      code: error?.code,
+      message: error?.message,
+      details: error?.details
+    });
 
     if (aiTheme) {
       aiTheme.status = 'failed';
@@ -80,10 +84,20 @@ router.post('/ai-generate', aiGenerateLimiter, async (req, res) => {
       await aiTheme.save();
     }
 
-    const statusCode = error?.code === 'MISSING_API_KEY' ? 503 : 502;
+    const providerStatus = Number(error?.status) || null;
+    const statusCode = error?.code === 'MISSING_API_KEY'
+      ? 503
+      : providerStatus === 429
+        ? 429
+        : 502;
+
     const message = error?.code === 'MISSING_API_KEY'
       ? 'خدمة توليد الصور غير متاحة حالياً'
-      : 'تعذر توليد الصورة حالياً، الرجاء المحاولة لاحقاً';
+      : providerStatus === 429
+        ? 'تم تجاوز الحد المسموح لخدمة الذكاء الاصطناعي، الرجاء المحاولة لاحقاً'
+        : providerStatus === 404
+          ? 'إعدادات خدمة إنشاء الصور غير صحيحة، الرجاء التواصل مع الدعم'
+          : 'تعذر توليد الصورة حالياً، الرجاء المحاولة لاحقاً';
 
     return res.status(statusCode).json({ error: message });
   }
