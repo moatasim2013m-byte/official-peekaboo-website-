@@ -406,18 +406,20 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
-            {whyPeekabooFeatures.map((feature, index) => (
-              <Card key={index} className="pk-card pb-card feature-card">
-                <CardContent className="feature-card-content text-center">
-                  <div className={`pk-icon-badge ${feature.badgeColor}`} aria-hidden="true">
-                    {feature.icon}
-                  </div>
-                  <h3 className="pk-card-title text-base feature-title">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed feature-description">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="rounded-2xl border border-border/70 bg-white/90 p-3 sm:p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 sm:gap-3">
+              {whyPeekabooFeatures.map((feature, index) => (
+                <Card key={index} className="rounded-xl border border-border/60 bg-background/70 shadow-sm">
+                  <CardContent className="p-3 text-center">
+                    <div className={`mx-auto mb-2 pk-icon-badge ${feature.badgeColor} w-10 h-10 text-lg`} aria-hidden="true">
+                      {feature.icon}
+                    </div>
+                    <h3 className="font-bold text-sm leading-tight mb-1">{feature.title}</h3>
+                    <p className="text-muted-foreground text-xs leading-relaxed">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </div>
         </div>
       </section>
