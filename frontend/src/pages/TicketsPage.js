@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
 import { Clock, Users, Loader2, AlertCircle, Star, Sun, Moon } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
+import mascotImg from '../assets/mascot.png';
 
 // Morning pricing constant
 const MORNING_PRICE_PER_HOUR = 3.5;
@@ -351,6 +352,10 @@ export default function TicketsPage() {
           <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3">
             احجز وقت اللعب
           </h1>
+          <div className="shroomi-promo shroomi-promo--booking">
+            <img src={mascotImg} alt="Shroomi with ticket" className="shroomi-promo__img shroomi-promo__img--ticket" />
+            <span className="shroomi-promo__text">Book Your Session!</span>
+          </div>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
             اختر التاريخ، الفترة، المدة، ثم الوقت المناسب
           </p>

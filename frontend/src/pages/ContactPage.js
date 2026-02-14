@@ -4,6 +4,7 @@ import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import PublicPageShell, { WonderSection, WonderSectionTitle } from '../components/PublicPageShell';
 import { FacebookLogoIcon, InstagramLogoIcon } from '../components/SocialBrandIcons';
+import mascotImg from '../assets/mascot.png';
 
 export default function ContactPage() {
   const contactInfo = [
@@ -19,6 +20,10 @@ export default function ContactPage() {
       subtitle="نسعد بتواصلكم معنا"
       maxWidth="max-w-5xl"
     >
+      <div className="shroomi-promo shroomi-promo--contact">
+        <img src={mascotImg} alt="Shroomi with heart" className="shroomi-promo__img shroomi-promo__img--heart" />
+        <span className="shroomi-promo__text">Get in Touch!</span>
+      </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Contact Info */}
         <WonderSection>
