@@ -72,11 +72,21 @@ router.post('/ai-generate', aiGenerateLimiter, async (req, res) => {
 
     return res.json({ imageUrl, requestId: aiTheme._id.toString() });
   } catch (error) {
+    const providerStatus = Number(error?.status) || null;
+    const providerMessage = error?.details?.providerError?.message || null;
+
+    if (providerStatus) {
+      console.error('Gemini provider non-200 response:', {
+        status: providerStatus,
+        message: providerMessage
+      });
+    }
+
     console.error('AI theme generation error:', {
       code: error?.code,
-      status: error?.status,
+      status: providerStatus,
       message: error?.message,
-      providerMessage: error?.details?.failures?.[0]?.details?.message || null,
+      providerMessage,
       details: error?.details
     });
 
@@ -86,7 +96,6 @@ router.post('/ai-generate', aiGenerateLimiter, async (req, res) => {
       await aiTheme.save();
     }
 
-    const providerStatus = Number(error?.status) || null;
     const statusCode = error?.code === 'MISSING_API_KEY'
       ? 503
       : providerStatus === 429
