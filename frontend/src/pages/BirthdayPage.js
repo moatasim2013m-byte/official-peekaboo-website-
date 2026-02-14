@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import { format, addDays, startOfDay } from 'date-fns';
 import { Cake, Users, Loader2, AlertCircle, Sparkles } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
+import mascotImg from '../assets/mascot.png';
 
 export default function BirthdayPage() {
   const { isAuthenticated, api } = useAuth();
@@ -296,6 +297,10 @@ export default function BirthdayPage() {
             <Cake className="inline-block h-9 w-9 text-accent ml-2" />
             حفلات أعياد الميلاد
           </h1>
+          <div className="shroomi-promo shroomi-promo--events">
+            <img src={mascotImg} alt="Shroomi with gift" className="shroomi-promo__img shroomi-promo__img--gift" />
+            <span className="shroomi-promo__text">Plan Your Party!</span>
+          </div>
           <p className="birthday-page-subtitle text-base md:text-lg max-w-xl mx-auto">
             اجعل عيد ميلاد طفلك لا يُنسى!
           </p>

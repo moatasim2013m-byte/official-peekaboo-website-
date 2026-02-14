@@ -9,6 +9,7 @@ import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
 import { Star, Check, Loader2, PartyPopper, Sparkles, Crown, Gift, Rocket } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
+import mascotImg from '../assets/mascot.png';
 
 export default function SubscriptionsPage() {
   const { isAuthenticated, api } = useAuth();
@@ -140,6 +141,10 @@ export default function SubscriptionsPage() {
             <Star className="inline-block h-9 w-9 text-secondary ml-2" />
             باقات الاشتراك
           </h1>
+          <div className="shroomi-promo shroomi-promo--subscriptions">
+            <img src={mascotImg} alt="Shroomi with calendar" className="shroomi-promo__img shroomi-promo__img--calendar" />
+            <span className="shroomi-promo__text">Join Now!</span>
+          </div>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
             وفّر أكثر مع باقات الزيارات. صالحة لمدة 30 يومًا.
           </p>
