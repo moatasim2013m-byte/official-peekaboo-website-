@@ -17,7 +17,7 @@ const RAW_BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').trim();
 const BACKEND_ORIGIN =
   !RAW_BACKEND_URL || RAW_BACKEND_URL === 'undefined' || RAW_BACKEND_URL === 'null'
     ? ''
-    : RAW_BACKEND_URL.replace(/\/+$/, '');
+    : RAW_BACKEND_URL.replace(/\/+$/, '').replace(/\/api$/i, '');
 
 const resolveMediaUrl = (url) => {
   if (!url) return '';
@@ -61,32 +61,35 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const [galleryRes, settingsRes] = await Promise.all([
-          api.get('/gallery'),
-          api.get('/settings')
-        ]);
-        setGallery(galleryRes.data.media || []);
-        
-        // Load hero config from settings
-        const s = settingsRes.data.settings || {};
-        setHeroConfig({
-          title: s.hero_title || heroConfig.title,
-          subtitle: s.hero_subtitle || heroConfig.subtitle,
-          ctaText: s.hero_cta_text || heroConfig.ctaText,
-          ctaRoute: s.hero_cta_route || heroConfig.ctaRoute,
+      const [galleryResult, settingsResult] = await Promise.allSettled([
+        api.get('/gallery'),
+        api.get('/settings')
+      ]);
+
+      if (galleryResult.status === 'fulfilled') {
+        setGallery(galleryResult.value?.data?.media || []);
+      } else {
+        console.error('Failed to fetch gallery:', galleryResult.reason);
+      }
+
+      if (settingsResult.status === 'fulfilled') {
+        const s = settingsResult.value?.data?.settings || {};
+        setHeroConfig((prev) => ({
+          title: s.hero_title || prev.title,
+          subtitle: s.hero_subtitle || prev.subtitle,
+          ctaText: s.hero_cta_text || prev.ctaText,
+          ctaRoute: s.hero_cta_route || prev.ctaRoute,
           image: s.hero_image || ''
-        });
-        // Set hero image src only after settings load to avoid initial image flicker.
+        }));
         setHeroImgSrc(s.hero_image ? resolveMediaUrl(s.hero_image) : '');
         setHeroImageError(false);
-      } catch (error) {
-        console.error('Failed to fetch data:', error);
+      } else {
+        console.error('Failed to fetch settings:', settingsResult.reason);
         setHeroImgSrc('');
         setHeroImageError(false);
-      } finally {
-        setHeroImageReady(true);
       }
+
+      setHeroImageReady(true);
     };
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
