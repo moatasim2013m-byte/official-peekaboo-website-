@@ -1861,7 +1861,7 @@ button.primary,
 }
 
 .cartoon-option {
-    overflow: hidden;
+    overflow: visible;
     border-width: 2.5px;
 }
 
