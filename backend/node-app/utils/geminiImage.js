@@ -1,4 +1,4 @@
-const DEFAULT_GEMINI_IMAGE_MODEL = 'imagen-3.0-generate-002';
+const DEFAULT_GEMINI_IMAGE_MODEL = 'gemini-2.0-flash-preview-image-generation';
 
 const parseGeminiImage = (data) => {
   const inlinePart = data?.candidates
@@ -45,6 +45,43 @@ const postGeminiRequest = async ({ endpoint, payload }) => {
   };
 };
 
+const isGeminiNativeModel = (model) => /gemini/i.test(model);
+
+const buildAttempts = ({ model, modelPath, apiKey, prompt, aspectRatio }) => {
+  const predictEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelPath}:predict?key=${encodeURIComponent(apiKey)}`;
+  const generateEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelPath}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+  const predictAttempt = {
+    endpoint: predictEndpoint,
+    payload: {
+      instances: [{ prompt }],
+      parameters: {
+        sampleCount: 1,
+        ...(aspectRatio ? { aspectRatio } : {})
+      }
+    }
+  };
+
+  const generateAttempt = {
+    endpoint: generateEndpoint,
+    payload: {
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: prompt }]
+        }
+      ],
+      generationConfig: {
+        responseModalities: ['IMAGE']
+      }
+    }
+  };
+
+  return isGeminiNativeModel(model)
+    ? [generateAttempt, predictAttempt]
+    : [predictAttempt, generateAttempt];
+};
+
 const generateThemeImage = async ({ prompt, aspectRatio }) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -55,42 +92,15 @@ const generateThemeImage = async ({ prompt, aspectRatio }) => {
 
   const model = process.env.GEMINI_IMAGE_MODEL || DEFAULT_GEMINI_IMAGE_MODEL;
   const modelPath = encodeURIComponent(model);
-  const predictEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelPath}:predict?key=${encodeURIComponent(apiKey)}`;
-  const generateEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${modelPath}:generateContent?key=${encodeURIComponent(apiKey)}`;
-
-  const attempts = [
-    {
-      endpoint: predictEndpoint,
-      payload: {
-      instances: [{ prompt }],
-      parameters: {
-        sampleCount: 1,
-        ...(aspectRatio ? { aspectRatio } : {})
-      }
-    }
-    },
-    {
-      endpoint: generateEndpoint,
-      payload: {
-        contents: [
-          {
-            role: 'user',
-            parts: [{ text: prompt }]
-          }
-        ],
-        generationConfig: {
-          responseModalities: ['TEXT', 'IMAGE'],
-          ...(aspectRatio ? { aspectRatio } : {})
-        }
-      }
-    }
-  ];
+  const attempts = buildAttempts({ model, modelPath, apiKey, prompt, aspectRatio });
 
   let lastErrorPayload;
+  let lastStatusCode;
 
   for (const attempt of attempts) {
     const response = await postGeminiRequest(attempt);
     if (!response.ok) {
+      lastStatusCode = response.status;
       lastErrorPayload = response.data;
       continue;
     }
@@ -99,11 +109,14 @@ const generateThemeImage = async ({ prompt, aspectRatio }) => {
     if (parsed) {
       return parsed;
     }
+
+    lastStatusCode = response.status;
     lastErrorPayload = response.data;
   }
 
   const err = new Error('Gemini image generation failed');
   err.code = 'GEMINI_API_ERROR';
+  err.status = lastStatusCode;
   err.details = lastErrorPayload;
   throw err;
 };
