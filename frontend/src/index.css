@@ -2703,6 +2703,35 @@ button.primary,
   transition: transform 220ms ease, filter 220ms ease;
 }
 
+@media (min-width: 1024px) {
+  .home-hero-sky {
+    padding-top: 2.75rem !important;
+    padding-bottom: 4.5rem !important;
+  }
+
+  .home-hero-shell {
+    padding-inline: 0.5rem;
+  }
+
+  .hero-image-section {
+    padding: clamp(0.9rem, 1.2vw, 1.2rem);
+    gap: clamp(0.75rem, 1.2vw, 1.2rem);
+  }
+
+  .hero-text-card {
+    padding: clamp(1rem, 1.4vw, 1.4rem);
+  }
+
+  .hero-brand-row {
+    margin-bottom: 0.5rem;
+    margin-inline: 0;
+  }
+
+  .hero-brand-logo {
+    height: clamp(74px, 7vw, 112px);
+  }
+}
+
 @media (hover: hover) and (pointer: fine) {
   .hero-brand-logo:hover {
     transform: rotate(-3deg) scale(1.06);
