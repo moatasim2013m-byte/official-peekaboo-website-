@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { toast } from 'sonner';
 import { Mail, Loader2, CheckCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const { forgotPassword } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,15 +22,13 @@ export default function ForgotPasswordPage() {
       return;
     }
 
-    const backendUrl = process.env.REACT_APP_BACKEND_URL || '';
     console.log('FORGOT_UI_SUBMIT', email);
-    console.log('FORGOT_UI_BACKEND_URL', backendUrl);
 
     setLoading(true);
 
     try {
-      const response = await axios.post(`${backendUrl}/api/auth/forgot-password`, { email });
-      console.log('FORGOT_UI_RESPONSE', response.status);
+      await forgotPassword(email);
+      console.log('FORGOT_UI_RESPONSE', 200);
       setSuccess(true);
       toast.success('تم إرسال رابط إعادة التعيين إلى بريدك الإلكتروني');
     } catch (error) {
