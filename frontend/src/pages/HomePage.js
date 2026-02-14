@@ -220,7 +220,7 @@ export default function HomePage() {
           <div className="sky-cloud cloud-5"></div>
         </div>
 
-        <div className="page-shell px-2 sm:px-4 lg:px-6 relative z-10">
+        <div className="page-shell home-hero-shell px-2 sm:px-4 lg:px-6 relative z-10">
           <div className="hero-content-stack">
             <div className="hero-image-section">
               <div
