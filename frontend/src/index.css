@@ -2376,11 +2376,118 @@ button.primary,
   right: 8%;
   width: 90px;
   height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #FFF7B3 0%, #FFD93B 55%, #FFB703 100%);
+  background: radial-gradient(circle at 35% 35%, #fff9be 0%, #ffd93b 58%, #ffb703 100%);
   box-shadow: 0 0 0 8px rgba(255, 217, 59, 0.18), 0 0 30px rgba(255, 217, 59, 0.25);
   animation: sunPulse 5.5s ease-in-out infinite;
   will-change: transform;
+}
+
+.sky-sun-ray-layer {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #ffc300 0deg 16deg,
+    transparent 16deg 30deg,
+    #ffcb00 30deg 46deg,
+    transparent 46deg 60deg,
+    #ffc300 60deg 76deg,
+    transparent 76deg 90deg,
+    #ffd200 90deg 106deg,
+    transparent 106deg 120deg,
+    #ffbf00 120deg 136deg,
+    transparent 136deg 150deg,
+    #ffd200 150deg 166deg,
+    transparent 166deg 180deg,
+    #ffc300 180deg 196deg,
+    transparent 196deg 210deg,
+    #ffcb00 210deg 226deg,
+    transparent 226deg 240deg,
+    #ffc300 240deg 256deg,
+    transparent 256deg 270deg,
+    #ffd200 270deg 286deg,
+    transparent 286deg 300deg,
+    #ffbf00 300deg 316deg,
+    transparent 316deg 330deg,
+    #ffd200 330deg 346deg,
+    transparent 346deg 360deg
+  );
+  filter: drop-shadow(0 8px 12px rgba(251, 191, 36, 0.35));
+  z-index: -1;
+}
+
+.sky-sun-face {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: inset 0 -4px 0 rgba(255, 168, 0, 0.3);
+}
+
+.sky-sun-eyes,
+.sky-sun-cheeks {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 48px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.sky-sun-eyes {
+  top: 31px;
+}
+
+.sky-sun-eye {
+  width: 11px;
+  height: 14px;
+  border-radius: 45%;
+  background: #3d2a16;
+  position: relative;
+  transform-origin: center;
+  animation: sunBlink 5.8s ease-in-out infinite;
+}
+
+.sky-sun-eye::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.sky-sun-cheeks {
+  top: 46px;
+  width: 58px;
+}
+
+.sky-sun-cheek {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 122, 50, 0.75);
+}
+
+.sky-sun-mouth {
+  position: absolute;
+  left: 50%;
+  top: 50px;
+  width: 24px;
+  height: 13px;
+  border: 3px solid #8a4b0a;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  border-radius: 0 0 16px 16px;
+  transform: translateX(-50%) rotate(-8deg);
 }
 
 /* Rainbow arc */
@@ -2462,6 +2569,10 @@ button.primary,
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
 }
+@keyframes sunBlink {
+  0%, 44%, 48%, 100% { transform: scaleY(1); }
+  46% { transform: scaleY(0.1); }
+}
 @keyframes twinkle {
   0%, 100% { transform: scale(0.9); opacity: 0.65; }
   50% { transform: scale(1.25); opacity: 1; }
@@ -2473,6 +2584,31 @@ button.primary,
   .sky-rainbow { width: 360px; height: 180px; bottom: -70px; left: 6%; opacity: 0.55; }
   .sky-sparkle { display: none; }
   .sky-sun { width: 72px; height: 72px; top: 8%; right: 6%; }
+  .sky-sun-ray-layer {
+    inset: -15px;
+  }
+  .sky-sun-eyes {
+    top: 24px;
+    width: 40px;
+  }
+  .sky-sun-eye {
+    width: 9px;
+    height: 12px;
+  }
+  .sky-sun-cheeks {
+    top: 36px;
+    width: 48px;
+  }
+  .sky-sun-cheek {
+    width: 9px;
+    height: 9px;
+  }
+  .sky-sun-mouth {
+    top: 40px;
+    width: 20px;
+    height: 10px;
+    border-bottom-width: 2px;
+  }
   .hero-brand-row {
     gap: 0;
   }
