@@ -6,7 +6,9 @@ const initialEnvPresence = {
   FRONTEND_URL: Boolean(process.env.FRONTEND_URL),
   CORS_ORIGINS: Boolean(process.env.CORS_ORIGINS),
   RESEND_API_KEY: Boolean(process.env.RESEND_API_KEY),
-  SENDER_EMAIL: Boolean(process.env.SENDER_EMAIL)
+  SENDER_EMAIL: Boolean(process.env.SENDER_EMAIL),
+  GEMINI_API_KEY: Boolean(process.env.GEMINI_API_KEY),
+  GEMINI_IMAGE_MODEL: Boolean(process.env.GEMINI_IMAGE_MODEL)
 };
 
 
@@ -102,7 +104,11 @@ app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
     service: 'peekaboo',
-    db: isDbConnected ? 'connected' : 'disconnected'
+    db: isDbConnected ? 'connected' : 'disconnected',
+    ai_image_generation: {
+      enabled: Boolean(process.env.GEMINI_API_KEY),
+      model: process.env.GEMINI_IMAGE_MODEL || 'imagen-3.0-generate-002'
+    }
   });
 });
 
