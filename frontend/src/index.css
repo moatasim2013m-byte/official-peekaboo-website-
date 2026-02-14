@@ -241,6 +241,45 @@ h3 {
     .brand-logo-lg { width: clamp(165px, 14.5vw, 225px); }
 }
 
+@media (min-width: 1024px) {
+    .navbar-customer .navbar-row {
+        padding-top: 0.35rem;
+        padding-bottom: 0.35rem;
+        min-height: 70px;
+    }
+
+    .navbar-customer .brand-logo-link {
+        min-width: clamp(140px, 12vw, 176px);
+        min-height: clamp(58px, 5.4vw, 72px);
+        padding: 0.1rem 0.25rem;
+    }
+
+    .navbar-customer .brand-logo-lg {
+        width: clamp(150px, 11.4vw, 182px);
+    }
+
+    .navbar-customer .desktop-nav-links {
+        gap: 0.5rem;
+    }
+
+    .navbar-customer .desktop-nav-links .nav-pill {
+        padding: 0.58rem 1.05rem;
+        font-size: 1rem;
+        line-height: 1.2;
+    }
+
+    .navbar-customer .desktop-auth-actions {
+        gap: 0.7rem;
+    }
+
+    .navbar-customer .desktop-auth-actions .btn-playful,
+    .navbar-customer .desktop-auth-actions button {
+        height: 42px;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+}
+
 @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
     .brand-logo-link:hover {
         animation: logo-float-bounce 900ms ease-in-out infinite alternate;
@@ -1713,6 +1752,62 @@ button.primary,
     text-align: center;
 }
 
+.cartoon-option {
+    overflow: hidden;
+    border-width: 2.5px;
+}
+
+.cartoon-option::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(160deg, rgba(255, 255, 255, 0.3), transparent 55%);
+    pointer-events: none;
+}
+
+.cartoon-blob {
+    position: absolute;
+    width: 132px;
+    height: 132px;
+    border-radius: 999px;
+    opacity: 0.5;
+    filter: blur(1px);
+    pointer-events: none;
+}
+
+.morning-option {
+    background: linear-gradient(145deg, #eff8ff, #dbeeff);
+    border-color: #7fb9ff;
+}
+
+.morning-option:hover:not(:disabled) {
+    border-color: #4c9fff;
+    box-shadow: 0 8px 20px rgba(76, 159, 255, 0.28);
+}
+
+.morning-blob {
+    top: -50px;
+    left: -26px;
+    background: radial-gradient(circle, rgba(147, 197, 253, 0.85) 0%, rgba(147, 197, 253, 0.05) 72%);
+}
+
+.afternoon-option {
+    background: linear-gradient(145deg, #f5f7fa, #e3e8ef);
+    border-color: #b5c0cf;
+}
+
+.afternoon-option:hover:not(:disabled) {
+    border-color: #8f9bad;
+    box-shadow: 0 8px 20px rgba(98, 109, 127, 0.25);
+}
+
+.afternoon-blob {
+    bottom: -52px;
+    right: -24px;
+    background: radial-gradient(circle, rgba(148, 163, 184, 0.8) 0%, rgba(148, 163, 184, 0.05) 72%);
+}
+
 .option-btn:hover:not(:disabled) {
     border-color: var(--pk-blue);
     box-shadow: 0 4px 12px rgba(69, 170, 242, 0.15);
@@ -1729,6 +1824,18 @@ button.primary,
     border-color: var(--pk-yellow);
     background: var(--pk-bg-light-yellow);
     box-shadow: 0 4px 16px rgba(255, 217, 61, 0.25);
+}
+
+.option-btn.morning-option.selected-yellow {
+    border-color: #3b82f6;
+    background: linear-gradient(145deg, #d9ecff, #b9ddff);
+    box-shadow: 0 10px 22px rgba(59, 130, 246, 0.28);
+}
+
+.option-btn.selected-afternoon {
+    border-color: #6b7280;
+    background: linear-gradient(145deg, #e5e7eb, #cfd4dc);
+    box-shadow: 0 10px 22px rgba(75, 85, 99, 0.24);
 }
 
 .option-btn.selected-pink {
@@ -2662,6 +2769,35 @@ button.primary,
   height: clamp(88px, 16vw, 180px);
   filter: drop-shadow(0 14px 26px rgba(29, 78, 216, 0.2));
   transition: transform 220ms ease, filter 220ms ease;
+}
+
+@media (min-width: 1024px) {
+  .home-hero-sky {
+    padding-top: 2.75rem !important;
+    padding-bottom: 4.5rem !important;
+  }
+
+  .home-hero-shell {
+    padding-inline: 0.5rem;
+  }
+
+  .hero-image-section {
+    padding: clamp(0.9rem, 1.2vw, 1.2rem);
+    gap: clamp(0.75rem, 1.2vw, 1.2rem);
+  }
+
+  .hero-text-card {
+    padding: clamp(1rem, 1.4vw, 1.4rem);
+  }
+
+  .hero-brand-row {
+    margin-bottom: 0.5rem;
+    margin-inline: 0;
+  }
+
+  .hero-brand-logo {
+    height: clamp(74px, 7vw, 112px);
+  }
 }
 
 @media (hover: hover) and (pointer: fine) {

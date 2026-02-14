@@ -411,13 +411,14 @@ export default function TicketsPage() {
                 <button
                   onClick={() => !morningExpired && handleTimeModeChange('morning')}
                   disabled={morningExpired}
-                  className={`option-btn ${timeMode === 'morning' ? 'selected-yellow' : ''} ${morningExpired ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`option-btn cartoon-option morning-option ${timeMode === 'morning' ? 'selected-yellow' : ''} ${morningExpired ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2 ${morningExpired ? 'bg-gray-400' : 'bg-gradient-to-r from-yellow-400 to-orange-500'} text-white text-xs`}>
+                  <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2 ${morningExpired ? 'bg-gray-400' : 'bg-gradient-to-r from-sky-500 to-blue-600'} text-white text-xs`}>
                     Happy Hour
                   </Badge>
+                  <span className="cartoon-blob morning-blob" aria-hidden="true"></span>
                   <div className="flex items-center justify-center gap-3 pt-2">
-                    <Sun className={`h-8 w-8 ${morningExpired ? 'text-gray-400' : 'text-yellow-500'}`} />
+                    <Sun className={`h-8 w-8 ${morningExpired ? 'text-gray-400' : 'text-blue-500'}`} />
                     <div className="text-right">
                       <div className={`font-heading text-xl font-bold ${morningExpired ? 'text-gray-400' : ''}`}>صباحي</div>
                       <div className="text-sm text-muted-foreground">10 ص - 2 م</div>
@@ -430,10 +431,11 @@ export default function TicketsPage() {
                 
                 <button
                   onClick={() => handleTimeModeChange('afternoon')}
-                  className={`option-btn ${timeMode === 'afternoon' ? 'selected' : ''}`}
+                  className={`option-btn cartoon-option afternoon-option ${timeMode === 'afternoon' ? 'selected-afternoon' : ''}`}
                 >
+                  <span className="cartoon-blob afternoon-blob" aria-hidden="true"></span>
                   <div className="flex items-center justify-center gap-3">
-                    <Moon className="h-8 w-8 text-indigo-500" />
+                    <Moon className="h-8 w-8 text-slate-600" />
                     <div className="text-right">
                       <div className="font-heading text-xl font-bold">مسائي</div>
                       <div className="text-sm text-muted-foreground">2 م - 12 ص</div>

@@ -43,31 +43,31 @@ export function PaymentMethodSelector({ value, onChange, showCliqInfo = true }) 
     <div className="space-y-4">
       <Label className="block text-base font-bold mb-2">طريقة الدفع</Label>
       
-      <div className="rounded-2xl border border-border bg-white p-2 sm:p-3">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <div className="rounded-2xl border border-border bg-white p-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
           {PAYMENT_METHODS.map((method) => (
             <button
               key={method.id}
               type="button"
               onClick={() => onChange(method.id)}
-              className={`relative p-2.5 rounded-xl border transition-all text-right ${
+              className={`relative p-2 rounded-lg border transition-all text-right ${
                 value === method.id
-                  ? 'border-primary bg-primary/10 shadow-sm'
-                  : 'border-border/80 bg-white hover:border-primary/50'
+                  ? 'border-primary bg-primary/10'
+                  : 'border-transparent hover:border-primary/40 hover:bg-muted/40'
               }`}
             >
-              <div className="flex items-center gap-2">
-                <div className={`${method.color} w-8 h-8 rounded-lg flex items-center justify-center`}>
-                  <method.icon className="h-4 w-4 text-white" />
+              <div className="flex items-center gap-1.5">
+                <div className={`${method.color} w-7 h-7 rounded-md flex items-center justify-center`}>
+                  <method.icon className="h-3.5 w-3.5 text-white" />
                 </div>
                 <div>
-                  <p className="font-bold text-sm leading-tight">{method.label}</p>
-                  <p className="text-[11px] text-muted-foreground leading-tight">{method.labelEn}</p>
+                  <p className="font-bold text-xs sm:text-sm leading-tight">{method.label}</p>
+                  <p className="text-[10px] text-muted-foreground leading-tight">{method.labelEn}</p>
                 </div>
               </div>
               {value === method.id && (
-                <div className="absolute top-1.5 left-1.5 w-4 h-4 rounded-full bg-primary flex items-center justify-center">
-                  <Check className="h-2.5 w-2.5 text-white" />
+                <div className="absolute top-1 left-1 w-3.5 h-3.5 rounded-full bg-primary flex items-center justify-center">
+                  <Check className="h-2 w-2 text-white" />
                 </div>
               )}
             </button>

@@ -42,7 +42,7 @@ export const Navbar = () => {
   return (
     <nav className={`sticky top-0 z-50 ${isCustomerNav ? 'navbar-customer' : 'bg-white border-b border-border shadow-sm'}`} dir="rtl">
       <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8">
-        <div className={`flex justify-between items-center py-2 ${isHomePage && isCustomerNav ? 'home-mobile-header min-h-16 flex-wrap md:flex-nowrap gap-y-1' : 'h-20'}`}>
+        <div className={`navbar-row flex justify-between items-center py-2 ${isHomePage && isCustomerNav ? 'home-mobile-header min-h-16 flex-wrap md:flex-nowrap gap-y-1' : 'h-20'}`}>
           {/* Logo with Pill Container - wrapped for mobile positioning */}
           <div className={`nav-logo-wrap ${isHomePage && !isAdmin ? 'mobile-home-logo order-1' : ''}`}>
             <Link to="/" className="brand-logo-link" data-testid="nav-logo">
@@ -52,7 +52,7 @@ export const Navbar = () => {
 
           {/* Desktop Navigation - Show only for non-admin users */}
           {!isAdmin && (
-            <div className="hidden md:flex items-center gap-3">
+            <div className="desktop-nav-links hidden md:flex items-center gap-3">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
@@ -75,7 +75,7 @@ export const Navbar = () => {
           )}
 
           {/* Auth Buttons / User Menu */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="desktop-auth-actions hidden md:flex items-center gap-4">
             {isAuthenticated && isAdmin && (
               <Link to="/admin">
                 <Button variant="default" className="rounded-full gap-2 bg-primary" data-testid="nav-admin-btn">
