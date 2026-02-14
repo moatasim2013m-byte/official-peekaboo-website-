@@ -191,6 +191,18 @@ export default function HomePage() {
 
   const showHeroImage = heroImageReady && !!heroImgSrc && !heroImageError;
   const canOpenLightbox = showHeroImage;
+  const shroomiPoseClasses = ['shroomi-icon--wave', 'shroomi-icon--point', 'shroomi-icon--cheer'];
+
+  const renderShroomiIcon = (index) => (
+    <img
+      src={mascotImg}
+      alt=""
+      aria-hidden="true"
+      className={`shroomi-icon ${shroomiPoseClasses[index % shroomiPoseClasses.length]}`}
+      loading="lazy"
+      decoding="async"
+    />
+  );
 
   return (
     <div className="home-page" dir="rtl">
@@ -272,14 +284,20 @@ export default function HomePage() {
             <div className="hero-cta-row flex flex-col sm:flex-row gap-4 justify-center">
               <Link to={heroConfig.ctaRoute}>
                 <Button size="lg" className="rounded-full btn-playful pb-btn primary-btn text-base sm:text-lg px-8 py-6 w-full sm:w-auto" data-testid="hero-book-btn">
-                  {heroConfig.ctaText}
+                  <span className="cta-label-with-shroomi">
+                    <span>{heroConfig.ctaText}</span>
+                    {renderShroomiIcon(0)}
+                  </span>
                   <ChevronLeft className="mr-2 h-5 w-5" />
                 </Button>
               </Link>
               {!isAuthenticated && (
                 <Link to="/register">
                   <Button size="lg" variant="outline" className="rounded-full text-base sm:text-lg px-8 py-6 border-2 w-full sm:w-auto" data-testid="hero-signup-btn">
-                    سجّل مجاناً
+                    <span className="cta-label-with-shroomi">
+                      <span>سجّل مجاناً</span>
+                      {renderShroomiIcon(1)}
+                    </span>
                   </Button>
                 </Link>
               )}
@@ -380,12 +398,18 @@ export default function HomePage() {
                   <p className="text-muted-foreground text-sm leading-relaxed feature-description">{feature.description}</p>
                   {feature.disabled ? (
                     <Button disabled className={`playful-btn primary-btn ${feature.buttonVariant} w-full opacity-50 cursor-not-allowed feature-cta`} data-testid={`feature-btn-${index}`}>
-                      {feature.buttonText}
+                      <span className="cta-label-with-shroomi">
+                        <span>{feature.buttonText}</span>
+                        {renderShroomiIcon(index + 2)}
+                      </span>
                     </Button>
                   ) : (
                     <Link to={feature.link} className="feature-cta-link">
                       <Button className={`playful-btn primary-btn ${feature.buttonVariant} w-full text-sm feature-cta`} data-testid={`feature-btn-${index}`}>
-                        {feature.buttonText}
+                        <span className="cta-label-with-shroomi">
+                          <span>{feature.buttonText}</span>
+                          {renderShroomiIcon(index + 2)}
+                        </span>
                         <ChevronLeft className="mr-2 h-4 w-4" />
                       </Button>
                     </Link>
@@ -505,7 +529,10 @@ export default function HomePage() {
                 className="rounded-full pb-btn home-cta home-cta-signup-btn primary-btn text-base sm:text-lg px-10 py-6 font-bold shadow-lg"
                 data-testid="cta-signup-btn"
               >
-                سجّل الآن
+                <span className="cta-label-with-shroomi">
+                  <span>سجّل الآن</span>
+                  {renderShroomiIcon(1)}
+                </span>
                 <ChevronLeft className="mr-2 h-5 w-5" />
               </Button>
             </Link>

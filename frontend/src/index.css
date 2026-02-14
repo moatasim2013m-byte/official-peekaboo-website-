@@ -843,6 +843,50 @@ code {
     margin-top: auto;
 }
 
+.cta-label-with-shroomi {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.shroomi-icon {
+  width: clamp(24px, 2.5vw, 32px);
+  height: clamp(24px, 2.5vw, 32px);
+  object-fit: contain;
+  flex: 0 0 auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  transition: transform 180ms ease;
+}
+
+.shroomi-icon--wave {
+  transform: rotate(-4deg);
+}
+
+.shroomi-icon--point {
+  transform: scaleX(-1) rotate(3deg);
+}
+
+.shroomi-icon--cheer {
+  transform: rotate(5deg) translateY(-1px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cta-label-with-shroomi:hover .shroomi-icon {
+    transform: translateY(-1px) rotate(-4deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shroomi-icon {
+    transition: none;
+  }
+
+  .cta-label-with-shroomi:hover .shroomi-icon {
+    transform: none;
+  }
+}
+
 
 .features-grid {
   display: grid;
