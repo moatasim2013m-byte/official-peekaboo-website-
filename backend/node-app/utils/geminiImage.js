@@ -1,9 +1,8 @@
-const DEFAULT_GEMINI_IMAGE_MODEL = 'gemini-2.0-flash-preview-image-generation';
-const FALLBACK_GEMINI_IMAGE_MODELS = [
+const FALLBACK_MODELS = [
   process.env.GEMINI_IMAGE_MODEL?.trim(),
-  DEFAULT_GEMINI_IMAGE_MODEL,
+  'gemini-2.0-flash-preview-image-generation',
   'gemini-1.5-pro'
-].filter((model, index, models) => model && models.indexOf(model) === index);
+].filter(Boolean);
 
 const parseGeminiImage = (data) => {
   const inlinePart = data?.candidates
@@ -107,7 +106,7 @@ const generateThemeImage = async ({ prompt }) => {
   let lastTriedModel = null;
   const triedModels = [];
 
-  for (const model of FALLBACK_GEMINI_IMAGE_MODELS) {
+  for (const model of FALLBACK_MODELS) {
     lastTriedModel = model;
     triedModels.push(model);
 
