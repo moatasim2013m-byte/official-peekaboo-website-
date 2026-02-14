@@ -72,7 +72,11 @@ router.post('/ai-generate', aiGenerateLimiter, async (req, res) => {
 
     return res.json({ imageUrl, requestId: aiTheme._id.toString() });
   } catch (error) {
-    console.error('AI theme generation error:', error);
+    console.error('AI theme generation error:', {
+      code: error?.code,
+      message: error?.message,
+      details: error?.details
+    });
 
     if (aiTheme) {
       aiTheme.status = 'failed';

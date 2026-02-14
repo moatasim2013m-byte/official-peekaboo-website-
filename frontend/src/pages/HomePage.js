@@ -3,12 +3,16 @@ import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useAuth } from '../context/AuthContext';
-import { useTranslation } from '../i18n/useT';
 import { ChevronLeft, Play, X, ZoomIn } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 import logoImg from '../assets/logo.png';
+import { ReactComponent as PlayHourIcon } from '../assets/icons/play-hour.svg';
+import { ReactComponent as BirthdayCakeIcon } from '../assets/icons/birthday-cake.svg';
+import { ReactComponent as CrownIcon } from '../assets/icons/crown.svg';
+import { ReactComponent as SchoolBusIcon } from '../assets/icons/school-bus.svg';
+import { ReactComponent as HomePartyIcon } from '../assets/icons/home-party.svg';
+import { ReactComponent as CareHeartIcon } from '../assets/icons/care-heart.svg';
 
-const HERO_FALLBACK = '/hero-fallback.jpg';
 const RAW_BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').trim();
 const BACKEND_ORIGIN =
   !RAW_BACKEND_URL || RAW_BACKEND_URL === 'undefined' || RAW_BACKEND_URL === 'null'
@@ -21,110 +25,13 @@ const resolveMediaUrl = (url) => {
   return `${BACKEND_ORIGIN}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
-function PlayfulClockIcon({ className }) {
-  return (
-    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
-      <circle cx="32" cy="34" r="19" fill="#FFFFFF" />
-      <circle cx="32" cy="34" r="13" stroke="#60A5FA" strokeWidth="3" />
-      <path d="M32 34V26" stroke="#F97316" strokeWidth="3" strokeLinecap="round" />
-      <path d="M32 34L38 38" stroke="#F97316" strokeWidth="3" strokeLinecap="round" />
-      <path d="M20 18L14 13" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
-      <path d="M44 18L50 13" stroke="#FACC15" strokeWidth="4" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function PlayfulCakeIcon({ className }) {
-  return (
-    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
-      <rect x="16" y="31" width="32" height="17" rx="8" fill="#FFFFFF" />
-      <path d="M16 37C20 33 24 41 28 37C32 33 36 41 40 37C44 33 48 41 48 37" stroke="#F472B6" strokeWidth="3" strokeLinecap="round" />
-      <path d="M32 21V31" stroke="#FDE047" strokeWidth="3" strokeLinecap="round" />
-      <path d="M29.5 22.5C29.5 20.2 31.5 18.5 32 16C32.5 18.5 34.5 20.2 34.5 22.5C34.5 24 33.4 25.2 32 25.2C30.6 25.2 29.5 24 29.5 22.5Z" fill="#FB923C" />
-      <circle cx="24" cy="41" r="2" fill="#60A5FA" />
-      <circle cx="32" cy="42" r="2" fill="#34D399" />
-      <circle cx="40" cy="41" r="2" fill="#FACC15" />
-    </svg>
-  );
-}
-
-function PlayfulCrownIcon({ className }) {
-  return (
-    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
-      <path d="M16 43L19 23L30 33L32 19L34 33L45 23L48 43H16Z" fill="#FFFFFF" />
-      <path d="M16 43H48" stroke="#F59E0B" strokeWidth="4" strokeLinecap="round" />
-      <circle cx="19" cy="22" r="3" fill="#60A5FA" />
-      <circle cx="32" cy="18" r="3" fill="#F472B6" />
-      <circle cx="45" cy="22" r="3" fill="#34D399" />
-      <path d="M23 37H41" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function PlayfulBusIcon({ className }) {
-  return (
-    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
-      <rect x="14" y="20" width="36" height="26" rx="8" fill="#FFFFFF" />
-      <rect x="19" y="25" width="10" height="8" rx="2" fill="#60A5FA" />
-      <rect x="33" y="25" width="12" height="8" rx="2" fill="#34D399" />
-      <circle cx="22" cy="47" r="4" fill="#1F2937" />
-      <circle cx="42" cy="47" r="4" fill="#1F2937" />
-      <path d="M50 30H54" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
-      <circle cx="17" cy="35" r="2" fill="#F97316" />
-    </svg>
-  );
-}
-
-function PlayfulHomePartyIcon({ className }) {
-  return (
-    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
-      <path d="M15 31L32 17L49 31" stroke="#FFFFFF" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
-      <rect x="20" y="30" width="24" height="19" rx="4" fill="#FFFFFF" />
-      <rect x="29" y="38" width="6" height="11" rx="2" fill="#F59E0B" />
-      <ellipse cx="50" cy="20" rx="5" ry="7" fill="#F472B6" />
-      <ellipse cx="42" cy="17" rx="5" ry="7" fill="#60A5FA" />
-      <path d="M46 27V34" stroke="#FFFFFF" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function PlayfulHeartHandsIcon({ className }) {
-  return (
-    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
-      <path d="M32 32L27 27C24 24 24 20.5 27 18.5C29.2 17 31.7 17.6 32.9 19.5C34.1 17.6 36.7 17 38.9 18.5C41.9 20.5 41.9 24 38.9 27L32 32Z" fill="#F472B6" />
-      <path d="M18 39C18 36.8 19.8 35 22 35H30C31.7 35 33 36.3 33 38C33 39.7 31.7 41 30 41H25" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" />
-      <path d="M46 39C46 36.8 44.2 35 42 35H34C32.3 35 31 36.3 31 38C31 39.7 32.3 41 34 41H39" stroke="#FFFFFF" strokeWidth="3" strokeLinecap="round" />
-      <path d="M19 46H28" stroke="#FDE047" strokeWidth="4" strokeLinecap="round" />
-      <path d="M36 46H45" stroke="#FDE047" strokeWidth="4" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function PlayfulSunIcon({ className }) {
-  return (
-    <svg viewBox="0 0 64 64" className={className} fill="none" aria-hidden="true">
-      <circle cx="32" cy="32" r="15" fill="#FACC15" />
-      <circle cx="32" cy="32" r="10" fill="#FDBA74" opacity="0.7" />
-      <circle cx="32" cy="32" r="16.5" stroke="#FB923C" strokeWidth="2.5" />
-      <path d="M32 8V16" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
-      <path d="M32 48V56" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
-      <path d="M8 32H16" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
-      <path d="M48 32H56" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
-      <path d="M15 15L20.5 20.5" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
-      <path d="M43.5 43.5L49 49" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
-      <path d="M49 15L43.5 20.5" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
-      <path d="M20.5 43.5L15 49" stroke="#F59E0B" strokeWidth="3" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 export default function HomePage() {
   const { isAuthenticated, api } = useAuth();
-  const { t } = useTranslation();
   const [gallery, setGallery] = useState([]);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [heroImgSrc, setHeroImgSrc] = useState('');
   const [heroImageReady, setHeroImageReady] = useState(false);
+  const [heroImageError, setHeroImageError] = useState(false);
   const [heroConfig, setHeroConfig] = useState({
     title: 'حيث يلعب الأطفال ويحتفلون 🎈',
     subtitle: 'أفضل تجربة ملعب داخلي! احجز جلسات اللعب، أقم حفلات أعياد ميلاد لا تُنسى، ووفّر مع باقات الاشتراك',
@@ -171,10 +78,12 @@ export default function HomePage() {
           image: s.hero_image || ''
         });
         // Set hero image src only after settings load to avoid initial image flicker.
-        setHeroImgSrc(s.hero_image ? resolveMediaUrl(s.hero_image) : HERO_FALLBACK);
+        setHeroImgSrc(s.hero_image ? resolveMediaUrl(s.hero_image) : '');
+        setHeroImageError(false);
       } catch (error) {
         console.error('Failed to fetch data:', error);
-        setHeroImgSrc(HERO_FALLBACK);
+        setHeroImgSrc('');
+        setHeroImageError(false);
       } finally {
         setHeroImageReady(true);
       }
@@ -185,7 +94,7 @@ export default function HomePage() {
 
   const features = [
     {
-      icon: PlayfulClockIcon,
+      icon: PlayHourIcon,
       title: 'اللعب بالساعة',
       description: 'احجز جلسات لعب لأطفالك واختر الوقت المثالي!',
       link: '/tickets',
@@ -195,7 +104,7 @@ export default function HomePage() {
       buttonVariant: 'btn-sunrise'
     },
     {
-      icon: PlayfulCakeIcon,
+      icon: BirthdayCakeIcon,
       title: 'حفلات أعياد الميلاد',
       description: 'احتفل مع ثيمات رائعة وحفلات مخصصة!',
       link: '/birthday',
@@ -205,7 +114,7 @@ export default function HomePage() {
       buttonVariant: 'btn-cotton-candy'
     },
     {
-      icon: PlayfulCrownIcon,
+      icon: CrownIcon,
       title: 'الاشتراكات',
       description: 'وفّر مع باقات الزيارات بصلاحية 30 يوم!',
       link: '/subscriptions',
@@ -215,7 +124,7 @@ export default function HomePage() {
       buttonVariant: 'btn-sunshine'
     },
     {
-      icon: PlayfulBusIcon,
+      icon: SchoolBusIcon,
       title: 'المدارس والمجموعات',
       description: 'رحلات مدرسية وبرامج لعب آمنة للمجموعات',
       link: '/groups',
@@ -225,7 +134,7 @@ export default function HomePage() {
       buttonVariant: 'btn-ocean'
     },
     {
-      icon: PlayfulHomePartyIcon,
+      icon: HomePartyIcon,
       title: 'حفلتك في بيتك',
       description: 'نأتيكم للمنزل مع ديكور واحتفال كامل!',
       link: '/home-party',
@@ -235,7 +144,7 @@ export default function HomePage() {
       buttonVariant: 'btn-sunrise'
     },
     {
-      icon: PlayfulHeartHandsIcon,
+      icon: CareHeartIcon,
       title: 'ذوي الهمم',
       description: 'برامج مخصصة لأصحاب الاحتياجات الخاصة',
       link: null,
@@ -249,36 +158,39 @@ export default function HomePage() {
 
   const whyPeekabooFeatures = [
     {
-      icon: '💖',
+      icon: '⭐',
       badgeColor: 'badge-red',
-      title: 'رعاية خاصة',
-      description: 'فريقنا يتعامل مع الأطفال باهتمام وصبر.'
+      title: 'عناية واهتمام بكل طفل',
+      description: 'نراعي احتياجات كل طفل ونمنحه تجربة مريحة وممتعة.'
     },
     {
       icon: '🧼',
       badgeColor: 'badge-orange',
       title: 'نظافة وتعقيم مستمر',
-      description: 'تعقيم يومي للألعاب والمناطق لضمان بيئة آمنة.'
+      description: 'تعقيم مستمر للألعاب والمناطق طوال اليوم.'
     },
     {
-      icon: '🎲',
+      icon: '🧩',
       badgeColor: 'badge-yellow',
-      title: 'لعب وتعليم',
-      description: 'نتعلم من خلال اللعب وتنمية المهارات الاجتماعية.'
+      title: 'اللعب للتعلّم وتنمية المهارات',
+      description: 'أنشطة تفاعلية تطوّر التفكير والتعاون والثقة.'
     },
     {
       icon: '🛡️',
       badgeColor: 'badge-blue',
-      title: 'مناطق آمنة ومناسبة للعمر',
-      description: 'تقسيمات واضحة تناسب أعمار مختلفة.'
+      title: 'بيئة آمنة ومراقبة',
+      description: 'مساحات لعب آمنة مع متابعة دائمة من الفريق.'
     },
     {
-      icon: '👨‍👩‍👧‍👦',
+      icon: '🎁',
       badgeColor: 'badge-green',
-      title: 'متابعة وراحة للأهل',
-      description: 'جلسات مريحة للأهل ومتابعة للأطفال داخل اللعب.'
+      title: 'فعاليات وهدايا وتجارب ممتعة',
+      description: 'مفاجآت وأنشطة موسمية تجعل كل زيارة مختلفة.'
     }
   ];
+
+  const showHeroImage = heroImageReady && !!heroImgSrc && !heroImageError;
+  const canOpenLightbox = showHeroImage;
 
   return (
     <div className="home-page" dir="rtl">
@@ -310,24 +222,42 @@ export default function HomePage() {
 
         <div className="page-shell px-2 sm:px-4 lg:px-6 relative z-10">
           <div className="hero-content-stack">
-            <div
-              className={`hero-image-section group ${heroImageReady && heroImgSrc ? 'is-ready' : 'is-loading'}`}
-              onClick={() => setLightboxOpen(true)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && setLightboxOpen(true)}
-              data-testid="hero-image-clickable"
-              style={heroImageReady && heroImgSrc ? { backgroundImage: `url(${heroImgSrc})` } : undefined}
-            >
-              <span className="sr-only" data-testid="hero-image">أطفال يلعبون في بيكابو</span>
-              <div className="hero-overlay" aria-hidden="true"></div>
-              {!heroImageReady && <div className="hero-image-placeholder" aria-hidden="true" />}
+            <div className="hero-image-section">
+              <div
+                className={`hero-image-panel group ${canOpenLightbox ? 'is-clickable' : ''}`}
+                onClick={() => canOpenLightbox && setLightboxOpen(true)}
+                role={canOpenLightbox ? 'button' : undefined}
+                tabIndex={canOpenLightbox ? 0 : -1}
+                onKeyDown={(e) => canOpenLightbox && e.key === 'Enter' && setLightboxOpen(true)}
+                data-testid="hero-image-clickable"
+              >
+                <span className="sr-only" data-testid="hero-image">أطفال يلعبون في بيكابو</span>
+                {!heroImageReady && <div className="hero-image-placeholder" aria-hidden="true" />}
+                {showHeroImage && (
+                  <img
+                    src={heroImgSrc}
+                    alt="أطفال يلعبون في بيكابو"
+                    className="hero-photo"
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
+                    onError={() => setHeroImageError(true)}
+                  />
+                )}
+                {heroImageReady && !showHeroImage && <div className="hero-image-fallback" aria-hidden="true" />}
+
+                {/* Zoom hint */}
+                {canOpenLightbox && (
+                  <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-2 rounded-full text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                    <ZoomIn className="h-4 w-4" />
+                    <span>اضغط للتكبير</span>
+                  </div>
+                )}
+              </div>
+
               <div className="hero-text-card text-center lg:text-right">
                 <div className="hero-brand-row mx-auto lg:mx-0">
                   <img src={logoImg} alt="شعار بيكابو" className="hero-brand-logo" />
-                  <div className="hero-sun-badge" aria-hidden="true">
-                    <PlayfulSunIcon className="hero-sun-icon" />
-                  </div>
                 </div>
                 <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight" data-testid="hero-title">
                   بيكابو يصنع السعادة
@@ -336,11 +266,6 @@ export default function HomePage() {
                 <p className="text-base sm:text-lg text-muted-foreground mt-6 leading-relaxed max-w-[520px] mx-auto lg:mx-0 opacity-85">
                   {heroConfig.subtitle}
                 </p>
-              </div>
-              {/* Zoom hint */}
-              <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-2 rounded-full text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                <ZoomIn className="h-4 w-4" />
-                <span>اضغط للتكبير</span>
               </div>
             </div>
 
@@ -396,10 +321,10 @@ export default function HomePage() {
 
       {/* Features Section */}
       <section className="section-container home-page-section pb-section page-shell page-section-gap">
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto why-peekaboo-cloud">
           <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
-              لماذا بيكابو مميز؟
+              لماذا بيكابو مميّز؟
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
               لأننا نهتم بالتفاصيل التي تصنع تجربة آمنة وممتعة لطفلك.
@@ -497,7 +422,13 @@ export default function HomePage() {
                 >
                   {item.type === 'video' ? (
                     <div className="relative aspect-square bg-muted">
-                      <video src={item.url} className="w-full h-full object-cover" />
+                      <video
+                        src={item.url}
+                        className="w-full h-full object-cover"
+                        preload="none"
+                        muted
+                        playsInline
+                      />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                         <Play className="h-12 w-12 text-white" />
                       </div>
@@ -507,6 +438,8 @@ export default function HomePage() {
                       src={item.url} 
                       alt={item.title || 'صورة من المعرض'} 
                       className="w-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                      decoding="async"
                     />
                   )}
                 </div>
@@ -519,6 +452,8 @@ export default function HomePage() {
                     src="https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg"
                     alt="أطفال يلعبون"
                     className="w-full h-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
                 <div className="rounded-2xl overflow-hidden shadow-md">
@@ -526,6 +461,8 @@ export default function HomePage() {
                     src="https://images.pexels.com/photos/6148511/pexels-photo-6148511.jpeg"
                     alt="حفلة عيد ميلاد"
                     className="w-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
                 <div className="rounded-2xl overflow-hidden shadow-md">
@@ -533,6 +470,8 @@ export default function HomePage() {
                     src="https://images.pexels.com/photos/3951099/pexels-photo-3951099.png"
                     alt="متعة عائلية"
                     className="w-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
               </>
