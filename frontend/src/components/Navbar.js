@@ -41,10 +41,10 @@ export const Navbar = () => {
 
   return (
     <nav className={`sticky top-0 z-50 ${isCustomerNav ? 'navbar-customer' : 'bg-white border-b border-border shadow-sm'}`} dir="rtl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={`flex justify-between items-center py-2 ${isHomePage && isCustomerNav ? 'min-h-16 flex-wrap md:flex-nowrap gap-y-1' : 'h-20'}`}>
+      <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8">
+        <div className={`flex justify-between items-center py-2 ${isHomePage && isCustomerNav ? 'home-mobile-header min-h-16 flex-wrap md:flex-nowrap gap-y-1' : 'h-20'}`}>
           {/* Logo with Pill Container - wrapped for mobile positioning */}
-          <div className="nav-logo-wrap">
+          <div className={`nav-logo-wrap ${isHomePage && !isAdmin ? 'mobile-home-logo order-1' : ''}`}>
             <Link to="/" className="brand-logo-link" data-testid="nav-logo">
               <img src={logoImg} alt="بيكابو" className="brand-logo-lg" />
             </Link>
@@ -163,7 +163,7 @@ export const Navbar = () => {
 
           {/* Mobile Menu Button - hidden on homepage to avoid duplicate navigation */}
           <button
-            className={`md:hidden playful-menu-button ${isHomePage ? 'hidden' : ''}`}
+            className={`md:hidden playful-menu-button ${isHomePage ? 'order-1 home-menu-toggle' : ''}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             data-testid="mobile-menu-toggle"
             aria-label={mobileMenuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
@@ -185,7 +185,7 @@ export const Navbar = () => {
 
           {/* Mobile Auth Buttons on Homepage */}
           {isHomePage && !isAdmin && (
-            <div className="order-2 md:hidden flex items-center gap-2">
+            <div className="mobile-home-auth order-2 basis-full md:hidden flex items-center justify-center gap-2">
               {isAuthenticated ? (
                 <Link to="/profile">
                   <Button variant="outline" size="sm" className="rounded-full">

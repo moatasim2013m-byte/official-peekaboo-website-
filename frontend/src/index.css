@@ -355,6 +355,63 @@ h3 {
     padding: 0.56rem 0.9rem;
 }
 
+@media (max-width: 768px) {
+    .navbar-customer > .max-w-7xl {
+        padding: 8px 12px;
+    }
+
+    .home-mobile-header {
+        row-gap: 6px;
+        column-gap: 8px;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    .home-mobile-header .mobile-home-logo {
+        margin-left: 0;
+    }
+
+    .brand-logo-link {
+        min-width: 0;
+        min-height: 36px;
+        padding: 0.1rem 0.2rem;
+    }
+
+    .brand-logo-lg {
+        width: auto;
+        max-height: 36px;
+    }
+
+    .home-menu-toggle {
+        margin-bottom: 0;
+        padding: 0.25rem 0.7rem;
+    }
+
+    .mobile-home-auth {
+        margin-top: 2px;
+        margin-bottom: 2px;
+        gap: 8px;
+    }
+
+    .mobile-home-auth .btn-playful,
+    .mobile-home-auth button {
+        height: 40px;
+    }
+
+    .mobile-home-headlines {
+        padding-top: 0;
+        margin-bottom: 2px;
+        gap: 8px;
+    }
+
+    .mobile-home-headlines .nav-pill {
+        min-width: 0;
+        padding: 6px 14px;
+        font-size: 13px;
+        border-radius: 999px;
+    }
+}
+
 .menu-bar {
     display: block;
     height: 3px;
