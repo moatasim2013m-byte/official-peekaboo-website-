@@ -341,7 +341,13 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
     // Send confirmation email (non-blocking)
     const user = await User.findById(req.userId);
     const childNames = validChildren.map(c => c.name).join(', ');
-    const template = emailTemplates.bookingConfirmation(bookings[0], slot, { name: childNames });
+    const template = emailTemplates.paymentPending({
+      userName: user?.name,
+      serviceName: `Hourly Play (${childNames})`,
+      serviceDate: slot?.date,
+      serviceTime: slot?.start_time,
+      totalPrice: totalAmount
+    });
     try {
       await sendEmail(user.email, template.subject, template.html);
     } catch (emailErr) {
@@ -606,7 +612,13 @@ router.post('/birthday/offline', authMiddleware, async (req, res) => {
 
     // Send confirmation email (non-blocking)
     const user = await User.findById(req.userId);
-    const template = emailTemplates.birthdayConfirmation(booking, slot, child, theme);
+    const template = emailTemplates.paymentPending({
+      userName: user?.name,
+      serviceName: `Birthday - ${theme?.name || 'Peekaboo'}`,
+      serviceDate: slot?.date,
+      serviceTime: slot?.start_time,
+      totalPrice: booking?.amount || theme?.price || 0
+    });
     try {
       await sendEmail(user.email, template.subject, template.html);
     } catch (emailErr) {

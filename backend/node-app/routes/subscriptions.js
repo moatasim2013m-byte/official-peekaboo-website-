@@ -82,7 +82,12 @@ router.post('/purchase', authMiddleware, async (req, res) => {
 
     // Send confirmation email (non-blocking)
     const user = await User.findById(req.userId);
-    const template = emailTemplates.subscriptionConfirmation(subscription, plan, child);
+    const template = emailTemplates.subscriptionConfirmation({
+      userName: user?.name,
+      subscription,
+      plan,
+      child
+    });
     try {
       await sendEmail(user.email, template.subject, template.html);
     } catch (emailErr) {
@@ -133,9 +138,22 @@ router.post('/purchase/offline', authMiddleware, async (req, res) => {
 
     // Send confirmation email (non-blocking)
     const user = await User.findById(req.userId);
-    const template = emailTemplates.subscriptionConfirmation(subscription, plan, child);
+    const template = emailTemplates.subscriptionConfirmation({
+      userName: user?.name,
+      subscription,
+      plan,
+      child
+    });
     try {
       await sendEmail(user.email, template.subject, template.html);
+      const pendingTemplate = emailTemplates.paymentPending({
+        userName: user?.name,
+        serviceName: `Subscription - ${plan?.name_ar || plan?.name || 'Peekaboo'}`,
+        serviceDate: new Date(subscription.created_at).toLocaleDateString('en-GB'),
+        serviceTime: new Date(subscription.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+        totalPrice: plan?.price || 0
+      });
+      await sendEmail(user.email, pendingTemplate.subject, pendingTemplate.html);
     } catch (emailErr) {
       console.error('SUBSCRIPTION_OFFLINE_EMAIL_ERROR', emailErr.message || emailErr);
     }

@@ -14,6 +14,7 @@ const SubscriptionPlan = require('../models/SubscriptionPlan');
 const Theme = require('../models/Theme');
 const Settings = require('../models/Settings');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
+const { sendEmail, emailTemplates } = require('../utils/email');
 
 const router = express.Router();
 
@@ -318,12 +319,35 @@ router.get('/bookings/birthday', async (req, res) => {
 // Update booking status
 router.put('/bookings/hourly/:id', async (req, res) => {
   try {
-    const { status } = req.body;
-    const booking = await HourlyBooking.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    ).populate('slot_id').populate('child_id');
+    const { status, payment_status } = req.body;
+    const booking = await HourlyBooking.findById(req.params.id)
+      .populate('slot_id')
+      .populate('child_id')
+      .populate('user_id');
+
+    if (!booking) return res.status(404).json({ error: 'Booking not found' });
+
+    const wasPending = ['pending_cash', 'pending_cliq'].includes(booking.payment_status);
+    if (status !== undefined) booking.status = status;
+    if (payment_status !== undefined) booking.payment_status = payment_status;
+    await booking.save();
+
+    const becamePaid = wasPending && booking.payment_status === 'paid';
+    if (becamePaid && booking.user_id?.email) {
+      try {
+        const template = emailTemplates.finalOrderConfirmation({
+          userName: booking.user_id?.name,
+          orderType: 'Hourly Play',
+          serviceName: 'Hourly Play',
+          serviceDate: booking.slot_id?.date,
+          serviceTime: booking.slot_id?.start_time,
+          totalPrice: booking.amount || 0
+        });
+        await sendEmail(booking.user_id.email, template.subject, template.html);
+      } catch (emailErr) {
+        console.error('ADMIN_HOURLY_FINAL_EMAIL_ERROR', emailErr.message || emailErr);
+      }
+    }
 
     res.json({ booking: booking.toJSON() });
   } catch (error) {
@@ -334,12 +358,36 @@ router.put('/bookings/hourly/:id', async (req, res) => {
 
 router.put('/bookings/birthday/:id', async (req, res) => {
   try {
-    const { status } = req.body;
-    const booking = await BirthdayBooking.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    ).populate('slot_id').populate('child_id').populate('theme_id');
+    const { status, payment_status } = req.body;
+    const booking = await BirthdayBooking.findById(req.params.id)
+      .populate('slot_id')
+      .populate('child_id')
+      .populate('theme_id')
+      .populate('user_id');
+
+    if (!booking) return res.status(404).json({ error: 'Booking not found' });
+
+    const wasPending = ['pending_cash', 'pending_cliq'].includes(booking.payment_status);
+    if (status !== undefined) booking.status = status;
+    if (payment_status !== undefined) booking.payment_status = payment_status;
+    await booking.save();
+
+    const becamePaid = wasPending && booking.payment_status === 'paid';
+    if (becamePaid && booking.user_id?.email) {
+      try {
+        const template = emailTemplates.finalOrderConfirmation({
+          userName: booking.user_id?.name,
+          orderType: 'Birthday',
+          serviceName: booking.theme_id?.name || 'Birthday Party',
+          serviceDate: booking.slot_id?.date,
+          serviceTime: booking.slot_id?.start_time,
+          totalPrice: booking.amount || 0
+        });
+        await sendEmail(booking.user_id.email, template.subject, template.html);
+      } catch (emailErr) {
+        console.error('ADMIN_BIRTHDAY_FINAL_EMAIL_ERROR', emailErr.message || emailErr);
+      }
+    }
 
     res.json({ booking: booking.toJSON() });
   } catch (error) {
@@ -380,6 +428,44 @@ router.get('/subscriptions', async (req, res) => {
   } catch (error) {
     console.error('Get subscriptions error:', error);
     res.status(500).json({ error: 'Failed to get subscriptions' });
+  }
+});
+
+router.put('/subscriptions/:id/payment-confirmation', async (req, res) => {
+  try {
+    const { payment_status = 'paid' } = req.body;
+    const subscription = await UserSubscription.findById(req.params.id)
+      .populate('user_id')
+      .populate('child_id')
+      .populate('plan_id');
+
+    if (!subscription) return res.status(404).json({ error: 'Subscription not found' });
+
+    const wasPending = ['pending_cash', 'pending_cliq'].includes(subscription.payment_status);
+    subscription.payment_status = payment_status;
+    await subscription.save();
+
+    const becamePaid = wasPending && subscription.payment_status === 'paid';
+    if (becamePaid && subscription.user_id?.email) {
+      try {
+        const template = emailTemplates.finalOrderConfirmation({
+          userName: subscription.user_id?.name,
+          orderType: 'Subscription',
+          serviceName: subscription.plan_id?.name_ar || subscription.plan_id?.name || 'Subscription',
+          serviceDate: new Date(subscription.created_at).toLocaleDateString('en-GB'),
+          serviceTime: new Date(subscription.created_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+          totalPrice: subscription.plan_id?.price || 0
+        });
+        await sendEmail(subscription.user_id.email, template.subject, template.html);
+      } catch (emailErr) {
+        console.error('ADMIN_SUBSCRIPTION_FINAL_EMAIL_ERROR', emailErr.message || emailErr);
+      }
+    }
+
+    res.json({ subscription: subscription.toJSON() });
+  } catch (error) {
+    console.error('Update subscription payment error:', error);
+    res.status(500).json({ error: 'Failed to update subscription payment' });
   }
 });
 
