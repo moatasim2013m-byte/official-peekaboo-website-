@@ -22,10 +22,14 @@ const router = express.Router();
 const uploadDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10MB compressed upload limit
+const MAX_INPUT_PIXELS = 40 * 1024 * 1024; // 40MP guardrail to prevent decode memory spikes
+const MAX_OUTPUT_WIDTH = 1200;
+
 const storage = multer.memoryStorage();
 const upload = multer({
   storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+  limits: { fileSize: MAX_UPLOAD_BYTES },
   fileFilter: (req, file, cb) => {
     const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'];
     if (allowed.includes(file.mimetype)) {
@@ -60,9 +64,13 @@ router.post('/upload-image', (req, res) => {
     const filename = `${Date.now()}-${Math.random().toString(36).substring(7)}.webp`;
     const filepath = path.join(uploadDir, filename);
 
-    // Resize to max 1200px width and convert to webp
-    await sharp(req.file.buffer)
-      .resize({ width: 1200, withoutEnlargement: true })
+    // Guard against pathological image dimensions that can cause memory spikes.
+    const imageProcessor = sharp(req.file.buffer, { failOn: 'warning', limitInputPixels: MAX_INPUT_PIXELS });
+
+    // Resize to max configured width and convert to webp.
+    await imageProcessor
+      .rotate() // respect EXIF orientation
+      .resize({ width: MAX_OUTPUT_WIDTH, withoutEnlargement: true })
       .webp({ quality: 80 })
       .toFile(filepath);
 
@@ -70,6 +78,10 @@ router.post('/upload-image', (req, res) => {
     res.json({ image_url: imageUrl });
   } catch (error) {
     console.error('Upload error:', error);
+    const msg = (error && error.message) || '';
+    if (msg.includes('Input image exceeds pixel limit')) {
+      return res.status(400).json({ error: 'Image dimensions are too large. Please upload a smaller image.' });
+    }
     res.status(500).json({ error: 'Failed to upload image' });
   }
   });

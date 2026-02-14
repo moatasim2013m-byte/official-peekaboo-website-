@@ -5,10 +5,13 @@ const AuthContext = createContext(null);
 
 const RAW_API_URL = (process.env.REACT_APP_BACKEND_URL || "").trim();
 
-const API_URL =
-  !RAW_API_URL || RAW_API_URL === "undefined" || RAW_API_URL === "null"
-    ? ""
-    : RAW_API_URL;
+const normalizeBackendOrigin = (rawUrl) => {
+  if (!rawUrl || rawUrl === "undefined" || rawUrl === "null") return "";
+  const sanitized = rawUrl.replace(/\/+$/, "");
+  return sanitized.replace(/\/api$/i, "");
+};
+
+const API_ORIGIN = normalizeBackendOrigin(RAW_API_URL);
 
 const TOKEN_KEY = 'peekaboo_token';
 
@@ -27,7 +30,7 @@ export const AuthProvider = ({ children }) => {
   // Create api instance
   const api = useMemo(() => {
     const instance = axios.create({
-      baseURL: API_URL ? `${API_URL}/api` : "/api",
+      baseURL: API_ORIGIN ? `${API_ORIGIN}/api` : "/api",
     });
     
     // Add interceptor to always use latest token from localStorage
