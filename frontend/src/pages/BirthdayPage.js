@@ -398,8 +398,9 @@ export default function BirthdayPage() {
                   <Card
                     key={theme.id}
                     onClick={() => setSelectedTheme(theme)}
-                    className={`pk-card cursor-pointer transition-all ${selectedTheme?.id === theme.id ? 'ring-2 ring-accent shadow-lg' : 'hover:shadow-md'}`}
+                    className={`pk-card cursor-pointer border-2 transition-all ${selectedTheme?.id === theme.id ? 'border-accent ring-2 ring-accent shadow-lg' : 'border-transparent hover:border-accent/40 hover:shadow-md'}`}
                     data-testid={`theme-${theme.id}`}
+                    aria-selected={selectedTheme?.id === theme.id}
                   >
                     <div className={`pk-card-accent accent-${['pink', 'blue', 'yellow', 'green', 'orange'][index % 5]}`} />
                     <CardContent className="p-3 pt-4 text-center">
