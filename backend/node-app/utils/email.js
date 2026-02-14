@@ -308,28 +308,47 @@ const emailTemplates = {
       <head>
         <meta charset="UTF-8">
         <style>
-          body { font-family: 'Cairo', 'Segoe UI', Arial, sans-serif; background: #FFE8F0; padding: 20px; direction: rtl; }
-          .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 24px; padding: 32px; }
-          .logo { text-align: center; margin-bottom: 10px; }
+          body { font-family: 'Cairo', 'Segoe UI', Arial, sans-serif; background: #E3F6FF; padding: 20px; direction: rtl; color: #2D3748; }
+          .container { max-width: 640px; margin: 0 auto; background: white; border-radius: 24px; overflow: hidden; border: 1px solid #D6EFFF; box-shadow: 0 8px 30px rgba(102, 169, 233, 0.14); }
+          .hero { text-align: center; padding: 28px 26px 18px; background: linear-gradient(135deg, #D9232E 0%, #E59B35 45%, #F2E533 100%); }
+          .logo { text-align: center; margin-bottom: 8px; }
           .brand-logo { width: 220px; max-width: 90%; height: auto; }
           .mascot { display: block; margin: 0 auto 8px; width: 82px; height: auto; }
-          .header { text-align: center; color: #E74C3C; font-size: 24px; margin-bottom: 20px; }
-          .content { background: #FFF0F3; border-radius: 16px; padding: 20px; margin: 20px 0; }
-          .footer { text-align: center; color: #7F8C8D; font-size: 14px; margin-top: 24px; }
+          .header { text-align: center; color: #fff; font-size: 27px; margin: 0 0 8px; font-weight: 800; }
+          .subheader { text-align: center; color: #fff; opacity: 0.95; margin: 0; font-size: 15px; }
+          .body { padding: 24px; }
+          .content { background: #FFF9E0; border: 1px solid #F2E533; border-radius: 16px; padding: 8px 16px; margin: 0 0 14px; }
+          .row { margin: 0; padding: 11px 0; border-bottom: 1px dashed #EACF58; font-size: 16px; }
+          .row:last-child { border-bottom: none; }
+          .label { font-weight: 700; color: #1A5276; }
+          .value { color: #2D3748; }
+          .note { background: #E8FFF0; border: 1px solid #97C64A; color: #29521f; border-radius: 14px; padding: 12px 14px; font-size: 14px; line-height: 1.8; }
+          .footer { text-align: center; color: #7F8C8D; font-size: 14px; padding: 20px 24px 24px; border-top: 1px solid #e2e8f0; }
         </style>
       </head>
       <body>
         <div class="container">
-          <img src="${BRAND_MASCOT_SRC}" alt="Peekaboo Mascot" class="mascot"/>
-          <div class="logo"><img src="${BRAND_LOGO_SRC}" alt="Peekaboo" class="brand-logo"/></div>
-          <h1 class="header">🎂 تم تأكيد حجز الحفلة</h1>
-          <div class="content">
-            <p><strong>اسم الطفل:</strong> ${child?.name || booking?.child_name || 'طفل'}</p>
-            <p><strong>التاريخ:</strong> ${slot?.date || booking?.date || ''}</p>
-            <p><strong>الوقت:</strong> ${slot?.start_time || ''}</p>
-            <p><strong>الثيم:</strong> ${theme?.name || (booking?.is_custom ? 'طلب مخصص' : '')}</p>
-            <p><strong>عدد الضيوف:</strong> ${booking?.guest_count || 0}</p>
-            <p><strong>المبلغ:</strong> ${booking?.amount || theme?.price || 0} دينار</p>
+          <div class="hero">
+            <img src="${BRAND_MASCOT_SRC}" alt="Peekaboo Mascot" class="mascot"/>
+            <div class="logo"><img src="${BRAND_LOGO_SRC}" alt="Peekaboo" class="brand-logo"/></div>
+            <h1 class="header">🎂 تم تأكيد حجز حفلة عيد الميلاد</h1>
+            <p class="subheader">متحمسين نحتفل معكم في بيكابو 🎉</p>
+          </div>
+          <div class="body">
+            <div class="content">
+              <p class="row"><span class="label">رقم الحجز:</span> <span class="value">${booking?.booking_code || 'غير متوفر'}</span></p>
+              <p class="row"><span class="label">اسم الطفل:</span> <span class="value">${child?.name || booking?.child_name || 'طفل'}</span></p>
+              <p class="row"><span class="label">التاريخ:</span> <span class="value">${slot?.date || booking?.date || 'غير محدد'}</span></p>
+              <p class="row"><span class="label">الوقت:</span> <span class="value">${slot?.start_time || 'غير محدد'}</span></p>
+              <p class="row"><span class="label">الثيم:</span> <span class="value">${theme?.name || (booking?.is_custom ? 'طلب مخصص' : 'غير محدد')}</span></p>
+              <p class="row"><span class="label">عدد الضيوف:</span> <span class="value">${booking?.guest_count || 0}</span></p>
+              <p class="row"><span class="label">طريقة الدفع:</span> <span class="value">${booking?.payment_method === 'cash' ? 'نقداً' : booking?.payment_method === 'cliq' ? 'CliQ' : 'بطاقة'}</span></p>
+              <p class="row"><span class="label">حالة الدفع:</span> <span class="value">${booking?.payment_status === 'pending_cash' ? 'بانتظار الدفع نقداً' : booking?.payment_status === 'pending_cliq' ? 'بانتظار تحويل CliQ' : 'مدفوع'}</span></p>
+              <p class="row"><span class="label">المبلغ:</span> <span class="value">${booking?.amount || theme?.price || 0} دينار</span></p>
+              <p class="row"><span class="label">ملاحظاتكم:</span> <span class="value">${booking?.special_notes || 'لا توجد'}</span></p>
+              ${booking?.is_custom && booking?.custom_request ? `<p class="row"><span class="label">تفاصيل الطلب المخصص:</span> <span class="value">${booking.custom_request}</span></p>` : ''}
+            </div>
+            <div class="note">يرجى الحضور قبل الموعد بـ 15 دقيقة. في حال رغبتكم بتعديل تفاصيل الحفلة، يرجى التواصل معنا مع رقم الحجز الموضح أعلاه.</div>
           </div>
           <div class="footer">
             <p>فريق بيكابو 🎪</p>
