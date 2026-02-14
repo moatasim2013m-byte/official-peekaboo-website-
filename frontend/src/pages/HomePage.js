@@ -331,18 +331,18 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="why-peekaboo-grid">
-            {whyPeekabooFeatures.map((feature, index) => (
-              <Card key={index} className="pk-card pb-card why-feature-card">
-                <CardContent className="feature-card-content text-center why-feature-card-content">
-                  <div className={`pk-icon-badge ${feature.badgeColor}`} aria-hidden="true">
+          <div className="rounded-2xl border border-border/70 bg-white/90 p-2 sm:p-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-1.5 sm:gap-2">
+              {whyPeekabooFeatures.map((feature, index) => (
+                <div key={index} className="rounded-lg border border-border/50 bg-background/60 p-2 text-center">
+                  <div className={`mx-auto mb-1.5 pk-icon-badge ${feature.badgeColor} w-9 h-9 text-base`} aria-hidden="true">
                     {feature.icon}
                   </div>
-                  <h3 className="pk-card-title text-base feature-title">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed feature-description">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+                  <h3 className="font-bold text-xs sm:text-sm leading-tight mb-1">{feature.title}</h3>
+                  <p className="text-muted-foreground text-[11px] leading-relaxed">{feature.description}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
