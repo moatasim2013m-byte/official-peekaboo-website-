@@ -211,15 +211,16 @@ export default function BirthdayPage() {
   };
 
   const handleGenerateAiTheme = async () => {
-    if (!aiPrompt.trim()) {
-      toast.error('يرجى كتابة وصف للثيم أولاً');
+    const trimmedPrompt = aiPrompt.trim();
+    if (trimmedPrompt.length < 10 || trimmedPrompt.length > 300) {
+      toast.error('يرجى كتابة وصف بين 10 و 300 حرف');
       return;
     }
 
     setAiGenerating(true);
     try {
       const response = await api.post('/themes/ai-generate', {
-        prompt: aiPrompt,
+        prompt: trimmedPrompt,
         aspectRatio: '1:1'
       });
 
@@ -231,7 +232,11 @@ export default function BirthdayPage() {
       setAiGeneratedThemeUrl(imageUrl);
       toast.success('تم إنشاء الثيم بنجاح');
     } catch (error) {
-      toast.error('تعذر إنشاء الثيم بالذكاء الاصطناعي، حاول مرة أخرى');
+      if (error.response?.status === 503) {
+        toast.error('خدمة إنشاء الثيم غير مفعّلة حالياً');
+      } else {
+        toast.error('حدث خطأ أثناء إنشاء الثيم');
+      }
     } finally {
       setAiGenerating(false);
     }
@@ -409,17 +414,18 @@ export default function BirthdayPage() {
                   <Textarea
                     value={aiPrompt}
                     onChange={(e) => setAiPrompt(e.target.value)}
-                    placeholder="مثال: بالونات زرقاء و صفراء مع سبايدرمان و كيك كبير"
+                    placeholder="مثال: بالونات زرقاء و صفراء مع سبايدرمان و كيك كبير و خلفية احتفالية"
                     className="rounded-xl min-h-[100px]"
+                    dir="rtl"
                     data-testid="ai-theme-prompt"
                   />
                   <Button
                     onClick={handleGenerateAiTheme}
-                    disabled={aiGenerating || !aiPrompt.trim()}
+                    disabled={aiGenerating}
                     className="rounded-full h-11 btn-playful bg-accent hover:bg-accent/90"
                     data-testid="generate-ai-theme-btn"
                   >
-                    {aiGenerating ? <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري الإنشاء...</> : 'إنشاء بالذكاء الاصطناعي'}
+                    {aiGenerating ? <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري إنشاء الثيم...</> : 'إنشاء بالذكاء الاصطناعي'}
                   </Button>
 
                   {aiGeneratedThemeUrl && (
