@@ -96,7 +96,7 @@ router.post('/ai-generate', aiGenerateLimiter, async (req, res) => {
       : providerStatus === 429
         ? 'تم تجاوز الحد المسموح لخدمة الذكاء الاصطناعي، الرجاء المحاولة لاحقاً'
         : providerStatus === 404
-          ? 'إعدادات خدمة إنشاء الصور غير صحيحة، الرجاء التواصل مع الدعم'
+          ? 'موديل إنشاء الصور غير متاح حالياً، الرجاء المحاولة لاحقاً'
           : 'تعذر توليد الصورة حالياً، الرجاء المحاولة لاحقاً';
 
     return res.status(statusCode).json({ error: message });

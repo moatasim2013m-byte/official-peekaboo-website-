@@ -1,4 +1,8 @@
-const DEFAULT_GEMINI_IMAGE_MODEL = 'gemini-2.0-flash-preview-image-generation';
+const DEFAULT_GEMINI_IMAGE_MODEL = 'imagen-3.0-generate-002';
+const FALLBACK_IMAGE_MODELS = [
+  'gemini-2.0-flash-preview-image-generation',
+  'imagen-3.0-generate-002'
+];
 
 const parseGeminiImage = (data) => {
   const inlinePart = data?.candidates
@@ -82,15 +86,12 @@ const buildAttempts = ({ model, modelPath, apiKey, prompt, aspectRatio }) => {
     : [predictAttempt, generateAttempt];
 };
 
-const generateThemeImage = async ({ prompt, aspectRatio }) => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    const err = new Error('GEMINI_API_KEY missing');
-    err.code = 'MISSING_API_KEY';
-    throw err;
-  }
+const buildModelCandidates = () => {
+  const configuredModel = process.env.GEMINI_IMAGE_MODEL?.trim();
+  return [...new Set([configuredModel || DEFAULT_GEMINI_IMAGE_MODEL, ...FALLBACK_IMAGE_MODELS].filter(Boolean))];
+};
 
-  const model = process.env.GEMINI_IMAGE_MODEL || DEFAULT_GEMINI_IMAGE_MODEL;
+const tryGenerateWithModel = async ({ model, apiKey, prompt, aspectRatio }) => {
   const modelPath = encodeURIComponent(model);
   const attempts = buildAttempts({ model, modelPath, apiKey, prompt, aspectRatio });
 
@@ -107,17 +108,50 @@ const generateThemeImage = async ({ prompt, aspectRatio }) => {
 
     const parsed = parseGeminiImage(response.data);
     if (parsed) {
-      return parsed;
+      return { parsed };
     }
 
     lastStatusCode = response.status;
     lastErrorPayload = response.data;
   }
 
+  return {
+    error: {
+      model,
+      status: lastStatusCode,
+      details: lastErrorPayload
+    }
+  };
+};
+
+const generateThemeImage = async ({ prompt, aspectRatio }) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    const err = new Error('GEMINI_API_KEY missing');
+    err.code = 'MISSING_API_KEY';
+    throw err;
+  }
+
+  const models = buildModelCandidates();
+  const failures = [];
+
+  for (const model of models) {
+    const result = await tryGenerateWithModel({ model, apiKey, prompt, aspectRatio });
+    if (result.parsed) {
+      return result.parsed;
+    }
+    failures.push(result.error);
+  }
+
+  const lastFailure = failures[failures.length - 1] || null;
+
   const err = new Error('Gemini image generation failed');
   err.code = 'GEMINI_API_ERROR';
-  err.status = lastStatusCode;
-  err.details = lastErrorPayload;
+  err.status = lastFailure?.status;
+  err.details = {
+    triedModels: models,
+    failures
+  };
   throw err;
 };
 
