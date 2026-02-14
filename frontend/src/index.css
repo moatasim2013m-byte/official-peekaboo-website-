@@ -241,6 +241,45 @@ h3 {
     .brand-logo-lg { width: clamp(165px, 14.5vw, 225px); }
 }
 
+@media (min-width: 1024px) {
+    .navbar-customer .navbar-row {
+        padding-top: 0.35rem;
+        padding-bottom: 0.35rem;
+        min-height: 70px;
+    }
+
+    .navbar-customer .brand-logo-link {
+        min-width: clamp(140px, 12vw, 176px);
+        min-height: clamp(58px, 5.4vw, 72px);
+        padding: 0.1rem 0.25rem;
+    }
+
+    .navbar-customer .brand-logo-lg {
+        width: clamp(150px, 11.4vw, 182px);
+    }
+
+    .navbar-customer .desktop-nav-links {
+        gap: 0.5rem;
+    }
+
+    .navbar-customer .desktop-nav-links .nav-pill {
+        padding: 0.58rem 1.05rem;
+        font-size: 1rem;
+        line-height: 1.2;
+    }
+
+    .navbar-customer .desktop-auth-actions {
+        gap: 0.7rem;
+    }
+
+    .navbar-customer .desktop-auth-actions .btn-playful,
+    .navbar-customer .desktop-auth-actions button {
+        height: 42px;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+    }
+}
+
 @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
     .brand-logo-link:hover {
         animation: logo-float-bounce 900ms ease-in-out infinite alternate;
