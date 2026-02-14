@@ -1,137 +1,138 @@
-const FALLBACK_MODELS = [
-  process.env.GEMINI_IMAGE_MODEL?.trim(),
-  'gemini-2.0-flash-preview-image-generation',
-  'gemini-1.5-pro'
-].filter(Boolean);
-
-const parseGeminiImage = (data) => {
-  const inlinePart = data?.candidates
-    ?.flatMap((candidate) => candidate?.content?.parts || [])
-    ?.find((part) => part?.inlineData?.data);
-
-  if (inlinePart?.inlineData?.data) {
-    return {
-      imageBuffer: Buffer.from(inlinePart.inlineData.data, 'base64'),
-      mimeType: inlinePart.inlineData.mimeType || 'image/png'
-    };
-  }
-
-  return null;
-};
-
-const postGeminiRequest = async ({ endpoint, apiKey, payload }) => {
-  const response = await fetch(endpoint, {
-    method: 'POST',
+const getAccessTokenFromMetadata = async () => {
+  const response = await fetch('http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token', {
     headers: {
-      'Content-Type': 'application/json',
-      'x-goog-api-key': apiKey
-    },
-    body: JSON.stringify(payload)
+      'Metadata-Flavor': 'Google'
+    }
   });
 
   const data = await response.json().catch(() => null);
 
-  return {
-    ok: response.ok,
-    status: response.status,
-    data
-  };
-};
-
-const buildAttempt = ({ modelPath, prompt }) => ({
-  endpoint: `https://generativelanguage.googleapis.com/v1beta/models/${modelPath}:generateContent`,
-  payload: {
-    contents: [
-      {
-        parts: [{ text: prompt }]
-      }
-    ],
-    generationConfig: {
-      responseModalities: ['IMAGE']
-    }
-  }
-});
-
-const normalizeProviderError = (data) => {
-  if (!data) return null;
-  return {
-    message: data?.error?.message || null,
-    status: data?.error?.status || null,
-    code: data?.error?.code || null,
-    raw: data
-  };
-};
-
-const tryGenerateWithModel = async ({ model, apiKey, prompt }) => {
-  const modelPath = encodeURIComponent(model);
-  const attempt = buildAttempt({ modelPath, prompt });
-
-  const response = await postGeminiRequest({ ...attempt, apiKey });
   if (!response.ok) {
-    return {
-      error: {
-        model,
+    const err = new Error('Gemini image generation failed');
+    err.code = 'GEMINI_API_ERROR';
+    err.status = response.status;
+    err.details = {
+      model: null,
+      providerError: {
+        message: data?.error?.message || 'Failed to fetch metadata access token',
         status: response.status,
-        details: normalizeProviderError(response.data)
+        code: data?.error?.code || null,
+        raw: data
       }
     };
+    throw err;
   }
 
-  const parsed = parseGeminiImage(response.data);
-  if (parsed) {
-    return { parsed };
-  }
-
-  return {
-    error: {
-      model,
-      status: response.status,
-      details: {
-        message: 'Image bytes not found in Gemini response',
-        raw: response.data
+  const token = data?.access_token;
+  if (!token) {
+    const err = new Error('Gemini image generation failed');
+    err.code = 'GEMINI_API_ERROR';
+    err.details = {
+      model: null,
+      providerError: {
+        message: 'Metadata access token missing',
+        status: null,
+        code: null,
+        raw: data
       }
-    }
-  };
+    };
+    throw err;
+  }
+
+  return token;
 };
 
-const generateThemeImage = async ({ prompt }) => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    const err = new Error('GEMINI_API_KEY missing');
+const generateThemeImage = async ({ prompt, aspectRatio }) => {
+  const project = process.env.GOOGLE_CLOUD_PROJECT?.trim();
+  if (!project) {
+    const err = new Error('GOOGLE_CLOUD_PROJECT missing');
     err.code = 'MISSING_API_KEY';
     throw err;
   }
 
-  let lastFailure = null;
-  let lastTriedModel = null;
-  const triedModels = [];
+  const location = process.env.VERTEX_LOCATION?.trim() || 'us-central1';
+  const model = process.env.IMAGEN_MODEL?.trim() || 'imagen-3.0-generate-002';
+  const endpoint = `https://${location}-aiplatform.googleapis.com/v1/projects/${project}/locations/${location}/publishers/google/models/${encodeURIComponent(model)}:predict`;
 
-  for (const model of FALLBACK_MODELS) {
-    lastTriedModel = model;
-    triedModels.push(model);
+  try {
+    const accessToken = await getAccessTokenFromMetadata();
 
-    const result = await tryGenerateWithModel({ model, apiKey, prompt });
-    if (result.parsed) {
-      return result.parsed;
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({
+        instances: [{ prompt }],
+        parameters: {
+          sampleCount: 1,
+          aspectRatio: aspectRatio || '1:1',
+          outputOptions: { mimeType: 'image/png' }
+        }
+      })
+    });
+
+    const data = await response.json().catch(() => null);
+
+    if (!response.ok) {
+      const err = new Error('Gemini image generation failed');
+      err.code = 'GEMINI_API_ERROR';
+      err.status = response.status;
+      err.details = {
+        model: `vertex:${model}`,
+        providerError: {
+          message: data?.error?.message || null,
+          status: data?.error?.status || response.status,
+          code: data?.error?.code || null,
+          raw: data
+        }
+      };
+      throw err;
     }
 
-    const failure = result.error || null;
-    lastFailure = failure;
+    const prediction = data?.predictions?.[0];
+    const bytesBase64Encoded = prediction?.bytesBase64Encoded;
 
-    if (failure?.status !== 404) {
-      break;
+    if (!bytesBase64Encoded) {
+      const err = new Error('Gemini image generation failed');
+      err.code = 'GEMINI_API_ERROR';
+      err.status = response.status;
+      err.details = {
+        model: `vertex:${model}`,
+        providerError: {
+          message: 'Image bytes not found in Vertex response',
+          status: response.status,
+          code: null,
+          raw: data
+        }
+      };
+      throw err;
     }
+
+    return {
+      imageBuffer: Buffer.from(bytesBase64Encoded, 'base64'),
+      mimeType: prediction.mimeType || 'image/png'
+    };
+  } catch (error) {
+    if (error?.code === 'GEMINI_API_ERROR') {
+      throw error;
+    }
+
+    const err = new Error('Gemini image generation failed');
+    err.code = 'GEMINI_API_ERROR';
+    err.status = Number(error?.status) || undefined;
+    err.details = {
+      model: `vertex:${model}`,
+      providerError: {
+        message: error?.message || null,
+        status: Number(error?.status) || null,
+        code: error?.code || null,
+        raw: error
+      }
+    };
+    throw err;
   }
-
-  const err = new Error('Gemini image generation failed');
-  err.code = 'GEMINI_API_ERROR';
-  err.status = lastFailure?.status;
-  err.details = {
-    model: lastTriedModel,
-    triedModels,
-    providerError: lastFailure?.details || null
-  };
-  throw err;
 };
 
 module.exports = { generateThemeImage };

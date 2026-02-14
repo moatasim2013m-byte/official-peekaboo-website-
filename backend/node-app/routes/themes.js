@@ -32,7 +32,7 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/ai-generate', aiGenerateLimiter, async (req, res) => {
-  if (!process.env.GEMINI_API_KEY) {
+  if (!process.env.GEMINI_API_KEY && !process.env.GOOGLE_CLOUD_PROJECT) {
     return res.status(503).json({ error: 'خدمة توليد الصور غير متاحة حالياً' });
   }
 
