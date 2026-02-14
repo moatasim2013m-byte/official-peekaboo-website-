@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
-import { Star, Check, Loader2 } from 'lucide-react';
+import { Star, Check, Loader2, PartyPopper, Sparkles, Crown, Gift, Rocket } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 
 export default function SubscriptionsPage() {
@@ -125,6 +125,12 @@ export default function SubscriptionsPage() {
     return 'premium';
   };
 
+  const tierIconMap = {
+    basic: { icon: Gift, bg: 'bg-[#FFE5D9]', color: 'text-[#FF6B6B]' },
+    standard: { icon: Sparkles, bg: 'bg-[#E6F7FF]', color: 'text-[#4D96FF]' },
+    premium: { icon: Crown, bg: 'bg-[#FFF5CC]', color: 'text-[#F4A100]' }
+  };
+
   return (
     <div className="min-h-screen py-8 md:py-12" dir="rtl">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -137,6 +143,24 @@ export default function SubscriptionsPage() {
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
             وفّر أكثر مع باقات الزيارات. صالحة لمدة 30 يومًا.
           </p>
+          <div className="mt-5 flex items-center justify-center gap-3 sm:gap-4">
+            {[
+              { icon: PartyPopper, bg: 'bg-[#FFE8CC]', color: 'text-[#FF924C]' },
+              { icon: Rocket, bg: 'bg-[#EAF4FF]', color: 'text-[#4D96FF]' },
+              { icon: Sparkles, bg: 'bg-[#FFF5CC]', color: 'text-[#F4A100]' }
+            ].map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <span
+                  key={index}
+                  className={`inline-flex h-11 w-11 items-center justify-center rounded-full border border-white shadow-sm ${item.bg}`}
+                  aria-hidden="true"
+                >
+                  <Icon className={`h-5 w-5 ${item.color}`} />
+                </span>
+              );
+            })}
+          </div>
         </div>
 
         {loadingPlans ? (
@@ -150,6 +174,8 @@ export default function SubscriptionsPage() {
               {plans.map((plan, index) => {
                 const tier = getPlanTier(index);
                 const isPopular = index === 1;
+                const tierIcon = tierIconMap[tier] || tierIconMap.basic;
+                const TierIconComponent = tierIcon.icon;
                 
                 return (
                   <Card
@@ -167,6 +193,11 @@ export default function SubscriptionsPage() {
                       </div>
                     )}
                     <CardHeader className={`text-center pb-3 ${isPopular ? 'pt-10' : 'pt-6'}`}>
+                      <div className="mb-3 flex justify-center">
+                        <span className={`inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-white shadow-sm ${tierIcon.bg}`}>
+                          <TierIconComponent className={`h-6 w-6 ${tierIcon.color}`} />
+                        </span>
+                      </div>
                       <CardTitle className="font-heading text-xl font-bold">
                         {plan.name_ar || t(plan.name) || plan.name}
                       </CardTitle>
