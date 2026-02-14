@@ -35,6 +35,9 @@ export default function BirthdayPage() {
   const [guestCount, setGuestCount] = useState(10);
   const [specialNotes, setSpecialNotes] = useState('');
   const [customRequest, setCustomRequest] = useState('');
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiGeneratedThemeUrl, setAiGeneratedThemeUrl] = useState('');
+  const [aiGenerating, setAiGenerating] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -118,6 +121,12 @@ export default function BirthdayPage() {
 
     setLoading(true);
     try {
+      if (!selectedTheme.id) {
+        toast.error('يرجى اختيار ثيم جاهز لإتمام الحجز حالياً');
+        setLoading(false);
+        return;
+      }
+
       const amount = selectedTheme.price;
       
       if (paymentMethod === 'card') {
@@ -199,6 +208,49 @@ export default function BirthdayPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleGenerateAiTheme = async () => {
+    if (!aiPrompt.trim()) {
+      toast.error('يرجى كتابة وصف للثيم أولاً');
+      return;
+    }
+
+    setAiGenerating(true);
+    try {
+      const response = await api.post('/themes/ai-generate', {
+        prompt: aiPrompt,
+        aspectRatio: '1:1'
+      });
+
+      const imageUrl = response.data?.imageUrl;
+      if (!imageUrl) {
+        throw new Error('Missing imageUrl');
+      }
+
+      setAiGeneratedThemeUrl(imageUrl);
+      toast.success('تم إنشاء الثيم بنجاح');
+    } catch (error) {
+      toast.error('تعذر إنشاء الثيم بالذكاء الاصطناعي، حاول مرة أخرى');
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
+  const handleUseAiTheme = () => {
+    if (!aiGeneratedThemeUrl) {
+      return;
+    }
+
+    setSelectedTheme({
+      id: null,
+      name: 'AI Generated Theme',
+      name_ar: 'ثيم مولد بالذكاء الاصطناعي',
+      image_url: aiGeneratedThemeUrl,
+      price: 0,
+      isAiGenerated: true
+    });
+    toast.success('تم اختيار الثيم المولد بالذكاء الاصطناعي');
   };
 
   const minDate = addDays(startOfDay(new Date()), getBirthdayMinLeadDays());
@@ -348,6 +400,47 @@ export default function BirthdayPage() {
                   </Card>
                 ))}
               </div>
+
+              <Card className="booking-card mt-5">
+                <CardContent className="py-5 space-y-4">
+                  <p className="text-sm font-medium">
+                    ما لقيت الثيم المناسب؟ اكتب وصفك وسننشئ لك ثيم بالذكاء الاصطناعي
+                  </p>
+                  <Textarea
+                    value={aiPrompt}
+                    onChange={(e) => setAiPrompt(e.target.value)}
+                    placeholder="مثال: بالونات زرقاء و صفراء مع سبايدرمان و كيك كبير"
+                    className="rounded-xl min-h-[100px]"
+                    data-testid="ai-theme-prompt"
+                  />
+                  <Button
+                    onClick={handleGenerateAiTheme}
+                    disabled={aiGenerating || !aiPrompt.trim()}
+                    className="rounded-full h-11 btn-playful bg-accent hover:bg-accent/90"
+                    data-testid="generate-ai-theme-btn"
+                  >
+                    {aiGenerating ? <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري الإنشاء...</> : 'إنشاء بالذكاء الاصطناعي'}
+                  </Button>
+
+                  {aiGeneratedThemeUrl && (
+                    <div className="space-y-3">
+                      <img
+                        src={aiGeneratedThemeUrl}
+                        alt="AI generated birthday theme"
+                        className="w-full max-w-xs h-auto rounded-xl border"
+                      />
+                      <Button
+                        onClick={handleUseAiTheme}
+                        variant="outline"
+                        className="rounded-full"
+                        data-testid="use-ai-theme-btn"
+                      >
+                        استخدام هذا الثيم
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </div>
 
             {/* Booking Form */}
