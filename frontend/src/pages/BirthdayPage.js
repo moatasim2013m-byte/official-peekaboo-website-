@@ -232,8 +232,15 @@ export default function BirthdayPage() {
       setAiGeneratedThemeUrl(imageUrl);
       toast.success('تم إنشاء الثيم بنجاح');
     } catch (error) {
-      if (error.response?.status === 503) {
-        toast.error('خدمة إنشاء الثيم غير مفعّلة حالياً');
+      const statusCode = error.response?.status;
+      const apiMessage = error.response?.data?.error;
+
+      if (statusCode === 503) {
+        toast.error(apiMessage || 'خدمة إنشاء الثيم غير مفعّلة حالياً');
+      } else if (statusCode === 429) {
+        toast.error(apiMessage || 'محاولات كثيرة جداً، الرجاء المحاولة بعد قليل');
+      } else if (apiMessage) {
+        toast.error(apiMessage);
       } else {
         toast.error('حدث خطأ أثناء إنشاء الثيم');
       }
