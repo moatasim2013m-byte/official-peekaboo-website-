@@ -91,6 +91,56 @@ const getSenderFrom = () => SENDER_FROM;
 
 // Email templates
 const emailTemplates = {
+  paymentPending: ({ userName, serviceName, serviceDate, serviceTime, totalPrice }) => ({
+    subject: 'تأكيد طلبك في Peekaboo | Order Received (Pending Payment)',
+    html: `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head><meta charset="UTF-8"></head>
+      <body style="font-family:Arial,sans-serif;background:#f7fbff;padding:20px;color:#1f2937;">
+        <div style="max-width:620px;margin:0 auto;background:#fff;border-radius:16px;padding:22px;">
+          <p>مرحبًا ${userName || 'عميلنا العزيز'}،</p>
+          <p>تم استلام طلبك لخدمة ${serviceName || 'Peekaboo'} في ${serviceDate || '-'} الساعة ${serviceTime || '-'}.<br/>
+          المبلغ الإجمالي: ${totalPrice || 0} دينار<br/>
+          حالة الدفع: <strong>قيد الانتظار</strong><br/>
+          سيتم تأكيد طلبك عند اكتمال الدفع.</p>
+          <hr style="margin:18px 0;border:none;border-top:1px solid #e5e7eb"/>
+          <p>Hello ${userName || 'there'},</p>
+          <p>We received your order for ${serviceName || 'Peekaboo'} on ${serviceDate || '-'} at ${serviceTime || '-'}.
+          <br/>Total amount: ${totalPrice || 0} JOD
+          <br/>Payment status: <strong>Pending</strong>
+          <br/>Your order will be confirmed once payment is verified.</p>
+        </div>
+      </body>
+      </html>
+    `
+  }),
+
+  finalOrderConfirmation: ({ userName, orderType, serviceName, serviceDate, serviceTime, totalPrice }) => ({
+    subject: 'تم تأكيد طلبك في Peekaboo | Payment Confirmed',
+    html: `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head><meta charset="UTF-8"></head>
+      <body style="font-family:Arial,sans-serif;background:#f4fff7;padding:20px;color:#1f2937;">
+        <div style="max-width:620px;margin:0 auto;background:#fff;border-radius:16px;padding:22px;">
+          <p>مرحبًا ${userName || 'عميلنا العزيز'}،</p>
+          <p>تم تأكيد طلبك (${orderType || 'Peekaboo'}) لخدمة ${serviceName || 'Peekaboo'} في ${serviceDate || '-'} الساعة ${serviceTime || '-'}.<br/>
+          المبلغ الإجمالي: ${totalPrice || 0} دينار<br/>
+          حالة الدفع: <strong>تم تأكيد الدفع</strong><br/>
+          تم تأكيد طلبك بنجاح، نتطلع لاستقبالك في Peekaboo!</p>
+          <hr style="margin:18px 0;border:none;border-top:1px solid #e5e7eb"/>
+          <p>Hello ${userName || 'there'},</p>
+          <p>Your ${orderType || 'Peekaboo'} order for ${serviceName || 'Peekaboo'} on ${serviceDate || '-'} at ${serviceTime || '-'} has been confirmed.
+          <br/>Total amount: ${totalPrice || 0} JOD
+          <br/>Payment status: <strong>Payment Confirmed</strong>
+          <br/>Thank you for choosing Peekaboo. We look forward to welcoming you!</p>
+        </div>
+      </body>
+      </html>
+    `
+  }),
+
   // Verification email - Arabic-first
   emailVerification: (verifyUrl) => ({
     subject: 'تأكيد حسابك في بيكابو',
@@ -360,8 +410,8 @@ const emailTemplates = {
   }),
 
   // Subscription confirmation
-  subscriptionConfirmation: (subscription, plan, child) => ({
-    subject: '⭐ تأكيد اشتراكك في بيكابو',
+  subscriptionConfirmation: ({ userName, subscription, plan, child }) => ({
+    subject: 'تأكيد اشتراكك في Peekaboo',
     html: `
       <!DOCTYPE html>
       <html dir="rtl" lang="ar">
@@ -382,13 +432,23 @@ const emailTemplates = {
         <div class="container">
           <img src="${BRAND_MASCOT_SRC}" alt="Peekaboo Mascot" class="mascot"/>
           <div class="logo"><img src="${BRAND_LOGO_SRC}" alt="Peekaboo" class="brand-logo"/></div>
-          <h1 class="header">⭐ تم تفعيل اشتراكك</h1>
+          <h1 class="header">⭐ تأكيد اشتراكك في Peekaboo</h1>
           <div class="content">
+            <p><strong>الاسم:</strong> ${userName || 'عميلنا العزيز'}</p>
             <p><strong>الطفل:</strong> ${child?.name || 'طفل'}</p>
-            <p><strong>الباقة:</strong> ${plan?.name || ''}</p>
+            <p><strong>الباقة:</strong> ${plan?.name_ar || plan?.name || ''}</p>
+            <p><strong>المدة:</strong> ${plan?.valid_days || 30} يوم</p>
             <p><strong>عدد الزيارات:</strong> ${plan?.visits || subscription?.remaining_visits || 0}</p>
+            <p><strong>تاريخ البدء:</strong> ${new Date(subscription?.created_at || Date.now()).toLocaleDateString('ar-EG')}</p>
             <p><strong>صالح حتى:</strong> ${subscription?.expires_at ? new Date(subscription.expires_at).toLocaleDateString('ar-EG') : ''}</p>
             <p><strong>المبلغ:</strong> ${subscription?.amount || plan?.price || 0} دينار</p>
+            <p><strong>حالة الدفع:</strong> ${['pending_cash', 'pending_cliq'].includes(subscription?.payment_status) ? 'قيد الانتظار' : 'تم تأكيد الدفع'}</p>
+            ${['pending_cash', 'pending_cliq'].includes(subscription?.payment_status) ? '<p>سيتم تأكيد الاشتراك عند اكتمال الدفع.</p>' : ''}
+            <hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb"/>
+            <p><strong>Name:</strong> ${userName || 'Customer'}</p>
+            <p><strong>Package:</strong> ${plan?.name || plan?.name_ar || ''} (${plan?.valid_days || 30} days)</p>
+            <p><strong>Price:</strong> ${subscription?.amount || plan?.price || 0} JOD</p>
+            <p><strong>Payment status:</strong> ${['pending_cash', 'pending_cliq'].includes(subscription?.payment_status) ? 'Pending' : 'Payment Confirmed'}</p>
           </div>
           <div class="footer">
             <p>فريق بيكابو 🎪</p>
