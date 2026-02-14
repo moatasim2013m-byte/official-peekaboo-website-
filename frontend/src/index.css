@@ -2126,9 +2126,9 @@ button.primary,
   height: 90px;
   background: rgba(255, 255, 255, 0.92);
   border-radius: 999px;
-  filter: blur(0.2px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.04);
   animation: cloudDriftSlow 38s linear infinite;
+  will-change: transform;
 }
 .sky-cloud::before,
 .sky-cloud::after {
@@ -2163,8 +2163,9 @@ button.primary,
   height: 90px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #FFF7B3 0%, #FFD93B 55%, #FFB703 100%);
-  box-shadow: 0 0 0 12px rgba(255, 217, 59, 0.20), 0 0 60px rgba(255, 217, 59, 0.35);
+  box-shadow: 0 0 0 8px rgba(255, 217, 59, 0.18), 0 0 30px rgba(255, 217, 59, 0.25);
   animation: sunPulse 5.5s ease-in-out infinite;
+  will-change: transform;
 }
 
 /* Rainbow arc */
@@ -2182,7 +2183,6 @@ button.primary,
     rgba(138,201,38,0.55),
     rgba(0,187,249,0.55)
   );
-  filter: blur(0.2px);
   opacity: 0.65;
   transform: rotate(-4deg);
 }
@@ -2195,6 +2195,7 @@ button.primary,
   border-radius: 50% 50% 45% 45%;
   box-shadow: 0 12px 25px rgba(0,0,0,0.10);
   animation: balloonFloat 6.5s ease-in-out infinite;
+  will-change: transform;
 }
 .sky-balloon::after {
   content: "";
@@ -2219,6 +2220,7 @@ button.primary,
   box-shadow: 0 0 14px rgba(255,255,255,0.7);
   animation: twinkle 2.4s ease-in-out infinite;
   opacity: 0.9;
+  will-change: transform, opacity;
 }
 .sparkle-1 { top: 14%; left: 28%; animation-delay: 0s; }
 .sparkle-2 { top: 22%; left: 40%; animation-delay: .6s; }

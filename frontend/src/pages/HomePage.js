@@ -238,6 +238,9 @@ export default function HomePage() {
                     src={heroImgSrc}
                     alt="أطفال يلعبون في بيكابو"
                     className="hero-photo"
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
                     onError={() => setHeroImageError(true)}
                   />
                 )}
@@ -419,7 +422,13 @@ export default function HomePage() {
                 >
                   {item.type === 'video' ? (
                     <div className="relative aspect-square bg-muted">
-                      <video src={item.url} className="w-full h-full object-cover" />
+                      <video
+                        src={item.url}
+                        className="w-full h-full object-cover"
+                        preload="none"
+                        muted
+                        playsInline
+                      />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                         <Play className="h-12 w-12 text-white" />
                       </div>
@@ -429,6 +438,8 @@ export default function HomePage() {
                       src={item.url} 
                       alt={item.title || 'صورة من المعرض'} 
                       className="w-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
+                      loading="lazy"
+                      decoding="async"
                     />
                   )}
                 </div>
@@ -441,6 +452,8 @@ export default function HomePage() {
                     src="https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg"
                     alt="أطفال يلعبون"
                     className="w-full h-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
                 <div className="rounded-2xl overflow-hidden shadow-md">
@@ -448,6 +461,8 @@ export default function HomePage() {
                     src="https://images.pexels.com/photos/6148511/pexels-photo-6148511.jpeg"
                     alt="حفلة عيد ميلاد"
                     className="w-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
                 <div className="rounded-2xl overflow-hidden shadow-md">
@@ -455,6 +470,8 @@ export default function HomePage() {
                     src="https://images.pexels.com/photos/3951099/pexels-photo-3951099.png"
                     alt="متعة عائلية"
                     className="w-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                    decoding="async"
                   />
                 </div>
               </>
