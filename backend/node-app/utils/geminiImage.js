@@ -1,7 +1,4 @@
 const DEFAULT_GEMINI_IMAGE_MODEL = 'gemini-2.0-flash-preview-image-generation';
-const FALLBACK_IMAGE_MODELS = [
-  'gemini-2.0-flash-preview-image-generation'
-];
 
 const parseGeminiImage = (data) => {
   const inlinePart = data?.candidates
@@ -42,7 +39,6 @@ const buildAttempt = ({ modelPath, prompt }) => ({
   payload: {
     contents: [
       {
-        role: 'user',
         parts: [{ text: prompt }]
       }
     ],
@@ -52,10 +48,7 @@ const buildAttempt = ({ modelPath, prompt }) => ({
   }
 });
 
-const buildModelCandidates = () => {
-  const configuredModel = process.env.GEMINI_IMAGE_MODEL?.trim();
-  return [...new Set([configuredModel || DEFAULT_GEMINI_IMAGE_MODEL, ...FALLBACK_IMAGE_MODELS].filter(Boolean))];
-};
+const getModel = () => process.env.GEMINI_IMAGE_MODEL?.trim() || DEFAULT_GEMINI_IMAGE_MODEL;
 
 const normalizeProviderError = (data) => {
   if (!data) return null;
@@ -107,25 +100,20 @@ const generateThemeImage = async ({ prompt }) => {
     throw err;
   }
 
-  const models = buildModelCandidates();
-  const failures = [];
-
-  for (const model of models) {
-    const result = await tryGenerateWithModel({ model, apiKey, prompt });
-    if (result.parsed) {
-      return result.parsed;
-    }
-    failures.push(result.error);
+  const model = getModel();
+  const result = await tryGenerateWithModel({ model, apiKey, prompt });
+  if (result.parsed) {
+    return result.parsed;
   }
 
-  const lastFailure = failures[failures.length - 1] || null;
+  const failure = result.error || null;
 
   const err = new Error('Gemini image generation failed');
   err.code = 'GEMINI_API_ERROR';
-  err.status = lastFailure?.status;
+  err.status = failure?.status;
   err.details = {
-    triedModels: models,
-    failures
+    model,
+    providerError: failure?.details || null
   };
   throw err;
 };
