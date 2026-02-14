@@ -74,7 +74,9 @@ router.post('/ai-generate', aiGenerateLimiter, async (req, res) => {
   } catch (error) {
     console.error('AI theme generation error:', {
       code: error?.code,
+      status: error?.status,
       message: error?.message,
+      providerMessage: error?.details?.failures?.[0]?.details?.message || null,
       details: error?.details
     });
 
