@@ -148,6 +148,7 @@ const galleryRoutes = require('./routes/gallery');
 const profileRoutes = require('./routes/profile');
 const themesRoutes = require('./routes/themes');
 const productsRoutes = require('./routes/products');
+const couponsRoutes = require('./routes/coupons');
 
 // Routes
 // Apply strict auth limiter to sensitive endpoints
@@ -166,6 +167,7 @@ app.use('/api/gallery', galleryRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/themes', themesRoutes);
 app.use('/api', productsRoutes);
+app.use('/api/coupons', couponsRoutes);
 
 // Public settings endpoint (for homepage hero config)
 const Settings = require('./models/Settings');

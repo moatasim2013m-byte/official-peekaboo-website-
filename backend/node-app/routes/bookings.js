@@ -10,8 +10,10 @@ const Product = require('../models/Product');
 const User = require('../models/User');
 const LoyaltyHistory = require('../models/LoyaltyHistory');
 const Settings = require('../models/Settings');
+const Coupon = require('../models/Coupon');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { sendEmail, emailTemplates } = require('../utils/email');
+const { validateCoupon } = require('../utils/coupons');
 const { addMinutes, isBefore, isAfter } = require('date-fns');
 
 const router = express.Router();
@@ -202,7 +204,7 @@ const awardLoyaltyPoints = async (userId, paymentId, source) => {
 // Create hourly booking (after payment confirmed) - supports multiple children
 router.post('/hourly', authMiddleware, async (req, res) => {
   try {
-    const { slot_id, child_ids, child_id, payment_id, duration_hours, custom_notes, lineItems } = req.body;
+    const { slot_id, child_ids, child_id, payment_id, duration_hours, custom_notes, lineItems, coupon_code } = req.body;
     // NOTE: req.body.amount is intentionally IGNORED for security - price computed server-side
     
     // Support both child_ids array and legacy child_id
@@ -245,7 +247,24 @@ router.post('/hourly', authMiddleware, async (req, res) => {
     const hours = parseInt(duration_hours) || 2;
     const basePrice = await getHourlyPrice(hours, slot.start_time);
     const { normalizedLineItems, productsTotal } = await buildLineItems(lineItems);
-    const totalAmount = (basePrice * childIdList.length) + productsTotal;
+    const subtotalAmount = (basePrice * childIdList.length) + productsTotal;
+    let discountAmount = 0;
+    let normalizedCouponCode = '';
+
+    if (coupon_code) {
+      const couponValidation = await validateCoupon({
+        code: coupon_code,
+        amount: subtotalAmount,
+        type: 'hourly'
+      });
+      if (!couponValidation.valid) {
+        await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: -childIdList.length } });
+        return res.status(400).json({ error: couponValidation.message });
+      }
+      discountAmount = couponValidation.discountAmount;
+      normalizedCouponCode = couponValidation.normalizedCode;
+    }
+    const totalAmount = subtotalAmount - discountAmount;
     
     // Safety check: computed amount must be valid
     if (!totalAmount || isNaN(totalAmount) || totalAmount <= 0) {
@@ -273,6 +292,9 @@ router.post('/hourly', authMiddleware, async (req, res) => {
         status: 'confirmed',
         payment_id,
         amount: pricePerChild,
+        subtotal_amount: subtotalAmount / childIdList.length,
+        discount_amount: discountAmount / childIdList.length,
+        coupon_code: normalizedCouponCode,
         lineItems: normalizedLineItems
       });
 
@@ -283,6 +305,10 @@ router.post('/hourly', authMiddleware, async (req, res) => {
     // Award loyalty points once per payment
     if (payment_id) {
       await awardLoyaltyPoints(req.userId, payment_id, 'hourly');
+    }
+
+    if (normalizedCouponCode) {
+      await Coupon.findOneAndUpdate({ code: normalizedCouponCode }, { $inc: { redeemed_count: 1 } });
     }
 
     // Send confirmation email (non-blocking)
@@ -305,7 +331,7 @@ router.post('/hourly', authMiddleware, async (req, res) => {
 // Create hourly booking with cash/cliq payment (no Stripe)
 router.post('/hourly/offline', authMiddleware, async (req, res) => {
   try {
-    const { slot_id, child_ids, child_id, duration_hours, custom_notes, payment_method, slot_start_time, lineItems } = req.body;
+    const { slot_id, child_ids, child_id, duration_hours, custom_notes, payment_method, slot_start_time, lineItems, coupon_code } = req.body;
     
     // Validate payment method
     if (!['cash', 'cliq'].includes(payment_method)) {
@@ -352,7 +378,25 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
     const hours = parseInt(duration_hours) || 2;
     const basePrice = await getHourlyPrice(hours, slot_start_time);
     const { normalizedLineItems, productsTotal } = await buildLineItems(lineItems);
-    const totalAmount = (basePrice * childIdList.length) + productsTotal;
+    const subtotalAmount = (basePrice * childIdList.length) + productsTotal;
+    let discountAmount = 0;
+    let normalizedCouponCode = '';
+
+    if (coupon_code) {
+      const couponValidation = await validateCoupon({
+        code: coupon_code,
+        amount: subtotalAmount,
+        type: 'hourly'
+      });
+      if (!couponValidation.valid) {
+        await TimeSlot.findByIdAndUpdate(slot_id, { $inc: { booked_count: -childIdList.length } });
+        return res.status(400).json({ error: couponValidation.message });
+      }
+      discountAmount = couponValidation.discountAmount;
+      normalizedCouponCode = couponValidation.normalizedCode;
+    }
+
+    const totalAmount = subtotalAmount - discountAmount;
     
     // Safety check: computed amount must be valid
     if (!totalAmount || isNaN(totalAmount) || totalAmount <= 0) {
@@ -382,11 +426,18 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
         payment_method,
         payment_status: paymentStatus,
         amount: pricePerChild,
+        subtotal_amount: subtotalAmount / childIdList.length,
+        discount_amount: discountAmount / childIdList.length,
+        coupon_code: normalizedCouponCode,
         lineItems: normalizedLineItems
       });
 
       await booking.save();
       bookings.push(booking);
+    }
+
+    if (normalizedCouponCode) {
+      await Coupon.findOneAndUpdate({ code: normalizedCouponCode }, { $inc: { redeemed_count: 1 } });
     }
 
     // Send confirmation email (non-blocking)

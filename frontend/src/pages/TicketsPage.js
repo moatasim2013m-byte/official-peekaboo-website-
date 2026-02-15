@@ -7,6 +7,7 @@ import { Calendar } from '../components/ui/calendar';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
+import { Input } from '../components/ui/input';
 import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
 import { Clock, Users, Loader2, AlertCircle, Star, Sun, Moon } from 'lucide-react';
@@ -73,6 +74,9 @@ export default function TicketsPage() {
   const [extraHourText, setExtraHourText] = useState('');
   const [products, setProducts] = useState([]);
   const [selectedProductQty, setSelectedProductQty] = useState({});
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   // Set page title
   useEffect(() => {
@@ -262,7 +266,7 @@ export default function TicketsPage() {
     setLoading(true);
     try {
       // Calculate amount using Happy Hour logic
-      const amount = getGrandTotal();
+      const amount = getFinalTotal();
       const lineItems = buildLineItems();
       
       if (paymentMethod === 'card') {
@@ -276,7 +280,8 @@ export default function TicketsPage() {
           custom_notes: customNotes.trim(),
           origin_url: window.location.origin,
           timeMode: timeMode, // Pass timeMode for server-side pricing
-          lineItems
+          lineItems,
+          coupon_code: appliedCoupon?.code
         });
         window.location.href = response.data.url;
       } else {
@@ -288,7 +293,8 @@ export default function TicketsPage() {
           slot_start_time: selectedSlot.start_time, // Pass slot time for Happy Hour calculation
           custom_notes: customNotes.trim(),
           payment_method: paymentMethod,
-          lineItems
+          lineItems,
+          coupon_code: appliedCoupon?.code
         });
         
         // Get child name(s) for confirmation
@@ -357,6 +363,8 @@ export default function TicketsPage() {
   };
 
   const getGrandTotal = () => getBaseBookingTotal() + getProductsTotal();
+  const getDiscountAmount = () => Number(appliedCoupon?.discount_amount || 0);
+  const getFinalTotal = () => Math.max(0, getGrandTotal() - getDiscountAmount());
 
   const getSlotTotalPrice = (startTime) => {
     const pricePerHour = getSlotPrice(startTime);
@@ -370,6 +378,32 @@ export default function TicketsPage() {
         ? prev.filter(id => id !== childId)
         : [...prev, childId]
     );
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error('الرجاء إدخال كود الخصم');
+      return;
+    }
+
+    setApplyingCoupon(true);
+    try {
+      const response = await api.post('/coupons/validate', {
+        code: couponCode.trim(),
+        amount: getGrandTotal(),
+        type: 'hourly'
+      });
+      setAppliedCoupon({
+        code: response.data.coupon.code,
+        discount_amount: response.data.discount_amount
+      });
+      toast.success(`تم تطبيق الكوبون (${response.data.discount_amount.toFixed(1)} دينار خصم)`);
+    } catch (error) {
+      setAppliedCoupon(null);
+      toast.error(error.response?.data?.error || 'فشل تطبيق الكوبون');
+    } finally {
+      setApplyingCoupon(false);
+    }
   };
 
   const todayStart = new Date();
@@ -699,6 +733,24 @@ export default function TicketsPage() {
                   <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
                 </div>
 
+                <div>
+                  <Label className="block text-sm font-medium mb-2">كوبون الخصم</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="مثال: PEEK10"
+                      className="rounded-xl"
+                    />
+                    <Button type="button" variant="outline" onClick={handleApplyCoupon} disabled={applyingCoupon}>
+                      {applyingCoupon ? '...' : 'تطبيق'}
+                    </Button>
+                  </div>
+                  {appliedCoupon && (
+                    <p className="text-sm text-green-600 mt-2">تم تطبيق الكوبون: {appliedCoupon.code}</p>
+                  )}
+                </div>
+
                 {paymentMethod && (
                   <div className="booking-summary">
                     <p className="text-sm text-muted-foreground mb-1">ملخص الحجز</p>
@@ -709,7 +761,8 @@ export default function TicketsPage() {
                       }
                     </p>
                     <p className="text-sm text-muted-foreground">إضافات: {getProductsTotal().toFixed(1)} دينار</p>
-                    <p className="font-semibold">الإجمالي: {getGrandTotal().toFixed(1)} دينار</p>
+                    <p className="text-sm text-green-700">الخصم: -{getDiscountAmount().toFixed(1)} دينار</p>
+                    <p className="font-semibold">الإجمالي: {getFinalTotal().toFixed(1)} دينار</p>
                   </div>
                 )}
 
@@ -726,7 +779,7 @@ export default function TicketsPage() {
                         جاري المعالجة...
                       </>
                     ) : (
-                      <span>احجز - {getGrandTotal().toFixed(1)} د</span>
+                      <span>احجز - {getFinalTotal().toFixed(1)} د</span>
                     )}
                   </Button>
                 </div>

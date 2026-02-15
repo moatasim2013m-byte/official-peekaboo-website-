@@ -7,6 +7,7 @@ const TimeSlot = require('../models/TimeSlot');
 const Product = require('../models/Product');
 const { authMiddleware } = require('../middleware/auth');
 const { awardPoints } = require('../utils/awardPoints');
+const { validateCoupon } = require('../utils/coupons');
 
 const router = express.Router();
 
@@ -230,7 +231,7 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       });
     }
 
-    const { type, reference_id, origin_url, duration_hours, custom_notes, timeMode, lineItems } = req.body;
+    const { type, reference_id, origin_url, duration_hours, custom_notes, timeMode, lineItems, coupon_code } = req.body;
 
     if (!type || !origin_url) {
       return res.status(400).json({ error: 'type and origin_url are required' });
@@ -297,6 +298,22 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       metadata.child_ids = JSON.stringify(req.body.child_ids);
     } else if (req.body.child_id) {
       metadata.child_ids = JSON.stringify([req.body.child_id]);
+    }
+
+    // Apply coupon discount when provided
+    if (coupon_code) {
+      const couponValidation = await validateCoupon({
+        code: coupon_code,
+        amount,
+        type
+      });
+      if (!couponValidation.valid) {
+        return res.status(400).json({ error: couponValidation.message });
+      }
+      const { normalizedCode, discountAmount, finalAmount } = couponValidation;
+      amount = finalAmount;
+      metadata.coupon_code = normalizedCode;
+      metadata.discount_amount = discountAmount;
     }
 
     // Ensure amount is a valid float
