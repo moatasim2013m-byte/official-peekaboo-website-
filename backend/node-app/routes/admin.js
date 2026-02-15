@@ -15,7 +15,28 @@ const Theme = require('../models/Theme');
 const Settings = require('../models/Settings');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { sendEmail, emailTemplates } = require('../utils/email');
-const { awardPoints } = require('../utils/awardPoints');
+const loyaltyRouter = require('./loyalty');
+const { awardPoints } = loyaltyRouter;
+
+const DEV_ENVIRONMENTS = new Set(['development', 'dev', 'local', 'test']);
+
+const isLoyaltyDuplicateError = (error) => {
+  return error?.code === 'LOYALTY_DUPLICATE_REFERENCE' || error?.code === 11000;
+};
+
+const maybeAwardLoyaltyPoints = async ({ userId, totalJD, reason, refType, refId }) => {
+  const points = Math.round(Number(totalJD || 0) * 10);
+  if (!userId || points <= 0) return;
+
+  try {
+    await awardPoints(userId, points, reason, refType, refId);
+    if (DEV_ENVIRONMENTS.has(process.env.NODE_ENV)) {
+      console.log('LOYALTY_POINTS_AWARDED', { userId: userId.toString(), refType, refId, points });
+    }
+  } catch (error) {
+    if (!isLoyaltyDuplicateError(error)) throw error;
+  }
+};
 
 const router = express.Router();
 
@@ -431,12 +452,12 @@ router.put('/bookings/hourly/:id', async (req, res) => {
     const becamePaid = wasPending && booking.payment_status === 'paid';
     const becameConfirmed = previousStatus !== 'confirmed' && booking.status === 'confirmed';
     if (becamePaid || becameConfirmed) {
-      await awardPoints({
+      await maybeAwardLoyaltyPoints({
         userId: booking.user_id?._id || booking.user_id,
-        refType: 'hourly_booking',
-        refId: booking._id.toString(),
-        type: 'hourly',
-        description: 'Earned points from hourly booking confirmation'
+        totalJD: booking.amount,
+        reason: 'نقاط على حجز جلسة لعب',
+        refType: 'hourly',
+        refId: booking._id.toString()
       });
     }
     if (becamePaid && booking.user_id?.email) {
@@ -482,12 +503,12 @@ router.put('/bookings/birthday/:id', async (req, res) => {
     const becamePaid = wasPending && booking.payment_status === 'paid';
     const becameConfirmed = previousStatus !== 'confirmed' && booking.status === 'confirmed';
     if (becamePaid || becameConfirmed) {
-      await awardPoints({
+      await maybeAwardLoyaltyPoints({
         userId: booking.user_id?._id || booking.user_id,
-        refType: 'birthday_booking',
-        refId: booking._id.toString(),
-        type: 'birthday',
-        description: 'Earned points from birthday booking confirmation'
+        totalJD: booking.amount,
+        reason: 'نقاط على حجز عيد ميلاد',
+        refType: 'birthday',
+        refId: booking._id.toString()
       });
     }
     if (becamePaid && booking.user_id?.email) {
@@ -564,12 +585,12 @@ router.put('/subscriptions/:id/payment-confirmation', async (req, res) => {
 
     const becamePaid = wasPending && subscription.payment_status === 'paid';
     if (becamePaid) {
-      await awardPoints({
+      await maybeAwardLoyaltyPoints({
         userId: subscription.user_id?._id || subscription.user_id,
-        refType: 'subscription_purchase',
-        refId: subscription._id.toString(),
-        type: 'subscription',
-        description: 'Earned points from subscription payment confirmation'
+        totalJD: subscription.plan_id?.price,
+        reason: 'نقاط على شراء اشتراك',
+        refType: 'subscription',
+        refId: subscription._id.toString()
       });
     }
     if (becamePaid && subscription.user_id?.email) {
