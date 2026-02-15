@@ -6,7 +6,8 @@ const Settings = require('../models/Settings');
 const TimeSlot = require('../models/TimeSlot');
 const Product = require('../models/Product');
 const { authMiddleware } = require('../middleware/auth');
-const { awardPoints } = require('../utils/awardPoints');
+const loyaltyRouter = require('./loyalty');
+const { awardPoints } = loyaltyRouter;
 const { validateCoupon } = require('../utils/coupons');
 
 const router = express.Router();
@@ -18,6 +19,37 @@ const PAYMENT_PROVIDERS = {
 };
 
 const paymentProvider = (process.env.PAYMENT_PROVIDER || PAYMENT_PROVIDERS.MANUAL).toLowerCase();
+
+const DEV_ENVIRONMENTS = new Set(['development', 'dev', 'local', 'test']);
+
+const isLoyaltyDuplicateError = (error) => {
+  return error?.code === 'LOYALTY_DUPLICATE_REFERENCE' || error?.code === 11000;
+};
+
+const maybeAwardProductLoyaltyPoints = async (transaction) => {
+  const points = Math.round(Number(transaction?.amount || 0) * 10);
+  if (!transaction?.user_id || points <= 0) return;
+
+  try {
+    await awardPoints(
+      transaction.user_id,
+      points,
+      'نقاط على شراء منتج',
+      'product',
+      transaction._id.toString()
+    );
+    if (DEV_ENVIRONMENTS.has(process.env.NODE_ENV)) {
+      console.log('LOYALTY_POINTS_AWARDED', {
+        userId: transaction.user_id.toString(),
+        refType: 'product',
+        refId: transaction._id.toString(),
+        points
+      });
+    }
+  } catch (error) {
+    if (!isLoyaltyDuplicateError(error)) throw error;
+  }
+};
 
 // Initialize Stripe when explicitly selected.
 let stripe = null;
@@ -454,14 +486,7 @@ router.get('/status/:sessionId', authMiddleware, async (req, res) => {
         await transaction.save();
 
         if (transaction.status === 'paid' && transaction.type === 'product') {
-          await awardPoints({
-            userId: transaction.user_id,
-            refType: 'product_purchase',
-            refId: transaction._id.toString(),
-            type: 'products',
-            amount: transaction.amount,
-            description: `Earned points from product purchase (${transaction.amount} JD)`
-          });
+          await maybeAwardProductLoyaltyPoints(transaction);
         }
       }
 
@@ -546,14 +571,7 @@ router.post('/capital-bank/callback', async (req, res) => {
     await transaction.save();
 
     if (transaction.status === 'paid' && transaction.type === 'product') {
-      await awardPoints({
-        userId: transaction.user_id,
-        refType: 'product_purchase',
-        refId: transaction._id.toString(),
-        type: 'products',
-        amount: transaction.amount,
-        description: `Earned points from product purchase (${transaction.amount} JD)`
-      });
+      await maybeAwardProductLoyaltyPoints(transaction);
     }
 
     return res.json({ received: true, session_id: order_id, status: transaction.status });
@@ -581,14 +599,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         await transaction.save();
 
         if (transaction.type === 'product') {
-          await awardPoints({
-            userId: transaction.user_id,
-            refType: 'product_purchase',
-            refId: transaction._id.toString(),
-            type: 'products',
-            amount: transaction.amount,
-            description: `Earned points from product purchase (${transaction.amount} JD)`
-          });
+          await maybeAwardProductLoyaltyPoints(transaction);
         }
       }
     }

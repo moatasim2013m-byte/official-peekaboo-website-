@@ -15,7 +15,28 @@ const Theme = require('../models/Theme');
 const Settings = require('../models/Settings');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { sendEmail, emailTemplates } = require('../utils/email');
-const { awardPoints } = require('../utils/awardPoints');
+const loyaltyRouter = require('./loyalty');
+const { awardPoints } = loyaltyRouter;
+
+const DEV_ENVIRONMENTS = new Set(['development', 'dev', 'local', 'test']);
+
+const isLoyaltyDuplicateError = (error) => {
+  return error?.code === 'LOYALTY_DUPLICATE_REFERENCE' || error?.code === 11000;
+};
+
+const maybeAwardLoyaltyPoints = async ({ userId, totalJD, reason, refType, refId }) => {
+  const points = Math.round(Number(totalJD || 0) * 10);
+  if (!userId || points <= 0) return;
+
+  try {
+    await awardPoints(userId, points, reason, refType, refId);
+    if (DEV_ENVIRONMENTS.has(process.env.NODE_ENV)) {
+      console.log('LOYALTY_POINTS_AWARDED', { userId: userId.toString(), refType, refId, points });
+    }
+  } catch (error) {
+    if (!isLoyaltyDuplicateError(error)) throw error;
+  }
+};
 
 const router = express.Router();
 
