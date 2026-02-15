@@ -12,6 +12,7 @@ const normalizeBackendOrigin = (rawUrl) => {
 };
 
 const API_ORIGIN = normalizeBackendOrigin(RAW_API_URL);
+const API_TIMEOUT_MS = 12000;
 
 const TOKEN_KEY = 'peekaboo_token';
 
@@ -31,6 +32,7 @@ export const AuthProvider = ({ children }) => {
   const api = useMemo(() => {
     const instance = axios.create({
       baseURL: API_ORIGIN ? `${API_ORIGIN}/api` : "/api",
+      timeout: API_TIMEOUT_MS,
     });
     
     // Add interceptor to always use latest token from localStorage
@@ -50,6 +52,9 @@ export const AuthProvider = ({ children }) => {
     instance.interceptors.response.use(
       (response) => response,
       (error) => {
+        if (error.code === 'ECONNABORTED') {
+          console.warn(`API request timed out after ${API_TIMEOUT_MS}ms:`, error.config?.url);
+        }
         // Don't auto-logout on /auth/me failures (handled separately)
         const isAuthCheck = error.config?.url?.includes('/auth/me');
         if (error.response?.status === 401 && !isAuthCheck) {
