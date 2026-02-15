@@ -12,7 +12,7 @@ import { Label } from '../components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import { format, addDays, startOfDay } from 'date-fns';
-import { Cake, Users, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import { Cake, Users, Loader2, AlertCircle, Sparkles, Copy } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import mascotImg from '../assets/mascot.png';
 
@@ -43,9 +43,14 @@ export default function BirthdayPage() {
   const [loading, setLoading] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [activeTab, setActiveTab] = useState('standard');
+  const [products, setProducts] = useState([]);
+  const [selectedProductQty, setSelectedProductQty] = useState({});
+  const [inviteGenerating, setInviteGenerating] = useState(false);
+  const [inviteResult, setInviteResult] = useState(null);
 
   useEffect(() => {
     fetchThemes();
+    fetchProducts();
     if (isAuthenticated) {
       fetchChildren();
     }
@@ -56,6 +61,33 @@ export default function BirthdayPage() {
     fetchSlots();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
+
+
+  const fetchProducts = async () => {
+    try {
+      const response = await api.get('/products?active=true');
+      setProducts(response.data.products || []);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    }
+  };
+
+  const updateProductQty = (productId, qty) => {
+    setSelectedProductQty((prev) => {
+      const next = { ...prev };
+      if (qty <= 0) delete next[productId];
+      else next[productId] = qty;
+      return next;
+    });
+  };
+
+  const buildLineItems = () => products
+    .filter((product) => (selectedProductQty[product.id] || 0) > 0)
+    .map((product) => ({ productId: product.id, quantity: selectedProductQty[product.id] }));
+
+  const getProductsTotal = () => products.reduce((sum, product) => (
+    sum + ((selectedProductQty[product.id] || 0) * (Number(product.priceJD) || 0))
+  ), 0);
 
   const fetchChildren = async () => {
     try {
@@ -128,7 +160,8 @@ export default function BirthdayPage() {
         return;
       }
 
-      const amount = selectedTheme.price;
+      const amount = (Number(selectedTheme.price) || 0) + getProductsTotal();
+      const lineItems = buildLineItems();
       
       if (paymentMethod === 'card') {
         // Stripe checkout flow
@@ -137,7 +170,8 @@ export default function BirthdayPage() {
           reference_id: selectedSlot.id,
           theme_id: selectedTheme.id,
           child_id: selectedChild,
-          origin_url: window.location.origin
+          origin_url: window.location.origin,
+          lineItems
         });
         window.location.href = response.data.url;
       } else {
@@ -149,7 +183,8 @@ export default function BirthdayPage() {
           guest_count: guestCount,
           special_notes: specialNotes,
           payment_method: paymentMethod,
-          amount
+          amount,
+          lineItems
         });
         
         // Get child name for confirmation
@@ -247,6 +282,45 @@ export default function BirthdayPage() {
       }
     } finally {
       setAiGenerating(false);
+    }
+  };
+
+  const copyToClipboard = async (text, successMessage) => {
+    if (!text) return;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(successMessage);
+    } catch (error) {
+      toast.error('تعذر النسخ، حاول مرة أخرى');
+    }
+  };
+
+  const handleGenerateInviteCopy = async () => {
+    if (!isAuthenticated) {
+      toast.error('الرجاء تسجيل الدخول أولاً');
+      navigate('/login');
+      return;
+    }
+
+    const selectedChildObj = children.find((child) => child.id === selectedChild);
+
+    setInviteGenerating(true);
+    try {
+      const response = await api.post('/ai/invite', {
+        childName: selectedChildObj?.name || '',
+        age: selectedChildObj?.age || null,
+        theme: selectedTheme?.name_ar || selectedTheme?.name || '',
+        extraDetails: specialNotes || ''
+      });
+
+      setInviteResult(response.data);
+      toast.success('تم إنشاء النصوص بنجاح');
+    } catch (error) {
+      const apiMessage = error.response?.data?.error;
+      toast.error(apiMessage || 'تعذر إنشاء النصوص حالياً');
+    } finally {
+      setInviteGenerating(false);
     }
   };
 
@@ -421,6 +495,69 @@ export default function BirthdayPage() {
 
               <Card className="booking-card mt-5">
                 <CardContent className="py-5 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <p className="text-sm font-medium">
+                      مولد نص الدعوة + كابشن إنستغرام (عربي أولاً)
+                    </p>
+                    <Button
+                      onClick={handleGenerateInviteCopy}
+                      disabled={inviteGenerating}
+                      variant="outline"
+                      className="rounded-full"
+                      data-testid="generate-ai-invite-btn"
+                    >
+                      {inviteGenerating ? <><Loader2 className="ml-2 h-4 w-4 animate-spin" />جاري الإنشاء...</> : 'إنشاء النص'}
+                    </Button>
+                  </div>
+
+                  {inviteResult && (
+                    <div className="space-y-3">
+                      <div className="p-3 rounded-xl border bg-muted/30">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <Label className="text-sm">الدعوة العربية</Label>
+                          <Button type="button" variant="ghost" size="sm" onClick={() => copyToClipboard(inviteResult.inviteArabic, 'تم نسخ الدعوة العربية')}>
+                            <Copy className="h-4 w-4 ml-1" />نسخ
+                          </Button>
+                        </div>
+                        <p className="text-sm whitespace-pre-line">{inviteResult.inviteArabic}</p>
+                      </div>
+
+                      {inviteResult.inviteEnglish && (
+                        <div className="p-3 rounded-xl border bg-muted/30" dir="ltr">
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <Label className="text-sm">English Invite</Label>
+                            <Button type="button" variant="ghost" size="sm" onClick={() => copyToClipboard(inviteResult.inviteEnglish, 'Copied English invite')}>
+                              <Copy className="h-4 w-4 ml-1" />Copy
+                            </Button>
+                          </div>
+                          <p className="text-sm whitespace-pre-line">{inviteResult.inviteEnglish}</p>
+                        </div>
+                      )}
+
+                      <div className="p-3 rounded-xl border bg-muted/30">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <Label className="text-sm">كابشن إنستغرام</Label>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(`${inviteResult.igCaptionArabic}\n\n${(inviteResult.hashtags || []).join(' ')}`, 'تم نسخ الكابشن والهاشتاغات')}
+                          >
+                            <Copy className="h-4 w-4 ml-1" />نسخ
+                          </Button>
+                        </div>
+                        <p className="text-sm whitespace-pre-line">{inviteResult.igCaptionArabic}</p>
+                        {!!inviteResult.hashtags?.length && (
+                          <p className="text-xs text-muted-foreground mt-2">{inviteResult.hashtags.join(' ')}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card className="booking-card mt-5">
+                <CardContent className="py-5 space-y-4">
                   <p className="text-sm font-medium">
                     ما لقيت الثيم المناسب؟ اكتب وصفك وسننشئ لك ثيم بالذكاء الاصطناعي
                   </p>
@@ -501,13 +638,40 @@ export default function BirthdayPage() {
                       <Label className="text-sm">الثيم المختار</Label>
                       <div className="p-2.5 rounded-xl bg-muted mt-1.5 text-sm">
                         {selectedTheme ? (
-                          <span className="font-semibold">{selectedTheme.name_ar || selectedTheme.name} - {selectedTheme.price} د</span>
+                          <span className="font-semibold">{selectedTheme.name_ar || selectedTheme.name} - {Number(selectedTheme.price || 0).toFixed(1)} د</span>
                         ) : (
                           <span className="text-muted-foreground">لم يتم اختيار ثيم</span>
                         )}
                       </div>
                     </div>
                   </div>
+
+
+                  {products.length > 0 && (
+                    <div>
+                      <Label className="text-sm">إضافات</Label>
+                      <div className="space-y-2 mt-2">
+                        {products.map((product) => {
+                          const qty = selectedProductQty[product.id] || 0;
+                          return (
+                            <div key={product.id} className="flex items-center justify-between rounded-xl border p-3">
+                              <div>
+                                <p className="font-medium">{product.nameAr}</p>
+                                <p className="text-xs text-muted-foreground">{product.priceJD} د</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button type="button" variant="outline" size="sm" onClick={() => updateProductQty(product.id, qty - 1)}>-</Button>
+                                <span className="min-w-6 text-center">{qty}</span>
+                                <Button type="button" variant="outline" size="sm" onClick={() => updateProductQty(product.id, qty + 1)}>+</Button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="text-sm text-muted-foreground">إضافات: {getProductsTotal().toFixed(1)} دينار</div>
 
                   <div className="pt-4 border-t">
                     <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
@@ -517,7 +681,7 @@ export default function BirthdayPage() {
                     {selectedTheme && (
                       <div className="text-center sm:text-right">
                         <p className="text-xs text-muted-foreground">الإجمالي</p>
-                        <p className="font-bold text-2xl text-accent">{selectedTheme.price} د</p>
+                        <p className="font-bold text-2xl text-accent">{((Number(selectedTheme.price) || 0) + getProductsTotal()).toFixed(1)} د</p>
                       </div>
                     )}
                     <Button

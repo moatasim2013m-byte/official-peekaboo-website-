@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema({
   email_verify_expires: { type: Date, default: null },
   reset_token: { type: String },
   reset_token_expires: { type: Date },
+  lastWinbackAt: { type: Date },
   created_at: { type: Date, default: Date.now }
 });
 

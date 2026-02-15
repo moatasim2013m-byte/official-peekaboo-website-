@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
 import { useTranslation } from "./i18n/useT";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -178,6 +179,7 @@ function AppRoutes() {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <AppRoutes />
         <Toaster
