@@ -12,7 +12,7 @@ import { Label } from '../components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import { format, addDays, startOfDay } from 'date-fns';
-import { Cake, Users, Loader2, AlertCircle, Sparkles, Copy } from 'lucide-react';
+import { Cake, Users, Loader2, AlertCircle, Sparkles, Copy, WandSparkles } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import mascotImg from '../assets/mascot.png';
 
@@ -39,6 +39,8 @@ export default function BirthdayPage() {
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiGeneratedThemeUrl, setAiGeneratedThemeUrl] = useState('');
   const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiCopyGenerating, setAiCopyGenerating] = useState(false);
+  const [aiInviteResult, setAiInviteResult] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -338,6 +340,47 @@ export default function BirthdayPage() {
       isAiGenerated: true
     });
     toast.success('تم اختيار الثيم المولد بالذكاء الاصطناعي');
+  };
+
+  const handleGenerateInviteCopy = async () => {
+    if (!isAuthenticated) {
+      toast.error('الرجاء تسجيل الدخول أولاً');
+      navigate('/login');
+      return;
+    }
+
+    const childObj = children.find((child) => child.id === selectedChild);
+
+    setAiCopyGenerating(true);
+    try {
+      const response = await api.post('/ai/invite', {
+        childName: childObj?.name || undefined,
+        age: childObj?.age || undefined,
+        partyDate: selectedSlot ? `${selectedSlot.date} ${selectedSlot.start_time}` : undefined,
+        partyLocation: 'Peekaboo',
+        partyTheme: selectedTheme?.name_ar || selectedTheme?.name || undefined,
+        extraNotes: specialNotes || undefined
+      });
+
+      setAiInviteResult(response.data);
+      toast.success('تم إنشاء نصوص الدعوة بنجاح');
+    } catch (error) {
+      const apiMessage = error.response?.data?.error;
+      toast.error(apiMessage || 'تعذر إنشاء النصوص حالياً');
+    } finally {
+      setAiCopyGenerating(false);
+    }
+  };
+
+  const handleCopyText = async (value, label) => {
+    if (!value) return;
+
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success(`تم نسخ ${label}`);
+    } catch (error) {
+      toast.error('تعذر النسخ، الرجاء المحاولة مرة أخرى');
+    }
   };
 
   const minDate = addDays(startOfDay(new Date()), getBirthdayMinLeadDays());
@@ -672,6 +715,65 @@ export default function BirthdayPage() {
                   )}
 
                   <div className="text-sm text-muted-foreground">إضافات: {getProductsTotal().toFixed(1)} دينار</div>
+
+                  <div className="rounded-2xl border bg-muted/30 p-4 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="font-semibold">مولد نص الدعوة وكابشن إنستغرام</p>
+                        <p className="text-xs text-muted-foreground">5 مرات يومياً لكل مستخدم</p>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={handleGenerateInviteCopy}
+                        disabled={aiCopyGenerating}
+                        className="rounded-full"
+                      >
+                        {aiCopyGenerating ? <><Loader2 className="ml-2 h-4 w-4 animate-spin" />جاري الإنشاء...</> : <><WandSparkles className="ml-2 h-4 w-4" />توليد النصوص</>}
+                      </Button>
+                    </div>
+
+                    {aiInviteResult && (
+                      <div className="space-y-3">
+                        <div className="rounded-xl bg-background border p-3">
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <p className="text-sm font-semibold">الدعوة بالعربية</p>
+                            <Button type="button" size="sm" variant="outline" onClick={() => handleCopyText(aiInviteResult.inviteArabic, 'الدعوة العربية')}><Copy className="ml-1 h-4 w-4" />نسخ</Button>
+                          </div>
+                          <p className="text-sm whitespace-pre-wrap">{aiInviteResult.inviteArabic}</p>
+                        </div>
+
+                        {aiInviteResult.inviteEnglish && (
+                          <div className="rounded-xl bg-background border p-3" dir="ltr">
+                            <div className="flex items-center justify-between gap-2 mb-2">
+                              <p className="text-sm font-semibold">English Invite</p>
+                              <Button type="button" size="sm" variant="outline" onClick={() => handleCopyText(aiInviteResult.inviteEnglish, 'English invite')}><Copy className="ml-1 h-4 w-4" />Copy</Button>
+                            </div>
+                            <p className="text-sm whitespace-pre-wrap">{aiInviteResult.inviteEnglish}</p>
+                          </div>
+                        )}
+
+                        <div className="rounded-xl bg-background border p-3">
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <p className="text-sm font-semibold">كابشن إنستغرام</p>
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleCopyText(`${aiInviteResult.igCaptionArabic}
+
+${(aiInviteResult.hashtags || []).join(' ')}`, 'الكابشن والهاشتاغات')}
+                            >
+                              <Copy className="ml-1 h-4 w-4" />نسخ
+                            </Button>
+                          </div>
+                          <p className="text-sm whitespace-pre-wrap">{aiInviteResult.igCaptionArabic}</p>
+                          {(aiInviteResult.hashtags || []).length > 0 && (
+                            <p className="text-xs text-muted-foreground mt-2">{aiInviteResult.hashtags.join(' ')}</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="pt-4 border-t">
                     <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
