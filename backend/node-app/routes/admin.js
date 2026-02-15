@@ -15,28 +15,7 @@ const Theme = require('../models/Theme');
 const Settings = require('../models/Settings');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { sendEmail, emailTemplates } = require('../utils/email');
-const loyaltyRouter = require('./loyalty');
-const { awardPoints } = loyaltyRouter;
-
-const DEV_ENVIRONMENTS = new Set(['development', 'dev', 'local', 'test']);
-
-const isLoyaltyDuplicateError = (error) => {
-  return error?.code === 'LOYALTY_DUPLICATE_REFERENCE' || error?.code === 11000;
-};
-
-const maybeAwardLoyaltyPoints = async ({ userId, totalJD, reason, refType, refId }) => {
-  const points = Math.round(Number(totalJD || 0) * 10);
-  if (!userId || points <= 0) return;
-
-  try {
-    await awardPoints(userId, points, reason, refType, refId);
-    if (DEV_ENVIRONMENTS.has(process.env.NODE_ENV)) {
-      console.log('LOYALTY_POINTS_AWARDED', { userId: userId.toString(), refType, refId, points });
-    }
-  } catch (error) {
-    if (!isLoyaltyDuplicateError(error)) throw error;
-  }
-};
+const { awardPoints } = require('../utils/loyalty');
 
 const router = express.Router();
 
@@ -452,16 +431,15 @@ router.put('/bookings/hourly/:id', async (req, res) => {
     const becamePaid = wasPending && booking.payment_status === 'paid';
     const becameConfirmed = previousStatus !== 'confirmed' && booking.status === 'confirmed';
     if (becamePaid || becameConfirmed) {
-      const totalJD = Number(booking.amount) || 0;
-      const points = Math.round(totalJD * 10);
-      await awardPoints({
-        userId: booking.user_id?._id || booking.user_id,
-        refType: 'hourly',
-        refId: booking._id.toString(),
-        type: 'hourly',
+      const totalJd = Number(booking.amount) || 0;
+      const points = Math.round(totalJd * 10);
+      await awardPoints(
+        booking.user_id?._id || booking.user_id,
         points,
-        description: `Earned ${points} points from hourly booking confirmation`
-      });
+        'Earned points from hourly booking confirmation',
+        'hourly',
+        booking._id.toString()
+      );
     }
     if (becamePaid && booking.user_id?.email) {
       try {
@@ -506,16 +484,15 @@ router.put('/bookings/birthday/:id', async (req, res) => {
     const becamePaid = wasPending && booking.payment_status === 'paid';
     const becameConfirmed = previousStatus !== 'confirmed' && booking.status === 'confirmed';
     if (becamePaid || becameConfirmed) {
-      const totalJD = Number(booking.amount) || 0;
-      const points = Math.round(totalJD * 10);
-      await awardPoints({
-        userId: booking.user_id?._id || booking.user_id,
-        refType: 'birthday',
-        refId: booking._id.toString(),
-        type: 'birthday',
+      const totalJd = Number(booking.amount) || 0;
+      const points = Math.round(totalJd * 10);
+      await awardPoints(
+        booking.user_id?._id || booking.user_id,
         points,
-        description: `Earned ${points} points from birthday booking confirmation`
-      });
+        'Earned points from birthday booking confirmation',
+        'birthday',
+        booking._id.toString()
+      );
     }
     if (becamePaid && booking.user_id?.email) {
       try {
@@ -591,16 +568,15 @@ router.put('/subscriptions/:id/payment-confirmation', async (req, res) => {
 
     const becamePaid = wasPending && subscription.payment_status === 'paid';
     if (becamePaid) {
-      const totalJD = Number(subscription.plan_id?.price) || 0;
-      const points = Math.round(totalJD * 10);
-      await awardPoints({
-        userId: subscription.user_id?._id || subscription.user_id,
-        refType: 'subscription',
-        refId: subscription._id.toString(),
-        type: 'subscription',
+      const totalJd = Number(subscription.plan_id?.price) || 0;
+      const points = Math.round(totalJd * 10);
+      await awardPoints(
+        subscription.user_id?._id || subscription.user_id,
         points,
-        description: `Earned ${points} points from subscription payment confirmation`
-      });
+        'Earned points from subscription payment confirmation',
+        'subscription',
+        subscription._id.toString()
+      );
     }
     if (becamePaid && subscription.user_id?.email) {
       try {
