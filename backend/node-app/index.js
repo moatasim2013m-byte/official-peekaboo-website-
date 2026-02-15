@@ -141,6 +141,7 @@ const slotsRoutes = require('./routes/slots');
 const bookingsRoutes = require('./routes/bookings');
 const subscriptionsRoutes = require('./routes/subscriptions');
 const loyaltyRoutes = require('./routes/loyalty');
+const adminWinbackRoutes = require('./routes/adminWinback');
 const adminRoutes = require('./routes/admin');
 const adminCronRoutes = require('./routes/adminCron');
 const staffRoutes = require('./routes/staff');
@@ -148,6 +149,7 @@ const paymentsRoutes = require('./routes/payments');
 const galleryRoutes = require('./routes/gallery');
 const profileRoutes = require('./routes/profile');
 const themesRoutes = require('./routes/themes');
+const faqBotRoutes = require('./routes/faqBot');
 
 // Routes
 // Apply strict auth limiter to sensitive endpoints
@@ -166,6 +168,7 @@ app.use('/api/payments', paymentsRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/themes', themesRoutes);
+app.use('/api/bot', faqBotRoutes);
 
 // Public settings endpoint (for homepage hero config)
 const Settings = require('./models/Settings');

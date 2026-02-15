@@ -90,6 +90,8 @@ export default function AdminPage() {
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [customerDetails, setCustomerDetails] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [productForm, setProductForm] = useState({ nameAr: '', nameEn: '', sku: '', priceJD: '', imageUrl: '', active: true, stockQty: '' });
   const [customerDialogOpen, setCustomerDialogOpen] = useState(false);
   const [customerDetailsOpen, setCustomerDetailsOpen] = useState(false);
   const [newCustomer, setNewCustomer] = useState({ name: '', email: '', phone: '' });
@@ -400,6 +402,50 @@ export default function AdminPage() {
     }
   };
 
+
+  const fetchProducts = async () => {
+    try {
+      const response = await api.get('/admin/products');
+      setProducts(response.data.products || []);
+    } catch (error) {
+      toast.error('فشل تحميل المنتجات');
+    }
+  };
+
+  const handleCreateProduct = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post('/admin/products', {
+        ...productForm,
+        priceJD: Number(productForm.priceJD),
+        stockQty: productForm.stockQty === '' ? undefined : Number(productForm.stockQty)
+      });
+      toast.success('تم إضافة المنتج');
+      setProductForm({ nameAr: '', nameEn: '', sku: '', priceJD: '', imageUrl: '', active: true, stockQty: '' });
+      fetchProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'فشل إضافة المنتج');
+    }
+  };
+
+  const handleUpdateProduct = async (product) => {
+    try {
+      await api.patch(`/admin/products/${product.id}`, {
+        nameAr: product.nameAr,
+        nameEn: product.nameEn,
+        sku: product.sku,
+        priceJD: Number(product.priceJD),
+        imageUrl: product.imageUrl || '',
+        active: product.active,
+        stockQty: product.stockQty === '' || product.stockQty === null ? undefined : Number(product.stockQty)
+      });
+      toast.success('تم تحديث المنتج');
+      fetchProducts();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'فشل تحديث المنتج');
+    }
+  };
+
   const handleTabChange = (tab) => {
     setActiveTab(tab);
     setActiveFilter(null); // Reset filter when manually changing tabs
@@ -408,6 +454,7 @@ export default function AdminPage() {
     if (tab === 'hourly') fetchHourlyBookings();
     if (tab === 'birthday') fetchBirthdayBookings();
     if (tab === 'subscriptions') fetchSubscriptions();
+    if (tab === 'products') fetchProducts();
   };
 
   // Dashboard card click handlers
@@ -418,6 +465,7 @@ export default function AdminPage() {
     if (tab === 'hourly') fetchHourlyBookings();
     if (tab === 'birthday') fetchBirthdayBookings();
     if (tab === 'subscriptions') fetchSubscriptions();
+    if (tab === 'products') fetchProducts();
   };
 
   // Filter helpers
@@ -876,6 +924,9 @@ export default function AdminPage() {
             </TabsTrigger>
             <TabsTrigger value="themes" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <Cake className="h-4 w-4" /> Themes
+            </TabsTrigger>
+            <TabsTrigger value="products" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
+              <Gift className="h-4 w-4" /> Products
             </TabsTrigger>
             <TabsTrigger value="gallery" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <Image className="h-4 w-4" /> Gallery
@@ -1733,6 +1784,49 @@ export default function AdminPage() {
           </TabsContent>
 
           {/* Gallery */}
+
+          <TabsContent value="products">
+            <Card className="rounded-2xl">
+              <CardHeader>
+                <CardTitle>إدارة الإضافات (الجوارب)</CardTitle>
+                <CardDescription>أنشئ وعدّل منتجات الإضافات المعروضة في صفحة الحجز.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <form onSubmit={handleCreateProduct} className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <Input placeholder="الاسم عربي" value={productForm.nameAr} onChange={(e) => setProductForm({ ...productForm, nameAr: e.target.value })} />
+                  <Input placeholder="Name EN" value={productForm.nameEn} onChange={(e) => setProductForm({ ...productForm, nameEn: e.target.value })} />
+                  <Input placeholder="SKU" value={productForm.sku} onChange={(e) => setProductForm({ ...productForm, sku: e.target.value })} />
+                  <Input type="number" step="0.01" placeholder="السعر" value={productForm.priceJD} onChange={(e) => setProductForm({ ...productForm, priceJD: e.target.value })} />
+                  <Input placeholder="Image URL" value={productForm.imageUrl} onChange={(e) => setProductForm({ ...productForm, imageUrl: e.target.value })} />
+                  <Input type="number" placeholder="الكمية (اختياري)" value={productForm.stockQty} onChange={(e) => setProductForm({ ...productForm, stockQty: e.target.value })} />
+                  <div className="md:col-span-3 flex items-center justify-between">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" checked={productForm.active} onChange={(e) => setProductForm({ ...productForm, active: e.target.checked })} />
+                      فعال
+                    </label>
+                    <Button type="submit" className="rounded-full">إضافة منتج</Button>
+                  </div>
+                </form>
+
+                <div className="space-y-3">
+                  {products.map((product) => (
+                    <div key={product.id} className="grid grid-cols-1 md:grid-cols-6 gap-2 border rounded-xl p-3">
+                      <Input value={product.nameAr || ''} onChange={(e) => setProducts((prev) => prev.map((p) => p.id === product.id ? { ...p, nameAr: e.target.value } : p))} />
+                      <Input value={product.nameEn || ''} onChange={(e) => setProducts((prev) => prev.map((p) => p.id === product.id ? { ...p, nameEn: e.target.value } : p))} />
+                      <Input value={product.sku || ''} onChange={(e) => setProducts((prev) => prev.map((p) => p.id === product.id ? { ...p, sku: e.target.value } : p))} />
+                      <Input type="number" step="0.01" value={product.priceJD ?? ''} onChange={(e) => setProducts((prev) => prev.map((p) => p.id === product.id ? { ...p, priceJD: e.target.value } : p))} />
+                      <label className="flex items-center gap-2 text-sm">
+                        <input type="checkbox" checked={!!product.active} onChange={(e) => setProducts((prev) => prev.map((p) => p.id === product.id ? { ...p, active: e.target.checked } : p))} />
+                        فعال
+                      </label>
+                      <Button type="button" variant="outline" onClick={() => handleUpdateProduct(product)}>حفظ</Button>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="gallery">
             <Card className="rounded-2xl">
               <CardHeader className="pb-2">

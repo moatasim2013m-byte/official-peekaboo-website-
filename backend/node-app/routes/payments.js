@@ -4,7 +4,11 @@ const crypto = require('crypto');
 const PaymentTransaction = require('../models/PaymentTransaction');
 const Settings = require('../models/Settings');
 const TimeSlot = require('../models/TimeSlot');
+const Product = require('../models/Product');
 const { authMiddleware } = require('../middleware/auth');
+const loyaltyRouter = require('./loyalty');
+const { awardPoints } = loyaltyRouter;
+const { validateCoupon } = require('../utils/coupons');
 
 const router = express.Router();
 
@@ -15,6 +19,37 @@ const PAYMENT_PROVIDERS = {
 };
 
 const paymentProvider = (process.env.PAYMENT_PROVIDER || PAYMENT_PROVIDERS.MANUAL).toLowerCase();
+
+const DEV_ENVIRONMENTS = new Set(['development', 'dev', 'local', 'test']);
+
+const isLoyaltyDuplicateError = (error) => {
+  return error?.code === 'LOYALTY_DUPLICATE_REFERENCE' || error?.code === 11000;
+};
+
+const maybeAwardProductLoyaltyPoints = async (transaction) => {
+  const points = Math.round(Number(transaction?.amount || 0) * 10);
+  if (!transaction?.user_id || points <= 0) return;
+
+  try {
+    await awardPoints(
+      transaction.user_id,
+      points,
+      'نقاط على شراء منتج',
+      'product',
+      transaction._id.toString()
+    );
+    if (DEV_ENVIRONMENTS.has(process.env.NODE_ENV)) {
+      console.log('LOYALTY_POINTS_AWARDED', {
+        userId: transaction.user_id.toString(),
+        refType: 'product',
+        refId: transaction._id.toString(),
+        points
+      });
+    }
+  } catch (error) {
+    if (!isLoyaltyDuplicateError(error)) throw error;
+  }
+};
 
 // Initialize Stripe when explicitly selected.
 let stripe = null;
@@ -120,6 +155,50 @@ const getSubscriptionPrice = async (planId) => {
   return parseFloat(plan?.price) || 50.00;
 };
 
+const buildLineItems = async (lineItems = []) => {
+  if (!Array.isArray(lineItems) || lineItems.length === 0) {
+    return { normalizedLineItems: [], productsTotal: 0 };
+  }
+
+  const quantityByProduct = new Map();
+  lineItems.forEach((item) => {
+    const productId = (item?.productId || item?.product_id || '').toString().trim();
+    const qty = parseInt(item?.quantity, 10) || 0;
+    if (!productId || qty <= 0) return;
+    quantityByProduct.set(productId, (quantityByProduct.get(productId) || 0) + qty);
+  });
+
+  const productIds = [...quantityByProduct.keys()];
+  if (productIds.length === 0) return { normalizedLineItems: [], productsTotal: 0 };
+
+  const products = await Product.find({ _id: { $in: productIds }, active: true });
+  const productsMap = new Map(products.map((product) => [product._id.toString(), product]));
+
+  const normalizedLineItems = [];
+  let productsTotal = 0;
+
+  quantityByProduct.forEach((quantity, productId) => {
+    const product = productsMap.get(productId);
+    if (!product) return;
+
+    const unitPriceJD = Number(product.priceJD) || 0;
+    const lineTotalJD = unitPriceJD * quantity;
+    productsTotal += lineTotalJD;
+
+    normalizedLineItems.push({
+      productId: product._id.toString(),
+      sku: product.sku,
+      nameAr: product.nameAr,
+      nameEn: product.nameEn,
+      unitPriceJD,
+      quantity,
+      lineTotalJD
+    });
+  });
+
+  return { normalizedLineItems, productsTotal };
+};
+
 // Get hourly pricing info (public endpoint for frontend)
 router.get('/hourly-pricing', async (req, res) => {
   try {
@@ -184,14 +263,19 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       });
     }
 
-    const { type, reference_id, origin_url, duration_hours, custom_notes, timeMode } = req.body;
+    const { type, reference_id, origin_url, duration_hours, custom_notes, timeMode, lineItems, coupon_code } = req.body;
 
     if (!type || !origin_url) {
       return res.status(400).json({ error: 'type and origin_url are required' });
     }
 
+    const { normalizedLineItems, productsTotal } = await buildLineItems(lineItems);
+
     let amount;
     let metadata = { type, user_id: req.userId.toString() };
+    if (normalizedLineItems.length > 0) {
+      metadata.line_items = JSON.stringify(normalizedLineItems);
+    }
 
     // Get amount from server-side pricing
     switch (type) {
@@ -212,7 +296,7 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
         }
 
         const basePrice = await getHourlyPrice(hours, slotStartTime);
-        amount = basePrice * childCount;
+        amount = (basePrice * childCount) + productsTotal;
         metadata.slot_id = reference_id;
         metadata.duration_hours = hours;
         metadata.child_ids = JSON.stringify(childIds);
@@ -224,7 +308,7 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
         if (!req.body.theme_id) {
           return res.status(400).json({ error: 'theme_id required for birthday booking' });
         }
-        amount = await getBirthdayThemePrice(req.body.theme_id);
+        amount = (await getBirthdayThemePrice(req.body.theme_id)) + productsTotal;
         metadata.slot_id = reference_id;
         metadata.theme_id = req.body.theme_id;
         break;
@@ -246,6 +330,22 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       metadata.child_ids = JSON.stringify(req.body.child_ids);
     } else if (req.body.child_id) {
       metadata.child_ids = JSON.stringify([req.body.child_id]);
+    }
+
+    // Apply coupon discount when provided
+    if (coupon_code) {
+      const couponValidation = await validateCoupon({
+        code: coupon_code,
+        amount,
+        type
+      });
+      if (!couponValidation.valid) {
+        return res.status(400).json({ error: couponValidation.message });
+      }
+      const { normalizedCode, discountAmount, finalAmount } = couponValidation;
+      amount = finalAmount;
+      metadata.coupon_code = normalizedCode;
+      metadata.discount_amount = discountAmount;
     }
 
     // Ensure amount is a valid float
@@ -384,6 +484,10 @@ router.get('/status/:sessionId', authMiddleware, async (req, res) => {
 
         transaction.updated_at = new Date();
         await transaction.save();
+
+        if (transaction.status === 'paid' && transaction.type === 'product') {
+          await maybeAwardProductLoyaltyPoints(transaction);
+        }
       }
 
       return res.json({
@@ -466,6 +570,10 @@ router.post('/capital-bank/callback', async (req, res) => {
     transaction.updated_at = new Date();
     await transaction.save();
 
+    if (transaction.status === 'paid' && transaction.type === 'product') {
+      await maybeAwardProductLoyaltyPoints(transaction);
+    }
+
     return res.json({ received: true, session_id: order_id, status: transaction.status });
   } catch (error) {
     console.error('Capital Bank callback error:', error);
@@ -489,6 +597,10 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         transaction.payment_id = session.payment_intent;
         transaction.updated_at = new Date();
         await transaction.save();
+
+        if (transaction.type === 'product') {
+          await maybeAwardProductLoyaltyPoints(transaction);
+        }
       }
     }
 

@@ -97,6 +97,7 @@ export default function HomePage() {
 
   const features = [
     {
+      id: 'hourly',
       icon: PlayHourIcon,
       title: 'اللعب بالساعة',
       description: 'احجز جلسات لعب لأطفالك واختر الوقت المثالي!',
@@ -107,6 +108,7 @@ export default function HomePage() {
       buttonVariant: 'btn-sunrise'
     },
     {
+      id: 'birthdays',
       icon: BirthdayCakeIcon,
       title: 'حفلات أعياد الميلاد',
       description: 'احتفل مع ثيمات رائعة وحفلات مخصصة!',
@@ -117,6 +119,7 @@ export default function HomePage() {
       buttonVariant: 'btn-cotton-candy'
     },
     {
+      id: 'subscriptions',
       icon: CrownIcon,
       title: 'الاشتراكات',
       description: 'وفّر مع باقات الزيارات بصلاحية 30 يوم!',
@@ -127,6 +130,7 @@ export default function HomePage() {
       buttonVariant: 'btn-sunshine'
     },
     {
+      id: 'schools',
       icon: SchoolBusIcon,
       title: 'المدارس والمجموعات',
       description: 'رحلات مدرسية وبرامج لعب آمنة للمجموعات',
@@ -239,7 +243,7 @@ export default function HomePage() {
         <div className="sky-sparkle sparkle-5"></div>
       </div>
 
-      <section className="home-hero-sky pb-hero pb-section py-14 md:py-24">
+      <section id="home" className="home-hero-sky pb-hero pb-section py-14 md:py-24">
         <div className="hero-cloud-layer" aria-hidden="true">
           <div className="sky-cloud cloud-1"></div>
           <div className="sky-cloud cloud-2"></div>
@@ -397,6 +401,7 @@ export default function HomePage() {
             {features.map((feature, index) => (
               <Card 
                 key={index} 
+                id={feature.id}
                 className={`pk-card pb-card feature-card ${feature.disabled ? 'opacity-70' : ''}`}
                 data-testid={`feature-card-${index}`}
               >

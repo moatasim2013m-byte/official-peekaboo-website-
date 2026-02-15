@@ -7,6 +7,7 @@ import { Calendar } from '../components/ui/calendar';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
+import { Input } from '../components/ui/input';
 import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
 import { Clock, Users, Loader2, AlertCircle, Star, Sun, Moon } from 'lucide-react';
@@ -71,6 +72,11 @@ export default function TicketsPage() {
   const [loading, setLoading] = useState(false);
   const [pricing, setPricing] = useState([]);
   const [extraHourText, setExtraHourText] = useState('');
+  const [products, setProducts] = useState([]);
+  const [selectedProductQty, setSelectedProductQty] = useState({});
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
 
   // Set page title
   useEffect(() => {
@@ -79,6 +85,7 @@ export default function TicketsPage() {
 
   // Fetch children on mount
   useEffect(() => {
+    fetchProducts();
     if (isAuthenticated) {
       fetchChildren();
     }
@@ -144,6 +151,39 @@ export default function TicketsPage() {
       }
     }
   };
+
+
+  const fetchProducts = async () => {
+    try {
+      const response = await api.get('/products?active=true');
+      setProducts(response.data.products || []);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    }
+  };
+
+  const updateProductQty = (productId, qty) => {
+    setSelectedProductQty((prev) => {
+      const next = { ...prev };
+      if (qty <= 0) {
+        delete next[productId];
+      } else {
+        next[productId] = qty;
+      }
+      return next;
+    });
+  };
+
+  const buildLineItems = () => products
+    .filter((product) => (selectedProductQty[product.id] || 0) > 0)
+    .map((product) => ({
+      productId: product.id,
+      quantity: selectedProductQty[product.id]
+    }));
+
+  const getProductsTotal = () => products.reduce((sum, product) => (
+    sum + ((selectedProductQty[product.id] || 0) * (Number(product.priceJD) || 0))
+  ), 0);
 
   const fetchChildren = async () => {
     try {
@@ -226,9 +266,8 @@ export default function TicketsPage() {
     setLoading(true);
     try {
       // Calculate amount using Happy Hour logic
-      const amount = selectedSlot 
-        ? parseFloat(getSlotTotalPrice(selectedSlot.start_time)) * Math.max(1, selectedChildren.length)
-        : getSelectedPrice();
+      const amount = getFinalTotal();
+      const lineItems = buildLineItems();
       
       if (paymentMethod === 'card') {
         // Stripe checkout flow
@@ -240,7 +279,9 @@ export default function TicketsPage() {
           slot_start_time: selectedSlot.start_time, // Pass slot time for Happy Hour calculation
           custom_notes: customNotes.trim(),
           origin_url: window.location.origin,
-          timeMode: timeMode // Pass timeMode for server-side pricing
+          timeMode: timeMode, // Pass timeMode for server-side pricing
+          lineItems,
+          coupon_code: appliedCoupon?.code
         });
         window.location.href = response.data.url;
       } else {
@@ -251,7 +292,9 @@ export default function TicketsPage() {
           duration_hours: selectedDuration,
           slot_start_time: selectedSlot.start_time, // Pass slot time for Happy Hour calculation
           custom_notes: customNotes.trim(),
-          payment_method: paymentMethod
+          payment_method: paymentMethod,
+          lineItems,
+          coupon_code: appliedCoupon?.code
         });
         
         // Get child name(s) for confirmation
@@ -311,6 +354,18 @@ export default function TicketsPage() {
     return selected ? selected.price / selected.hours : null;
   };
 
+
+  const getBaseBookingTotal = () => {
+    if (selectedSlot) {
+      return parseFloat(getSlotTotalPrice(selectedSlot.start_time)) * Math.max(1, selectedChildren.length);
+    }
+    return getSelectedPrice();
+  };
+
+  const getGrandTotal = () => getBaseBookingTotal() + getProductsTotal();
+  const getDiscountAmount = () => Number(appliedCoupon?.discount_amount || 0);
+  const getFinalTotal = () => Math.max(0, getGrandTotal() - getDiscountAmount());
+
   const getSlotTotalPrice = (startTime) => {
     const pricePerHour = getSlotPrice(startTime);
     if (!pricePerHour) return null;
@@ -323,6 +378,32 @@ export default function TicketsPage() {
         ? prev.filter(id => id !== childId)
         : [...prev, childId]
     );
+  };
+
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      toast.error('الرجاء إدخال كود الخصم');
+      return;
+    }
+
+    setApplyingCoupon(true);
+    try {
+      const response = await api.post('/coupons/validate', {
+        code: couponCode.trim(),
+        amount: getGrandTotal(),
+        type: 'hourly'
+      });
+      setAppliedCoupon({
+        code: response.data.coupon.code,
+        discount_amount: response.data.discount_amount
+      });
+      toast.success(`تم تطبيق الكوبون (${response.data.discount_amount.toFixed(1)} دينار خصم)`);
+    } catch (error) {
+      setAppliedCoupon(null);
+      toast.error(error.response?.data?.error || 'فشل تطبيق الكوبون');
+    } finally {
+      setApplyingCoupon(false);
+    }
   };
 
   const todayStart = new Date();
@@ -612,6 +693,30 @@ export default function TicketsPage() {
                   </div>
                 </div>
 
+                {products.length > 0 && (
+                  <div>
+                    <Label className="block text-sm font-medium mb-2">إضافات</Label>
+                    <div className="space-y-2">
+                      {products.map((product) => {
+                        const qty = selectedProductQty[product.id] || 0;
+                        return (
+                          <div key={product.id} className="flex items-center justify-between rounded-xl border p-3">
+                            <div>
+                              <p className="font-medium">{product.nameAr}</p>
+                              <p className="text-xs text-muted-foreground">{product.priceJD} د</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button type="button" variant="outline" size="sm" onClick={() => updateProductQty(product.id, qty - 1)}>-</Button>
+                              <span className="min-w-6 text-center">{qty}</span>
+                              <Button type="button" variant="outline" size="sm" onClick={() => updateProductQty(product.id, qty + 1)}>+</Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <Label htmlFor="custom-notes" className="block text-sm font-medium mb-2">ملاحظات (اختياري)</Label>
                   <Textarea
@@ -628,6 +733,24 @@ export default function TicketsPage() {
                   <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
                 </div>
 
+                <div>
+                  <Label className="block text-sm font-medium mb-2">كوبون الخصم</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="مثال: PEEK10"
+                      className="rounded-xl"
+                    />
+                    <Button type="button" variant="outline" onClick={handleApplyCoupon} disabled={applyingCoupon}>
+                      {applyingCoupon ? '...' : 'تطبيق'}
+                    </Button>
+                  </div>
+                  {appliedCoupon && (
+                    <p className="text-sm text-green-600 mt-2">تم تطبيق الكوبون: {appliedCoupon.code}</p>
+                  )}
+                </div>
+
                 {paymentMethod && (
                   <div className="booking-summary">
                     <p className="text-sm text-muted-foreground mb-1">ملخص الحجز</p>
@@ -637,6 +760,9 @@ export default function TicketsPage() {
                         : `${selectedDuration} ساعة × ${selectedChildren.length || 1} طفل = ${getSelectedPrice()} دينار`
                       }
                     </p>
+                    <p className="text-sm text-muted-foreground">إضافات: {getProductsTotal().toFixed(1)} دينار</p>
+                    <p className="text-sm text-green-700">الخصم: -{getDiscountAmount().toFixed(1)} دينار</p>
+                    <p className="font-semibold">الإجمالي: {getFinalTotal().toFixed(1)} دينار</p>
                   </div>
                 )}
 
@@ -653,7 +779,7 @@ export default function TicketsPage() {
                         جاري المعالجة...
                       </>
                     ) : (
-                      <span>احجز - {getSelectedPrice()} د</span>
+                      <span>احجز - {getFinalTotal().toFixed(1)} د</span>
                     )}
                   </Button>
                 </div>

@@ -484,6 +484,39 @@ const emailTemplates = {
       </body>
       </html>
     `
+  }),
+
+  // Win-back email (Arabic-first)
+  winback: ({ userName, bookingUrl, couponPlaceholder = 'COUPON-CODE' }) => ({
+    subject: 'اشتقنالك في Peekaboo 💛 | We miss you',
+    html: `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head>
+        <meta charset="UTF-8">
+        <style>
+          body { font-family: 'Cairo', 'Segoe UI', Arial, sans-serif; background: #f5f8ff; padding: 20px; direction: rtl; color: #1f2937; }
+          .container { max-width: 620px; margin: 0 auto; background: white; border-radius: 20px; padding: 28px; box-shadow: 0 10px 30px rgba(30, 64, 175, 0.08); }
+          .cta { display: inline-block; background: #2563eb; color: #ffffff !important; text-decoration: none; padding: 12px 22px; border-radius: 999px; font-weight: 700; }
+          .coupon { background: #fffbeb; border: 1px dashed #f59e0b; border-radius: 12px; padding: 12px; margin: 14px 0; text-align: center; font-weight: 700; }
+          .muted { color: #6b7280; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <p>مرحباً ${userName || 'أهل Peekaboo'} 👋</p>
+          <p>اشتقنالك! من زمان ما شفناك في بيكابو، وحابين نرحّب فيكم من جديد بجلسة مليانة لعب وضحك 🎉</p>
+          <p style="text-align:center; margin: 24px 0;"><a class="cta" href="${bookingUrl}">احجز زيارتك الآن</a></p>
+          <div class="coupon">كود خصم اختياري (قريباً): ${couponPlaceholder}</div>
+          <hr style="border:none;border-top:1px solid #e5e7eb; margin:20px 0;" />
+          <p><strong>Hello ${userName || 'there'},</strong></p>
+          <p>We miss you at Peekaboo! Come back for more fun and smiles.</p>
+          <p><a href="${bookingUrl}">Book your next visit</a></p>
+          <p class="muted">Peekaboo Team 🎪</p>
+        </div>
+      </body>
+      </html>
+    `
   })
 };
 
