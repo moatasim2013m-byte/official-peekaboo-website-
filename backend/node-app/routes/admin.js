@@ -977,8 +977,13 @@ router.get('/customers/:id', async (req, res) => {
       lastBookingDate = lastHourly?.created_at || lastBirthday?.created_at || null;
     }
 
-    // Get active subscriptions
-    const activeSubscriptions = await UserSubscription.countDocuments({ user_id: req.params.id, status: 'active' });
+    // Get subscriptions summary (active + total for delete eligibility)
+    const [activeSubscriptions, totalSubscriptions] = await Promise.all([
+      UserSubscription.countDocuments({ user_id: req.params.id, status: 'active' }),
+      UserSubscription.countDocuments({ user_id: req.params.id })
+    ]);
+
+    const canDelete = hourlyCount === 0 && birthdayCount === 0 && totalSubscriptions === 0;
 
     res.json({
       customer: customer.toJSON(),
@@ -987,8 +992,10 @@ router.get('/customers/:id', async (req, res) => {
         hourly_count: hourlyCount,
         birthday_count: birthdayCount,
         active_subscriptions: activeSubscriptions,
+        total_subscriptions: totalSubscriptions,
         last_booking_date: lastBookingDate
-      }
+      },
+      can_delete: canDelete
     });
   } catch (error) {
     console.error('Get customer error:', error);
