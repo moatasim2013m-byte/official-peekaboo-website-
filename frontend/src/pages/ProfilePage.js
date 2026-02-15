@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { 
   User, Baby, Clock, Cake, Star, Gift, Plus, Edit, Trash2, 
-  QrCode, AlertTriangle, Calendar, Loader2, Phone, Settings
+  AlertTriangle, Calendar, Loader2, Phone, Settings
 } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -25,7 +25,10 @@ export default function ProfilePage() {
   const [birthdayBookings, setBirthdayBookings] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
   const [loyaltyBalance, setLoyaltyBalance] = useState(0);
+  const [loyaltyJdValue, setLoyaltyJdValue] = useState(0);
   const [loyaltyHistory, setLoyaltyHistory] = useState([]);
+  const [loyaltyLoading, setLoyaltyLoading] = useState(false);
+  const [loyaltyError, setLoyaltyError] = useState('');
   const [referralCode, setReferralCode] = useState('');
   const [referralInput, setReferralInput] = useState('');
   const [redeemingReferral, setRedeemingReferral] = useState(false);
@@ -53,40 +56,56 @@ export default function ProfilePage() {
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    try {
-      const [
-        profileRes,
-        hourlyRes,
-        birthdayRes,
-        subsRes,
-        loyaltyBalanceRes,
-        loyaltyHistoryRes,
-        referralCodeRes,
-        activeRes
-      ] = await Promise.all([
-        api.get('/profile'),
-        api.get('/bookings/hourly'),
-        api.get('/bookings/birthday'),
-        api.get('/subscriptions/my'),
-        api.get('/loyalty/balance'),
-        api.get('/loyalty/history'),
-        api.get('/referrals/my-code'),
-        api.get('/bookings/hourly/active')
-      ]);
+    setLoyaltyLoading(true);
+    setLoyaltyError('');
+    const [
+      profileRes,
+      hourlyRes,
+      birthdayRes,
+      subsRes,
+      loyaltyBalanceRes,
+      loyaltyHistoryRes,
+      referralCodeRes,
+      activeRes
+    ] = await Promise.allSettled([
+      api.get('/profile'),
+      api.get('/bookings/hourly'),
+      api.get('/bookings/birthday'),
+      api.get('/subscriptions/my'),
+      api.get('/loyalty/balance'),
+      api.get('/loyalty/history'),
+      api.get('/referrals/my-code'),
+      api.get('/bookings/hourly/active')
+    ]);
 
-      setChildren(profileRes.data.children || []);
-      setHourlyBookings(hourlyRes.data.bookings || []);
-      setBirthdayBookings(birthdayRes.data.bookings || []);
-      setSubscriptions(subsRes.data.subscriptions || []);
-      setLoyaltyBalance(loyaltyBalanceRes.data.points || 0);
-      setLoyaltyHistory(loyaltyHistoryRes.data.history || []);
-      setReferralCode(referralCodeRes.data.code || '');
-      setActiveSession(activeRes.data.active_session);
-    } catch (error) {
-      console.error('Failed to fetch profile data:', error);
-    } finally {
-      setLoading(false);
+    if (profileRes.status === 'fulfilled') setChildren(profileRes.value.data.children || []);
+    if (hourlyRes.status === 'fulfilled') setHourlyBookings(hourlyRes.value.data.bookings || []);
+    if (birthdayRes.status === 'fulfilled') setBirthdayBookings(birthdayRes.value.data.bookings || []);
+    if (subsRes.status === 'fulfilled') setSubscriptions(subsRes.value.data.subscriptions || []);
+    if (referralCodeRes.status === 'fulfilled') setReferralCode(referralCodeRes.value.data.code || '');
+    if (activeRes.status === 'fulfilled') setActiveSession(activeRes.value.data.active_session);
+
+    if (loyaltyBalanceRes.status === 'fulfilled' && loyaltyHistoryRes.status === 'fulfilled') {
+      const pointsAvailable = Number(loyaltyBalanceRes.value.data.pointsAvailable ?? loyaltyBalanceRes.value.data.points ?? 0);
+      const jdValue = Number(loyaltyBalanceRes.value.data.jdValue ?? pointsAvailable / 100);
+      const history = loyaltyHistoryRes.value.data.history || loyaltyHistoryRes.value.data.entries || [];
+
+      setLoyaltyBalance(Number.isFinite(pointsAvailable) ? pointsAvailable : 0);
+      setLoyaltyJdValue(Number.isFinite(jdValue) ? jdValue : 0);
+      setLoyaltyHistory(Array.isArray(history) ? history.slice(0, 50) : []);
+    } else {
+      setLoyaltyError('تعذر تحميل نقاط الولاء حالياً. حاول مرة أخرى لاحقاً.');
+      setLoyaltyBalance(0);
+      setLoyaltyJdValue(0);
+      setLoyaltyHistory([]);
     }
+
+    if ([profileRes, hourlyRes, birthdayRes, subsRes, referralCodeRes, activeRes].some((res) => res.status === 'rejected')) {
+      console.error('Failed to fetch some profile data');
+    }
+
+    setLoyaltyLoading(false);
+    setLoading(false);
   }, [api]);
 
   useEffect(() => {
@@ -590,39 +609,22 @@ export default function ProfilePage() {
               <CardContent className="space-y-6">
                 {/* Points Balance Card */}
                 <div className="bg-gradient-to-r from-[var(--brand-yellow)]/20 to-[var(--brand-orange)]/20 rounded-2xl p-6 text-center">
-                  <p className="text-sm text-muted-foreground mb-2">رصيد النقاط</p>
-                  <p className="text-5xl font-heading font-bold text-[var(--brand-orange)]">
-                    {loyaltyBalance}
-                  </p>
-                  <p className="text-lg text-muted-foreground mt-1">نقطة</p>
-                  
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button variant="outline" className="rounded-full mt-4 gap-2" data-testid="redeem-info-btn">
-                        <QrCode className="h-4 w-4" />
-                        طريقة الاستبدال
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="rounded-3xl" dir="rtl">
-                      <DialogHeader>
-                        <DialogTitle className="font-heading text-xl flex items-center gap-2">
-                          <Gift className="h-5 w-5 text-secondary" />
-                          طريقة استبدال النقاط
-                        </DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="bg-muted/50 rounded-2xl p-4 text-center">
-                          <QrCode className="h-12 w-12 mx-auto mb-3 text-primary" />
-                          <p className="text-lg font-medium">
-                            سيتم تفعيل الاستبدال قريباً عبر كود أو QR عند الاستقبال.
-                          </p>
-                        </div>
-                        <p className="text-sm text-muted-foreground text-center">
-                          ترقبوا التحديثات القادمة لبرنامج الولاء!
-                        </p>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
+                  <p className="text-sm text-muted-foreground mb-2">نقاطي</p>
+                  {loyaltyLoading ? (
+                    <p className="text-lg text-muted-foreground">جاري تحميل نقاطك...</p>
+                  ) : loyaltyError ? (
+                    <p className="text-lg text-destructive">{loyaltyError}</p>
+                  ) : (
+                    <>
+                      <p className="text-5xl font-heading font-bold text-[var(--brand-orange)]">
+                        {loyaltyBalance}
+                      </p>
+                      <p className="text-lg text-muted-foreground mt-1">نقطة</p>
+                      <p className="text-base text-foreground mt-3">
+                        القيمة بالدينار: {loyaltyJdValue.toFixed(2)} د.أ
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 {/* Referral */}
@@ -669,7 +671,11 @@ export default function ProfilePage() {
                 {/* History */}
                 <div>
                   <h4 className="font-heading font-bold mb-4">سجل النقاط</h4>
-                  {loyaltyHistory.length === 0 ? (
+                  {loyaltyLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">جاري تحميل سجل النقاط...</div>
+                  ) : loyaltyError ? (
+                    <div className="text-center py-8 text-destructive">{loyaltyError}</div>
+                  ) : loyaltyHistory.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground">
                       <Gift className="h-10 w-10 mx-auto mb-3 opacity-50" />
                       <p>لا يوجد سجل نقاط بعد</p>
@@ -678,15 +684,15 @@ export default function ProfilePage() {
                   ) : (
                     <div className="space-y-3">
                       {loyaltyHistory.map((entry) => (
-                        <div key={entry.id} className="flex justify-between items-center p-3 rounded-xl bg-muted/50">
+                        <div key={entry.id || entry._id || `${entry.createdAt || entry.created_at}-${entry.reason || entry.description}`} className="flex justify-between items-center p-3 rounded-xl bg-muted/50">
                           <div>
-                            <p className="font-medium">{entry.description}</p>
+                            <p className="font-medium">{entry.reason || entry.description || 'عملية نقاط'}</p>
                             <p className="text-sm text-muted-foreground">
-                              {format(new Date(entry.created_at), 'yyyy/MM/dd')}
+                              {format(new Date(entry.createdAt || entry.created_at), 'dd/MM/yyyy')}
                             </p>
                           </div>
-                          <span className={`font-bold ${entry.points > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {entry.points > 0 ? '+' : ''}{entry.points}
+                          <span className={`font-bold ${(entry.pointsDelta ?? entry.points ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {(entry.pointsDelta ?? entry.points ?? 0) >= 0 ? '+' : ''}{entry.pointsDelta ?? entry.points ?? 0}
                           </span>
                         </div>
                       ))}
