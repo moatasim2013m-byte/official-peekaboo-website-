@@ -148,7 +148,7 @@ const paymentsRoutes = require('./routes/payments');
 const galleryRoutes = require('./routes/gallery');
 const profileRoutes = require('./routes/profile');
 const themesRoutes = require('./routes/themes');
-const referralsRoutes = require('./routes/referrals');
+const faqBotRoutes = require('./routes/faqBot');
 
 // Routes
 // Apply strict auth limiter to sensitive endpoints
@@ -167,7 +167,7 @@ app.use('/api/payments', paymentsRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/themes', themesRoutes);
-app.use('/api/referrals', referralsRoutes);
+app.use('/api/bot', faqBotRoutes);
 
 // Public settings endpoint (for homepage hero config)
 const Settings = require('./models/Settings');

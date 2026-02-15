@@ -7,6 +7,7 @@ import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import { useTranslation } from "./i18n/useT";
+import FaqBotWidget from "./components/FaqBotWidget";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
@@ -182,6 +183,7 @@ function App() {
       <ScrollToTop />
       <AuthProvider>
         <AppRoutes />
+        <FaqBotWidget />
         <Toaster
           position="top-center"
           richColors
