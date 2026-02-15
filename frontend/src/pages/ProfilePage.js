@@ -29,9 +29,6 @@ export default function ProfilePage() {
   const [loyaltyHistory, setLoyaltyHistory] = useState([]);
   const [loyaltyLoading, setLoyaltyLoading] = useState(false);
   const [loyaltyError, setLoyaltyError] = useState('');
-  const [referralCode, setReferralCode] = useState('');
-  const [referralInput, setReferralInput] = useState('');
-  const [redeemingReferral, setRedeemingReferral] = useState(false);
   const [activeSession, setActiveSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [addChildOpen, setAddChildOpen] = useState(false);
@@ -65,7 +62,6 @@ export default function ProfilePage() {
       subsRes,
       loyaltyBalanceRes,
       loyaltyHistoryRes,
-      referralCodeRes,
       activeRes
     ] = await Promise.allSettled([
       api.get('/profile'),
@@ -74,7 +70,6 @@ export default function ProfilePage() {
       api.get('/subscriptions/my'),
       api.get('/loyalty/balance'),
       api.get('/loyalty/history'),
-      api.get('/referrals/my-code'),
       api.get('/bookings/hourly/active')
     ]);
 
@@ -82,12 +77,11 @@ export default function ProfilePage() {
     if (hourlyRes.status === 'fulfilled') setHourlyBookings(hourlyRes.value.data.bookings || []);
     if (birthdayRes.status === 'fulfilled') setBirthdayBookings(birthdayRes.value.data.bookings || []);
     if (subsRes.status === 'fulfilled') setSubscriptions(subsRes.value.data.subscriptions || []);
-    if (referralCodeRes.status === 'fulfilled') setReferralCode(referralCodeRes.value.data.code || '');
     if (activeRes.status === 'fulfilled') setActiveSession(activeRes.value.data.active_session);
 
     if (loyaltyBalanceRes.status === 'fulfilled' && loyaltyHistoryRes.status === 'fulfilled') {
       const pointsAvailable = Number(loyaltyBalanceRes.value.data.pointsAvailable ?? loyaltyBalanceRes.value.data.points ?? 0);
-      const jdValue = Number(loyaltyBalanceRes.value.data.jdValue ?? pointsAvailable / 100);
+      const jdValue = pointsAvailable / 100;
       const history = loyaltyHistoryRes.value.data.history || loyaltyHistoryRes.value.data.entries || [];
 
       setLoyaltyBalance(Number.isFinite(pointsAvailable) ? pointsAvailable : 0);
@@ -100,7 +94,7 @@ export default function ProfilePage() {
       setLoyaltyHistory([]);
     }
 
-    if ([profileRes, hourlyRes, birthdayRes, subsRes, referralCodeRes, activeRes].some((res) => res.status === 'rejected')) {
+    if ([profileRes, hourlyRes, birthdayRes, subsRes, activeRes].some((res) => res.status === 'rejected')) {
       console.error('Failed to fetch some profile data');
     }
 
@@ -179,41 +173,6 @@ export default function ProfilePage() {
       toast.error('فشل حفظ رقم الهاتف');
     } finally {
       setSavingPhone(false);
-    }
-  };
-
-  const handleCopyReferralCode = async () => {
-    if (!referralCode) {
-      toast.error('لم يتم إنشاء كود إحالة بعد');
-      return;
-    }
-
-    try {
-      await navigator.clipboard.writeText(referralCode);
-      toast.success('تم نسخ كود الإحالة');
-    } catch (error) {
-      toast.error('تعذر نسخ الكود، حاول مرة أخرى');
-    }
-  };
-
-  const handleRedeemReferral = async (e) => {
-    e.preventDefault();
-
-    if (!referralInput.trim()) {
-      toast.error('الرجاء إدخال كود الإحالة');
-      return;
-    }
-
-    setRedeemingReferral(true);
-    try {
-      await api.post('/referrals/redeem', { code: referralInput.trim() });
-      toast.success('تم استخدام كود الإحالة بنجاح');
-      setReferralInput('');
-      fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.error || 'تعذر استخدام كود الإحالة');
-    } finally {
-      setRedeemingReferral(false);
     }
   };
 
@@ -603,16 +562,16 @@ export default function ProfilePage() {
               <CardHeader>
                 <CardTitle className="font-heading flex items-center gap-2">
                   <Gift className="h-6 w-6 text-secondary" />
-                  برنامج الولاء
+                  نقاطي
                 </CardTitle>
                 <CardDescription>
-                  اجمع نقاط مع كل زيارة واستبدلها بعروض وخصومات.
+                  راقب رصيد نقاطك وقيمتها بالدينار.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Points Balance Card */}
                 <div className="bg-gradient-to-r from-[var(--brand-yellow)]/20 to-[var(--brand-orange)]/20 rounded-2xl p-6 text-center">
-                  <p className="text-sm text-muted-foreground mb-2">نقاطي</p>
+                  <p className="text-sm text-muted-foreground mb-2">النقاط المتاحة</p>
                   {loyaltyLoading ? (
                     <p className="text-lg text-muted-foreground">جاري تحميل نقاطك...</p>
                   ) : loyaltyError ? (
@@ -624,51 +583,10 @@ export default function ProfilePage() {
                       </p>
                       <p className="text-lg text-muted-foreground mt-1">نقطة</p>
                       <p className="text-base text-foreground mt-3">
-                        القيمة بالدينار: {loyaltyJdValue.toFixed(2)} د.أ
+                        القيمة بالدينار (JD): {loyaltyJdValue.toFixed(2)}
                       </p>
                     </>
                   )}
-                </div>
-
-                {/* Referral */}
-                <div className="space-y-4">
-                  <h4 className="font-heading font-bold">الإحالة</h4>
-                  <div className="rounded-2xl border p-4 bg-muted/40">
-                    <p className="text-sm text-muted-foreground mb-2">كود الإحالة الخاص بك</p>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                      <Input
-                        value={referralCode || '---'}
-                        readOnly
-                        className="rounded-xl font-semibold tracking-wider text-center sm:text-right"
-                        dir="ltr"
-                      />
-                      <Button
-                        type="button"
-                        onClick={handleCopyReferralCode}
-                        className="rounded-full"
-                        variant="outline"
-                      >
-                        نسخ الكود
-                      </Button>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleRedeemReferral} className="rounded-2xl border p-4 space-y-3">
-                    <Label htmlFor="referralRedeemCode">استخدام كود إحالة</Label>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-                      <Input
-                        id="referralRedeemCode"
-                        value={referralInput}
-                        onChange={(e) => setReferralInput(e.target.value)}
-                        placeholder="أدخل الكود هنا"
-                        className="rounded-xl"
-                        dir="ltr"
-                      />
-                      <Button type="submit" className="rounded-full" disabled={redeemingReferral}>
-                        {redeemingReferral ? <Loader2 className="h-4 w-4 animate-spin" /> : 'تأكيد'}
-                      </Button>
-                    </div>
-                  </form>
                 </div>
 
                 {/* History */}
@@ -691,11 +609,13 @@ export default function ProfilePage() {
                           <div>
                             <p className="font-medium">{entry.reason || entry.description || 'عملية نقاط'}</p>
                             <p className="text-sm text-muted-foreground">
-                              {format(new Date(entry.createdAt || entry.created_at), 'dd/MM/yyyy')}
+                              {entry.createdAt || entry.created_at
+                                ? format(new Date(entry.createdAt || entry.created_at), 'dd/MM/yyyy')
+                                : '--/--/----'}
                             </p>
                           </div>
                           <span className={`font-bold ${(entry.pointsDelta ?? entry.points ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {(entry.pointsDelta ?? entry.points ?? 0) >= 0 ? '+' : ''}{entry.pointsDelta ?? entry.points ?? 0}
+                            {(entry.pointsDelta ?? entry.points ?? 0) >= 0 ? '+' : '-'}{Math.abs(entry.pointsDelta ?? entry.points ?? 0)}
                           </span>
                         </div>
                       ))}
