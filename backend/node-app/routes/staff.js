@@ -161,6 +161,7 @@ router.post('/consume-visit', async (req, res) => {
     
     const subscription = await UserSubscription.findOne({
       child_id,
+      payment_status: 'paid', // Do not allow consuming visits before payment confirmation
       status: { $in: ['pending', 'active'] },
       remaining_visits: { $gt: 0 },
       $or: [
@@ -170,6 +171,21 @@ router.post('/consume-visit', async (req, res) => {
     }).populate('plan_id').populate('child_id');
 
     if (!subscription) {
+      const unpaidSubscription = await UserSubscription.findOne({
+        child_id,
+        payment_status: { $in: ['pending_cash', 'pending_cliq'] },
+        status: { $in: ['pending', 'active'] },
+        remaining_visits: { $gt: 0 },
+        $or: [
+          { expires_at: null },
+          { expires_at: { $gt: new Date() } }
+        ]
+      });
+
+      if (unpaidSubscription) {
+        return res.status(402).json({ error: 'Cannot activate subscription before payment confirmation' });
+      }
+
       return res.status(400).json({ error: 'No active subscription found for this child' });
     }
 
