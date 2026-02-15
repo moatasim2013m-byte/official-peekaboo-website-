@@ -15,7 +15,7 @@ const Theme = require('../models/Theme');
 const Settings = require('../models/Settings');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { sendEmail, emailTemplates } = require('../utils/email');
-const { awardPoints } = require('../utils/awardPoints');
+const { awardReferralForFirstConfirmedOrder } = require('../utils/referrals');
 
 const router = express.Router();
 
@@ -429,16 +429,10 @@ router.put('/bookings/hourly/:id', async (req, res) => {
     await booking.save();
 
     const becamePaid = wasPending && booking.payment_status === 'paid';
-    const becameConfirmed = previousStatus !== 'confirmed' && booking.status === 'confirmed';
-    if (becamePaid || becameConfirmed) {
-      await awardPoints({
-        userId: booking.user_id?._id || booking.user_id,
-        refType: 'hourly_booking',
-        refId: booking._id.toString(),
-        type: 'hourly',
-        description: 'Earned points from hourly booking confirmation'
-      });
+    if (becamePaid) {
+      await awardReferralForFirstConfirmedOrder(booking.user_id?._id || booking.user_id, `hourly:${booking._id}`);
     }
+
     if (becamePaid && booking.user_id?.email) {
       try {
         const template = emailTemplates.finalOrderConfirmation({
@@ -480,16 +474,10 @@ router.put('/bookings/birthday/:id', async (req, res) => {
     await booking.save();
 
     const becamePaid = wasPending && booking.payment_status === 'paid';
-    const becameConfirmed = previousStatus !== 'confirmed' && booking.status === 'confirmed';
-    if (becamePaid || becameConfirmed) {
-      await awardPoints({
-        userId: booking.user_id?._id || booking.user_id,
-        refType: 'birthday_booking',
-        refId: booking._id.toString(),
-        type: 'birthday',
-        description: 'Earned points from birthday booking confirmation'
-      });
+    if (becamePaid) {
+      await awardReferralForFirstConfirmedOrder(booking.user_id?._id || booking.user_id, `birthday:${booking._id}`);
     }
+
     if (becamePaid && booking.user_id?.email) {
       try {
         const template = emailTemplates.finalOrderConfirmation({
@@ -564,14 +552,9 @@ router.put('/subscriptions/:id/payment-confirmation', async (req, res) => {
 
     const becamePaid = wasPending && subscription.payment_status === 'paid';
     if (becamePaid) {
-      await awardPoints({
-        userId: subscription.user_id?._id || subscription.user_id,
-        refType: 'subscription_purchase',
-        refId: subscription._id.toString(),
-        type: 'subscription',
-        description: 'Earned points from subscription payment confirmation'
-      });
+      await awardReferralForFirstConfirmedOrder(subscription.user_id?._id || subscription.user_id, `subscription:${subscription._id}`);
     }
+
     if (becamePaid && subscription.user_id?.email) {
       try {
         const template = emailTemplates.finalOrderConfirmation({

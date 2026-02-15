@@ -2,12 +2,9 @@ const mongoose = require('mongoose');
 
 const productSchema = new mongoose.Schema({
   nameAr: { type: String, required: true, trim: true },
-  nameEn: { type: String, required: true, trim: true },
   priceJD: { type: Number, required: true, min: 0 },
   imageUrl: { type: String, default: '' },
-  active: { type: Boolean, default: true },
-  sku: { type: String, required: true, unique: true, trim: true },
-  stockQty: { type: Number, min: 0 }
+  active: { type: Boolean, default: true }
 }, {
   timestamps: true
 });
