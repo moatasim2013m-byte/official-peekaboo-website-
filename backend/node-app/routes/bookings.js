@@ -6,6 +6,7 @@ const BirthdayBooking = require('../models/BirthdayBooking');
 const TimeSlot = require('../models/TimeSlot');
 const Child = require('../models/Child');
 const Theme = require('../models/Theme');
+const Product = require('../models/Product');
 const User = require('../models/User');
 const LoyaltyHistory = require('../models/LoyaltyHistory');
 const Settings = require('../models/Settings');
@@ -114,6 +115,52 @@ const getHourlyPrice = async (duration_hours = 2, slot_start_time = null) => {
   }
 };
 
+const buildLineItems = async (lineItems = []) => {
+  if (!Array.isArray(lineItems) || lineItems.length === 0) {
+    return { normalizedLineItems: [], productsTotal: 0 };
+  }
+
+  const quantityByProduct = new Map();
+  lineItems.forEach((item) => {
+    const productId = (item?.productId || item?.product_id || '').toString().trim();
+    const qty = parseInt(item?.quantity, 10) || 0;
+    if (!productId || qty <= 0) return;
+    quantityByProduct.set(productId, (quantityByProduct.get(productId) || 0) + qty);
+  });
+
+  const productIds = [...quantityByProduct.keys()];
+  if (productIds.length === 0) {
+    return { normalizedLineItems: [], productsTotal: 0 };
+  }
+
+  const products = await Product.find({ _id: { $in: productIds }, active: true });
+  const productsMap = new Map(products.map((product) => [product._id.toString(), product]));
+
+  const normalizedLineItems = [];
+  let productsTotal = 0;
+
+  quantityByProduct.forEach((quantity, productId) => {
+    const product = productsMap.get(productId);
+    if (!product) return;
+
+    const unitPriceJD = Number(product.priceJD) || 0;
+    const lineTotalJD = unitPriceJD * quantity;
+    productsTotal += lineTotalJD;
+
+    normalizedLineItems.push({
+      product_id: product._id,
+      sku: product.sku,
+      nameAr: product.nameAr,
+      nameEn: product.nameEn,
+      unitPriceJD,
+      quantity,
+      lineTotalJD
+    });
+  });
+
+  return { normalizedLineItems, productsTotal };
+};
+
 // Generate QR code as data URL
 const generateQRCode = async (data) => {
   try {
@@ -155,7 +202,7 @@ const awardLoyaltyPoints = async (userId, paymentId, source) => {
 // Create hourly booking (after payment confirmed) - supports multiple children
 router.post('/hourly', authMiddleware, async (req, res) => {
   try {
-    const { slot_id, child_ids, child_id, payment_id, duration_hours, custom_notes } = req.body;
+    const { slot_id, child_ids, child_id, payment_id, duration_hours, custom_notes, lineItems } = req.body;
     // NOTE: req.body.amount is intentionally IGNORED for security - price computed server-side
     
     // Support both child_ids array and legacy child_id
@@ -197,7 +244,8 @@ router.post('/hourly', authMiddleware, async (req, res) => {
     // SECURITY: Compute price server-side using slot start_time for Happy Hour pricing
     const hours = parseInt(duration_hours) || 2;
     const basePrice = await getHourlyPrice(hours, slot.start_time);
-    const totalAmount = basePrice * childIdList.length;
+    const { normalizedLineItems, productsTotal } = await buildLineItems(lineItems);
+    const totalAmount = (basePrice * childIdList.length) + productsTotal;
     
     // Safety check: computed amount must be valid
     if (!totalAmount || isNaN(totalAmount) || totalAmount <= 0) {
@@ -224,7 +272,8 @@ router.post('/hourly', authMiddleware, async (req, res) => {
         booking_code,
         status: 'confirmed',
         payment_id,
-        amount: pricePerChild
+        amount: pricePerChild,
+        lineItems: normalizedLineItems
       });
 
       await booking.save();
@@ -256,7 +305,7 @@ router.post('/hourly', authMiddleware, async (req, res) => {
 // Create hourly booking with cash/cliq payment (no Stripe)
 router.post('/hourly/offline', authMiddleware, async (req, res) => {
   try {
-    const { slot_id, child_ids, child_id, duration_hours, custom_notes, payment_method, slot_start_time } = req.body;
+    const { slot_id, child_ids, child_id, duration_hours, custom_notes, payment_method, slot_start_time, lineItems } = req.body;
     
     // Validate payment method
     if (!['cash', 'cliq'].includes(payment_method)) {
@@ -302,7 +351,8 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
     // Calculate price on server side with Happy Hour logic
     const hours = parseInt(duration_hours) || 2;
     const basePrice = await getHourlyPrice(hours, slot_start_time);
-    const totalAmount = basePrice * childIdList.length;
+    const { normalizedLineItems, productsTotal } = await buildLineItems(lineItems);
+    const totalAmount = (basePrice * childIdList.length) + productsTotal;
     
     // Safety check: computed amount must be valid
     if (!totalAmount || isNaN(totalAmount) || totalAmount <= 0) {
@@ -331,7 +381,8 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
         status: 'confirmed',
         payment_method,
         payment_status: paymentStatus,
-        amount: pricePerChild
+        amount: pricePerChild,
+        lineItems: normalizedLineItems
       });
 
       await booking.save();
@@ -455,7 +506,7 @@ router.post('/hourly/checkin', authMiddleware, async (req, res) => {
 // Create birthday booking
 router.post('/birthday', authMiddleware, async (req, res) => {
   try {
-    const { slot_id, child_id, theme_id, is_custom, custom_request, guest_count, special_notes, payment_id, amount } = req.body;
+    const { slot_id, child_id, theme_id, is_custom, custom_request, guest_count, special_notes, payment_id, lineItems } = req.body;
 
     const requestedSlot = await TimeSlot.findById(slot_id).select('date slot_type');
     if (!requestedSlot || requestedSlot.slot_type !== 'birthday') {
@@ -503,6 +554,8 @@ router.post('/birthday', authMiddleware, async (req, res) => {
     }
 
     const booking_code = `PK-B-${randomUUID().substring(0, 8).toUpperCase()}`;
+    const { normalizedLineItems, productsTotal } = await buildLineItems(lineItems);
+    const themeAmount = Number(theme?.price || 0);
 
     const booking = new BirthdayBooking({
       user_id: req.userId,
@@ -514,7 +567,8 @@ router.post('/birthday', authMiddleware, async (req, res) => {
       booking_code,
       status: is_custom ? 'custom_pending' : 'confirmed',
       payment_id: is_custom ? null : payment_id,
-      amount: is_custom ? null : amount,
+      amount: is_custom ? null : (themeAmount + productsTotal),
+      lineItems: normalizedLineItems,
       guest_count,
       special_notes
     });
@@ -542,7 +596,7 @@ router.post('/birthday', authMiddleware, async (req, res) => {
 // Create birthday booking with cash/cliq payment (no Stripe)
 router.post('/birthday/offline', authMiddleware, async (req, res) => {
   try {
-    const { slot_id, child_id, theme_id, guest_count, special_notes, payment_method, amount } = req.body;
+    const { slot_id, child_id, theme_id, guest_count, special_notes, payment_method, lineItems } = req.body;
     
     // Validate payment method
     if (!['cash', 'cliq'].includes(payment_method)) {
@@ -592,6 +646,8 @@ router.post('/birthday/offline', authMiddleware, async (req, res) => {
     }
 
     const booking_code = `PK-B-${randomUUID().substring(0, 8).toUpperCase()}`;
+    const { normalizedLineItems, productsTotal } = await buildLineItems(lineItems);
+    const totalAmount = Number(theme?.price || 0) + productsTotal;
     const paymentStatus = payment_method === 'cash' ? 'pending_cash' : 'pending_cliq';
 
     const booking = new BirthdayBooking({
@@ -603,7 +659,8 @@ router.post('/birthday/offline', authMiddleware, async (req, res) => {
       status: 'confirmed',
       payment_method,
       payment_status: paymentStatus,
-      amount: amount || theme.price,
+      amount: totalAmount,
+      lineItems: normalizedLineItems,
       guest_count,
       special_notes
     });
@@ -617,7 +674,7 @@ router.post('/birthday/offline', authMiddleware, async (req, res) => {
       serviceName: `Birthday - ${theme?.name || 'Peekaboo'}`,
       serviceDate: slot?.date,
       serviceTime: slot?.start_time,
-      totalPrice: booking?.amount || theme?.price || 0
+      totalPrice: booking?.amount || totalAmount
     });
     try {
       await sendEmail(user.email, template.subject, template.html);

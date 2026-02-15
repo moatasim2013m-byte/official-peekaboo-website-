@@ -15,6 +15,15 @@ const hourlyBookingSchema = new mongoose.Schema({
   payment_method: { type: String, enum: ['card', 'cash', 'cliq'], default: 'card' },
   payment_status: { type: String, enum: ['paid', 'pending_cash', 'pending_cliq'], default: 'paid' },
   amount: { type: Number, required: true },
+  lineItems: [{
+    product_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
+    sku: { type: String },
+    nameAr: { type: String },
+    nameEn: { type: String },
+    unitPriceJD: { type: Number },
+    quantity: { type: Number },
+    lineTotalJD: { type: Number }
+  }],
   created_at: { type: Date, default: Date.now }
 });
 
