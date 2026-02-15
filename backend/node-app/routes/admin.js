@@ -431,12 +431,15 @@ router.put('/bookings/hourly/:id', async (req, res) => {
     const becamePaid = wasPending && booking.payment_status === 'paid';
     const becameConfirmed = previousStatus !== 'confirmed' && booking.status === 'confirmed';
     if (becamePaid || becameConfirmed) {
+      const totalJD = Number(booking.amount) || 0;
+      const points = Math.round(totalJD * 10);
       await awardPoints({
         userId: booking.user_id?._id || booking.user_id,
-        refType: 'hourly_booking',
+        refType: 'hourly',
         refId: booking._id.toString(),
         type: 'hourly',
-        description: 'Earned points from hourly booking confirmation'
+        points,
+        description: `Earned ${points} points from hourly booking confirmation`
       });
     }
     if (becamePaid && booking.user_id?.email) {
@@ -482,12 +485,15 @@ router.put('/bookings/birthday/:id', async (req, res) => {
     const becamePaid = wasPending && booking.payment_status === 'paid';
     const becameConfirmed = previousStatus !== 'confirmed' && booking.status === 'confirmed';
     if (becamePaid || becameConfirmed) {
+      const totalJD = Number(booking.amount) || 0;
+      const points = Math.round(totalJD * 10);
       await awardPoints({
         userId: booking.user_id?._id || booking.user_id,
-        refType: 'birthday_booking',
+        refType: 'birthday',
         refId: booking._id.toString(),
         type: 'birthday',
-        description: 'Earned points from birthday booking confirmation'
+        points,
+        description: `Earned ${points} points from birthday booking confirmation`
       });
     }
     if (becamePaid && booking.user_id?.email) {
@@ -564,12 +570,15 @@ router.put('/subscriptions/:id/payment-confirmation', async (req, res) => {
 
     const becamePaid = wasPending && subscription.payment_status === 'paid';
     if (becamePaid) {
+      const totalJD = Number(subscription.plan_id?.price) || 0;
+      const points = Math.round(totalJD * 10);
       await awardPoints({
         userId: subscription.user_id?._id || subscription.user_id,
-        refType: 'subscription_purchase',
+        refType: 'subscription',
         refId: subscription._id.toString(),
         type: 'subscription',
-        description: 'Earned points from subscription payment confirmation'
+        points,
+        description: `Earned ${points} points from subscription payment confirmation`
       });
     }
     if (becamePaid && subscription.user_id?.email) {
