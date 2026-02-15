@@ -15,7 +15,8 @@ const Theme = require('../models/Theme');
 const Settings = require('../models/Settings');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { sendEmail, emailTemplates } = require('../utils/email');
-const { awardPoints } = require('../utils/loyalty');
+const { awardPoints } = require('../utils/awardPoints');
+const { handleReferralAwardForConfirmedOrder } = require('../utils/referrals');
 
 const router = express.Router();
 
@@ -431,15 +432,15 @@ router.put('/bookings/hourly/:id', async (req, res) => {
     const becamePaid = wasPending && booking.payment_status === 'paid';
     const becameConfirmed = previousStatus !== 'confirmed' && booking.status === 'confirmed';
     if (becamePaid || becameConfirmed) {
-      const totalJd = Number(booking.amount) || 0;
-      const points = Math.round(totalJd * 10);
-      await awardPoints(
-        booking.user_id?._id || booking.user_id,
-        points,
-        'Earned points from hourly booking confirmation',
-        'hourly',
-        booking._id.toString()
-      );
+      await awardPoints({
+        userId: booking.user_id?._id || booking.user_id,
+        refType: 'hourly_booking',
+        refId: booking._id.toString(),
+        type: 'hourly',
+        description: 'Earned points from hourly booking confirmation'
+      });
+
+      await handleReferralAwardForConfirmedOrder(booking.user_id?._id || booking.user_id);
     }
     if (becamePaid && booking.user_id?.email) {
       try {
@@ -484,15 +485,15 @@ router.put('/bookings/birthday/:id', async (req, res) => {
     const becamePaid = wasPending && booking.payment_status === 'paid';
     const becameConfirmed = previousStatus !== 'confirmed' && booking.status === 'confirmed';
     if (becamePaid || becameConfirmed) {
-      const totalJd = Number(booking.amount) || 0;
-      const points = Math.round(totalJd * 10);
-      await awardPoints(
-        booking.user_id?._id || booking.user_id,
-        points,
-        'Earned points from birthday booking confirmation',
-        'birthday',
-        booking._id.toString()
-      );
+      await awardPoints({
+        userId: booking.user_id?._id || booking.user_id,
+        refType: 'birthday_booking',
+        refId: booking._id.toString(),
+        type: 'birthday',
+        description: 'Earned points from birthday booking confirmation'
+      });
+
+      await handleReferralAwardForConfirmedOrder(booking.user_id?._id || booking.user_id);
     }
     if (becamePaid && booking.user_id?.email) {
       try {
@@ -568,15 +569,15 @@ router.put('/subscriptions/:id/payment-confirmation', async (req, res) => {
 
     const becamePaid = wasPending && subscription.payment_status === 'paid';
     if (becamePaid) {
-      const totalJd = Number(subscription.plan_id?.price) || 0;
-      const points = Math.round(totalJd * 10);
-      await awardPoints(
-        subscription.user_id?._id || subscription.user_id,
-        points,
-        'Earned points from subscription payment confirmation',
-        'subscription',
-        subscription._id.toString()
-      );
+      await awardPoints({
+        userId: subscription.user_id?._id || subscription.user_id,
+        refType: 'subscription_purchase',
+        refId: subscription._id.toString(),
+        type: 'subscription',
+        description: 'Earned points from subscription payment confirmation'
+      });
+
+      await handleReferralAwardForConfirmedOrder(subscription.user_id?._id || subscription.user_id);
     }
     if (becamePaid && subscription.user_id?.email) {
       try {
