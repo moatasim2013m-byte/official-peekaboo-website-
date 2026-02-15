@@ -17,29 +17,36 @@ import mascotImg from '../assets/mascot.png';
 // Morning pricing constant
 const MORNING_PRICE_PER_HOUR = 3.5;
 
-// Check if morning period has expired for a given date
-const isMorningExpiredForDate = (selectedDate) => {
-  if (!selectedDate) return false;
-  
-  // Check if selected date is today (in Amman timezone)
-  const now = new Date();
-  const ammanFormatter = new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Amman',
+const formatDateInTimeZone = (date, timeZone) => {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone,
     year: 'numeric',
     month: '2-digit',
     day: '2-digit'
-  });
-  const todayInAmman = ammanFormatter.format(now); // YYYY-MM-DD format
+  }).formatToParts(date);
+
+  const partMap = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${partMap.year}-${partMap.month}-${partMap.day}`;
+};
+
+// Check if morning period has expired for a given date
+const isMorningExpiredForDate = (selectedDate) => {
+  if (!selectedDate) return false;
+  const ammanTimeZone = 'Asia/Amman';
+  
+  // Check if selected date is today (in Amman timezone)
+  const now = new Date();
+  const todayInAmman = formatDateInTimeZone(now, ammanTimeZone);
   
   // Format selected date as YYYY-MM-DD for comparison
-  const selectedDateStr = selectedDate.toISOString().split('T')[0];
+  const selectedDateStr = formatDateInTimeZone(selectedDate, ammanTimeZone);
   
   // If selected date is not today in Amman, morning is available
   if (selectedDateStr !== todayInAmman) return false;
   
   // Get current hour in Asia/Amman timezone
   const hourFormatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'Asia/Amman',
+    timeZone: ammanTimeZone,
     hour: 'numeric',
     hour12: false
   });
