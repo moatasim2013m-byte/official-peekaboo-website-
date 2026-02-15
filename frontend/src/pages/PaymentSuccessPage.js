@@ -30,9 +30,10 @@ export default function PaymentSuccessPage() {
           setStatus('success');
           
           // Create the actual booking based on type
-          const { type, child_ids, child_id } = data.metadata;
+          const { type, child_ids, child_id, line_items, coupon_code } = data.metadata;
           // Parse child_ids (stored as JSON string in metadata)
           const parsedChildIds = child_ids ? JSON.parse(child_ids) : (child_id ? [child_id] : []);
+          const parsedLineItems = line_items ? JSON.parse(line_items) : [];
           
           if (type === 'hourly') {
             await api.post('/bookings/hourly', {
@@ -41,7 +42,9 @@ export default function PaymentSuccessPage() {
               duration_hours: data.metadata.duration_hours,
               custom_notes: data.metadata.custom_notes,
               payment_id: data.payment_id,
-              amount: data.amount
+              amount: data.amount,
+              lineItems: parsedLineItems,
+              coupon_code
             });
           } else if (type === 'birthday') {
             await api.post('/bookings/birthday', {
@@ -49,7 +52,8 @@ export default function PaymentSuccessPage() {
               child_id: parsedChildIds[0],
               theme_id: data.metadata.theme_id,
               payment_id: data.payment_id,
-              amount: data.amount
+              amount: data.amount,
+              lineItems: parsedLineItems
             });
           } else if (type === 'subscription') {
             await api.post('/subscriptions/purchase', {

@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
 import { useTranslation } from "./i18n/useT";
 import FaqBotWidget from "./components/FaqBotWidget";
 
@@ -179,6 +180,7 @@ function AppRoutes() {
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AuthProvider>
         <AppRoutes />
         <FaqBotWidget />

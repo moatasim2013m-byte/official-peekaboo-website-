@@ -83,11 +83,11 @@ export const Footer = () => {
             <div>
               <h4 className="footer-heading footer-heading-blue">روابط سريعة</h4>
               <ul className="space-y-2">
-                <li><Link to="/" className="footer-link-new">الرئيسية</Link></li>
-                <li><Link to="/tickets" className="footer-link-new">تذاكر بالساعة</Link></li>
-                <li><Link to="/birthday" className="footer-link-new">حفلات أعياد الميلاد</Link></li>
-                <li><Link to="/subscriptions" className="footer-link-new">الاشتراكات</Link></li>
-                <li><Link to="/groups" className="footer-link-new">المدارس والمجموعات</Link></li>
+                <li><Link to="/#home" className="footer-link-new">الرئيسية</Link></li>
+                <li><Link to="/#hourly" className="footer-link-new">تذاكر بالساعة</Link></li>
+                <li><Link to="/#birthdays" className="footer-link-new">حفلات أعياد الميلاد</Link></li>
+                <li><Link to="/#subscriptions" className="footer-link-new">الاشتراكات</Link></li>
+                <li><Link to="/#schools" className="footer-link-new">المدارس والمجموعات</Link></li>
               </ul>
             </div>
 
