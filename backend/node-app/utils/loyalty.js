@@ -2,25 +2,12 @@ const mongoose = require('mongoose');
 const LoyaltyLedger = require('../models/LoyaltyLedger');
 const LoyaltyBalance = require('../models/LoyaltyBalance');
 
-const POINTS_PER_JD = 10;
 const DUPLICATE_KEY_CODE = 11000;
-const ALLOWED_REF_TYPES = new Set(['hourly', 'birthday', 'subscription', 'product', 'referral', 'admin', 'winback']);
 
 const addMonths = (date, months) => {
   const copy = new Date(date);
   copy.setMonth(copy.getMonth() + months);
   return copy;
-};
-
-const normalizeRefType = (refType, type) => {
-  if (ALLOWED_REF_TYPES.has(refType)) return refType;
-
-  const combined = `${refType || ''} ${type || ''}`.toLowerCase();
-  if (combined.includes('hourly')) return 'hourly';
-  if (combined.includes('birthday')) return 'birthday';
-  if (combined.includes('subscription')) return 'subscription';
-  if (combined.includes('product')) return 'product';
-  return 'admin';
 };
 
 const toObjectId = (value) => {
@@ -65,50 +52,33 @@ const upsertBalance = async (userId, pointsAvailable, session) => {
   );
 };
 
-const getPoints = ({ points, amount = 0 }) => {
+async function awardPoints(userId, points, reason, refType, refId) {
   const numericPoints = Number(points);
-  if (Number.isFinite(numericPoints)) {
-    return Math.max(0, Math.round(numericPoints));
-  }
-
-  const numericAmount = Number(amount);
-  if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
-    return 0;
-  }
-
-  return Math.max(0, Math.round(numericAmount * POINTS_PER_JD));
-};
-
-const awardPoints = async ({ userId, refType, refId, type, amount = 0, points, description }) => {
-  if (!userId || !refType || !refId) {
-    return { awarded: false, reason: 'missing_reference' };
-  }
-
-  const pointsToAward = getPoints({ points, amount });
-  if (!pointsToAward) {
-    return { awarded: false, reason: 'zero_points' };
+  if (!Number.isFinite(numericPoints) || numericPoints <= 0) {
+    return { awarded: false, reason: 'invalid_points' };
   }
 
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
 
+    const expiresAt = addMonths(new Date(), 12);
     const [ledgerEntry] = await LoyaltyLedger.create([
       {
         userId,
-        pointsDelta: pointsToAward,
-        reason: description || `Earned ${pointsToAward} points from ${type || refType}`,
-        refType: normalizeRefType(refType, type),
+        pointsDelta: numericPoints,
+        reason,
+        refType,
         refId,
-        expiresAt: addMonths(new Date(), 12)
+        expiresAt
       }
     ], { session });
 
     const currentPoints = await getNonExpiredPoints(userId, session);
-    await upsertBalance(userId, currentPoints, session);
+    const balance = await upsertBalance(userId, currentPoints, session);
 
     await session.commitTransaction();
-    return { awarded: true, points: pointsToAward, ledgerEntry };
+    return { awarded: true, ledgerEntry, balance };
   } catch (error) {
     await session.abortTransaction();
 
@@ -120,9 +90,8 @@ const awardPoints = async ({ userId, refType, refId, type, amount = 0, points, d
   } finally {
     await session.endSession();
   }
-};
+}
 
 module.exports = {
-  awardPoints,
-  POINTS_PER_JD
+  awardPoints
 };

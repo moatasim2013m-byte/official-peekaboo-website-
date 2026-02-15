@@ -16,6 +16,7 @@ const Settings = require('../models/Settings');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { sendEmail, emailTemplates } = require('../utils/email');
 const { awardPoints } = require('../utils/awardPoints');
+const { handleReferralAwardForConfirmedOrder } = require('../utils/referrals');
 
 const router = express.Router();
 
@@ -438,6 +439,8 @@ router.put('/bookings/hourly/:id', async (req, res) => {
         type: 'hourly',
         description: 'Earned points from hourly booking confirmation'
       });
+
+      await handleReferralAwardForConfirmedOrder(booking.user_id?._id || booking.user_id);
     }
     if (becamePaid && booking.user_id?.email) {
       try {
@@ -489,6 +492,8 @@ router.put('/bookings/birthday/:id', async (req, res) => {
         type: 'birthday',
         description: 'Earned points from birthday booking confirmation'
       });
+
+      await handleReferralAwardForConfirmedOrder(booking.user_id?._id || booking.user_id);
     }
     if (becamePaid && booking.user_id?.email) {
       try {
@@ -571,6 +576,8 @@ router.put('/subscriptions/:id/payment-confirmation', async (req, res) => {
         type: 'subscription',
         description: 'Earned points from subscription payment confirmation'
       });
+
+      await handleReferralAwardForConfirmedOrder(subscription.user_id?._id || subscription.user_id);
     }
     if (becamePaid && subscription.user_id?.email) {
       try {
