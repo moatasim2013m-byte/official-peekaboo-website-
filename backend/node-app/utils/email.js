@@ -409,6 +409,33 @@ const emailTemplates = {
     `
   }),
 
+  winback: ({ userName, ctaLink, couponCode }) => ({
+    subject: '💛 مشتاقين نشوفكم في Peekaboo | We miss you!',
+    html: `
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head><meta charset="UTF-8"></head>
+      <body style="font-family:'Cairo','Segoe UI',Arial,sans-serif;background:#f7fbff;padding:20px;color:#1f2937;direction:rtl;">
+        <div style="max-width:620px;margin:0 auto;background:#fff;border-radius:16px;padding:24px;">
+          <h2 style="margin-top:0;color:#2563eb;">👋 أهلًا ${userName || 'بكم'}!</h2>
+          <p>اشتقنالكم في بيكابو 🎪<br/>
+          صار لنا فترة ما شفناكم، وحابين نرحّب فيكم من جديد بجلسة لعب مليانة مرح!</p>
+          <p>احجزوا زيارتكم القادمة من خلال الرابط التالي:</p>
+          <p style="text-align:center;margin:24px 0;">
+            <a href="${ctaLink}" style="background:#2563eb;color:#fff;text-decoration:none;padding:12px 24px;border-radius:999px;font-weight:700;display:inline-block;">احجز الآن</a>
+          </p>
+          ${couponCode ? `<p style="background:#fef9c3;border:1px solid #fde68a;padding:12px;border-radius:12px;"><strong>كود خصم مقترح:</strong> ${couponCode}</p>` : '<p style="color:#6b7280;">(يمكن إضافة كود خصم هنا لاحقًا)</p>'}
+          <hr style="margin:18px 0;border:none;border-top:1px solid #e5e7eb"/>
+          <p>Hello ${userName || 'there'},</p>
+          <p>We miss you at Peekaboo! It has been a while since your last confirmed visit.
+          Tap below to book your next session:</p>
+          <p><a href="${ctaLink}">${ctaLink}</a></p>
+        </div>
+      </body>
+      </html>
+    `
+  }),
+
   // Subscription confirmation
   subscriptionConfirmation: ({ userName, subscription, plan, child }) => ({
     subject: 'تأكيد اشتراكك في Peekaboo',
