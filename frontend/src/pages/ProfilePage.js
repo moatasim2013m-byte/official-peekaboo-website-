@@ -24,7 +24,11 @@ export default function ProfilePage() {
   const [hourlyBookings, setHourlyBookings] = useState([]);
   const [birthdayBookings, setBirthdayBookings] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
+  const [loyaltyBalance, setLoyaltyBalance] = useState(0);
   const [loyaltyHistory, setLoyaltyHistory] = useState([]);
+  const [referralCode, setReferralCode] = useState('');
+  const [referralInput, setReferralInput] = useState('');
+  const [redeemingReferral, setRedeemingReferral] = useState(false);
   const [activeSession, setActiveSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [addChildOpen, setAddChildOpen] = useState(false);
@@ -50,12 +54,23 @@ export default function ProfilePage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [profileRes, hourlyRes, birthdayRes, subsRes, loyaltyRes, activeRes] = await Promise.all([
+      const [
+        profileRes,
+        hourlyRes,
+        birthdayRes,
+        subsRes,
+        loyaltyBalanceRes,
+        loyaltyHistoryRes,
+        referralCodeRes,
+        activeRes
+      ] = await Promise.all([
         api.get('/profile'),
         api.get('/bookings/hourly'),
         api.get('/bookings/birthday'),
         api.get('/subscriptions/my'),
-        api.get('/loyalty'),
+        api.get('/loyalty/balance'),
+        api.get('/loyalty/history'),
+        api.get('/referrals/my-code'),
         api.get('/bookings/hourly/active')
       ]);
 
@@ -63,7 +78,9 @@ export default function ProfilePage() {
       setHourlyBookings(hourlyRes.data.bookings || []);
       setBirthdayBookings(birthdayRes.data.bookings || []);
       setSubscriptions(subsRes.data.subscriptions || []);
-      setLoyaltyHistory(loyaltyRes.data.history || []);
+      setLoyaltyBalance(loyaltyBalanceRes.data.points || 0);
+      setLoyaltyHistory(loyaltyHistoryRes.data.history || []);
+      setReferralCode(referralCodeRes.data.code || '');
       setActiveSession(activeRes.data.active_session);
     } catch (error) {
       console.error('Failed to fetch profile data:', error);
@@ -146,6 +163,41 @@ export default function ProfilePage() {
     }
   };
 
+  const handleCopyReferralCode = async () => {
+    if (!referralCode) {
+      toast.error('لم يتم إنشاء كود إحالة بعد');
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(referralCode);
+      toast.success('تم نسخ كود الإحالة');
+    } catch (error) {
+      toast.error('تعذر نسخ الكود، حاول مرة أخرى');
+    }
+  };
+
+  const handleRedeemReferral = async (e) => {
+    e.preventDefault();
+
+    if (!referralInput.trim()) {
+      toast.error('الرجاء إدخال كود الإحالة');
+      return;
+    }
+
+    setRedeemingReferral(true);
+    try {
+      await api.post('/referrals/redeem', { code: referralInput.trim() });
+      toast.success('تم استخدام كود الإحالة بنجاح');
+      setReferralInput('');
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'تعذر استخدام كود الإحالة');
+    } finally {
+      setRedeemingReferral(false);
+    }
+  };
+
   const getStatusBadge = (status) => {
     const colors = {
       confirmed: 'bg-green-100 text-green-700',
@@ -186,7 +238,7 @@ export default function ProfilePage() {
           <div className="flex items-center gap-4">
             <div className="bg-secondary/10 px-4 py-2 rounded-full flex items-center gap-2">
               <Star className="h-5 w-5 text-secondary" />
-              <span className="font-bold text-secondary">{user?.loyalty_points || 0} نقطة</span>
+              <span className="font-bold text-secondary">{loyaltyBalance} نقطة</span>
             </div>
           </div>
         </div>
@@ -540,7 +592,7 @@ export default function ProfilePage() {
                 <div className="bg-gradient-to-r from-[var(--brand-yellow)]/20 to-[var(--brand-orange)]/20 rounded-2xl p-6 text-center">
                   <p className="text-sm text-muted-foreground mb-2">رصيد النقاط</p>
                   <p className="text-5xl font-heading font-bold text-[var(--brand-orange)]">
-                    {user?.loyalty_points || 0}
+                    {loyaltyBalance}
                   </p>
                   <p className="text-lg text-muted-foreground mt-1">نقطة</p>
                   
@@ -571,6 +623,47 @@ export default function ProfilePage() {
                       </div>
                     </DialogContent>
                   </Dialog>
+                </div>
+
+                {/* Referral */}
+                <div className="space-y-4">
+                  <h4 className="font-heading font-bold">الإحالة</h4>
+                  <div className="rounded-2xl border p-4 bg-muted/40">
+                    <p className="text-sm text-muted-foreground mb-2">كود الإحالة الخاص بك</p>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <Input
+                        value={referralCode || '---'}
+                        readOnly
+                        className="rounded-xl font-semibold tracking-wider text-center sm:text-right"
+                        dir="ltr"
+                      />
+                      <Button
+                        type="button"
+                        onClick={handleCopyReferralCode}
+                        className="rounded-full"
+                        variant="outline"
+                      >
+                        نسخ الكود
+                      </Button>
+                    </div>
+                  </div>
+
+                  <form onSubmit={handleRedeemReferral} className="rounded-2xl border p-4 space-y-3">
+                    <Label htmlFor="referralRedeemCode">استخدام كود إحالة</Label>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                      <Input
+                        id="referralRedeemCode"
+                        value={referralInput}
+                        onChange={(e) => setReferralInput(e.target.value)}
+                        placeholder="أدخل الكود هنا"
+                        className="rounded-xl"
+                        dir="ltr"
+                      />
+                      <Button type="submit" className="rounded-full" disabled={redeemingReferral}>
+                        {redeemingReferral ? <Loader2 className="h-4 w-4 animate-spin" /> : 'تأكيد'}
+                      </Button>
+                    </div>
+                  </form>
                 </div>
 
                 {/* History */}
