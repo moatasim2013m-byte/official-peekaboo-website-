@@ -8,6 +8,7 @@ const Child = require('../models/Child');
 const User = require('../models/User');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { sendEmail, emailTemplates } = require('../utils/email');
+const { awardPoints } = require('../utils/awardPoints');
 const { addDays } = require('date-fns');
 
 const router = express.Router();
@@ -78,7 +79,13 @@ router.post('/purchase', authMiddleware, async (req, res) => {
 
     await subscription.save();
 
-    // NO loyalty points for subscriptions (only hourly gets points)
+    await awardPoints({
+      userId: req.userId,
+      refType: 'subscription_purchase',
+      refId: subscription._id.toString(),
+      type: 'subscription',
+      description: 'Earned points from subscription purchase'
+    });
 
     // Send confirmation email (non-blocking)
     const user = await User.findById(req.userId);

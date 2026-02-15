@@ -15,6 +15,7 @@ const Theme = require('../models/Theme');
 const Settings = require('../models/Settings');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { sendEmail, emailTemplates } = require('../utils/email');
+const { awardPoints } = require('../utils/awardPoints');
 
 const router = express.Router();
 
@@ -340,11 +341,22 @@ router.put('/bookings/hourly/:id', async (req, res) => {
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
 
     const wasPending = ['pending_cash', 'pending_cliq'].includes(booking.payment_status);
+    const previousStatus = booking.status;
     if (status !== undefined) booking.status = status;
     if (payment_status !== undefined) booking.payment_status = payment_status;
     await booking.save();
 
     const becamePaid = wasPending && booking.payment_status === 'paid';
+    const becameConfirmed = previousStatus !== 'confirmed' && booking.status === 'confirmed';
+    if (becamePaid || becameConfirmed) {
+      await awardPoints({
+        userId: booking.user_id?._id || booking.user_id,
+        refType: 'hourly_booking',
+        refId: booking._id.toString(),
+        type: 'hourly',
+        description: 'Earned points from hourly booking confirmation'
+      });
+    }
     if (becamePaid && booking.user_id?.email) {
       try {
         const template = emailTemplates.finalOrderConfirmation({
@@ -380,11 +392,22 @@ router.put('/bookings/birthday/:id', async (req, res) => {
     if (!booking) return res.status(404).json({ error: 'Booking not found' });
 
     const wasPending = ['pending_cash', 'pending_cliq'].includes(booking.payment_status);
+    const previousStatus = booking.status;
     if (status !== undefined) booking.status = status;
     if (payment_status !== undefined) booking.payment_status = payment_status;
     await booking.save();
 
     const becamePaid = wasPending && booking.payment_status === 'paid';
+    const becameConfirmed = previousStatus !== 'confirmed' && booking.status === 'confirmed';
+    if (becamePaid || becameConfirmed) {
+      await awardPoints({
+        userId: booking.user_id?._id || booking.user_id,
+        refType: 'birthday_booking',
+        refId: booking._id.toString(),
+        type: 'birthday',
+        description: 'Earned points from birthday booking confirmation'
+      });
+    }
     if (becamePaid && booking.user_id?.email) {
       try {
         const template = emailTemplates.finalOrderConfirmation({
@@ -458,6 +481,15 @@ router.put('/subscriptions/:id/payment-confirmation', async (req, res) => {
     await subscription.save();
 
     const becamePaid = wasPending && subscription.payment_status === 'paid';
+    if (becamePaid) {
+      await awardPoints({
+        userId: subscription.user_id?._id || subscription.user_id,
+        refType: 'subscription_purchase',
+        refId: subscription._id.toString(),
+        type: 'subscription',
+        description: 'Earned points from subscription payment confirmation'
+      });
+    }
     if (becamePaid && subscription.user_id?.email) {
       try {
         const template = emailTemplates.finalOrderConfirmation({
