@@ -39,6 +39,11 @@ export default function BirthdayPage() {
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiGeneratedThemeUrl, setAiGeneratedThemeUrl] = useState('');
   const [aiGenerating, setAiGenerating] = useState(false);
+  const [inviteTone, setInviteTone] = useState('friendly');
+  const [inviteBranch, setInviteBranch] = useState('فرع دابوق');
+  const [invitePhone, setInvitePhone] = useState('0790000000');
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteResult, setInviteResult] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -247,6 +252,56 @@ export default function BirthdayPage() {
       }
     } finally {
       setAiGenerating(false);
+    }
+  };
+
+  const copyText = async (value) => {
+    if (!value) return;
+
+    try {
+      await navigator.clipboard.writeText(value);
+      toast.success('تم نسخ النص');
+    } catch (error) {
+      toast.error('تعذر النسخ، حاول يدوياً');
+    }
+  };
+
+  const handleGenerateInviteCopy = async () => {
+    if (!isAuthenticated) {
+      toast.error('الرجاء تسجيل الدخول أولاً');
+      navigate('/login');
+      return;
+    }
+
+    if (!selectedSlot || !selectedTheme || !selectedChild) {
+      toast.error('اختر الموعد والثيم والطفل أولاً');
+      return;
+    }
+
+    const child = children.find((item) => item.id === selectedChild);
+    if (!child?.name) {
+      toast.error('يرجى اختيار طفل صالح');
+      return;
+    }
+
+    setInviteLoading(true);
+    try {
+      const response = await api.post('/ai/invite', {
+        theme: selectedTheme.name_ar || selectedTheme.name,
+        childName: child.name,
+        date: selectedSlot.date,
+        time: selectedSlot.start_time,
+        branch: inviteBranch,
+        phone: invitePhone,
+        tone: inviteTone
+      });
+
+      setInviteResult(response.data);
+      toast.success('تم إنشاء نص الدعوة');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'تعذر إنشاء النص حالياً');
+    } finally {
+      setInviteLoading(false);
     }
   };
 
@@ -463,6 +518,85 @@ export default function BirthdayPage() {
             </div>
 
             {/* Booking Form */}
+            {isAuthenticated && (
+              <Card className="booking-card">
+                <CardHeader className="booking-card-header">
+                  <CardTitle className="booking-card-title">مولد نص الدعوة والنشر</CardTitle>
+                  <CardDescription className="text-sm mr-6">
+                    أنشئ دعوة عيد ميلاد + كابشن إنستغرام جاهز للنشر.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="py-5 space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <Label className="text-sm">الفرع</Label>
+                      <Input
+                        value={inviteBranch}
+                        onChange={(e) => setInviteBranch(e.target.value)}
+                        className="rounded-xl mt-1.5"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm">رقم التواصل</Label>
+                      <Input
+                        value={invitePhone}
+                        onChange={(e) => setInvitePhone(e.target.value)}
+                        className="rounded-xl mt-1.5"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-sm">النبرة</Label>
+                      <Select value={inviteTone} onValueChange={setInviteTone}>
+                        <SelectTrigger className="rounded-xl mt-1.5">
+                          <SelectValue placeholder="اختر النبرة" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="friendly">ودية</SelectItem>
+                          <SelectItem value="elegant">راقية</SelectItem>
+                          <SelectItem value="playful">مرحة</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={handleGenerateInviteCopy}
+                    disabled={inviteLoading}
+                    className="rounded-full h-11 btn-playful bg-accent hover:bg-accent/90"
+                  >
+                    {inviteLoading ? <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري الإنشاء...</> : 'إنشاء نص الدعوة'}
+                  </Button>
+
+                  {inviteResult && (
+                    <div className="space-y-3 pt-2 border-t">
+                      <div className="rounded-xl bg-muted p-3">
+                        <p className="text-xs text-muted-foreground mb-1">الدعوة بالعربية</p>
+                        <p className="text-sm whitespace-pre-wrap">{inviteResult.inviteTextArabic}</p>
+                        <Button variant="outline" className="rounded-full mt-3" onClick={() => copyText(inviteResult.inviteTextArabic)}>نسخ</Button>
+                      </div>
+
+                      {inviteResult.inviteTextEnglish && (
+                        <div className="rounded-xl bg-muted p-3">
+                          <p className="text-xs text-muted-foreground mb-1">Invitation (EN)</p>
+                          <p className="text-sm whitespace-pre-wrap">{inviteResult.inviteTextEnglish}</p>
+                          <Button variant="outline" className="rounded-full mt-3" onClick={() => copyText(inviteResult.inviteTextEnglish)}>Copy</Button>
+                        </div>
+                      )}
+
+                      <div className="rounded-xl bg-muted p-3">
+                        <p className="text-xs text-muted-foreground mb-1">كابشن إنستغرام</p>
+                        <p className="text-sm whitespace-pre-wrap">{inviteResult.igCaptionArabic}</p>
+                        <p className="text-sm mt-2 text-accent">{(inviteResult.hashtags || []).join(' ')}</p>
+                        <Button variant="outline" className="rounded-full mt-3" onClick={() => copyText(`${inviteResult.igCaptionArabic}
+
+${(inviteResult.hashtags || []).join(' ')}`)}>نسخ الكابشن + الهاشتاقات</Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {isAuthenticated && (
               <Card className="booking-card">
                 <CardHeader className="booking-card-header">
