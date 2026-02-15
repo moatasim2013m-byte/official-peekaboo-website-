@@ -71,6 +71,8 @@ export default function TicketsPage() {
   const [loading, setLoading] = useState(false);
   const [pricing, setPricing] = useState([]);
   const [extraHourText, setExtraHourText] = useState('');
+  const [products, setProducts] = useState([]);
+  const [selectedProductQty, setSelectedProductQty] = useState({});
 
   // Set page title
   useEffect(() => {
@@ -79,6 +81,7 @@ export default function TicketsPage() {
 
   // Fetch children on mount
   useEffect(() => {
+    fetchProducts();
     if (isAuthenticated) {
       fetchChildren();
     }
@@ -144,6 +147,39 @@ export default function TicketsPage() {
       }
     }
   };
+
+
+  const fetchProducts = async () => {
+    try {
+      const response = await api.get('/products?active=true');
+      setProducts(response.data.products || []);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    }
+  };
+
+  const updateProductQty = (productId, qty) => {
+    setSelectedProductQty((prev) => {
+      const next = { ...prev };
+      if (qty <= 0) {
+        delete next[productId];
+      } else {
+        next[productId] = qty;
+      }
+      return next;
+    });
+  };
+
+  const buildLineItems = () => products
+    .filter((product) => (selectedProductQty[product.id] || 0) > 0)
+    .map((product) => ({
+      productId: product.id,
+      quantity: selectedProductQty[product.id]
+    }));
+
+  const getProductsTotal = () => products.reduce((sum, product) => (
+    sum + ((selectedProductQty[product.id] || 0) * (Number(product.priceJD) || 0))
+  ), 0);
 
   const fetchChildren = async () => {
     try {
@@ -226,9 +262,8 @@ export default function TicketsPage() {
     setLoading(true);
     try {
       // Calculate amount using Happy Hour logic
-      const amount = selectedSlot 
-        ? parseFloat(getSlotTotalPrice(selectedSlot.start_time)) * Math.max(1, selectedChildren.length)
-        : getSelectedPrice();
+      const amount = getGrandTotal();
+      const lineItems = buildLineItems();
       
       if (paymentMethod === 'card') {
         // Stripe checkout flow
@@ -240,7 +275,8 @@ export default function TicketsPage() {
           slot_start_time: selectedSlot.start_time, // Pass slot time for Happy Hour calculation
           custom_notes: customNotes.trim(),
           origin_url: window.location.origin,
-          timeMode: timeMode // Pass timeMode for server-side pricing
+          timeMode: timeMode, // Pass timeMode for server-side pricing
+          lineItems
         });
         window.location.href = response.data.url;
       } else {
@@ -251,7 +287,8 @@ export default function TicketsPage() {
           duration_hours: selectedDuration,
           slot_start_time: selectedSlot.start_time, // Pass slot time for Happy Hour calculation
           custom_notes: customNotes.trim(),
-          payment_method: paymentMethod
+          payment_method: paymentMethod,
+          lineItems
         });
         
         // Get child name(s) for confirmation
@@ -310,6 +347,16 @@ export default function TicketsPage() {
     const selected = pricing.find(p => p.hours === selectedDuration);
     return selected ? selected.price / selected.hours : null;
   };
+
+
+  const getBaseBookingTotal = () => {
+    if (selectedSlot) {
+      return parseFloat(getSlotTotalPrice(selectedSlot.start_time)) * Math.max(1, selectedChildren.length);
+    }
+    return getSelectedPrice();
+  };
+
+  const getGrandTotal = () => getBaseBookingTotal() + getProductsTotal();
 
   const getSlotTotalPrice = (startTime) => {
     const pricePerHour = getSlotPrice(startTime);
@@ -612,6 +659,30 @@ export default function TicketsPage() {
                   </div>
                 </div>
 
+                {products.length > 0 && (
+                  <div>
+                    <Label className="block text-sm font-medium mb-2">إضافات</Label>
+                    <div className="space-y-2">
+                      {products.map((product) => {
+                        const qty = selectedProductQty[product.id] || 0;
+                        return (
+                          <div key={product.id} className="flex items-center justify-between rounded-xl border p-3">
+                            <div>
+                              <p className="font-medium">{product.nameAr}</p>
+                              <p className="text-xs text-muted-foreground">{product.priceJD} د</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button type="button" variant="outline" size="sm" onClick={() => updateProductQty(product.id, qty - 1)}>-</Button>
+                              <span className="min-w-6 text-center">{qty}</span>
+                              <Button type="button" variant="outline" size="sm" onClick={() => updateProductQty(product.id, qty + 1)}>+</Button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 <div>
                   <Label htmlFor="custom-notes" className="block text-sm font-medium mb-2">ملاحظات (اختياري)</Label>
                   <Textarea
@@ -637,6 +708,8 @@ export default function TicketsPage() {
                         : `${selectedDuration} ساعة × ${selectedChildren.length || 1} طفل = ${getSelectedPrice()} دينار`
                       }
                     </p>
+                    <p className="text-sm text-muted-foreground">إضافات: {getProductsTotal().toFixed(1)} دينار</p>
+                    <p className="font-semibold">الإجمالي: {getGrandTotal().toFixed(1)} دينار</p>
                   </div>
                 )}
 
@@ -653,7 +726,7 @@ export default function TicketsPage() {
                         جاري المعالجة...
                       </>
                     ) : (
-                      <span>احجز - {getSelectedPrice()} د</span>
+                      <span>احجز - {getGrandTotal().toFixed(1)} د</span>
                     )}
                   </Button>
                 </div>

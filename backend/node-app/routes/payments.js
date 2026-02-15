@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const PaymentTransaction = require('../models/PaymentTransaction');
 const Settings = require('../models/Settings');
 const TimeSlot = require('../models/TimeSlot');
+const Product = require('../models/Product');
 const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
@@ -120,6 +121,50 @@ const getSubscriptionPrice = async (planId) => {
   return parseFloat(plan?.price) || 50.00;
 };
 
+const buildLineItems = async (lineItems = []) => {
+  if (!Array.isArray(lineItems) || lineItems.length === 0) {
+    return { normalizedLineItems: [], productsTotal: 0 };
+  }
+
+  const quantityByProduct = new Map();
+  lineItems.forEach((item) => {
+    const productId = (item?.productId || item?.product_id || '').toString().trim();
+    const qty = parseInt(item?.quantity, 10) || 0;
+    if (!productId || qty <= 0) return;
+    quantityByProduct.set(productId, (quantityByProduct.get(productId) || 0) + qty);
+  });
+
+  const productIds = [...quantityByProduct.keys()];
+  if (productIds.length === 0) return { normalizedLineItems: [], productsTotal: 0 };
+
+  const products = await Product.find({ _id: { $in: productIds }, active: true });
+  const productsMap = new Map(products.map((product) => [product._id.toString(), product]));
+
+  const normalizedLineItems = [];
+  let productsTotal = 0;
+
+  quantityByProduct.forEach((quantity, productId) => {
+    const product = productsMap.get(productId);
+    if (!product) return;
+
+    const unitPriceJD = Number(product.priceJD) || 0;
+    const lineTotalJD = unitPriceJD * quantity;
+    productsTotal += lineTotalJD;
+
+    normalizedLineItems.push({
+      productId: product._id.toString(),
+      sku: product.sku,
+      nameAr: product.nameAr,
+      nameEn: product.nameEn,
+      unitPriceJD,
+      quantity,
+      lineTotalJD
+    });
+  });
+
+  return { normalizedLineItems, productsTotal };
+};
+
 // Get hourly pricing info (public endpoint for frontend)
 router.get('/hourly-pricing', async (req, res) => {
   try {
@@ -184,14 +229,19 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       });
     }
 
-    const { type, reference_id, origin_url, duration_hours, custom_notes, timeMode } = req.body;
+    const { type, reference_id, origin_url, duration_hours, custom_notes, timeMode, lineItems } = req.body;
 
     if (!type || !origin_url) {
       return res.status(400).json({ error: 'type and origin_url are required' });
     }
 
+    const { normalizedLineItems, productsTotal } = await buildLineItems(lineItems);
+
     let amount;
     let metadata = { type, user_id: req.userId.toString() };
+    if (normalizedLineItems.length > 0) {
+      metadata.line_items = JSON.stringify(normalizedLineItems);
+    }
 
     // Get amount from server-side pricing
     switch (type) {
@@ -212,7 +262,7 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
         }
 
         const basePrice = await getHourlyPrice(hours, slotStartTime);
-        amount = basePrice * childCount;
+        amount = (basePrice * childCount) + productsTotal;
         metadata.slot_id = reference_id;
         metadata.duration_hours = hours;
         metadata.child_ids = JSON.stringify(childIds);
@@ -224,7 +274,7 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
         if (!req.body.theme_id) {
           return res.status(400).json({ error: 'theme_id required for birthday booking' });
         }
-        amount = await getBirthdayThemePrice(req.body.theme_id);
+        amount = (await getBirthdayThemePrice(req.body.theme_id)) + productsTotal;
         metadata.slot_id = reference_id;
         metadata.theme_id = req.body.theme_id;
         break;

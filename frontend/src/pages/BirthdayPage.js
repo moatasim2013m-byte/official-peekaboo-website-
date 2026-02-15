@@ -43,9 +43,12 @@ export default function BirthdayPage() {
   const [loading, setLoading] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [activeTab, setActiveTab] = useState('standard');
+  const [products, setProducts] = useState([]);
+  const [selectedProductQty, setSelectedProductQty] = useState({});
 
   useEffect(() => {
     fetchThemes();
+    fetchProducts();
     if (isAuthenticated) {
       fetchChildren();
     }
@@ -56,6 +59,33 @@ export default function BirthdayPage() {
     fetchSlots();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [date]);
+
+
+  const fetchProducts = async () => {
+    try {
+      const response = await api.get('/products?active=true');
+      setProducts(response.data.products || []);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    }
+  };
+
+  const updateProductQty = (productId, qty) => {
+    setSelectedProductQty((prev) => {
+      const next = { ...prev };
+      if (qty <= 0) delete next[productId];
+      else next[productId] = qty;
+      return next;
+    });
+  };
+
+  const buildLineItems = () => products
+    .filter((product) => (selectedProductQty[product.id] || 0) > 0)
+    .map((product) => ({ productId: product.id, quantity: selectedProductQty[product.id] }));
+
+  const getProductsTotal = () => products.reduce((sum, product) => (
+    sum + ((selectedProductQty[product.id] || 0) * (Number(product.priceJD) || 0))
+  ), 0);
 
   const fetchChildren = async () => {
     try {
@@ -128,7 +158,8 @@ export default function BirthdayPage() {
         return;
       }
 
-      const amount = selectedTheme.price;
+      const amount = (Number(selectedTheme.price) || 0) + getProductsTotal();
+      const lineItems = buildLineItems();
       
       if (paymentMethod === 'card') {
         // Stripe checkout flow
@@ -137,7 +168,8 @@ export default function BirthdayPage() {
           reference_id: selectedSlot.id,
           theme_id: selectedTheme.id,
           child_id: selectedChild,
-          origin_url: window.location.origin
+          origin_url: window.location.origin,
+          lineItems
         });
         window.location.href = response.data.url;
       } else {
@@ -149,7 +181,8 @@ export default function BirthdayPage() {
           guest_count: guestCount,
           special_notes: specialNotes,
           payment_method: paymentMethod,
-          amount
+          amount,
+          lineItems
         });
         
         // Get child name for confirmation
@@ -501,13 +534,40 @@ export default function BirthdayPage() {
                       <Label className="text-sm">الثيم المختار</Label>
                       <div className="p-2.5 rounded-xl bg-muted mt-1.5 text-sm">
                         {selectedTheme ? (
-                          <span className="font-semibold">{selectedTheme.name_ar || selectedTheme.name} - {selectedTheme.price} د</span>
+                          <span className="font-semibold">{selectedTheme.name_ar || selectedTheme.name} - {Number(selectedTheme.price || 0).toFixed(1)} د</span>
                         ) : (
                           <span className="text-muted-foreground">لم يتم اختيار ثيم</span>
                         )}
                       </div>
                     </div>
                   </div>
+
+
+                  {products.length > 0 && (
+                    <div>
+                      <Label className="text-sm">إضافات</Label>
+                      <div className="space-y-2 mt-2">
+                        {products.map((product) => {
+                          const qty = selectedProductQty[product.id] || 0;
+                          return (
+                            <div key={product.id} className="flex items-center justify-between rounded-xl border p-3">
+                              <div>
+                                <p className="font-medium">{product.nameAr}</p>
+                                <p className="text-xs text-muted-foreground">{product.priceJD} د</p>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button type="button" variant="outline" size="sm" onClick={() => updateProductQty(product.id, qty - 1)}>-</Button>
+                                <span className="min-w-6 text-center">{qty}</span>
+                                <Button type="button" variant="outline" size="sm" onClick={() => updateProductQty(product.id, qty + 1)}>+</Button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="text-sm text-muted-foreground">إضافات: {getProductsTotal().toFixed(1)} دينار</div>
 
                   <div className="pt-4 border-t">
                     <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
@@ -517,7 +577,7 @@ export default function BirthdayPage() {
                     {selectedTheme && (
                       <div className="text-center sm:text-right">
                         <p className="text-xs text-muted-foreground">الإجمالي</p>
-                        <p className="font-bold text-2xl text-accent">{selectedTheme.price} د</p>
+                        <p className="font-bold text-2xl text-accent">{((Number(selectedTheme.price) || 0) + getProductsTotal()).toFixed(1)} د</p>
                       </div>
                     )}
                     <Button
