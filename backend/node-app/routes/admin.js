@@ -452,12 +452,15 @@ router.put('/bookings/hourly/:id', async (req, res) => {
     const becamePaid = wasPending && booking.payment_status === 'paid';
     const becameConfirmed = previousStatus !== 'confirmed' && booking.status === 'confirmed';
     if (becamePaid || becameConfirmed) {
-      await maybeAwardLoyaltyPoints({
+      const totalJD = Number(booking.amount) || 0;
+      const points = Math.round(totalJD * 10);
+      await awardPoints({
         userId: booking.user_id?._id || booking.user_id,
-        totalJD: booking.amount,
-        reason: 'نقاط على حجز جلسة لعب',
         refType: 'hourly',
-        refId: booking._id.toString()
+        refId: booking._id.toString(),
+        type: 'hourly',
+        points,
+        description: `Earned ${points} points from hourly booking confirmation`
       });
     }
     if (becamePaid && booking.user_id?.email) {
@@ -503,12 +506,15 @@ router.put('/bookings/birthday/:id', async (req, res) => {
     const becamePaid = wasPending && booking.payment_status === 'paid';
     const becameConfirmed = previousStatus !== 'confirmed' && booking.status === 'confirmed';
     if (becamePaid || becameConfirmed) {
-      await maybeAwardLoyaltyPoints({
+      const totalJD = Number(booking.amount) || 0;
+      const points = Math.round(totalJD * 10);
+      await awardPoints({
         userId: booking.user_id?._id || booking.user_id,
-        totalJD: booking.amount,
-        reason: 'نقاط على حجز عيد ميلاد',
         refType: 'birthday',
-        refId: booking._id.toString()
+        refId: booking._id.toString(),
+        type: 'birthday',
+        points,
+        description: `Earned ${points} points from birthday booking confirmation`
       });
     }
     if (becamePaid && booking.user_id?.email) {
@@ -585,12 +591,15 @@ router.put('/subscriptions/:id/payment-confirmation', async (req, res) => {
 
     const becamePaid = wasPending && subscription.payment_status === 'paid';
     if (becamePaid) {
-      await maybeAwardLoyaltyPoints({
+      const totalJD = Number(subscription.plan_id?.price) || 0;
+      const points = Math.round(totalJD * 10);
+      await awardPoints({
         userId: subscription.user_id?._id || subscription.user_id,
-        totalJD: subscription.plan_id?.price,
-        reason: 'نقاط على شراء اشتراك',
         refType: 'subscription',
-        refId: subscription._id.toString()
+        refId: subscription._id.toString(),
+        type: 'subscription',
+        points,
+        description: `Earned ${points} points from subscription payment confirmation`
       });
     }
     if (becamePaid && subscription.user_id?.email) {
