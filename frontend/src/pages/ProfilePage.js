@@ -432,6 +432,9 @@ export default function ProfilePage() {
                             </div>
                             <div className="text-left">
                               <p className="font-bold">{booking.amount} دينار</p>
+                              {booking.coupon_code && (
+                                <p className="text-xs text-green-700">كوبون: {booking.coupon_code}</p>
+                              )}
                               {booking.status === 'confirmed' && (
                                 <Dialog>
                                   <DialogTrigger asChild>
