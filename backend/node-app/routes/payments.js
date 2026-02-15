@@ -5,6 +5,7 @@ const PaymentTransaction = require('../models/PaymentTransaction');
 const Settings = require('../models/Settings');
 const TimeSlot = require('../models/TimeSlot');
 const { authMiddleware } = require('../middleware/auth');
+const { awardPoints } = require('../utils/awardPoints');
 
 const router = express.Router();
 
@@ -384,6 +385,17 @@ router.get('/status/:sessionId', authMiddleware, async (req, res) => {
 
         transaction.updated_at = new Date();
         await transaction.save();
+
+        if (transaction.status === 'paid' && transaction.type === 'product') {
+          await awardPoints({
+            userId: transaction.user_id,
+            refType: 'product_purchase',
+            refId: transaction._id.toString(),
+            type: 'products',
+            amount: transaction.amount,
+            description: `Earned points from product purchase (${transaction.amount} JD)`
+          });
+        }
       }
 
       return res.json({
@@ -466,6 +478,17 @@ router.post('/capital-bank/callback', async (req, res) => {
     transaction.updated_at = new Date();
     await transaction.save();
 
+    if (transaction.status === 'paid' && transaction.type === 'product') {
+      await awardPoints({
+        userId: transaction.user_id,
+        refType: 'product_purchase',
+        refId: transaction._id.toString(),
+        type: 'products',
+        amount: transaction.amount,
+        description: `Earned points from product purchase (${transaction.amount} JD)`
+      });
+    }
+
     return res.json({ received: true, session_id: order_id, status: transaction.status });
   } catch (error) {
     console.error('Capital Bank callback error:', error);
@@ -489,6 +512,17 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         transaction.payment_id = session.payment_intent;
         transaction.updated_at = new Date();
         await transaction.save();
+
+        if (transaction.type === 'product') {
+          await awardPoints({
+            userId: transaction.user_id,
+            refType: 'product_purchase',
+            refId: transaction._id.toString(),
+            type: 'products',
+            amount: transaction.amount,
+            description: `Earned points from product purchase (${transaction.amount} JD)`
+          });
+        }
       }
     }
 
