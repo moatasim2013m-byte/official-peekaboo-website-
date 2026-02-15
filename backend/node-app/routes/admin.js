@@ -15,6 +15,7 @@ const Theme = require('../models/Theme');
 const Settings = require('../models/Settings');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { sendEmail, emailTemplates } = require('../utils/email');
+const { awardReferralForFirstConfirmedOrder } = require('../utils/referrals');
 
 const router = express.Router();
 
@@ -345,6 +346,10 @@ router.put('/bookings/hourly/:id', async (req, res) => {
     await booking.save();
 
     const becamePaid = wasPending && booking.payment_status === 'paid';
+    if (becamePaid) {
+      await awardReferralForFirstConfirmedOrder(booking.user_id?._id || booking.user_id, `hourly:${booking._id}`);
+    }
+
     if (becamePaid && booking.user_id?.email) {
       try {
         const template = emailTemplates.finalOrderConfirmation({
@@ -385,6 +390,10 @@ router.put('/bookings/birthday/:id', async (req, res) => {
     await booking.save();
 
     const becamePaid = wasPending && booking.payment_status === 'paid';
+    if (becamePaid) {
+      await awardReferralForFirstConfirmedOrder(booking.user_id?._id || booking.user_id, `birthday:${booking._id}`);
+    }
+
     if (becamePaid && booking.user_id?.email) {
       try {
         const template = emailTemplates.finalOrderConfirmation({
@@ -458,6 +467,10 @@ router.put('/subscriptions/:id/payment-confirmation', async (req, res) => {
     await subscription.save();
 
     const becamePaid = wasPending && subscription.payment_status === 'paid';
+    if (becamePaid) {
+      await awardReferralForFirstConfirmedOrder(subscription.user_id?._id || subscription.user_id, `subscription:${subscription._id}`);
+    }
+
     if (becamePaid && subscription.user_id?.email) {
       try {
         const template = emailTemplates.finalOrderConfirmation({
