@@ -925,8 +925,8 @@ button.primary,
 }
 
 .playful-btn {
-    background: linear-gradient(135deg, #ff91a4, #ffb347);
-    color: #fff;
+    background: #FFD93B !important;
+    color: #000 !important;
     border: none;
     border-radius: 999px;
     padding: 12px 22px;
@@ -936,19 +936,19 @@ button.primary,
 }
 
 .playful-btn.btn-cotton-candy {
-    background: linear-gradient(135deg, #ff8db6, #ffae7a);
+    background: #FFD93B !important;
 }
 
 .playful-btn.btn-ocean {
-    background: linear-gradient(135deg, #49b6ff, #4bd7a8);
+    background: #FFD93B !important;
 }
 
 .playful-btn.btn-sunshine {
-    background: linear-gradient(135deg, #ffd65c, #ffa94f);
+    background: #FFD93B !important;
 }
 
 .playful-btn.btn-sunrise {
-    background: linear-gradient(135deg, #ff97a5, #ff9f57);
+    background: #FFD93B !important;
 }
 
 .playful-btn:hover {
