@@ -270,7 +270,7 @@ export default function ProfilePage() {
               <Star className="h-4 w-4" /> الاشتراكات
             </TabsTrigger>
             <TabsTrigger value="loyalty" className="rounded-full gap-2" data-testid="tab-loyalty">
-              <Gift className="h-4 w-4" /> نقاط الولاء
+              <Gift className="h-4 w-4" /> Loopy Loyalty
             </TabsTrigger>
             <TabsTrigger value="settings" className="rounded-full gap-2" data-testid="tab-settings">
               <Settings className="h-4 w-4" /> الإعدادات
@@ -562,10 +562,10 @@ export default function ProfilePage() {
               <CardHeader>
                 <CardTitle className="font-heading flex items-center gap-2">
                   <Gift className="h-6 w-6 text-secondary" />
-                  نقاطي
+                  Loopy Loyalty
                 </CardTitle>
                 <CardDescription>
-                  راقب رصيد نقاطك وقيمتها بالدينار.
+                  تابع رصيد Loopy Loyalty وقيمته بالدينار.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -591,7 +591,7 @@ export default function ProfilePage() {
 
                 {/* History */}
                 <div>
-                  <h4 className="font-heading font-bold mb-4">سجل النقاط</h4>
+                  <h4 className="font-heading font-bold mb-4">سجل Loopy Loyalty</h4>
                   {loyaltyLoading ? (
                     <div className="text-center py-8 text-muted-foreground">جاري تحميل سجل النقاط...</div>
                   ) : loyaltyError ? (
