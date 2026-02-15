@@ -12,7 +12,7 @@ import { Label } from '../components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import { format, addDays, startOfDay } from 'date-fns';
-import { Cake, Users, Loader2, AlertCircle, Sparkles } from 'lucide-react';
+import { Cake, Users, Loader2, AlertCircle, Sparkles, Copy } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import mascotImg from '../assets/mascot.png';
 
@@ -45,6 +45,8 @@ export default function BirthdayPage() {
   const [activeTab, setActiveTab] = useState('standard');
   const [products, setProducts] = useState([]);
   const [selectedProductQty, setSelectedProductQty] = useState({});
+  const [inviteGenerating, setInviteGenerating] = useState(false);
+  const [inviteResult, setInviteResult] = useState(null);
 
   useEffect(() => {
     fetchThemes();
@@ -283,6 +285,45 @@ export default function BirthdayPage() {
     }
   };
 
+  const copyToClipboard = async (text, successMessage) => {
+    if (!text) return;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success(successMessage);
+    } catch (error) {
+      toast.error('تعذر النسخ، حاول مرة أخرى');
+    }
+  };
+
+  const handleGenerateInviteCopy = async () => {
+    if (!isAuthenticated) {
+      toast.error('الرجاء تسجيل الدخول أولاً');
+      navigate('/login');
+      return;
+    }
+
+    const selectedChildObj = children.find((child) => child.id === selectedChild);
+
+    setInviteGenerating(true);
+    try {
+      const response = await api.post('/ai/invite', {
+        childName: selectedChildObj?.name || '',
+        age: selectedChildObj?.age || null,
+        theme: selectedTheme?.name_ar || selectedTheme?.name || '',
+        extraDetails: specialNotes || ''
+      });
+
+      setInviteResult(response.data);
+      toast.success('تم إنشاء النصوص بنجاح');
+    } catch (error) {
+      const apiMessage = error.response?.data?.error;
+      toast.error(apiMessage || 'تعذر إنشاء النصوص حالياً');
+    } finally {
+      setInviteGenerating(false);
+    }
+  };
+
   const handleUseAiTheme = () => {
     if (!aiGeneratedThemeUrl) {
       return;
@@ -451,6 +492,69 @@ export default function BirthdayPage() {
                   </Card>
                 ))}
               </div>
+
+              <Card className="booking-card mt-5">
+                <CardContent className="py-5 space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <p className="text-sm font-medium">
+                      مولد نص الدعوة + كابشن إنستغرام (عربي أولاً)
+                    </p>
+                    <Button
+                      onClick={handleGenerateInviteCopy}
+                      disabled={inviteGenerating}
+                      variant="outline"
+                      className="rounded-full"
+                      data-testid="generate-ai-invite-btn"
+                    >
+                      {inviteGenerating ? <><Loader2 className="ml-2 h-4 w-4 animate-spin" />جاري الإنشاء...</> : 'إنشاء النص'}
+                    </Button>
+                  </div>
+
+                  {inviteResult && (
+                    <div className="space-y-3">
+                      <div className="p-3 rounded-xl border bg-muted/30">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <Label className="text-sm">الدعوة العربية</Label>
+                          <Button type="button" variant="ghost" size="sm" onClick={() => copyToClipboard(inviteResult.inviteArabic, 'تم نسخ الدعوة العربية')}>
+                            <Copy className="h-4 w-4 ml-1" />نسخ
+                          </Button>
+                        </div>
+                        <p className="text-sm whitespace-pre-line">{inviteResult.inviteArabic}</p>
+                      </div>
+
+                      {inviteResult.inviteEnglish && (
+                        <div className="p-3 rounded-xl border bg-muted/30" dir="ltr">
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <Label className="text-sm">English Invite</Label>
+                            <Button type="button" variant="ghost" size="sm" onClick={() => copyToClipboard(inviteResult.inviteEnglish, 'Copied English invite')}>
+                              <Copy className="h-4 w-4 ml-1" />Copy
+                            </Button>
+                          </div>
+                          <p className="text-sm whitespace-pre-line">{inviteResult.inviteEnglish}</p>
+                        </div>
+                      )}
+
+                      <div className="p-3 rounded-xl border bg-muted/30">
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <Label className="text-sm">كابشن إنستغرام</Label>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(`${inviteResult.igCaptionArabic}\n\n${(inviteResult.hashtags || []).join(' ')}`, 'تم نسخ الكابشن والهاشتاغات')}
+                          >
+                            <Copy className="h-4 w-4 ml-1" />نسخ
+                          </Button>
+                        </div>
+                        <p className="text-sm whitespace-pre-line">{inviteResult.igCaptionArabic}</p>
+                        {!!inviteResult.hashtags?.length && (
+                          <p className="text-xs text-muted-foreground mt-2">{inviteResult.hashtags.join(' ')}</p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               <Card className="booking-card mt-5">
                 <CardContent className="py-5 space-y-4">
