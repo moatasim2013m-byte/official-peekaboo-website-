@@ -246,6 +246,7 @@ router.post('/consume', authMiddleware, async (req, res) => {
     const subscription = await UserSubscription.findOne({
       child_id,
       user_id: req.userId, // SECURITY: Ensure subscription belongs to authenticated user
+      payment_status: 'paid', // Do not allow consuming visits before payment confirmation
       status: { $in: ['pending', 'active'] },
       remaining_visits: { $gt: 0 },
       $or: [
@@ -255,6 +256,22 @@ router.post('/consume', authMiddleware, async (req, res) => {
     }).populate('plan_id').populate('child_id');
 
     if (!subscription) {
+      const unpaidSubscription = await UserSubscription.findOne({
+        child_id,
+        user_id: req.userId,
+        payment_status: { $in: ['pending_cash', 'pending_cliq'] },
+        status: { $in: ['pending', 'active'] },
+        remaining_visits: { $gt: 0 },
+        $or: [
+          { expires_at: null },
+          { expires_at: { $gt: new Date() } }
+        ]
+      });
+
+      if (unpaidSubscription) {
+        return res.status(402).json({ error: 'لا يمكن تفعيل الاشتراك قبل تأكيد الدفع' });
+      }
+
       return res.status(404).json({ error: 'لا يوجد اشتراك فعال لهذا الطفل' });
     }
 
