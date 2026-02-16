@@ -1,25 +1,13 @@
-substitutions:
-  _LOCATION: us-west1
-  _REPOSITORY: cloud-run-source-deploy
-  _IMAGE: peekaboo
-
 steps:
-  - name: gcr.io/cloud-builders/docker
+  - name: 'gcr.io/cloud-builders/docker'
     args:
-      - build
-      - -f
-      - Dockerfile
-      - -t
-      - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA
-      - .
-
-  - name: gcr.io/cloud-builders/docker
+      - 'build'
+      - '-t'
+      - 'us-west1-docker.pkg.dev/gen-lang-client-0086895721/cloud-run-source-deploy/peekaboo:$SHORT_SHA'
+      - '.'
+  - name: 'gcr.io/cloud-builders/docker'
     args:
-      - push
-      - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA
-
+      - 'push'
+      - 'us-west1-docker.pkg.dev/gen-lang-client-0086895721/cloud-run-source-deploy/peekaboo:$SHORT_SHA'
 images:
-  - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA
-
-options:
-  logging: CLOUD_LOGGING_ONLY
+  - 'us-west1-docker.pkg.dev/gen-lang-client-0086895721/cloud-run-source-deploy/peekaboo:$SHORT_SHA'
