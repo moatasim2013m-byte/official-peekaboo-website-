@@ -342,7 +342,7 @@ export default function BirthdayPage() {
     toast.success('تم اختيار الثيم المولد بالذكاء الاصطناعي');
   };
 
-  const handleGenerateInviteCopy = async () => {
+  const handleGenerateInviteCopyClick = async () => {
     if (!isAuthenticated) {
       toast.error('الرجاء تسجيل الدخول أولاً');
       navigate('/login');
@@ -724,7 +724,7 @@ export default function BirthdayPage() {
                       </div>
                       <Button
                         type="button"
-                        onClick={handleGenerateInviteCopy}
+                        onClick={handleGenerateInviteCopyClick}
                         disabled={aiCopyGenerating}
                         className="rounded-full"
                       >
