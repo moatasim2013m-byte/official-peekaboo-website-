@@ -224,14 +224,12 @@ h3 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: clamp(175px, 17vw, 230px);
-    min-height: clamp(72px, 7.4vw, 96px);
-    transition: transform 0.24s ease, box-shadow 0.24s ease;
+    min-width: clamp(196px, 19vw, 254px);
+    min-height: clamp(76px, 8.2vw, 106px);
+    transition: transform 0.28s ease, filter 0.28s ease;
     flex: 0 0 auto;
-    border-radius: 999px;
-    background: linear-gradient(140deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.32));
-    border: 1px solid rgba(102, 169, 233, 0.24);
-    box-shadow: 0 8px 20px rgba(94, 136, 198, 0.14);
+    transform-origin: center;
+    will-change: transform;
 }
 
 .brand-logo-with-shroomi {
@@ -239,21 +237,23 @@ h3 {
 }
 
 .nav-shroomi-logo {
-    width: clamp(34px, 2.7vw, 45px);
-    height: clamp(34px, 2.7vw, 45px);
+    width: clamp(36px, 2.9vw, 49px);
+    height: clamp(36px, 2.9vw, 49px);
     object-fit: contain;
     flex: 0 0 auto;
 }
 
 .brand-logo-lg {
-    width: clamp(148px, 14vw, 198px);
+    width: clamp(166px, 15.8vw, 222px);
     height: auto;
     max-width: 100%;
     filter: none;
+    background: transparent;
+    mix-blend-mode: multiply;
 }
 
 @media (min-width: 768px) {
-    .brand-logo-lg { width: clamp(165px, 14.5vw, 225px); }
+    .brand-logo-lg { width: clamp(186px, 15.4vw, 245px); }
 }
 
 @media (min-width: 1024px) {
@@ -264,13 +264,13 @@ h3 {
     }
 
     .navbar-customer .brand-logo-link {
-        min-width: clamp(172px, 13.8vw, 214px);
-        min-height: clamp(64px, 5.8vw, 82px);
-        padding: 0.18rem 0.55rem;
+        min-width: clamp(166px, 13.4vw, 196px);
+        min-height: clamp(62px, 6vw, 80px);
+        padding: 0.1rem 0.25rem;
     }
 
     .navbar-customer .brand-logo-lg {
-        width: clamp(168px, 12.5vw, 204px);
+        width: clamp(176px, 12.8vw, 210px);
     }
 
     .navbar-customer .desktop-nav-links {
@@ -297,8 +297,9 @@ h3 {
 
 @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
     .brand-logo-link:hover {
-        animation: logo-float-bounce 650ms ease-out;
-        transform: translateY(-2px) scale(1.03);
+        animation: logo-float-bounce 1400ms ease-in-out infinite alternate;
+        transform: translateY(-2px) scale(1.04);
+        filter: drop-shadow(0 8px 18px rgba(56, 189, 248, 0.28));
     }
 }
 
@@ -312,13 +313,10 @@ h3 {
 
 @keyframes logo-float-bounce {
     0% {
-        transform: translateY(0) scale(1);
-    }
-    55% {
-        transform: translateY(-3px) scale(1.02) rotate(-0.8deg);
+        transform: translateY(0) scale(1.02);
     }
     100% {
-        transform: translateY(-2px) scale(1.03);
+        transform: translateY(-5px) scale(1.04);
     }
 }
 
@@ -1141,15 +1139,16 @@ button.primary,
 
 .hero-mascot {
   position: absolute;
-  bottom: clamp(76px, 9vw, 116px);
-  left: clamp(-14px, 1.6vw, 16px);
-  width: clamp(72px, 10vw, 114px);
-  height: clamp(72px, 10vw, 114px);
+  bottom: clamp(84px, 10vw, 132px);
+  left: clamp(-8px, 2vw, 20px);
+  width: clamp(88px, 11.8vw, 136px);
+  height: clamp(88px, 11.8vw, 136px);
   border-radius: 50%;
-  border: 4px solid #fff;
-  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
+  border: 5px solid #fff;
+  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.24);
   object-fit: cover;
-  z-index: 4;
+  z-index: 6;
+  animation: mascotHop 3.8s ease-in-out infinite;
 }
 
 @media (max-width: 1023px) {
@@ -3036,6 +3035,34 @@ button.primary,
   top: -10px;
 }
 
+.hero-corner-sun {
+  position: absolute;
+  top: clamp(6px, 1vw, 16px);
+  right: clamp(12px, 2.5vw, 34px);
+  width: clamp(68px, 7vw, 102px);
+  height: clamp(68px, 7vw, 102px);
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff9bf 0%, #ffd744 55%, #ffae00 100%);
+  box-shadow: 0 0 0 8px rgba(254, 211, 48, 0.2), 0 14px 28px rgba(245, 158, 11, 0.35);
+  animation: sunPulse 4.6s ease-in-out infinite;
+  opacity: 0.95;
+}
+
+.hero-corner-sun::before,
+.hero-corner-sun::after {
+  content: '';
+  position: absolute;
+  inset: -14px;
+  border-radius: 50%;
+  border: 2px dashed rgba(251, 191, 36, 0.58);
+}
+
+.hero-corner-sun::after {
+  inset: -22px;
+  border-style: solid;
+  border-color: rgba(255, 226, 128, 0.28);
+}
+
 .sky-sun {
   left: 5%;
   right: auto;
@@ -3063,8 +3090,8 @@ button.primary,
 
 @media (min-width: 1024px) {
   .home-hero-sky {
-    padding-top: 2.75rem !important;
-    padding-bottom: 4.5rem !important;
+    padding-top: 2.25rem !important;
+    padding-bottom: 3.5rem !important;
   }
 
   .home-hero-shell {
@@ -3074,6 +3101,18 @@ button.primary,
   .hero-image-section {
     padding: clamp(0.9rem, 1.2vw, 1.2rem);
     gap: clamp(0.75rem, 1.2vw, 1.2rem);
+  }
+
+  .hero-cloud-layer {
+    top: -84px;
+  }
+
+  .home-page .cloud-1,
+  .home-page .cloud-2,
+  .home-page .cloud-3,
+  .home-page .cloud-4,
+  .home-page .cloud-5 {
+    opacity: 0.98;
   }
 
   .hero-text-card {
@@ -3087,6 +3126,24 @@ button.primary,
 
   .hero-brand-logo {
     height: clamp(74px, 7vw, 112px);
+  }
+
+  .page-section-gap {
+    margin-top: 1.1rem;
+  }
+
+  .home-page-section {
+    padding-top: 2.5rem !important;
+    padding-bottom: 2.75rem !important;
+  }
+
+  .home-section-heading {
+    margin-bottom: 2rem !important;
+  }
+
+  .home-section-heading h2 {
+    margin-bottom: 0.65rem !important;
+    line-height: 1.2;
   }
 }
 
@@ -3160,6 +3217,26 @@ button.primary,
 
 .feature-card {
   min-height: 310px;
+}
+
+.feature-card .pk-icon-badge {
+  background: linear-gradient(135deg, #ff9db6 0%, #ffd166 50%, #5dd4ff 100%) !important;
+  color: #ffffff;
+  box-shadow: 0 8px 16px rgba(56, 189, 248, 0.26);
+}
+
+.feature-icon-svg {
+  stroke-width: 2.2;
+}
+
+@keyframes mascotHop {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(2deg);
+  }
 }
 
 .feature-cta {
