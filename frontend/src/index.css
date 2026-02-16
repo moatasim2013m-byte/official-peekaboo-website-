@@ -448,6 +448,33 @@ h3 {
         height: 40px;
     }
 
+
+    .mobile-home-auth .mobile-home-register-btn {
+        border-color: rgba(244, 107, 69, 0.45);
+        color: #cf3d24;
+        background: linear-gradient(135deg, #ffffff, #fff7f2);
+        box-shadow: 0 3px 10px rgba(244, 107, 69, 0.18);
+    }
+
+    .mobile-home-auth .mobile-home-register-btn:hover {
+        background: #fff2e8;
+        border-color: rgba(244, 107, 69, 0.7);
+    }
+
+    .mobile-home-auth .mobile-home-login-btn {
+        color: #fff;
+        border: none;
+        background: linear-gradient(135deg, #d8432e, #f46b45);
+        box-shadow: 0 6px 14px rgba(216, 67, 46, 0.28);
+    }
+
+    .mobile-home-auth .mobile-home-login-btn:hover {
+        filter: brightness(1.04);
+        transform: translateY(-1px);
+        background: linear-gradient(135deg, #c73a27, #ea5f3e);
+        box-shadow: 0 8px 18px rgba(199, 58, 39, 0.32);
+    }
+
     .mobile-home-headlines {
         padding-top: 0;
         margin-bottom: 2px;
@@ -1612,6 +1639,18 @@ button.primary,
     font-size: 1.125rem;
     color: var(--pk-orange);
     margin-top: 0.5rem;
+}
+
+
+.auth-welcome-title {
+    color: #d8432e;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    text-shadow: 0 4px 14px rgba(216, 67, 46, 0.2);
+    background: linear-gradient(135deg, #cf3d24 0%, #f46b45 45%, #f5b436 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 /* ===== SLOGAN HIGHLIGHT ===== */
