@@ -1,15 +1,14 @@
 # Use Node.js 20.19 (required by mongodb, mongoose, resend)
-FROM node:20.19-alpine
+FROM node:20.19-bookworm-slim
 
 # Set working directory
 WORKDIR /app
 
 # --- 1. FRONTEND BUILD ---
 COPY frontend/package*.json ./frontend/
-RUN cd frontend && npm install --legacy-peer-deps
-
-# Fix missing library
-RUN cd frontend && npm install ajv@8 --legacy-peer-deps
+# Cloud Build environments may set production installs by default; force dev deps
+# so CRACO is available for the frontend build step.
+RUN cd frontend && npm ci --include=dev --legacy-peer-deps
 
 COPY frontend/ ./frontend/
 
@@ -17,25 +16,16 @@ COPY frontend/ ./frontend/
 ENV CI=false
 ENV GENERATE_SOURCEMAP=false
 
-# Cache bust to force rebuild (increment to invalidate Docker layer cache)
-ARG CACHE_BUST=20260210_3
-RUN echo "CACHE_BUST=${CACHE_BUST}"
-
-# TEMPORARY: Check for duplicate selectedDuration
-RUN echo "DUP_CHECK:" && grep -n "selectedDuration" frontend/src/pages/TicketsPage.js || true
-
 # Build the React app
 RUN cd frontend && npm run build
 
 # --- 2. BACKEND SETUP ---
 COPY backend/node-app/package*.json ./backend/node-app/
-RUN cd backend/node-app && npm install
+RUN cd backend/node-app && npm ci --omit=dev
 COPY backend/ ./backend/
 
 # --- 3. STARTUP ---
 ENV PORT=8080
 EXPOSE 8080
-
-# FIX: Add the dummy key so the app starts
 
 CMD ["node", "backend/node-app/index.js"]
