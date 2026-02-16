@@ -196,12 +196,16 @@ export const Navbar = () => {
               ) : (
                 <>
                   <Link to="/register">
-                    <Button variant="outline" size="sm" className="rounded-full text-sm">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full text-sm mobile-home-register-btn"
+                    >
                       إنشاء حساب
                     </Button>
                   </Link>
                   <Link to="/login">
-                    <Button size="sm" className="rounded-full btn-playful text-sm">
+                    <Button size="sm" className="rounded-full text-sm mobile-home-login-btn">
                       دخول
                     </Button>
                   </Link>

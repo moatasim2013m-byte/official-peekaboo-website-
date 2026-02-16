@@ -84,7 +84,7 @@ export default function LoginPage() {
               <img src={mascotImg} alt="بيكابو" className="auth-mascot-img" />
             </div>
           </div>
-          <CardTitle className="font-heading text-3xl text-[var(--text-primary)]" data-testid="login-title">أهلًا بعودتك!</CardTitle>
+          <CardTitle className="font-heading text-3xl auth-welcome-title" data-testid="login-title">أهلًا بعودتك!</CardTitle>
           <p className="auth-slogan">بيكابو يصنع السعادة ✨</p>
           <CardDescription className="text-base mt-2">
             سجّل دخولك إلى حساب بيكابو
