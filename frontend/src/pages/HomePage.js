@@ -3,15 +3,20 @@ import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useAuth } from '../context/AuthContext';
-import { ChevronLeft, Play, X, ZoomIn } from 'lucide-react';
+import {
+  ChevronLeft,
+  Play,
+  X,
+  ZoomIn,
+  Blocks,
+  PartyPopper,
+  Crown,
+  Bus,
+  House,
+  HeartHandshake
+} from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 import logoImg from '../assets/logo.png';
-import { ReactComponent as PlayHourIcon } from '../assets/icons/play-hour.svg';
-import { ReactComponent as BirthdayCakeIcon } from '../assets/icons/birthday-cake.svg';
-import { ReactComponent as CrownIcon } from '../assets/icons/crown.svg';
-import { ReactComponent as SchoolBusIcon } from '../assets/icons/school-bus.svg';
-import { ReactComponent as HomePartyIcon } from '../assets/icons/home-party.svg';
-import { ReactComponent as CareHeartIcon } from '../assets/icons/care-heart.svg';
 
 const RAW_BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').trim();
 const BACKEND_ORIGIN =
@@ -98,7 +103,7 @@ export default function HomePage() {
   const features = [
     {
       id: 'hourly',
-      icon: PlayHourIcon,
+      icon: Blocks,
       title: 'اللعب بالساعة',
       description: 'احجز جلسات لعب لأطفالك واختر الوقت المثالي!',
       link: '/tickets',
@@ -109,7 +114,7 @@ export default function HomePage() {
     },
     {
       id: 'birthdays',
-      icon: BirthdayCakeIcon,
+      icon: PartyPopper,
       title: 'حفلات أعياد الميلاد',
       description: 'احتفل مع ثيمات رائعة وحفلات مخصصة!',
       link: '/birthday',
@@ -120,7 +125,7 @@ export default function HomePage() {
     },
     {
       id: 'subscriptions',
-      icon: CrownIcon,
+      icon: Crown,
       title: 'الاشتراكات',
       description: 'وفّر مع باقات الزيارات بصلاحية 30 يوم!',
       link: '/subscriptions',
@@ -131,7 +136,7 @@ export default function HomePage() {
     },
     {
       id: 'schools',
-      icon: SchoolBusIcon,
+      icon: Bus,
       title: 'المدارس والمجموعات',
       description: 'رحلات مدرسية وبرامج لعب آمنة للمجموعات',
       link: '/groups',
@@ -141,7 +146,7 @@ export default function HomePage() {
       buttonVariant: 'btn-ocean'
     },
     {
-      icon: HomePartyIcon,
+      icon: House,
       title: 'حفلتك في بيتك',
       description: 'نأتيكم للمنزل مع ديكور واحتفال كامل!',
       link: '/home-party',
@@ -151,7 +156,7 @@ export default function HomePage() {
       buttonVariant: 'btn-sunrise'
     },
     {
-      icon: CareHeartIcon,
+      icon: HeartHandshake,
       title: 'ذوي الهمم',
       description: 'برامج مخصصة لأصحاب الاحتياجات الخاصة',
       link: null,
@@ -245,6 +250,7 @@ export default function HomePage() {
 
       <section id="home" className="home-hero-sky pb-hero pb-section py-14 md:py-24">
         <div className="hero-cloud-layer" aria-hidden="true">
+          <div className="hero-corner-sun" aria-hidden="true" />
           <div className="sky-cloud cloud-1"></div>
           <div className="sky-cloud cloud-2"></div>
           <div className="sky-cloud cloud-3"></div>
@@ -360,7 +366,7 @@ export default function HomePage() {
       {/* Features Section */}
       <section className="section-container home-page-section pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto why-peekaboo-cloud">
-          <div className="text-center mb-12">
+          <div className="home-section-heading text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
               لماذا بيكابو مميّز؟
             </h2>
@@ -388,7 +394,7 @@ export default function HomePage() {
       {/* Features Section */}
       <section className="section-container home-page-section pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="home-section-heading text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="features-title">
               ماذا نقدم
             </h2>
@@ -445,7 +451,7 @@ export default function HomePage() {
       {/* Gallery Section */}
       <section className="section-container home-page-section pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="home-section-heading text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="gallery-title">
               لحظات ممتعة في بيكابو
             </h2>
