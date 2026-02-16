@@ -243,7 +243,7 @@ export default function HomePage() {
         <div className="sky-sparkle sparkle-5"></div>
       </div>
 
-      <section id="home" className="home-hero-sky pb-hero pb-section py-14 md:py-24">
+      <section id="home" className="home-hero-sky home-hero-section pb-hero pb-section py-14 md:py-24">
         <div className="hero-cloud-layer" aria-hidden="true">
           <div className="sky-cloud cloud-1"></div>
           <div className="sky-cloud cloud-2"></div>
@@ -358,7 +358,7 @@ export default function HomePage() {
       )}
 
       {/* Features Section */}
-      <section className="section-container home-page-section pb-section page-shell page-section-gap">
+      <section className="section-container home-page-section home-page-section-compact pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto why-peekaboo-cloud">
           <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
@@ -386,7 +386,7 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="section-container home-page-section pb-section page-shell page-section-gap">
+      <section className="section-container home-page-section home-page-section-compact pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="features-title">
@@ -443,7 +443,7 @@ export default function HomePage() {
       </section>
 
       {/* Gallery Section */}
-      <section className="section-container home-page-section pb-section page-shell page-section-gap">
+      <section className="section-container home-page-section home-page-section-compact pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="gallery-title">

@@ -226,8 +226,12 @@ h3 {
     justify-content: center;
     min-width: clamp(175px, 17vw, 230px);
     min-height: clamp(72px, 7.4vw, 96px);
-    transition: transform 0.24s ease;
+    transition: transform 0.24s ease, box-shadow 0.24s ease;
     flex: 0 0 auto;
+    border-radius: 999px;
+    background: linear-gradient(140deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.32));
+    border: 1px solid rgba(102, 169, 233, 0.24);
+    box-shadow: 0 8px 20px rgba(94, 136, 198, 0.14);
 }
 
 .brand-logo-with-shroomi {
@@ -254,19 +258,19 @@ h3 {
 
 @media (min-width: 1024px) {
     .navbar-customer .navbar-row {
-        padding-top: 0.35rem;
-        padding-bottom: 0.35rem;
-        min-height: 70px;
+        padding-top: 0.2rem;
+        padding-bottom: 0.2rem;
+        min-height: 64px;
     }
 
     .navbar-customer .brand-logo-link {
-        min-width: clamp(140px, 12vw, 176px);
-        min-height: clamp(58px, 5.4vw, 72px);
-        padding: 0.1rem 0.25rem;
+        min-width: clamp(172px, 13.8vw, 214px);
+        min-height: clamp(64px, 5.8vw, 82px);
+        padding: 0.18rem 0.55rem;
     }
 
     .navbar-customer .brand-logo-lg {
-        width: clamp(150px, 11.4vw, 182px);
+        width: clamp(168px, 12.5vw, 204px);
     }
 
     .navbar-customer .desktop-nav-links {
@@ -293,8 +297,8 @@ h3 {
 
 @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
     .brand-logo-link:hover {
-        animation: logo-float-bounce 900ms ease-in-out infinite alternate;
-        transform: scale(1.06) rotate(-2deg);
+        animation: logo-float-bounce 650ms ease-out;
+        transform: translateY(-2px) scale(1.03);
     }
 }
 
@@ -308,10 +312,13 @@ h3 {
 
 @keyframes logo-float-bounce {
     0% {
-        transform: translateY(0) scale(1.05) rotate(-1deg);
+        transform: translateY(0) scale(1);
+    }
+    55% {
+        transform: translateY(-3px) scale(1.02) rotate(-0.8deg);
     }
     100% {
-        transform: translateY(-6px) scale(1.07) rotate(1.5deg);
+        transform: translateY(-2px) scale(1.03);
     }
 }
 
@@ -1689,14 +1696,16 @@ button.primary,
 
 /* ===== WONDERLAND BOOKING PAGE STYLES ===== */
 
-.birthday-page {
+.home-page,
+.birthday-page,
+.subscriptions-page {
     position: relative;
     background:
-        radial-gradient(circle at 10% 20%, rgba(255, 126, 185, 0.24) 0%, rgba(255, 126, 185, 0) 36%),
-        radial-gradient(circle at 90% 15%, rgba(255, 211, 102, 0.26) 0%, rgba(255, 211, 102, 0) 35%),
-        radial-gradient(circle at 90% 80%, rgba(0, 187, 249, 0.22) 0%, rgba(0, 187, 249, 0) 32%),
-        radial-gradient(circle at 10% 75%, rgba(90, 214, 122, 0.18) 0%, rgba(90, 214, 122, 0) 34%),
-        linear-gradient(180deg, #fdfcff 0%, #f6f9ff 100%);
+        radial-gradient(circle at 12% 18%, rgba(148, 217, 255, 0.34) 0%, rgba(148, 217, 255, 0) 34%),
+        radial-gradient(circle at 88% 14%, rgba(255, 224, 140, 0.30) 0%, rgba(255, 224, 140, 0) 32%),
+        radial-gradient(circle at 86% 78%, rgba(167, 236, 192, 0.24) 0%, rgba(167, 236, 192, 0) 34%),
+        radial-gradient(circle at 14% 82%, rgba(255, 176, 206, 0.22) 0%, rgba(255, 176, 206, 0) 34%),
+        linear-gradient(180deg, #f3fbff 0%, #f9fcff 46%, #fff7ec 100%);
 }
 
 .birthday-page-decoration {
@@ -2277,11 +2286,9 @@ button.primary,
 }
 
 .home-page {
-  position: relative;
   overflow-x: clip;
   overflow-y: visible;
   min-height: 100vh;
-  background: linear-gradient(180deg, #f7fbff 0%, #f9fcff 45%, #fffaf2 100%);
   -webkit-background-size: 100% 100%;
   background-size: 100% 100%;
 }
@@ -3190,3 +3197,36 @@ button.primary,
 .playful-btn.btn-sunshine { background: linear-gradient(135deg, #ffe276, #ffb86d) !important; }
 .playful-btn.btn-sunrise { background: linear-gradient(135deg, #ff9fba, #ffb26f) !important; }
 .playful-btn.btn-cotton-candy { background: linear-gradient(135deg, #ff9fd0, #ffc39d) !important; }
+
+
+@media (min-width: 1024px) {
+  .home-hero-section {
+    padding-top: 4.4rem !important;
+    padding-bottom: 4.8rem !important;
+  }
+
+  .home-page .home-page-section-compact.section-container {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .home-page .page-section-gap {
+    margin-top: 1.2rem;
+  }
+
+  .birthday-page,
+  .subscriptions-page {
+    padding-top: 2.4rem !important;
+    padding-bottom: 2.75rem !important;
+  }
+
+  .birthday-page-header,
+  .subscriptions-page-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .birthday-tabs-wrap {
+    gap: 1.1rem;
+  }
+}
