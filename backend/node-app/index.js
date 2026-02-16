@@ -97,7 +97,6 @@ app.use((req, res, next) => {
 
 // ==================== HEALTH CHECK (before rate limiting) ====================
 app.get('/healthz', (req, res) => res.status(200).send('ok'));
-app.get('/api/healthz', (req, res) => res.status(200).send('ok'));
 
 app.get('/health', (req, res) => {
   const isDbConnected = mongoose?.connection?.readyState === 1;
@@ -153,7 +152,6 @@ const themesRoutes = require('./routes/themes');
 const productsRoutes = require('./routes/products');
 const couponsRoutes = require('./routes/coupons');
 const aiCopyRoutes = require('./routes/aiCopy');
-const faqBotRoutes = require('./routes/faqBot');
 
 // Routes
 // Apply strict auth limiter to sensitive endpoints
@@ -175,7 +173,6 @@ app.use('/api/themes', themesRoutes);
 app.use('/api', productsRoutes);
 app.use('/api/coupons', couponsRoutes);
 app.use('/api/ai', aiCopyRoutes);
-app.use('/api/bot', faqBotRoutes);
 
 // Public settings endpoint (for homepage hero config)
 const Settings = require('./models/Settings');

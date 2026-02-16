@@ -1,28 +1,41 @@
-FROM node:20-bookworm-slim AS frontend-builder
+# Use Node.js 20.19 (required by mongodb, mongoose, resend)
+FROM node:20.19-alpine
 
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm ci --include=dev --legacy-peer-deps
-COPY frontend/ ./
+# Set working directory
+WORKDIR /app
+
+# --- 1. FRONTEND BUILD ---
+COPY frontend/package*.json ./frontend/
+RUN cd frontend && npm install --legacy-peer-deps
+
+# Fix missing library
+RUN cd frontend && npm install ajv@8 --legacy-peer-deps
+
+COPY frontend/ ./frontend/
+
+# Optimization settings
 ENV CI=false
 ENV GENERATE_SOURCEMAP=false
-RUN npm run build
 
-FROM node:20-bookworm-slim AS backend-deps
+# Cache bust to force rebuild (increment to invalidate Docker layer cache)
+ARG CACHE_BUST=20260210_3
+RUN echo "CACHE_BUST=${CACHE_BUST}"
 
-WORKDIR /app/backend/node-app
-COPY backend/node-app/package*.json ./
-RUN npm ci --omit=dev
+# TEMPORARY: Check for duplicate selectedDuration
+RUN echo "DUP_CHECK:" && grep -n "selectedDuration" frontend/src/pages/TicketsPage.js || true
 
-FROM node:20-bookworm-slim
+# Build the React app
+RUN cd frontend && npm run build
 
-WORKDIR /app
-COPY --from=frontend-builder /app/frontend/build ./frontend/build
-COPY --from=backend-deps /app/backend/node-app/node_modules ./backend/node-app/node_modules
+# --- 2. BACKEND SETUP ---
+COPY backend/node-app/package*.json ./backend/node-app/
+RUN cd backend/node-app && npm install
 COPY backend/ ./backend/
 
-ENV NODE_ENV=production
+# --- 3. STARTUP ---
 ENV PORT=8080
 EXPOSE 8080
+
+# FIX: Add the dummy key so the app starts
 
 CMD ["node", "backend/node-app/index.js"]

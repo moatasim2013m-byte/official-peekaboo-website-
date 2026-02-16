@@ -39,6 +39,8 @@ export default function BirthdayPage() {
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiGeneratedThemeUrl, setAiGeneratedThemeUrl] = useState('');
   const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiCopyGenerating, setAiCopyGenerating] = useState(false);
+  const [aiInviteResult, setAiInviteResult] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -340,6 +342,36 @@ export default function BirthdayPage() {
     toast.success('تم اختيار الثيم المولد بالذكاء الاصطناعي');
   };
 
+  const handleGenerateInviteCopy = async () => {
+    if (!isAuthenticated) {
+      toast.error('الرجاء تسجيل الدخول أولاً');
+      navigate('/login');
+      return;
+    }
+
+    const childObj = children.find((child) => child.id === selectedChild);
+
+    setAiCopyGenerating(true);
+    try {
+      const response = await api.post('/ai/invite', {
+        childName: childObj?.name || undefined,
+        age: childObj?.age || undefined,
+        partyDate: selectedSlot ? `${selectedSlot.date} ${selectedSlot.start_time}` : undefined,
+        partyLocation: 'Peekaboo',
+        partyTheme: selectedTheme?.name_ar || selectedTheme?.name || undefined,
+        extraNotes: specialNotes || undefined
+      });
+
+      setAiInviteResult(response.data);
+      toast.success('تم إنشاء نصوص الدعوة بنجاح');
+    } catch (error) {
+      const apiMessage = error.response?.data?.error;
+      toast.error(apiMessage || 'تعذر إنشاء النصوص حالياً');
+    } finally {
+      setAiCopyGenerating(false);
+    }
+  };
+
   const handleCopyText = async (value, label) => {
     if (!value) return;
 
@@ -377,7 +409,7 @@ export default function BirthdayPage() {
         </div>
 
         {/* Page Header */}
-        <div className="birthday-page-header text-center mb-8">
+        <div className="text-center mb-8">
           <h1 className="birthday-page-title font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3" data-testid="birthday-title">
             <Cake className="inline-block h-9 w-9 text-accent ml-2" />
             حفلات أعياد الميلاد
@@ -391,7 +423,7 @@ export default function BirthdayPage() {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="birthday-tabs-wrap space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="birthday-tabs-list grid w-full max-w-sm mx-auto grid-cols-2 rounded-full p-1 h-12">
             <TabsTrigger value="standard" className="rounded-full text-sm font-semibold" data-testid="tab-standard">
               الثيمات الجاهزة
@@ -693,30 +725,30 @@ export default function BirthdayPage() {
                       <Button
                         type="button"
                         onClick={handleGenerateInviteCopy}
-                        disabled={inviteGenerating}
+                        disabled={aiCopyGenerating}
                         className="rounded-full"
                       >
-                        {inviteGenerating ? <><Loader2 className="ml-2 h-4 w-4 animate-spin" />جاري الإنشاء...</> : <><WandSparkles className="ml-2 h-4 w-4" />توليد النصوص</>}
+                        {aiCopyGenerating ? <><Loader2 className="ml-2 h-4 w-4 animate-spin" />جاري الإنشاء...</> : <><WandSparkles className="ml-2 h-4 w-4" />توليد النصوص</>}
                       </Button>
                     </div>
 
-                    {inviteResult && (
+                    {aiInviteResult && (
                       <div className="space-y-3">
                         <div className="rounded-xl bg-background border p-3">
                           <div className="flex items-center justify-between gap-2 mb-2">
                             <p className="text-sm font-semibold">الدعوة بالعربية</p>
-                            <Button type="button" size="sm" variant="outline" onClick={() => handleCopyText(inviteResult.inviteArabic, 'الدعوة العربية')}><Copy className="ml-1 h-4 w-4" />نسخ</Button>
+                            <Button type="button" size="sm" variant="outline" onClick={() => handleCopyText(aiInviteResult.inviteArabic, 'الدعوة العربية')}><Copy className="ml-1 h-4 w-4" />نسخ</Button>
                           </div>
-                          <p className="text-sm whitespace-pre-wrap">{inviteResult.inviteArabic}</p>
+                          <p className="text-sm whitespace-pre-wrap">{aiInviteResult.inviteArabic}</p>
                         </div>
 
-                        {inviteResult.inviteEnglish && (
+                        {aiInviteResult.inviteEnglish && (
                           <div className="rounded-xl bg-background border p-3" dir="ltr">
                             <div className="flex items-center justify-between gap-2 mb-2">
                               <p className="text-sm font-semibold">English Invite</p>
-                              <Button type="button" size="sm" variant="outline" onClick={() => handleCopyText(inviteResult.inviteEnglish, 'English invite')}><Copy className="ml-1 h-4 w-4" />Copy</Button>
+                              <Button type="button" size="sm" variant="outline" onClick={() => handleCopyText(aiInviteResult.inviteEnglish, 'English invite')}><Copy className="ml-1 h-4 w-4" />Copy</Button>
                             </div>
-                            <p className="text-sm whitespace-pre-wrap">{inviteResult.inviteEnglish}</p>
+                            <p className="text-sm whitespace-pre-wrap">{aiInviteResult.inviteEnglish}</p>
                           </div>
                         )}
 
@@ -727,16 +759,16 @@ export default function BirthdayPage() {
                               type="button"
                               size="sm"
                               variant="outline"
-                              onClick={() => handleCopyText(`${inviteResult.igCaptionArabic}
+                              onClick={() => handleCopyText(`${aiInviteResult.igCaptionArabic}
 
-${(inviteResult.hashtags || []).join(' ')}`, 'الكابشن والهاشتاغات')}
+${(aiInviteResult.hashtags || []).join(' ')}`, 'الكابشن والهاشتاغات')}
                             >
                               <Copy className="ml-1 h-4 w-4" />نسخ
                             </Button>
                           </div>
-                          <p className="text-sm whitespace-pre-wrap">{inviteResult.igCaptionArabic}</p>
-                          {(inviteResult.hashtags || []).length > 0 && (
-                            <p className="text-xs text-muted-foreground mt-2">{inviteResult.hashtags.join(' ')}</p>
+                          <p className="text-sm whitespace-pre-wrap">{aiInviteResult.igCaptionArabic}</p>
+                          {(aiInviteResult.hashtags || []).length > 0 && (
+                            <p className="text-xs text-muted-foreground mt-2">{aiInviteResult.hashtags.join(' ')}</p>
                           )}
                         </div>
                       </div>

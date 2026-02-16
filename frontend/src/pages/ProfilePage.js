@@ -37,15 +37,6 @@ export default function ProfilePage() {
   const [editPhone, setEditPhone] = useState('');
   const [savingPhone, setSavingPhone] = useState(false);
 
-  const safeFormatDate = useCallback((value, pattern = 'yyyy/MM/dd') => {
-    if (!value) return null;
-
-    const parsedDate = new Date(value);
-    if (Number.isNaN(parsedDate.getTime())) return null;
-
-    return format(parsedDate, pattern);
-  }, []);
-
   // Defense in depth: Redirect admin users
   useEffect(() => {
     if (isAdmin) {
@@ -279,7 +270,7 @@ export default function ProfilePage() {
               <Star className="h-4 w-4" /> الاشتراكات
             </TabsTrigger>
             <TabsTrigger value="loyalty" className="rounded-full gap-2" data-testid="tab-loyalty">
-              <Gift className="h-4 w-4" /> Loopy Loyalty
+              <Gift className="h-4 w-4" /> نقاط الولاء
             </TabsTrigger>
             <TabsTrigger value="settings" className="rounded-full gap-2" data-testid="tab-settings">
               <Settings className="h-4 w-4" /> الإعدادات
@@ -353,7 +344,7 @@ export default function ProfilePage() {
                             <div>
                               <p className="font-semibold">{child.name}</p>
                               <p className="text-sm text-muted-foreground">
-                                تاريخ الميلاد: {safeFormatDate(child.birthday) || '--/--/----'}
+                                تاريخ الميلاد: {format(new Date(child.birthday), 'yyyy/MM/dd')}
                               </p>
                             </div>
                           </div>
@@ -544,7 +535,7 @@ export default function ProfilePage() {
                                 {sub.status === 'pending' 
                                   ? 'ينتهي بعد 30 يوم من أول تسجيل دخول'
                                   : sub.expires_at 
-                                    ? `ينتهي: ${safeFormatDate(sub.expires_at) || '--/--/----'}`
+                                    ? `ينتهي: ${format(new Date(sub.expires_at), 'yyyy/MM/dd')}`
                                     : 'لم يتم تحديد تاريخ انتهاء'
                                 }
                               </p>
@@ -571,10 +562,10 @@ export default function ProfilePage() {
               <CardHeader>
                 <CardTitle className="font-heading flex items-center gap-2">
                   <Gift className="h-6 w-6 text-secondary" />
-                  Loopy Loyalty
+                  نقاطي
                 </CardTitle>
                 <CardDescription>
-                  تابع رصيد Loopy Loyalty وقيمته بالدينار.
+                  راقب رصيد نقاطك وقيمتها بالدينار.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -600,7 +591,7 @@ export default function ProfilePage() {
 
                 {/* History */}
                 <div>
-                  <h4 className="font-heading font-bold mb-4">سجل Loopy Loyalty</h4>
+                  <h4 className="font-heading font-bold mb-4">سجل النقاط</h4>
                   {loyaltyLoading ? (
                     <div className="text-center py-8 text-muted-foreground">جاري تحميل سجل النقاط...</div>
                   ) : loyaltyError ? (
@@ -618,7 +609,9 @@ export default function ProfilePage() {
                           <div>
                             <p className="font-medium">{entry.reason || entry.description || 'عملية نقاط'}</p>
                             <p className="text-sm text-muted-foreground">
-                              {safeFormatDate(entry.createdAt || entry.created_at, 'dd/MM/yyyy') || '--/--/----'}
+                              {entry.createdAt || entry.created_at
+                                ? format(new Date(entry.createdAt || entry.created_at), 'dd/MM/yyyy')
+                                : '--/--/----'}
                             </p>
                           </div>
                           <span className={`font-bold ${(entry.pointsDelta ?? entry.points ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
