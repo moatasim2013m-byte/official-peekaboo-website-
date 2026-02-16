@@ -12,6 +12,7 @@ const normalizeBackendOrigin = (rawUrl) => {
 };
 
 const API_ORIGIN = normalizeBackendOrigin(RAW_API_URL);
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 const API_TIMEOUT_MS = 12000;
 
 const TOKEN_KEY = 'peekaboo_token';
@@ -31,7 +32,7 @@ export const AuthProvider = ({ children }) => {
   // Create api instance
   const api = useMemo(() => {
     const instance = axios.create({
-      baseURL: API_ORIGIN ? `${API_ORIGIN}/api` : "/api",
+      baseURL: IS_PRODUCTION ? '/api' : (API_ORIGIN ? `${API_ORIGIN}/api` : '/api'),
       timeout: API_TIMEOUT_MS,
     });
     
