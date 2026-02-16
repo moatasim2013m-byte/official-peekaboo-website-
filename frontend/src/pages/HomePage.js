@@ -221,20 +221,7 @@ export default function HomePage() {
       {/* Decorative Sky Layer (applies to whole page) */}
       <div className="home-sky-layer cloud-layer" aria-hidden="true">
         {/* Sun */}
-        <div className="sky-sun" role="presentation">
-          <span className="sky-sun-ray-layer" aria-hidden="true" />
-          <span className="sky-sun-face" aria-hidden="true">
-            <span className="sky-sun-eyes">
-              <span className="sky-sun-eye" />
-              <span className="sky-sun-eye" />
-            </span>
-            <span className="sky-sun-cheeks">
-              <span className="sky-sun-cheek" />
-              <span className="sky-sun-cheek" />
-            </span>
-            <span className="sky-sun-mouth" />
-          </span>
-        </div>
+        <div className="sky-sun sky-sun-left" aria-hidden="true"></div>
         {/* Rainbow Arc */}
         <div className="sky-rainbow"></div>
         {/* Balloons */}
