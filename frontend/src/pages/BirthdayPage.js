@@ -296,7 +296,7 @@ export default function BirthdayPage() {
     }
   };
 
-  const handleGenerateInviteCopy = async () => {
+  const handleGenerateInviteDetailsCopy = async () => {
     if (!isAuthenticated) {
       toast.error('الرجاء تسجيل الدخول أولاً');
       navigate('/login');
@@ -511,7 +511,7 @@ export default function BirthdayPage() {
                       مولد نص الدعوة + كابشن إنستغرام (عربي أولاً)
                     </p>
                     <Button
-                      onClick={handleGenerateInviteCopy}
+                      onClick={handleGenerateInviteDetailsCopy}
                       disabled={inviteGenerating}
                       variant="outline"
                       className="rounded-full"
@@ -692,7 +692,7 @@ export default function BirthdayPage() {
                       </div>
                       <Button
                         type="button"
-                        onClick={handleGenerateInviteCopy}
+                        onClick={handleGenerateInviteDetailsCopy}
                         disabled={inviteGenerating}
                         className="rounded-full"
                       >
