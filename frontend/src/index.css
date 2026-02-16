@@ -258,9 +258,9 @@ h3 {
 
 @media (min-width: 1024px) {
     .navbar-customer .navbar-row {
-        padding-top: 0.35rem;
-        padding-bottom: 0.35rem;
-        min-height: 70px;
+        padding-top: 0.2rem;
+        padding-bottom: 0.2rem;
+        min-height: 64px;
     }
 
     .navbar-customer .brand-logo-link {
@@ -1695,14 +1695,16 @@ button.primary,
 
 /* ===== WONDERLAND BOOKING PAGE STYLES ===== */
 
-.birthday-page {
+.home-page,
+.birthday-page,
+.subscriptions-page {
     position: relative;
     background:
-        radial-gradient(circle at 10% 20%, rgba(255, 126, 185, 0.24) 0%, rgba(255, 126, 185, 0) 36%),
-        radial-gradient(circle at 90% 15%, rgba(255, 211, 102, 0.26) 0%, rgba(255, 211, 102, 0) 35%),
-        radial-gradient(circle at 90% 80%, rgba(0, 187, 249, 0.22) 0%, rgba(0, 187, 249, 0) 32%),
-        radial-gradient(circle at 10% 75%, rgba(90, 214, 122, 0.18) 0%, rgba(90, 214, 122, 0) 34%),
-        linear-gradient(180deg, #fdfcff 0%, #f6f9ff 100%);
+        radial-gradient(circle at 12% 18%, rgba(148, 217, 255, 0.34) 0%, rgba(148, 217, 255, 0) 34%),
+        radial-gradient(circle at 88% 14%, rgba(255, 224, 140, 0.30) 0%, rgba(255, 224, 140, 0) 32%),
+        radial-gradient(circle at 86% 78%, rgba(167, 236, 192, 0.24) 0%, rgba(167, 236, 192, 0) 34%),
+        radial-gradient(circle at 14% 82%, rgba(255, 176, 206, 0.22) 0%, rgba(255, 176, 206, 0) 34%),
+        linear-gradient(180deg, #f3fbff 0%, #f9fcff 46%, #fff7ec 100%);
 }
 
 .birthday-page-decoration {
@@ -2283,11 +2285,9 @@ button.primary,
 }
 
 .home-page {
-  position: relative;
   overflow-x: clip;
   overflow-y: visible;
   min-height: 100vh;
-  background: linear-gradient(180deg, #f7fbff 0%, #f9fcff 45%, #fffaf2 100%);
   -webkit-background-size: 100% 100%;
   background-size: 100% 100%;
 }
@@ -3274,3 +3274,36 @@ button.primary,
 .playful-btn.btn-sunshine { background: linear-gradient(135deg, #ffe276, #ffb86d) !important; }
 .playful-btn.btn-sunrise { background: linear-gradient(135deg, #ff9fba, #ffb26f) !important; }
 .playful-btn.btn-cotton-candy { background: linear-gradient(135deg, #ff9fd0, #ffc39d) !important; }
+
+
+@media (min-width: 1024px) {
+  .home-hero-section {
+    padding-top: 4.4rem !important;
+    padding-bottom: 4.8rem !important;
+  }
+
+  .home-page .home-page-section-compact.section-container {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .home-page .page-section-gap {
+    margin-top: 1.2rem;
+  }
+
+  .birthday-page,
+  .subscriptions-page {
+    padding-top: 2.4rem !important;
+    padding-bottom: 2.75rem !important;
+  }
+
+  .birthday-page-header,
+  .subscriptions-page-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .birthday-tabs-wrap {
+    gap: 1.1rem;
+  }
+}
