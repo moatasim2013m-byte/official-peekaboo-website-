@@ -348,12 +348,7 @@ export default function AdminPage() {
         setEditingCustomer(null);
       }
     } catch (error) {
-      const serverError = error.response?.data?.error || '';
-      if (serverError.includes('Cannot delete customer with booking/subscription history')) {
-        toast.error('لا يمكن حذف العميل لوجود سجل حجوزات/اشتراكات. يمكنك تعطيل العميل بدلاً من ذلك.');
-        return;
-      }
-      toast.error(serverError || 'فشل حذف العميل');
+      toast.error(error.response?.data?.error || 'فشل حذف العميل');
     }
   };
 
@@ -1351,19 +1346,6 @@ export default function AdminPage() {
                 </DialogHeader>
                 {customerDetails && (
                   <div className="space-y-6">
-                    {(() => {
-                      const bookingsSummary = customerDetails.bookings_summary || {};
-                      const fallbackHasHistory =
-                        (bookingsSummary.hourly_count || 0) > 0 ||
-                        (bookingsSummary.birthday_count || 0) > 0 ||
-                        (bookingsSummary.total_subscriptions || bookingsSummary.active_subscriptions || 0) > 0;
-                      const canDeleteCustomer =
-                        typeof customerDetails.can_delete === 'boolean'
-                          ? customerDetails.can_delete
-                          : !fallbackHasHistory;
-
-                      return (
-                        <>
                     {/* Customer Info */}
                     <div className="space-y-4 p-4 bg-muted/30 rounded-xl">
                       <h3 className="font-bold text-sm mb-3">بيانات العميل</h3>
@@ -1411,17 +1393,10 @@ export default function AdminPage() {
                           variant="destructive"
                           onClick={() => handleDeleteCustomer(customerDetails.customer.id)}
                           className="rounded-full"
-                          disabled={!canDeleteCustomer}
-                          title={!canDeleteCustomer ? 'لا يمكن حذف العميل لوجود سجل حجوزات أو اشتراكات' : undefined}
                         >
                           <Trash2 className="h-4 w-4 ml-1" /> حذف العميل
                         </Button>
                       </div>
-                      {!canDeleteCustomer && (
-                        <p className="text-xs text-amber-700 font-medium">
-                          لا يمكن حذف العميل لوجود سجل حجوزات أو اشتراكات. يمكنك استخدام زر تعطيل بدلاً من الحذف.
-                        </p>
-                      )}
                     </div>
 
                     {/* Bookings Summary */}
@@ -1451,9 +1426,6 @@ export default function AdminPage() {
                         </p>
                       )}
                     </div>
-                        </>
-                      );
-                    })()}
 
                     {/* Children */}
                     <div className="p-4 bg-yellow-50 rounded-xl">
@@ -1825,33 +1797,14 @@ export default function AdminPage() {
                   <Input placeholder="Name EN" value={productForm.nameEn} onChange={(e) => setProductForm({ ...productForm, nameEn: e.target.value })} />
                   <Input placeholder="SKU" value={productForm.sku} onChange={(e) => setProductForm({ ...productForm, sku: e.target.value })} />
                   <Input type="number" step="0.01" placeholder="السعر" value={productForm.priceJD} onChange={(e) => setProductForm({ ...productForm, priceJD: e.target.value })} />
-                  <div className="space-y-2">
-                    <Label htmlFor="product-image-upload">صورة المنتج</Label>
-                    <Input
-                      id="product-image-upload"
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      onChange={(e) => handleImageUpload(e, setProductForm, 'imageUrl')}
-                      disabled={uploadingImage}
-                    />
-                    {productForm.imageUrl ? (
-                      <img
-                        src={resolveMediaUrl(productForm.imageUrl)}
-                        alt="معاينة صورة المنتج"
-                        className="h-16 w-16 rounded-md object-cover border"
-                      />
-                    ) : null}
-                  </div>
+                  <Input placeholder="Image URL" value={productForm.imageUrl} onChange={(e) => setProductForm({ ...productForm, imageUrl: e.target.value })} />
                   <Input type="number" placeholder="الكمية (اختياري)" value={productForm.stockQty} onChange={(e) => setProductForm({ ...productForm, stockQty: e.target.value })} />
                   <div className="md:col-span-3 flex items-center justify-between">
                     <label className="flex items-center gap-2 text-sm">
                       <input type="checkbox" checked={productForm.active} onChange={(e) => setProductForm({ ...productForm, active: e.target.checked })} />
                       فعال
                     </label>
-                    <Button type="submit" className="rounded-full" disabled={uploadingImage}>
-                      {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
-                      إضافة منتج
-                    </Button>
+                    <Button type="submit" className="rounded-full">إضافة منتج</Button>
                   </div>
                 </form>
 
