@@ -3,20 +3,15 @@ import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useAuth } from '../context/AuthContext';
-import {
-  ChevronLeft,
-  Play,
-  X,
-  ZoomIn,
-  Blocks,
-  PartyPopper,
-  Crown,
-  Bus,
-  House,
-  HeartHandshake
-} from 'lucide-react';
+import { ChevronLeft, Play, X, ZoomIn } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 import logoImg from '../assets/logo.png';
+import { ReactComponent as PlayHourIcon } from '../assets/icons/play-hour.svg';
+import { ReactComponent as BirthdayCakeIcon } from '../assets/icons/birthday-cake.svg';
+import { ReactComponent as CrownIcon } from '../assets/icons/crown.svg';
+import { ReactComponent as SchoolBusIcon } from '../assets/icons/school-bus.svg';
+import { ReactComponent as HomePartyIcon } from '../assets/icons/home-party.svg';
+import { ReactComponent as CareHeartIcon } from '../assets/icons/care-heart.svg';
 
 const RAW_BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').trim();
 const BACKEND_ORIGIN =
@@ -103,7 +98,7 @@ export default function HomePage() {
   const features = [
     {
       id: 'hourly',
-      icon: Blocks,
+      icon: PlayHourIcon,
       title: 'اللعب بالساعة',
       description: 'احجز جلسات لعب لأطفالك واختر الوقت المثالي!',
       link: '/tickets',
@@ -114,7 +109,7 @@ export default function HomePage() {
     },
     {
       id: 'birthdays',
-      icon: PartyPopper,
+      icon: BirthdayCakeIcon,
       title: 'حفلات أعياد الميلاد',
       description: 'احتفل مع ثيمات رائعة وحفلات مخصصة!',
       link: '/birthday',
@@ -125,7 +120,7 @@ export default function HomePage() {
     },
     {
       id: 'subscriptions',
-      icon: Crown,
+      icon: CrownIcon,
       title: 'الاشتراكات',
       description: 'وفّر مع باقات الزيارات بصلاحية 30 يوم!',
       link: '/subscriptions',
@@ -136,7 +131,7 @@ export default function HomePage() {
     },
     {
       id: 'schools',
-      icon: Bus,
+      icon: SchoolBusIcon,
       title: 'المدارس والمجموعات',
       description: 'رحلات مدرسية وبرامج لعب آمنة للمجموعات',
       link: '/groups',
@@ -146,7 +141,7 @@ export default function HomePage() {
       buttonVariant: 'btn-ocean'
     },
     {
-      icon: House,
+      icon: HomePartyIcon,
       title: 'حفلتك في بيتك',
       description: 'نأتيكم للمنزل مع ديكور واحتفال كامل!',
       link: '/home-party',
@@ -156,7 +151,7 @@ export default function HomePage() {
       buttonVariant: 'btn-sunrise'
     },
     {
-      icon: HeartHandshake,
+      icon: CareHeartIcon,
       title: 'ذوي الهمم',
       description: 'برامج مخصصة لأصحاب الاحتياجات الخاصة',
       link: null,
@@ -221,7 +216,20 @@ export default function HomePage() {
       {/* Decorative Sky Layer (applies to whole page) */}
       <div className="home-sky-layer cloud-layer" aria-hidden="true">
         {/* Sun */}
-        <div className="sky-sun sky-sun-left" aria-hidden="true"></div>
+        <div className="sky-sun" role="presentation">
+          <span className="sky-sun-ray-layer" aria-hidden="true" />
+          <span className="sky-sun-face" aria-hidden="true">
+            <span className="sky-sun-eyes">
+              <span className="sky-sun-eye" />
+              <span className="sky-sun-eye" />
+            </span>
+            <span className="sky-sun-cheeks">
+              <span className="sky-sun-cheek" />
+              <span className="sky-sun-cheek" />
+            </span>
+            <span className="sky-sun-mouth" />
+          </span>
+        </div>
         {/* Rainbow Arc */}
         <div className="sky-rainbow"></div>
         {/* Balloons */}
@@ -235,9 +243,8 @@ export default function HomePage() {
         <div className="sky-sparkle sparkle-5"></div>
       </div>
 
-      <section id="home" className="home-hero-sky home-hero-section pb-hero pb-section py-14 md:py-24">
+      <section id="home" className="home-hero-sky pb-hero pb-section py-14 md:py-24">
         <div className="hero-cloud-layer" aria-hidden="true">
-          <div className="hero-corner-sun" aria-hidden="true" />
           <div className="sky-cloud cloud-1"></div>
           <div className="sky-cloud cloud-2"></div>
           <div className="sky-cloud cloud-3"></div>
@@ -351,9 +358,9 @@ export default function HomePage() {
       )}
 
       {/* Features Section */}
-      <section className="section-container home-page-section home-page-section-compact pb-section page-shell page-section-gap">
+      <section className="section-container home-page-section pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto why-peekaboo-cloud">
-          <div className="home-section-heading text-center mb-12">
+          <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
               لماذا بيكابو مميّز؟
             </h2>
@@ -379,9 +386,9 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="section-container home-page-section home-page-section-compact pb-section page-shell page-section-gap">
+      <section className="section-container home-page-section pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto">
-          <div className="home-section-heading text-center mb-12">
+          <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="features-title">
               ماذا نقدم
             </h2>
@@ -436,9 +443,9 @@ export default function HomePage() {
       </section>
 
       {/* Gallery Section */}
-      <section className="section-container home-page-section home-page-section-compact pb-section page-shell page-section-gap">
+      <section className="section-container home-page-section pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto">
-          <div className="home-section-heading text-center mb-12">
+          <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="gallery-title">
               لحظات ممتعة في بيكابو
             </h2>

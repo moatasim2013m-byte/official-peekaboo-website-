@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
@@ -23,12 +23,6 @@ export default function StaffPage() {
   const [bookingCode, setBookingCode] = useState('');
   const [scanResult, setScanResult] = useState(null);
   const [scanning, setScanning] = useState(false);
-  const [cameraEnabled, setCameraEnabled] = useState(false);
-  const [cameraSupported, setCameraSupported] = useState(false);
-  const [cameraMessage, setCameraMessage] = useState('');
-  const videoRef = useRef(null);
-  const streamRef = useRef(null);
-  const animationFrameRef = useRef(null);
   
   // Active sessions
   const [activeSessions, setActiveSessions] = useState([]);
@@ -89,30 +83,6 @@ export default function StaffPage() {
     return () => clearInterval(interval);
   }, [fetchActiveSessions, fetchPendingCheckins, fetchTodayParties]);
 
-  useEffect(() => {
-    setCameraSupported(typeof window !== 'undefined' && 'BarcodeDetector' in window && !!navigator.mediaDevices?.getUserMedia);
-  }, []);
-
-  const stopCamera = useCallback(() => {
-    if (animationFrameRef.current) {
-      cancelAnimationFrame(animationFrameRef.current);
-      animationFrameRef.current = null;
-    }
-
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
-    }
-
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-
-    setCameraEnabled(false);
-  }, []);
-
-  useEffect(() => () => stopCamera(), [stopCamera]);
-
   // QR Scanner - Check in
   const handleCheckin = async (e) => {
     e.preventDefault();
@@ -121,83 +91,30 @@ export default function StaffPage() {
       return;
     }
 
-    await submitCheckinCode(bookingCode.toUpperCase().trim());
-  };
-
-  const submitCheckinCode = useCallback(async (value, fromScanner = false) => {
-    const codeToSubmit = value?.trim();
-    if (!codeToSubmit) return;
-
-    setBookingCode(codeToSubmit);
     setScanning(true);
     setScanResult(null);
 
     try {
       const response = await api.post('/staff/checkin', {
-        booking_code: codeToSubmit,
-        scan_payload: fromScanner ? value : undefined
+        booking_code: bookingCode.toUpperCase().trim()
       });
-
-      setScanResult({ success: true, data: response.data });
+      
+      setScanResult({
+        success: true,
+        data: response.data
+      });
       toast.success('Check-in successful!');
       setBookingCode('');
-      setCameraMessage(fromScanner ? 'QR scanned successfully.' : '');
       fetchActiveSessions();
       fetchPendingCheckins();
-      if (fromScanner) stopCamera();
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'Check-in failed';
-      setScanResult({ success: false, error: errorMessage });
-      toast.error(errorMessage);
-      if (fromScanner) {
-        setCameraMessage(errorMessage);
-      }
+      setScanResult({
+        success: false,
+        error: error.response?.data?.error || 'Check-in failed'
+      });
+      toast.error(error.response?.data?.error || 'Check-in failed');
     } finally {
       setScanning(false);
-    }
-  }, [api, fetchActiveSessions, fetchPendingCheckins, stopCamera]);
-
-  const startCameraScanner = async () => {
-    if (!cameraSupported || scanning || cameraEnabled) return;
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
-        audio: false
-      });
-
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-
-      setCameraEnabled(true);
-      setCameraMessage('Point the camera at the QR code.');
-
-      const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
-
-      const scanLoop = async () => {
-        if (!videoRef.current || !streamRef.current || scanning) return;
-
-        try {
-          const barcodes = await detector.detect(videoRef.current);
-          const qrRawValue = barcodes?.[0]?.rawValue;
-          if (qrRawValue) {
-            await submitCheckinCode(qrRawValue, true);
-            return;
-          }
-        } catch (_err) {
-          // Continue scanning.
-        }
-
-        animationFrameRef.current = requestAnimationFrame(scanLoop);
-      };
-
-      animationFrameRef.current = requestAnimationFrame(scanLoop);
-    } catch (_error) {
-      setCameraMessage('Unable to access camera. Please allow camera permission or enter code manually.');
-      stopCamera();
     }
   };
 
@@ -319,43 +236,17 @@ export default function StaffPage() {
                     Check-in Scanner
                   </CardTitle>
                   <CardDescription>
-                    Loopy Loyalty check-in via QR scan or manual booking code
+                    Enter the booking code from the parent's QR to start their session
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3 mb-5">
-                    <div className="aspect-video rounded-xl overflow-hidden bg-black/80 flex items-center justify-center">
-                      <video ref={videoRef} className={`w-full h-full object-cover ${cameraEnabled ? 'block' : 'hidden'}`} muted playsInline />
-                      {!cameraEnabled && (
-                        <p className="text-sm text-white/90 px-4 text-center">
-                          {cameraSupported ? 'Start camera to scan Loopy Loyalty QR codes.' : 'QR camera scan is not supported on this browser.'}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        onClick={cameraEnabled ? stopCamera : startCameraScanner}
-                        disabled={!cameraSupported || scanning}
-                        variant="outline"
-                        className="rounded-full flex-1"
-                      >
-                        <QrCode className="h-4 w-4 mr-2" />
-                        {cameraEnabled ? 'Stop QR Camera' : 'Start QR Camera'}
-                      </Button>
-                    </div>
-
-                    {cameraMessage && <p className="text-xs text-muted-foreground">{cameraMessage}</p>}
-                  </div>
-
                   <form onSubmit={handleCheckin} className="space-y-4">
                     <div>
                       <Label>Booking Code</Label>
                       <Input
                         value={bookingCode}
                         onChange={(e) => setBookingCode(e.target.value)}
-                        placeholder="PK-H-XXXXXXXX / scanned QR value"
+                        placeholder="PK-H-XXXXXXXX"
                         className="rounded-xl h-14 text-lg uppercase mt-2"
                         data-testid="booking-code-input"
                       />
@@ -371,7 +262,7 @@ export default function StaffPage() {
                       ) : (
                         <CheckCircle className="h-5 w-5 mr-2" />
                       )}
-                      Check In (Loopy Loyalty)
+                      Check In
                     </Button>
                   </form>
 

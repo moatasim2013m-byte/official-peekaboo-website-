@@ -10,44 +10,6 @@ const { addMinutes, format } = require('date-fns');
 
 const router = express.Router();
 
-const BOOKING_CODE_REGEX = /PK-H-[A-Z0-9]{8}/i;
-
-const extractBookingCode = (inputValue) => {
-  if (!inputValue) return '';
-
-  const rawValue = String(inputValue).trim();
-  if (!rawValue) return '';
-
-  const directMatch = rawValue.match(BOOKING_CODE_REGEX);
-  if (directMatch?.[0]) {
-    return directMatch[0].toUpperCase();
-  }
-
-  try {
-    const parsedUrl = new URL(rawValue);
-    const queryCode = parsedUrl.searchParams.get('booking_code') || parsedUrl.searchParams.get('code');
-    const urlMatch = queryCode?.match(BOOKING_CODE_REGEX);
-    if (urlMatch?.[0]) {
-      return urlMatch[0].toUpperCase();
-    }
-  } catch (_err) {
-    // Ignore invalid URL input.
-  }
-
-  try {
-    const parsedJson = JSON.parse(rawValue);
-    const jsonCode = parsedJson?.booking_code || parsedJson?.bookingCode || parsedJson?.code;
-    const jsonMatch = String(jsonCode || '').match(BOOKING_CODE_REGEX);
-    if (jsonMatch?.[0]) {
-      return jsonMatch[0].toUpperCase();
-    }
-  } catch (_err) {
-    // Ignore non-JSON payloads.
-  }
-
-  return '';
-};
-
 // Apply staff middleware to all routes (staffMiddleware allows both staff and admin)
 router.use(authMiddleware, staffMiddleware);
 
@@ -122,14 +84,9 @@ router.get('/pending-checkins', async (req, res) => {
 // Check-in a booking (QR scan)
 router.post('/checkin', async (req, res) => {
   try {
-    const { booking_code, scan_payload } = req.body;
-    const normalizedBookingCode = extractBookingCode(booking_code || scan_payload);
-
-    if (!normalizedBookingCode) {
-      return res.status(400).json({ error: 'Invalid booking code' });
-    }
+    const { booking_code } = req.body;
     
-    const booking = await HourlyBooking.findOne({ booking_code: normalizedBookingCode })
+    const booking = await HourlyBooking.findOne({ booking_code })
       .populate('slot_id')
       .populate('child_id');
 
@@ -204,7 +161,6 @@ router.post('/consume-visit', async (req, res) => {
     
     const subscription = await UserSubscription.findOne({
       child_id,
-      payment_status: 'paid', // Do not allow consuming visits before payment confirmation
       status: { $in: ['pending', 'active'] },
       remaining_visits: { $gt: 0 },
       $or: [
@@ -214,21 +170,6 @@ router.post('/consume-visit', async (req, res) => {
     }).populate('plan_id').populate('child_id');
 
     if (!subscription) {
-      const unpaidSubscription = await UserSubscription.findOne({
-        child_id,
-        payment_status: { $in: ['pending_cash', 'pending_cliq'] },
-        status: { $in: ['pending', 'active'] },
-        remaining_visits: { $gt: 0 },
-        $or: [
-          { expires_at: null },
-          { expires_at: { $gt: new Date() } }
-        ]
-      });
-
-      if (unpaidSubscription) {
-        return res.status(402).json({ error: 'Cannot activate subscription before payment confirmation' });
-      }
-
       return res.status(400).json({ error: 'No active subscription found for this child' });
     }
 

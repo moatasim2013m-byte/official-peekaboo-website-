@@ -224,12 +224,10 @@ h3 {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: clamp(196px, 19vw, 254px);
-    min-height: clamp(76px, 8.2vw, 106px);
-    transition: transform 0.28s ease, filter 0.28s ease;
+    min-width: clamp(175px, 17vw, 230px);
+    min-height: clamp(72px, 7.4vw, 96px);
+    transition: transform 0.24s ease;
     flex: 0 0 auto;
-    transform-origin: center;
-    will-change: transform;
 }
 
 .brand-logo-with-shroomi {
@@ -237,40 +235,38 @@ h3 {
 }
 
 .nav-shroomi-logo {
-    width: clamp(36px, 2.9vw, 49px);
-    height: clamp(36px, 2.9vw, 49px);
+    width: clamp(34px, 2.7vw, 45px);
+    height: clamp(34px, 2.7vw, 45px);
     object-fit: contain;
     flex: 0 0 auto;
 }
 
 .brand-logo-lg {
-    width: clamp(166px, 15.8vw, 222px);
+    width: clamp(148px, 14vw, 198px);
     height: auto;
     max-width: 100%;
     filter: none;
-    background: transparent;
-    mix-blend-mode: multiply;
 }
 
 @media (min-width: 768px) {
-    .brand-logo-lg { width: clamp(186px, 15.4vw, 245px); }
+    .brand-logo-lg { width: clamp(165px, 14.5vw, 225px); }
 }
 
 @media (min-width: 1024px) {
     .navbar-customer .navbar-row {
-        padding-top: 0.2rem;
-        padding-bottom: 0.2rem;
-        min-height: 64px;
+        padding-top: 0.35rem;
+        padding-bottom: 0.35rem;
+        min-height: 70px;
     }
 
     .navbar-customer .brand-logo-link {
-        min-width: clamp(166px, 13.4vw, 196px);
-        min-height: clamp(62px, 6vw, 80px);
+        min-width: clamp(140px, 12vw, 176px);
+        min-height: clamp(58px, 5.4vw, 72px);
         padding: 0.1rem 0.25rem;
     }
 
     .navbar-customer .brand-logo-lg {
-        width: clamp(176px, 12.8vw, 210px);
+        width: clamp(150px, 11.4vw, 182px);
     }
 
     .navbar-customer .desktop-nav-links {
@@ -297,9 +293,8 @@ h3 {
 
 @media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
     .brand-logo-link:hover {
-        animation: logo-float-bounce 1400ms ease-in-out infinite alternate;
-        transform: translateY(-2px) scale(1.04);
-        filter: drop-shadow(0 8px 18px rgba(56, 189, 248, 0.28));
+        animation: logo-float-bounce 900ms ease-in-out infinite alternate;
+        transform: scale(1.06) rotate(-2deg);
     }
 }
 
@@ -313,10 +308,10 @@ h3 {
 
 @keyframes logo-float-bounce {
     0% {
-        transform: translateY(0) scale(1.02);
+        transform: translateY(0) scale(1.05) rotate(-1deg);
     }
     100% {
-        transform: translateY(-5px) scale(1.04);
+        transform: translateY(-6px) scale(1.07) rotate(1.5deg);
     }
 }
 
@@ -451,33 +446,6 @@ h3 {
     .mobile-home-auth .btn-playful,
     .mobile-home-auth button {
         height: 40px;
-    }
-
-
-    .mobile-home-auth .mobile-home-register-btn {
-        border-color: rgba(244, 107, 69, 0.45);
-        color: #cf3d24;
-        background: linear-gradient(135deg, #ffffff, #fff7f2);
-        box-shadow: 0 3px 10px rgba(244, 107, 69, 0.18);
-    }
-
-    .mobile-home-auth .mobile-home-register-btn:hover {
-        background: #fff2e8;
-        border-color: rgba(244, 107, 69, 0.7);
-    }
-
-    .mobile-home-auth .mobile-home-login-btn {
-        color: #fff;
-        border: none;
-        background: linear-gradient(135deg, #d8432e, #f46b45);
-        box-shadow: 0 6px 14px rgba(216, 67, 46, 0.28);
-    }
-
-    .mobile-home-auth .mobile-home-login-btn:hover {
-        filter: brightness(1.04);
-        transform: translateY(-1px);
-        background: linear-gradient(135deg, #c73a27, #ea5f3e);
-        box-shadow: 0 8px 18px rgba(199, 58, 39, 0.32);
     }
 
     .mobile-home-headlines {
@@ -1139,16 +1107,15 @@ button.primary,
 
 .hero-mascot {
   position: absolute;
-  bottom: clamp(84px, 10vw, 132px);
-  left: clamp(-8px, 2vw, 20px);
-  width: clamp(88px, 11.8vw, 136px);
-  height: clamp(88px, 11.8vw, 136px);
+  bottom: clamp(76px, 9vw, 116px);
+  left: clamp(-14px, 1.6vw, 16px);
+  width: clamp(72px, 10vw, 114px);
+  height: clamp(72px, 10vw, 114px);
   border-radius: 50%;
-  border: 5px solid #fff;
-  box-shadow: 0 18px 34px rgba(15, 23, 42, 0.24);
+  border: 4px solid #fff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
   object-fit: cover;
-  z-index: 6;
-  animation: mascotHop 3.8s ease-in-out infinite;
+  z-index: 4;
 }
 
 @media (max-width: 1023px) {
@@ -1647,18 +1614,6 @@ button.primary,
     margin-top: 0.5rem;
 }
 
-
-.auth-welcome-title {
-    color: #d8432e;
-    font-weight: 800;
-    letter-spacing: 0.01em;
-    text-shadow: 0 4px 14px rgba(216, 67, 46, 0.2);
-    background: linear-gradient(135deg, #cf3d24 0%, #f46b45 45%, #f5b436 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
 /* ===== SLOGAN HIGHLIGHT ===== */
 .slogan-highlight {
     display: inline-block;
@@ -1695,16 +1650,14 @@ button.primary,
 
 /* ===== WONDERLAND BOOKING PAGE STYLES ===== */
 
-.home-page,
-.birthday-page,
-.subscriptions-page {
+.birthday-page {
     position: relative;
     background:
-        radial-gradient(circle at 12% 18%, rgba(148, 217, 255, 0.34) 0%, rgba(148, 217, 255, 0) 34%),
-        radial-gradient(circle at 88% 14%, rgba(255, 224, 140, 0.30) 0%, rgba(255, 224, 140, 0) 32%),
-        radial-gradient(circle at 86% 78%, rgba(167, 236, 192, 0.24) 0%, rgba(167, 236, 192, 0) 34%),
-        radial-gradient(circle at 14% 82%, rgba(255, 176, 206, 0.22) 0%, rgba(255, 176, 206, 0) 34%),
-        linear-gradient(180deg, #f3fbff 0%, #f9fcff 46%, #fff7ec 100%);
+        radial-gradient(circle at 10% 20%, rgba(255, 126, 185, 0.24) 0%, rgba(255, 126, 185, 0) 36%),
+        radial-gradient(circle at 90% 15%, rgba(255, 211, 102, 0.26) 0%, rgba(255, 211, 102, 0) 35%),
+        radial-gradient(circle at 90% 80%, rgba(0, 187, 249, 0.22) 0%, rgba(0, 187, 249, 0) 32%),
+        radial-gradient(circle at 10% 75%, rgba(90, 214, 122, 0.18) 0%, rgba(90, 214, 122, 0) 34%),
+        linear-gradient(180deg, #fdfcff 0%, #f6f9ff 100%);
 }
 
 .birthday-page-decoration {
@@ -2285,9 +2238,11 @@ button.primary,
 }
 
 .home-page {
+  position: relative;
   overflow-x: clip;
   overflow-y: visible;
   min-height: 100vh;
+  background: linear-gradient(180deg, #f7fbff 0%, #f9fcff 45%, #fffaf2 100%);
   -webkit-background-size: 100% 100%;
   background-size: 100% 100%;
 }
@@ -2421,61 +2376,118 @@ button.primary,
   right: 8%;
   width: 90px;
   height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50%;
-  background: radial-gradient(circle at 32% 30%, #fffce1 0%, #ffe27a 42%, #ffc832 72%, #ffad1f 100%);
-  box-shadow:
-    0 0 0 8px rgba(255, 217, 59, 0.2),
-    0 0 0 18px rgba(255, 206, 74, 0.12),
-    0 12px 28px rgba(245, 158, 11, 0.24);
+  background: radial-gradient(circle at 35% 35%, #fff9be 0%, #ffd93b 58%, #ffb703 100%);
+  box-shadow: 0 0 0 8px rgba(255, 217, 59, 0.18), 0 0 30px rgba(255, 217, 59, 0.25);
   animation: sunPulse 5.5s ease-in-out infinite;
   will-change: transform;
-  z-index: 0;
 }
 
-.sky-sun-left {
-  left: clamp(12px, 2.4vw, 38px);
-  right: auto;
-  top: clamp(8px, 2.2vh, 24px);
-  box-shadow:
-    0 0 0 8px rgba(255, 217, 59, 0.2),
-    0 0 0 18px rgba(255, 206, 74, 0.12),
-    0 12px 28px rgba(245, 158, 11, 0.24),
-    0 -26px 0 -22px rgba(255, 173, 31, 0.9),
-    19px -19px 0 -22px rgba(255, 193, 58, 0.85),
-    26px 0 0 -22px rgba(255, 173, 31, 0.9),
-    19px 19px 0 -22px rgba(255, 193, 58, 0.85),
-    0 26px 0 -22px rgba(255, 173, 31, 0.9),
-    -19px 19px 0 -22px rgba(255, 193, 58, 0.85),
-    -26px 0 0 -22px rgba(255, 173, 31, 0.9),
-    -19px -19px 0 -22px rgba(255, 193, 58, 0.85);
+.sky-sun-ray-layer {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    #ffc300 0deg 16deg,
+    transparent 16deg 30deg,
+    #ffcb00 30deg 46deg,
+    transparent 46deg 60deg,
+    #ffc300 60deg 76deg,
+    transparent 76deg 90deg,
+    #ffd200 90deg 106deg,
+    transparent 106deg 120deg,
+    #ffbf00 120deg 136deg,
+    transparent 136deg 150deg,
+    #ffd200 150deg 166deg,
+    transparent 166deg 180deg,
+    #ffc300 180deg 196deg,
+    transparent 196deg 210deg,
+    #ffcb00 210deg 226deg,
+    transparent 226deg 240deg,
+    #ffc300 240deg 256deg,
+    transparent 256deg 270deg,
+    #ffd200 270deg 286deg,
+    transparent 286deg 300deg,
+    #ffbf00 300deg 316deg,
+    transparent 316deg 330deg,
+    #ffd200 330deg 346deg,
+    transparent 346deg 360deg
+  );
+  filter: drop-shadow(0 8px 12px rgba(251, 191, 36, 0.35));
+  z-index: -1;
 }
 
-.sky-sun-left::before,
-.sky-sun-left::after {
-  content: "";
+.sky-sun-face {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: inset 0 -4px 0 rgba(255, 168, 0, 0.3);
+}
+
+.sky-sun-eyes,
+.sky-sun-cheeks {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  width: 48px;
+  display: flex;
+  justify-content: space-between;
 }
 
-.sky-sun-left::before {
-  top: 34px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #3f2f18;
-  box-shadow: 20px 0 0 #3f2f18, -20px 0 0 #3f2f18;
+.sky-sun-eyes {
+  top: 31px;
 }
 
-.sky-sun-left::after {
-  top: 49px;
-  width: 28px;
+.sky-sun-eye {
+  width: 11px;
   height: 14px;
+  border-radius: 45%;
+  background: #3d2a16;
+  position: relative;
+  transform-origin: center;
+  animation: sunBlink 5.8s ease-in-out infinite;
+}
+
+.sky-sun-eye::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.sky-sun-cheeks {
+  top: 46px;
+  width: 58px;
+}
+
+.sky-sun-cheek {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 122, 50, 0.75);
+}
+
+.sky-sun-mouth {
+  position: absolute;
+  left: 50%;
+  top: 50px;
+  width: 24px;
+  height: 13px;
   border: 3px solid #8a4b0a;
   border-top: 0;
   border-left: 0;
   border-right: 0;
-  border-radius: 0 0 18px 18px;
+  border-radius: 0 0 16px 16px;
+  transform: translateX(-50%) rotate(-8deg);
 }
 
 /* Rainbow arc */
@@ -2557,6 +2569,10 @@ button.primary,
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
 }
+@keyframes sunBlink {
+  0%, 44%, 48%, 100% { transform: scaleY(1); }
+  46% { transform: scaleY(0.1); }
+}
 @keyframes twinkle {
   0%, 100% { transform: scale(0.9); opacity: 0.65; }
   50% { transform: scale(1.25); opacity: 1; }
@@ -2567,32 +2583,29 @@ button.primary,
   .cloud-4, .cloud-5 { display: none; }
   .sky-rainbow { width: 360px; height: 180px; bottom: -70px; left: 6%; opacity: 0.55; }
   .sky-sparkle { display: none; }
-  .sky-sun { width: 72px; height: 72px; }
-  .sky-sun-left {
-    top: clamp(6px, 1.5vh, 14px);
-    left: clamp(8px, 3vw, 16px);
-    box-shadow:
-      0 0 0 6px rgba(255, 217, 59, 0.22),
-      0 0 0 14px rgba(255, 206, 74, 0.12),
-      0 10px 20px rgba(245, 158, 11, 0.24),
-      0 -22px 0 -19px rgba(255, 173, 31, 0.9),
-      16px -16px 0 -19px rgba(255, 193, 58, 0.85),
-      22px 0 0 -19px rgba(255, 173, 31, 0.9),
-      16px 16px 0 -19px rgba(255, 193, 58, 0.85),
-      0 22px 0 -19px rgba(255, 173, 31, 0.9),
-      -16px 16px 0 -19px rgba(255, 193, 58, 0.85),
-      -22px 0 0 -19px rgba(255, 173, 31, 0.9),
-      -16px -16px 0 -19px rgba(255, 193, 58, 0.85);
+  .sky-sun { width: 72px; height: 72px; top: 8%; right: 6%; }
+  .sky-sun-ray-layer {
+    inset: -15px;
   }
-  .sky-sun-left::before {
-    top: 27px;
-    width: 7px;
-    height: 7px;
-    box-shadow: 15px 0 0 #3f2f18, -15px 0 0 #3f2f18;
+  .sky-sun-eyes {
+    top: 24px;
+    width: 40px;
   }
-  .sky-sun-left::after {
-    top: 39px;
-    width: 22px;
+  .sky-sun-eye {
+    width: 9px;
+    height: 12px;
+  }
+  .sky-sun-cheeks {
+    top: 36px;
+    width: 48px;
+  }
+  .sky-sun-cheek {
+    width: 9px;
+    height: 9px;
+  }
+  .sky-sun-mouth {
+    top: 40px;
+    width: 20px;
     height: 10px;
     border-bottom-width: 2px;
   }
@@ -2977,34 +2990,6 @@ button.primary,
   top: -10px;
 }
 
-.hero-corner-sun {
-  position: absolute;
-  top: clamp(6px, 1vw, 16px);
-  right: clamp(12px, 2.5vw, 34px);
-  width: clamp(68px, 7vw, 102px);
-  height: clamp(68px, 7vw, 102px);
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #fff9bf 0%, #ffd744 55%, #ffae00 100%);
-  box-shadow: 0 0 0 8px rgba(254, 211, 48, 0.2), 0 14px 28px rgba(245, 158, 11, 0.35);
-  animation: sunPulse 4.6s ease-in-out infinite;
-  opacity: 0.95;
-}
-
-.hero-corner-sun::before,
-.hero-corner-sun::after {
-  content: '';
-  position: absolute;
-  inset: -14px;
-  border-radius: 50%;
-  border: 2px dashed rgba(251, 191, 36, 0.58);
-}
-
-.hero-corner-sun::after {
-  inset: -22px;
-  border-style: solid;
-  border-color: rgba(255, 226, 128, 0.28);
-}
-
 .sky-sun {
   left: 5%;
   right: auto;
@@ -3032,8 +3017,8 @@ button.primary,
 
 @media (min-width: 1024px) {
   .home-hero-sky {
-    padding-top: 2.25rem !important;
-    padding-bottom: 3.5rem !important;
+    padding-top: 2.75rem !important;
+    padding-bottom: 4.5rem !important;
   }
 
   .home-hero-shell {
@@ -3043,18 +3028,6 @@ button.primary,
   .hero-image-section {
     padding: clamp(0.9rem, 1.2vw, 1.2rem);
     gap: clamp(0.75rem, 1.2vw, 1.2rem);
-  }
-
-  .hero-cloud-layer {
-    top: -84px;
-  }
-
-  .home-page .cloud-1,
-  .home-page .cloud-2,
-  .home-page .cloud-3,
-  .home-page .cloud-4,
-  .home-page .cloud-5 {
-    opacity: 0.98;
   }
 
   .hero-text-card {
@@ -3068,24 +3041,6 @@ button.primary,
 
   .hero-brand-logo {
     height: clamp(74px, 7vw, 112px);
-  }
-
-  .page-section-gap {
-    margin-top: 1.1rem;
-  }
-
-  .home-page-section {
-    padding-top: 2.5rem !important;
-    padding-bottom: 2.75rem !important;
-  }
-
-  .home-section-heading {
-    margin-bottom: 2rem !important;
-  }
-
-  .home-section-heading h2 {
-    margin-bottom: 0.65rem !important;
-    line-height: 1.2;
   }
 }
 
@@ -3161,26 +3116,6 @@ button.primary,
   min-height: 310px;
 }
 
-.feature-card .pk-icon-badge {
-  background: linear-gradient(135deg, #ff9db6 0%, #ffd166 50%, #5dd4ff 100%) !important;
-  color: #ffffff;
-  box-shadow: 0 8px 16px rgba(56, 189, 248, 0.26);
-}
-
-.feature-icon-svg {
-  stroke-width: 2.2;
-}
-
-@keyframes mascotHop {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-3deg);
-  }
-  50% {
-    transform: translateY(-8px) rotate(2deg);
-  }
-}
-
 .feature-cta {
   min-height: 52px;
   line-height: 1.4;
@@ -3216,36 +3151,3 @@ button.primary,
 .playful-btn.btn-sunshine { background: linear-gradient(135deg, #ffe276, #ffb86d) !important; }
 .playful-btn.btn-sunrise { background: linear-gradient(135deg, #ff9fba, #ffb26f) !important; }
 .playful-btn.btn-cotton-candy { background: linear-gradient(135deg, #ff9fd0, #ffc39d) !important; }
-
-
-@media (min-width: 1024px) {
-  .home-hero-section {
-    padding-top: 4.4rem !important;
-    padding-bottom: 4.8rem !important;
-  }
-
-  .home-page .home-page-section-compact.section-container {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
-    margin-bottom: 1.75rem;
-  }
-
-  .home-page .page-section-gap {
-    margin-top: 1.2rem;
-  }
-
-  .birthday-page,
-  .subscriptions-page {
-    padding-top: 2.4rem !important;
-    padding-bottom: 2.75rem !important;
-  }
-
-  .birthday-page-header,
-  .subscriptions-page-header {
-    margin-bottom: 1.5rem;
-  }
-
-  .birthday-tabs-wrap {
-    gap: 1.1rem;
-  }
-}
