@@ -409,7 +409,7 @@ export default function BirthdayPage() {
         </div>
 
         {/* Page Header */}
-        <div className="text-center mb-8">
+        <div className="birthday-page-header text-center mb-8">
           <h1 className="birthday-page-title font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3" data-testid="birthday-title">
             <Cake className="inline-block h-9 w-9 text-accent ml-2" />
             حفلات أعياد الميلاد
@@ -423,7 +423,7 @@ export default function BirthdayPage() {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="birthday-tabs-wrap space-y-6">
           <TabsList className="birthday-tabs-list grid w-full max-w-sm mx-auto grid-cols-2 rounded-full p-1 h-12">
             <TabsTrigger value="standard" className="rounded-full text-sm font-semibold" data-testid="tab-standard">
               الثيمات الجاهزة
