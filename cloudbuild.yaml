@@ -1,27 +1,25 @@
+substitutions:
+  _LOCATION: us-west1
+  _REPOSITORY: cloud-run-source-deploy
+  _IMAGE: peekaboo
+
 steps:
-- name: gcr.io/cloud-builders/docker
-  args: ["build", "-t", "gcr.io/$PROJECT_ID/peekaboo", "."]
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -f
+      - Dockerfile
+      - -t
+      - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA
+      - .
 
-- name: gcr.io/cloud-builders/docker
-  args: ["push", "gcr.io/$PROJECT_ID/peekaboo"]
-
-- name: gcr.io/google.com/cloudsdktool/cloud-sdk
-  entrypoint: gcloud
-  args:
-    ["run","deploy","peekaboo-indoor-playground",
-     "--image=gcr.io/$PROJECT_ID/peekaboo",
-     "--region=us-west1",
-     "--platform=managed",
-     "--min-instances=1",
-     "--no-cpu-throttling",
-     "--concurrency=60",
-     "--cpu=1",
-     "--memory=512Mi",
-     "--allow-unauthenticated"]
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA
 
 images:
-- gcr.io/$PROJECT_ID/peekaboo
+  - ${_LOCATION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_IMAGE}:$SHORT_SHA
 
-# 👇 ADD THIS BLOCK
 options:
   logging: CLOUD_LOGGING_ONLY
