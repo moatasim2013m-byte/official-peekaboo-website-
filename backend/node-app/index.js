@@ -97,6 +97,7 @@ app.use((req, res, next) => {
 
 // ==================== HEALTH CHECK (before rate limiting) ====================
 app.get('/healthz', (req, res) => res.status(200).send('ok'));
+app.get('/api/healthz', (req, res) => res.status(200).send('ok'));
 
 app.get('/health', (req, res) => {
   const isDbConnected = mongoose?.connection?.readyState === 1;

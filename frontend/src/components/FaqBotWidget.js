@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 const QUICK_QUESTIONS = ["الأسعار", "الموقع", "ساعات العمل", "الحجز", "الاشتراكات", "قواعد المركز"];
 
 const RAW_API_URL = (process.env.REACT_APP_BACKEND_URL || "").trim();
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
 
 const normalizeBackendOrigin = (rawUrl) => {
   if (!rawUrl || rawUrl === "undefined" || rawUrl === "null") return "";
@@ -19,8 +20,9 @@ export default function FaqBotWidget() {
   const [inputValue, setInputValue] = useState("");
 
   const apiBase = useMemo(() => {
+    if (IS_PRODUCTION) return '/api';
     const origin = normalizeBackendOrigin(RAW_API_URL);
-    return origin ? `${origin}/api` : "/api";
+    return origin ? `${origin}/api` : '/api';
   }, []);
 
   const askQuestion = async (question) => {
