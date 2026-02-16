@@ -260,8 +260,7 @@ optionalEnvVars.forEach(varName => {
 });
 
 if (!hasAllRequiredVars && isProduction) {
-  console.error('FATAL: Missing required env vars in production. Exiting.');
-  process.exit(1);
+  console.error('FATAL: Missing required env vars in production. Continuing startup.');
 } else if (hasAllRequiredVars) {
   console.log('=== All required env vars present ===');
 }
