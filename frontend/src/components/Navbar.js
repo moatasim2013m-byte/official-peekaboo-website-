@@ -201,7 +201,10 @@ export const Navbar = () => {
                     </Button>
                   </Link>
                   <Link to="/login">
-                    <Button size="sm" className="rounded-full btn-playful text-sm">
+                    <Button
+                      size="sm"
+                      className="rounded-full text-sm bg-[var(--pk-red)] hover:bg-[#e74c3c] text-white shadow-md"
+                    >
                       دخول
                     </Button>
                   </Link>
