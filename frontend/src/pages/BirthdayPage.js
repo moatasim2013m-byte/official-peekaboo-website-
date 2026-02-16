@@ -39,8 +39,6 @@ export default function BirthdayPage() {
   const [aiPrompt, setAiPrompt] = useState('');
   const [aiGeneratedThemeUrl, setAiGeneratedThemeUrl] = useState('');
   const [aiGenerating, setAiGenerating] = useState(false);
-  const [aiCopyGenerating, setAiCopyGenerating] = useState(false);
-  const [aiInviteResult, setAiInviteResult] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState('card');
   const [loading, setLoading] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -340,36 +338,6 @@ export default function BirthdayPage() {
       isAiGenerated: true
     });
     toast.success('تم اختيار الثيم المولد بالذكاء الاصطناعي');
-  };
-
-  const handleGenerateInviteDetailsCopy = async () => {
-    if (!isAuthenticated) {
-      toast.error('الرجاء تسجيل الدخول أولاً');
-      navigate('/login');
-      return;
-    }
-
-    const childObj = children.find((child) => child.id === selectedChild);
-
-    setAiCopyGenerating(true);
-    try {
-      const response = await api.post('/ai/invite', {
-        childName: childObj?.name || undefined,
-        age: childObj?.age || undefined,
-        partyDate: selectedSlot ? `${selectedSlot.date} ${selectedSlot.start_time}` : undefined,
-        partyLocation: 'Peekaboo',
-        partyTheme: selectedTheme?.name_ar || selectedTheme?.name || undefined,
-        extraNotes: specialNotes || undefined
-      });
-
-      setAiInviteResult(response.data);
-      toast.success('تم إنشاء نصوص الدعوة بنجاح');
-    } catch (error) {
-      const apiMessage = error.response?.data?.error;
-      toast.error(apiMessage || 'تعذر إنشاء النصوص حالياً');
-    } finally {
-      setAiCopyGenerating(false);
-    }
   };
 
   const handleCopyText = async (value, label) => {
@@ -724,31 +692,31 @@ export default function BirthdayPage() {
                       </div>
                       <Button
                         type="button"
-                        onClick={handleGenerateInviteDetailsCopy}
-                        disabled={aiCopyGenerating}
+                        onClick={handleGenerateInviteCopy}
+                        disabled={inviteGenerating}
                         className="rounded-full"
                       >
-                        {aiCopyGenerating ? <><Loader2 className="ml-2 h-4 w-4 animate-spin" />جاري الإنشاء...</> : <><WandSparkles className="ml-2 h-4 w-4" />توليد النصوص</>}
+                        {inviteGenerating ? <><Loader2 className="ml-2 h-4 w-4 animate-spin" />جاري الإنشاء...</> : <><WandSparkles className="ml-2 h-4 w-4" />توليد النصوص</>}
                       </Button>
                     </div>
 
-                    {aiInviteResult && (
+                    {inviteResult && (
                       <div className="space-y-3">
                         <div className="rounded-xl bg-background border p-3">
                           <div className="flex items-center justify-between gap-2 mb-2">
                             <p className="text-sm font-semibold">الدعوة بالعربية</p>
-                            <Button type="button" size="sm" variant="outline" onClick={() => handleCopyText(aiInviteResult.inviteArabic, 'الدعوة العربية')}><Copy className="ml-1 h-4 w-4" />نسخ</Button>
+                            <Button type="button" size="sm" variant="outline" onClick={() => handleCopyText(inviteResult.inviteArabic, 'الدعوة العربية')}><Copy className="ml-1 h-4 w-4" />نسخ</Button>
                           </div>
-                          <p className="text-sm whitespace-pre-wrap">{aiInviteResult.inviteArabic}</p>
+                          <p className="text-sm whitespace-pre-wrap">{inviteResult.inviteArabic}</p>
                         </div>
 
-                        {aiInviteResult.inviteEnglish && (
+                        {inviteResult.inviteEnglish && (
                           <div className="rounded-xl bg-background border p-3" dir="ltr">
                             <div className="flex items-center justify-between gap-2 mb-2">
                               <p className="text-sm font-semibold">English Invite</p>
-                              <Button type="button" size="sm" variant="outline" onClick={() => handleCopyText(aiInviteResult.inviteEnglish, 'English invite')}><Copy className="ml-1 h-4 w-4" />Copy</Button>
+                              <Button type="button" size="sm" variant="outline" onClick={() => handleCopyText(inviteResult.inviteEnglish, 'English invite')}><Copy className="ml-1 h-4 w-4" />Copy</Button>
                             </div>
-                            <p className="text-sm whitespace-pre-wrap">{aiInviteResult.inviteEnglish}</p>
+                            <p className="text-sm whitespace-pre-wrap">{inviteResult.inviteEnglish}</p>
                           </div>
                         )}
 
@@ -759,16 +727,16 @@ export default function BirthdayPage() {
                               type="button"
                               size="sm"
                               variant="outline"
-                              onClick={() => handleCopyText(`${aiInviteResult.igCaptionArabic}
+                              onClick={() => handleCopyText(`${inviteResult.igCaptionArabic}
 
-${(aiInviteResult.hashtags || []).join(' ')}`, 'الكابشن والهاشتاغات')}
+${(inviteResult.hashtags || []).join(' ')}`, 'الكابشن والهاشتاغات')}
                             >
                               <Copy className="ml-1 h-4 w-4" />نسخ
                             </Button>
                           </div>
-                          <p className="text-sm whitespace-pre-wrap">{aiInviteResult.igCaptionArabic}</p>
-                          {(aiInviteResult.hashtags || []).length > 0 && (
-                            <p className="text-xs text-muted-foreground mt-2">{aiInviteResult.hashtags.join(' ')}</p>
+                          <p className="text-sm whitespace-pre-wrap">{inviteResult.igCaptionArabic}</p>
+                          {(inviteResult.hashtags || []).length > 0 && (
+                            <p className="text-xs text-muted-foreground mt-2">{inviteResult.hashtags.join(' ')}</p>
                           )}
                         </div>
                       </div>
