@@ -12,7 +12,6 @@ import { Label } from '../components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import { format, addDays, startOfDay } from 'date-fns';
-import { Loader2 } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import mascotImg from '../assets/mascot.png';
 import SkyBackground from '../components/theme/SkyBackground';
@@ -443,7 +442,7 @@ export default function BirthdayPage() {
                 {loadingSlots ? (
                   <div className="soft-loading-state py-6">
                     <div className="flex justify-center mb-4">
-                      <Loader2 className="h-8 w-8 animate-spin text-accent" />
+                      <span className="pk-spinner" aria-label="جاري التحميل" />
                     </div>
                     <BirthdaySlotsSkeleton />
                   </div>
@@ -703,7 +702,7 @@ export default function BirthdayPage() {
                       data-testid="book-party-btn"
                     >
                       {loading ? (
-                        <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري المعالجة...</>
+                        <span className="inline-flex items-center gap-2"><span className="pk-spinner pk-spinner--sm" aria-hidden="true" />جاري المعالجة...</span>
                       ) : (
                         <span className="inline-flex items-center gap-2">احجز وادفع <MascotVariant accessory={birthdayAccessory} alt="" /></span>
                       )}
@@ -782,7 +781,7 @@ export default function BirthdayPage() {
                   className="rounded-full h-11 btn-playful bg-[var(--pk-red)] hover:bg-[var(--pk-orange)]"
                   data-testid="submit-custom-btn"
                 >
-                  {loading ? <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري الإرسال...</> : 'إرسال الطلب'}
+                  {loading ? <span className="inline-flex items-center gap-2"><span className="pk-spinner pk-spinner--sm" aria-hidden="true" />جاري الإرسال...</span> : 'إرسال الطلب'}
                 </Button>
                 <p className="text-xs text-muted-foreground">سيتواصل فريقنا معك بالأسعار.</p>
               </CardContent>

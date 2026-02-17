@@ -247,6 +247,7 @@ export default function HomePage() {
                 tabIndex={canOpenLightbox ? 0 : -1}
                 onKeyDown={(e) => canOpenLightbox && e.key === 'Enter' && setLightboxOpen(true)}
                 data-testid="hero-image-clickable"
+                aria-label="عرض صورة الأطفال بحجم أكبر"
               >
                 <span className="sr-only" data-testid="hero-image">أطفال يلعبون في بيكابو</span>
                 {!heroImageReady && <div className="hero-image-placeholder" aria-hidden="true" />}

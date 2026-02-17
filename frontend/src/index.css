@@ -3159,15 +3159,15 @@ button.primary,
 .btn-playful,
 .pb-btn,
 .primary-btn {
-  background: linear-gradient(135deg, #ff9db6, #ffc75f) !important;
-  color: #2f2a1f !important;
+  background: linear-gradient(135deg, var(--pk-red), var(--pk-yellow)) !important;
+  color: var(--text-primary) !important;
   font-weight: 800;
 }
 
-.playful-btn.btn-ocean { background: linear-gradient(135deg, #78d6ff, #7ef2c1) !important; }
-.playful-btn.btn-sunshine { background: linear-gradient(135deg, #ffe276, #ffb86d) !important; }
-.playful-btn.btn-sunrise { background: linear-gradient(135deg, #ff9fba, #ffb26f) !important; }
-.playful-btn.btn-cotton-candy { background: linear-gradient(135deg, #ff9fd0, #ffc39d) !important; }
+.playful-btn.btn-ocean { background: linear-gradient(135deg, var(--pk-blue), var(--pk-green)) !important; }
+.playful-btn.btn-sunshine { background: linear-gradient(135deg, var(--pk-yellow), var(--pk-orange)) !important; }
+.playful-btn.btn-sunrise { background: linear-gradient(135deg, var(--pk-red), var(--pk-orange)) !important; }
+.playful-btn.btn-cotton-candy { background: linear-gradient(135deg, var(--pk-orange), var(--pk-yellow)) !important; }
 
 /* ===== Playful shared sky + sun components ===== */
 body {
@@ -3289,3 +3289,20 @@ body {
 .subscriptions-page {
     background: linear-gradient(135deg, color-mix(in srgb, var(--pk-blue) 12%, var(--pk-white) 88%), color-mix(in srgb, var(--pk-green) 16%, var(--pk-white) 84%), color-mix(in srgb, var(--pk-yellow) 20%, var(--pk-white) 80%));
 }
+
+
+.pk-spinner {
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 3px solid color-mix(in srgb, var(--pk-blue) 30%, transparent);
+    border-top-color: var(--pk-blue);
+    border-radius: 50%;
+    display: inline-block;
+    animation: pk-spin .8s linear infinite;
+}
+.pk-spinner--sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 2px;
+}
+@keyframes pk-spin { to { transform: rotate(360deg); } }

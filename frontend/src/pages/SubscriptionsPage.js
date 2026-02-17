@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import mascotImg from '../assets/mascot.png';
 import SkyBackground from '../components/theme/SkyBackground';
@@ -184,7 +183,7 @@ export default function SubscriptionsPage() {
 
         {loadingPlans ? (
           <div className="flex justify-center py-12">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <span className="pk-spinner" aria-label="جاري التحميل" />
           </div>
         ) : (
           <>
@@ -314,7 +313,7 @@ export default function SubscriptionsPage() {
                       data-testid="purchase-btn"
                     >
                       {loading ? (
-                        <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري المعالجة...</>
+                        <span className="inline-flex items-center gap-2"><span className="pk-spinner pk-spinner--sm" aria-hidden="true" />جاري المعالجة...</span>
                       ) : (
                         <span className="inline-flex items-center gap-2">اشترِ الآن <MascotVariant accessory={subscriptionAccessory} alt="" /></span>
                       )}

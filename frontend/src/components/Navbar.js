@@ -75,7 +75,7 @@ export const Navbar = () => {
           {isAuthenticated && (isAdmin || isStaff) && (
             <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--peekaboo-green)]/10 border border-[var(--peekaboo-green)]">
               <img src={mascotImg} alt="" className="h-6 w-6 rounded-full" />
-              <span className="text-xs font-medium text-[#2d6a4f]">{isAdmin ? 'Admin' : 'Staff'}</span>
+              <span className="text-xs font-medium text-[var(--text-primary)]">{isAdmin ? 'Admin' : 'Staff'}</span>
             </div>
           )}
 
@@ -222,7 +222,7 @@ export const Navbar = () => {
             {isAuthenticated && (isAdmin || isStaff) && (
               <div className="mb-4 flex items-center gap-2 px-3 py-2 rounded bg-[var(--peekaboo-green)]/10 border border-[var(--peekaboo-green)]">
                 <img src={mascotImg} alt="" className="h-6 w-6 rounded-full" />
-                <span className="text-xs font-medium text-[#2d6a4f]">{isAdmin ? 'وضع المدير' : 'وضع الموظف'}</span>
+                <span className="text-xs font-medium text-[var(--text-primary)]">{isAdmin ? 'وضع المدير' : 'وضع الموظف'}</span>
               </div>
             )}
             <div className="flex flex-col gap-3">
