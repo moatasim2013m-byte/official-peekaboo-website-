@@ -25,6 +25,14 @@ const resolveMediaUrl = (url) => {
   return `${BACKEND_ORIGIN}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
+const mapHeroSettings = (settings = {}, fallback = {}) => ({
+  title: settings.hero_title || fallback.title,
+  subtitle: settings.hero_subtitle || fallback.subtitle,
+  ctaText: settings.hero_cta_text || fallback.ctaText,
+  ctaRoute: settings.hero_cta_route || fallback.ctaRoute,
+  image: settings.hero_image || ''
+});
+
 export default function HomePage() {
   const { isAuthenticated, api } = useAuth();
   const [gallery, setGallery] = useState([]);
@@ -89,16 +97,9 @@ export default function HomePage() {
       try {
         const settingsResult = await api.get('/settings');
         const s = settingsResult?.data?.settings || {};
-
         if (!isActive) return;
 
-        setHeroConfig((prev) => ({
-          title: s.hero_title || prev.title,
-          subtitle: s.hero_subtitle || prev.subtitle,
-          ctaText: s.hero_cta_text || prev.ctaText,
-          ctaRoute: s.hero_cta_route || prev.ctaRoute,
-          image: s.hero_image || ''
-        }));
+        setHeroConfig((prev) => mapHeroSettings(s, prev));
         setHeroImgSrc(s.hero_image ? resolveMediaUrl(s.hero_image) : '');
         setHeroImageError(false);
       } catch (error) {
