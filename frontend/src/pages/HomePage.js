@@ -32,6 +32,7 @@ export default function HomePage() {
   const [heroImgSrc, setHeroImgSrc] = useState('');
   const [heroImageReady, setHeroImageReady] = useState(false);
   const [heroImageError, setHeroImageError] = useState(false);
+  const [showDeferredSections, setShowDeferredSections] = useState(false);
   const [heroConfig, setHeroConfig] = useState({
     title: 'حيث يلعب الأطفال ويحتفلون 🎈',
     subtitle: 'أفضل تجربة ملعب داخلي! احجز جلسات اللعب، أقم حفلات أعياد ميلاد لا تُنسى، ووفّر مع باقات الاشتراك',
@@ -42,6 +43,28 @@ export default function HomePage() {
 
   useEffect(() => {
     document.title = 'بيكابو | ملعب داخلي للأطفال - إربد';
+  }, []);
+
+  useEffect(() => {
+    let timeoutId;
+    let idleId;
+
+    const markReady = () => setShowDeferredSections(true);
+
+    if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+      idleId = window.requestIdleCallback(markReady, { timeout: 600 });
+    } else {
+      timeoutId = window.setTimeout(markReady, 250);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined' && typeof window.cancelIdleCallback === 'function' && idleId) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
   }, []);
 
   // Handle ESC key and body scroll
@@ -60,20 +83,10 @@ export default function HomePage() {
   }, [lightboxOpen]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const [galleryResult, settingsResult] = await Promise.allSettled([
-        api.get('/gallery'),
-        api.get('/settings')
-      ]);
-
-      if (galleryResult.status === 'fulfilled') {
-        setGallery(galleryResult.value?.data?.media || []);
-      } else {
-        console.error('Failed to fetch gallery:', galleryResult.reason);
-      }
-
-      if (settingsResult.status === 'fulfilled') {
-        const s = settingsResult.value?.data?.settings || {};
+    const fetchSettings = async () => {
+      try {
+        const settingsResult = await api.get('/settings');
+        const s = settingsResult?.data?.settings || {};
         setHeroConfig((prev) => ({
           title: s.hero_title || prev.title,
           subtitle: s.hero_subtitle || prev.subtitle,
@@ -83,17 +96,35 @@ export default function HomePage() {
         }));
         setHeroImgSrc(s.hero_image ? resolveMediaUrl(s.hero_image) : '');
         setHeroImageError(false);
-      } else {
-        console.error('Failed to fetch settings:', settingsResult.reason);
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
         setHeroImgSrc('');
         setHeroImageError(false);
+      } finally {
+        // Keep first paint responsive and do not block hero rendering on gallery API latency
+        setHeroImageReady(true);
       }
-
-      setHeroImageReady(true);
     };
-    fetchData();
+
+    fetchSettings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!showDeferredSections) return;
+
+    const fetchGallery = async () => {
+      try {
+        const galleryResult = await api.get('/gallery');
+        setGallery(galleryResult?.data?.media || []);
+      } catch (error) {
+        console.error('Failed to fetch gallery:', error);
+      }
+    };
+
+    fetchGallery();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showDeferredSections]);
 
   const features = [
     {
@@ -220,7 +251,6 @@ export default function HomePage() {
         <div className="sky-cloud cloud-2"></div>
         <div className="sky-cloud cloud-3"></div>
         <div className="sky-cloud cloud-4"></div>
-        <div className="sky-cloud cloud-5"></div>
         {/* Sun */}
         <div className="sky-sun" role="presentation">
           <span className="sky-sun-ray-layer" aria-hidden="true" />
@@ -246,7 +276,6 @@ export default function HomePage() {
         <div className="sky-sparkle sparkle-2"></div>
         <div className="sky-sparkle sparkle-3"></div>
         <div className="sky-sparkle sparkle-4"></div>
-        <div className="sky-sparkle sparkle-5"></div>
       </div>
 
       <section id="home" className="home-hero-sky pb-hero pb-section py-14 md:py-24">
@@ -355,6 +384,8 @@ export default function HomePage() {
         </div>
       )}
 
+      {showDeferredSections && (
+        <>
       {/* Features Section */}
       <section className="section-container home-page-section pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto why-peekaboo-cloud">
@@ -492,7 +523,7 @@ export default function HomePage() {
               <>
                 <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-md">
                   <img 
-                    src="https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg"
+                    src="/hero-fallback.jpg"
                     alt="أطفال يلعبون"
                     className="w-full h-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
                     loading="lazy"
@@ -501,7 +532,7 @@ export default function HomePage() {
                 </div>
                 <div className="rounded-2xl overflow-hidden shadow-md">
                   <img 
-                    src="https://images.pexels.com/photos/6148511/pexels-photo-6148511.jpeg"
+                    src="/hero-fallback.jpg"
                     alt="حفلة عيد ميلاد"
                     className="w-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
                     loading="lazy"
@@ -510,7 +541,7 @@ export default function HomePage() {
                 </div>
                 <div className="rounded-2xl overflow-hidden shadow-md">
                   <img 
-                    src="https://images.pexels.com/photos/3951099/pexels-photo-3951099.png"
+                    src="/hero-fallback.jpg"
                     alt="متعة عائلية"
                     className="w-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
                     loading="lazy"
@@ -557,6 +588,8 @@ export default function HomePage() {
             </Link>
           </div>
         </section>
+      )}
+        </>
       )}
     </div>
   );
