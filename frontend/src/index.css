@@ -534,7 +534,7 @@ code {
         --popover: 0 0% 100%;
         --popover-foreground: 240 10% 10%;
         /* Peekaboo Brand Colors - Enhanced */
-        --primary: 355 100% 64%; /* Red */
+        --primary: 356 72% 49%; /* Red (matches birthday) */
         --primary-foreground: 0 0% 100%;
         --secondary: 48 100% 62%; /* Yellow */
         --secondary-foreground: 240 10% 10%;
@@ -546,7 +546,7 @@ code {
         --destructive-foreground: 0 0% 98%;
         --border: 220 13% 91%;
         --input: 220 13% 91%;
-        --ring: 355 100% 64%;
+        --ring: 356 72% 49%;
         --radius: 0.75rem;
         /* Legacy compatibility */
         --peekaboo-yellow: var(--brand-yellow);
@@ -556,7 +556,7 @@ code {
         --peekaboo-blue: var(--brand-blue);
         --color-cream: var(--bg-cream);
         --color-light-gray: var(--bg-light);
-        --chart-1: 355 100% 64%;
+        --chart-1: 356 72% 49%;
         --chart-2: 48 100% 62%;
         --chart-3: 28 100% 63%;
         --chart-4: 145 65% 51%;
@@ -656,8 +656,8 @@ code {
 }
 .nav-pill.pill-pink:hover,
 .nav-pill.pill-pink.active {
-    background: #e74c3c;
-    box-shadow: 0 6px 20px rgba(255, 71, 87, 0.4);
+    background: var(--pk-red);
+    box-shadow: 0 6px 20px rgba(217, 35, 46, 0.4);
 }
 
 .nav-pill.pill-yellow {
@@ -3218,7 +3218,7 @@ button.primary,
   width: min(220px, 48vw);
   height: 10px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #ff595e 0%, #5fb9ea 100%);
+  background: linear-gradient(90deg, var(--pk-red) 0%, #5fb9ea 100%);
   box-shadow: 0 6px 14px rgba(102, 169, 233, 0.22);
 }
 
@@ -3287,7 +3287,7 @@ button.primary,
 .btn-playful,
 .pb-btn,
 .primary-btn {
-  background: #ff595e !important;
+  background: var(--pk-red) !important;
   color: #ffffff !important;
   font-weight: 800;
 }
@@ -3296,7 +3296,7 @@ button.primary,
 .home-page .playful-btn.btn-sunshine,
 .home-page .playful-btn.btn-sunrise,
 .home-page .playful-btn.btn-cotton-candy {
-  background: #ff595e !important;
+  background: var(--pk-red) !important;
   color: #ffffff !important;
 }
 
