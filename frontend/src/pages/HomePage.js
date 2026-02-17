@@ -3,15 +3,21 @@ import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 import { useAuth } from '../context/AuthContext';
-import { ChevronLeft, Play, X, ZoomIn } from 'lucide-react';
+import SkyBackground from '../components/theme/SkyBackground';
+import SmilingSun from '../components/theme/SmilingSun';
+import MascotVariant from '../components/theme/MascotVariant';
 import mascotImg from '../assets/mascot.png';
 import logoImg from '../assets/logo.png';
-import { ReactComponent as PlayHourIcon } from '../assets/icons/play-hour.svg';
-import { ReactComponent as BirthdayCakeIcon } from '../assets/icons/birthday-cake.svg';
-import { ReactComponent as CrownIcon } from '../assets/icons/crown.svg';
-import { ReactComponent as SchoolBusIcon } from '../assets/icons/school-bus.svg';
-import { ReactComponent as HomePartyIcon } from '../assets/icons/home-party.svg';
-import { ReactComponent as CareHeartIcon } from '../assets/icons/care-heart.svg';
+import playHourIcon from '../assets/cartoon-icons/play-clock.svg';
+import birthdayCakeIcon from '../assets/cartoon-icons/party-cake.svg';
+import crownIcon from '../assets/cartoon-icons/crown.svg';
+import schoolBusIcon from '../assets/cartoon-icons/bus.svg';
+import homePartyIcon from '../assets/cartoon-icons/house-party.svg';
+import careHeartIcon from '../assets/cartoon-icons/heart-care.svg';
+import birthdayAccessory from '../assets/mascot-variants/birthday-party.svg';
+import playAccessory from '../assets/mascot-variants/play-session.svg';
+import subscriptionAccessory from '../assets/mascot-variants/subscription-crown.svg';
+import closeIcon from '../assets/cartoon-icons/close.svg';
 
 const RAW_BACKEND_URL = (process.env.REACT_APP_BACKEND_URL || '').trim();
 const BACKEND_ORIGIN =
@@ -60,10 +66,14 @@ export default function HomePage() {
   }, [lightboxOpen]);
 
   useEffect(() => {
+    let isActive = true;
+
     const fetchSettings = async () => {
       try {
         const settingsResult = await api.get('/settings');
         const s = settingsResult?.data?.settings || {};
+        if (!isActive) return;
+
         setHeroConfig((prev) => ({
           title: s.hero_title || prev.title,
           subtitle: s.hero_subtitle || prev.subtitle,
@@ -74,10 +84,12 @@ export default function HomePage() {
         setHeroImgSrc(s.hero_image ? resolveMediaUrl(s.hero_image) : '');
         setHeroImageError(false);
       } catch (error) {
+        if (!isActive) return;
         console.error('Failed to fetch settings:', error);
         setHeroImgSrc('');
         setHeroImageError(false);
       } finally {
+        if (!isActive) return;
         // Keep first paint responsive and do not block hero rendering on gallery API latency
         setHeroImageReady(true);
       }
@@ -86,21 +98,27 @@ export default function HomePage() {
     const fetchGallery = async () => {
       try {
         const galleryResult = await api.get('/gallery');
+        if (!isActive) return;
         setGallery(galleryResult?.data?.media || []);
       } catch (error) {
+        if (!isActive) return;
         console.error('Failed to fetch gallery:', error);
       }
     };
 
     fetchSettings();
     fetchGallery();
+
+    return () => {
+      isActive = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const features = [
     {
       id: 'hourly',
-      icon: PlayHourIcon,
+      icon: playHourIcon,
       title: 'اللعب بالساعة',
       description: 'احجز جلسات لعب لأطفالك واختر الوقت المثالي!',
       link: '/tickets',
@@ -111,7 +129,7 @@ export default function HomePage() {
     },
     {
       id: 'birthdays',
-      icon: BirthdayCakeIcon,
+      icon: birthdayCakeIcon,
       title: 'حفلات أعياد الميلاد',
       description: 'احتفل مع ثيمات رائعة وحفلات مخصصة!',
       link: '/birthday',
@@ -122,7 +140,7 @@ export default function HomePage() {
     },
     {
       id: 'subscriptions',
-      icon: CrownIcon,
+      icon: crownIcon,
       title: 'الاشتراكات',
       description: 'وفّر مع باقات الزيارات بصلاحية 30 يوم!',
       link: '/subscriptions',
@@ -133,7 +151,7 @@ export default function HomePage() {
     },
     {
       id: 'schools',
-      icon: SchoolBusIcon,
+      icon: schoolBusIcon,
       title: 'المدارس والمجموعات',
       description: 'رحلات مدرسية وبرامج لعب آمنة للمجموعات',
       link: '/groups',
@@ -143,7 +161,7 @@ export default function HomePage() {
       buttonVariant: 'btn-ocean'
     },
     {
-      icon: HomePartyIcon,
+      icon: homePartyIcon,
       title: 'حفلتك في بيتك',
       description: 'نأتيكم للمنزل مع ديكور واحتفال كامل!',
       link: '/home-party',
@@ -153,7 +171,7 @@ export default function HomePage() {
       buttonVariant: 'btn-sunrise'
     },
     {
-      icon: CareHeartIcon,
+      icon: careHeartIcon,
       title: 'ذوي الهمم',
       description: 'برامج مخصصة لأصحاب الاحتياجات الخاصة',
       link: null,
@@ -215,39 +233,8 @@ export default function HomePage() {
 
   return (
     <div className="home-page" dir="rtl">
-      {/* Decorative Sky Layer (applies to whole page) */}
-      <div className="home-sky-layer cloud-layer" aria-hidden="true">
-        {/* Moving Clouds */}
-        <div className="sky-cloud cloud-1"></div>
-        <div className="sky-cloud cloud-2"></div>
-        <div className="sky-cloud cloud-3"></div>
-        <div className="sky-cloud cloud-4"></div>
-        {/* Sun */}
-        <div className="sky-sun" role="presentation">
-          <span className="sky-sun-ray-layer" aria-hidden="true" />
-          <span className="sky-sun-face" aria-hidden="true">
-            <span className="sky-sun-eyes">
-              <span className="sky-sun-eye" />
-              <span className="sky-sun-eye" />
-            </span>
-            <span className="sky-sun-cheeks">
-              <span className="sky-sun-cheek" />
-              <span className="sky-sun-cheek" />
-            </span>
-            <span className="sky-sun-mouth" />
-          </span>
-        </div>
-        {/* Rainbow Arc */}
-        <div className="sky-rainbow"></div>
-        {/* Balloons */}
-        <div className="sky-balloon balloon-1"></div>
-        <div className="sky-balloon balloon-2"></div>
-        {/* Sparkles */}
-        <div className="sky-sparkle sparkle-1"></div>
-        <div className="sky-sparkle sparkle-2"></div>
-        <div className="sky-sparkle sparkle-3"></div>
-        <div className="sky-sparkle sparkle-4"></div>
-      </div>
+      <SkyBackground className="home-sky-layer" />
+      <SmilingSun className="home-sun-corner" />
 
       <section id="home" className="home-hero-sky pb-hero pb-section py-14 md:py-24">
         <div className="page-shell home-hero-shell px-2 sm:px-4 lg:px-6 relative z-10">
@@ -278,8 +265,8 @@ export default function HomePage() {
 
                 {/* Zoom hint */}
                 {canOpenLightbox && (
-                  <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white px-3 py-2 rounded-full text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
-                    <ZoomIn className="h-4 w-4" />
+                  <div className="absolute bottom-4 left-4 bg-[var(--pk-blue)]/90 backdrop-blur-sm text-white px-3 py-2 rounded-full text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                    <span className="font-bold">🔍</span>
                     <span>اضغط للتكبير</span>
                   </div>
                 )}
@@ -306,7 +293,7 @@ export default function HomePage() {
                     <span>{heroConfig.ctaText}</span>
                     {renderShroomiIcon(0)}
                   </span>
-                  <ChevronLeft className="mr-2 h-5 w-5" />
+                  <span className="mr-2 font-bold" aria-hidden="true">←</span>
                 </Button>
               </Link>
               {!isAuthenticated && (
@@ -343,7 +330,7 @@ export default function HomePage() {
             onClick={() => setLightboxOpen(false)}
             aria-label="إغلاق"
           >
-            <X className="h-6 w-6" />
+            <img src={closeIcon} alt="" className="h-6 w-6" />
           </button>
           <img
             src={heroImgSrc}
@@ -411,7 +398,7 @@ export default function HomePage() {
                 )}
                 <CardContent className="feature-card-content text-center">
                   <div className={`pk-icon-badge ${feature.badgeColor} ${feature.disabled ? 'grayscale' : ''}`}>
-                    <feature.icon className="feature-icon-svg text-white" />
+                    <img src={feature.icon} alt="" className="feature-icon-svg" />
                   </div>
                   <h3 className="pk-card-title text-base feature-title">{feature.title}</h3>
                   <p className="text-muted-foreground text-sm leading-relaxed feature-description">{feature.description}</p>
@@ -426,10 +413,13 @@ export default function HomePage() {
                     <Link to={feature.link} className="feature-cta-link">
                       <Button className={`playful-btn primary-btn ${feature.buttonVariant} w-full text-sm feature-cta`} data-testid={`feature-btn-${index}`}>
                         <span className="cta-label-with-shroomi">
-                          <span>{feature.buttonText}</span>
-                          {renderShroomiIcon(index + 2)}
-                        </span>
-                        <ChevronLeft className="mr-2 h-4 w-4" />
+                        <span>{feature.buttonText}</span>
+                        {feature.id === 'birthdays' && <MascotVariant accessory={birthdayAccessory} alt="" />}
+                        {feature.id === 'hourly' && <MascotVariant accessory={playAccessory} alt="" />}
+                        {feature.id === 'subscriptions' && <MascotVariant accessory={subscriptionAccessory} alt="" />}
+                        {renderShroomiIcon(index + 2)}
+                      </span>
+                        <span className="mr-2 font-bold" aria-hidden="true">←</span>
                       </Button>
                     </Link>
                   )}
@@ -450,7 +440,7 @@ export default function HomePage() {
             <p className="text-muted-foreground text-base sm:text-lg">
               شاهد ما يجعلنا مميزين!
             </p>
-            <div className="mt-4 inline-flex items-center bg-red-500 text-white px-4 sm:px-6 py-2 rounded-full font-heading font-bold shadow-sm text-sm sm:text-base">
+            <div className="mt-4 inline-flex items-center bg-[var(--pk-red)] text-white px-4 sm:px-6 py-2 rounded-full font-heading font-bold shadow-sm text-sm sm:text-base">
               مفتوح يومياً من 10 صباحاً حتى 12 منتصف الليل
             </div>
           </div>
@@ -473,7 +463,7 @@ export default function HomePage() {
                         playsInline
                       />
                       <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                        <Play className="h-12 w-12 text-white" />
+                        <span className="text-5xl" aria-hidden="true">▶️</span>
                       </div>
                     </div>
                   ) : (
@@ -552,7 +542,7 @@ export default function HomePage() {
                   <span>سجّل الآن</span>
                   {renderShroomiIcon(1)}
                 </span>
-                <ChevronLeft className="mr-2 h-5 w-5" />
+                <span className="mr-2 font-bold" aria-hidden="true">←</span>
               </Button>
             </Link>
           </div>

@@ -12,9 +12,18 @@ import { Label } from '../components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { toast } from 'sonner';
 import { format, addDays, startOfDay } from 'date-fns';
-import { Cake, Users, Loader2, AlertCircle, Sparkles, Copy } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import mascotImg from '../assets/mascot.png';
+import SkyBackground from '../components/theme/SkyBackground';
+import SmilingSun from '../components/theme/SmilingSun';
+import MascotVariant from '../components/theme/MascotVariant';
+import partyCakeIcon from '../assets/cartoon-icons/party-cake.svg';
+import sparkleIcon from '../assets/cartoon-icons/sparkle.svg';
+import alertIcon from '../assets/cartoon-icons/popper.svg';
+import copyIcon from '../assets/cartoon-icons/check.svg';
+import birthdayAccessory from '../assets/mascot-variants/birthday-party.svg';
+
 
 export default function BirthdayPage() {
   const { isAuthenticated, api } = useAuth();
@@ -356,7 +365,9 @@ export default function BirthdayPage() {
   );
 
   return (
-    <div className="birthday-page min-h-screen py-8 md:py-12" dir="rtl">
+    <div className="birthday-page birthday-playful min-h-screen py-8 md:py-12" dir="rtl">
+      <SkyBackground className="birthday-sky" />
+      <SmilingSun className="birthday-sun" />
       <div className="page-shell max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="birthday-page-decoration" aria-hidden="true">
           <span className="birthday-confetti birthday-confetti--pink" />
@@ -366,9 +377,9 @@ export default function BirthdayPage() {
         </div>
 
         {/* Page Header */}
-        <div className="text-center mb-8">
+        <div className="birthday-hero text-center mb-8">
           <h1 className="birthday-page-title font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3" data-testid="birthday-title">
-            <Cake className="inline-block h-9 w-9 text-accent ml-2" />
+            <img src={partyCakeIcon} className="inline-block h-9 w-9 ml-2" alt="" />
             حفلات أعياد الميلاد
           </h1>
           <div className="shroomi-promo shroomi-promo--events">
@@ -376,8 +387,9 @@ export default function BirthdayPage() {
             <span className="shroomi-promo__text">Plan Your Party!</span>
           </div>
           <p className="birthday-page-subtitle text-base md:text-lg max-w-xl mx-auto">
-            اجعل عيد ميلاد طفلك لا يُنسى!
+            أجواء احتفالية، بالونات مرحة، وتجربة لا تُنسى لطفلك!
           </p>
+          <div className="birthday-hero-balloons" aria-hidden="true">🎈 🎉 🎈</div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -437,7 +449,7 @@ export default function BirthdayPage() {
                   </div>
                 ) : getFilteredBirthdaySlots().length === 0 ? (
                   <div className="soft-loading-state text-center py-8 text-muted-foreground">
-                    <AlertCircle className="h-10 w-10 mx-auto mb-3 opacity-50" />
+                    <img src={alertIcon} className="h-10 w-10 mx-auto mb-3 opacity-70" alt="" />
                     <p className="text-sm">لا توجد أوقات متاحة</p>
                   </div>
                 ) : (
@@ -516,7 +528,7 @@ export default function BirthdayPage() {
                         <div className="flex items-center justify-between gap-2 mb-2">
                           <Label className="text-sm">الدعوة العربية</Label>
                           <Button type="button" variant="ghost" size="sm" onClick={() => copyToClipboard(inviteResult.inviteArabic, 'تم نسخ الدعوة العربية')}>
-                            <Copy className="h-4 w-4 ml-1" />نسخ
+                            <img src={copyIcon} className="h-4 w-4 ml-1" alt="" />نسخ
                           </Button>
                         </div>
                         <p className="text-sm whitespace-pre-line">{inviteResult.inviteArabic}</p>
@@ -527,7 +539,7 @@ export default function BirthdayPage() {
                           <div className="flex items-center justify-between gap-2 mb-2">
                             <Label className="text-sm">English Invite</Label>
                             <Button type="button" variant="ghost" size="sm" onClick={() => copyToClipboard(inviteResult.inviteEnglish, 'Copied English invite')}>
-                              <Copy className="h-4 w-4 ml-1" />Copy
+                              <img src={copyIcon} className="h-4 w-4 ml-1" alt="" />Copy
                             </Button>
                           </div>
                           <p className="text-sm whitespace-pre-line">{inviteResult.inviteEnglish}</p>
@@ -543,7 +555,7 @@ export default function BirthdayPage() {
                             size="sm"
                             onClick={() => copyToClipboard(`${inviteResult.igCaptionArabic}\n\n${(inviteResult.hashtags || []).join(' ')}`, 'تم نسخ الكابشن والهاشتاغات')}
                           >
-                            <Copy className="h-4 w-4 ml-1" />نسخ
+                            <img src={copyIcon} className="h-4 w-4 ml-1" alt="" />نسخ
                           </Button>
                         </div>
                         <p className="text-sm whitespace-pre-line">{inviteResult.igCaptionArabic}</p>
@@ -572,7 +584,7 @@ export default function BirthdayPage() {
                   <Button
                     onClick={handleGenerateAiTheme}
                     disabled={aiGenerating}
-                    className="rounded-full h-11 btn-playful bg-accent hover:bg-accent/90"
+                    className="rounded-full h-11 btn-playful bg-[var(--pk-red)] hover:bg-[var(--pk-orange)]"
                     data-testid="generate-ai-theme-btn"
                   >
                     {aiGenerating ? <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري إنشاء الثيم...</> : 'إنشاء بالذكاء الاصطناعي'}
@@ -687,13 +699,13 @@ export default function BirthdayPage() {
                     <Button
                       onClick={handleStandardBooking}
                       disabled={!selectedSlot || !selectedTheme || !selectedChild || loading}
-                      className="w-full sm:w-auto px-8 rounded-full h-12 btn-playful bg-accent hover:bg-accent/90"
+                      className="w-full sm:w-auto px-8 rounded-full h-12 btn-playful bg-[var(--pk-red)] hover:bg-[var(--pk-orange)]"
                       data-testid="book-party-btn"
                     >
                       {loading ? (
                         <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري المعالجة...</>
                       ) : (
-                        <span>احجز وادفع</span>
+                        <span className="inline-flex items-center gap-2">احجز وادفع <MascotVariant accessory={birthdayAccessory} alt="" /></span>
                       )}
                     </Button>
                   </div>
@@ -706,7 +718,7 @@ export default function BirthdayPage() {
             <Card className="booking-card">
               <CardHeader className="booking-card-header">
                 <CardTitle className="booking-card-title">
-                  <Sparkles className="h-5 w-5 text-accent" />
+                  <img src={sparkleIcon} className="h-5 w-5" alt="" />
                   طلب ثيم مخصص
                 </CardTitle>
                 <CardDescription className="text-sm mr-6">
@@ -767,7 +779,7 @@ export default function BirthdayPage() {
                 <Button
                   onClick={handleCustomRequest}
                   disabled={!selectedSlot || !selectedChild || !customRequest || loading}
-                  className="rounded-full h-11 btn-playful bg-accent hover:bg-accent/90"
+                  className="rounded-full h-11 btn-playful bg-[var(--pk-red)] hover:bg-[var(--pk-orange)]"
                   data-testid="submit-custom-btn"
                 >
                   {loading ? <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري الإرسال...</> : 'إرسال الطلب'}
@@ -784,7 +796,7 @@ export default function BirthdayPage() {
               <p className="text-base mb-4">سجّل الدخول أو أنشئ حساب لحجز حفلة</p>
               <div className="flex gap-4 justify-center">
                 <Button onClick={() => navigate('/login')} variant="outline" className="rounded-full">تسجيل الدخول</Button>
-                <Button onClick={() => navigate('/register')} className="rounded-full btn-playful bg-accent">إنشاء حساب</Button>
+                <Button onClick={() => navigate('/register')} className="rounded-full btn-playful bg-[var(--pk-red)]">إنشاء حساب</Button>
               </div>
             </CardContent>
           </Card>
