@@ -2312,7 +2312,7 @@ button.primary,
 .home-hero-sky {
   position: relative;
   overflow: visible;
-  background: transparent;
+  background: #beebff;
   isolation: isolate;
 }
 
@@ -2321,7 +2321,7 @@ button.primary,
   overflow-x: clip;
   overflow-y: visible;
   min-height: 100vh;
-  background: linear-gradient(180deg, #f7fbff 0%, #f9fcff 45%, #fffaf2 100%);
+  background: linear-gradient(180deg, #eaf7ff 0%, #f2faff 55%, #f7fcff 100%);
   -webkit-background-size: 100% 100%;
   background-size: 100% 100%;
 }
@@ -2383,7 +2383,7 @@ button.primary,
 }
 
 .home-page-section {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.84);
 }
 
 .page-shell {
@@ -3174,14 +3174,7 @@ button.primary,
   width: min(220px, 48vw);
   height: 10px;
   border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    var(--pk-red) 0%,
-    var(--pk-orange) 22%,
-    var(--pk-yellow) 44%,
-    var(--pk-green) 66%,
-    var(--pk-blue) 100%
-  );
+  background: linear-gradient(90deg, #ff595e 0%, #5fb9ea 100%);
   box-shadow: 0 6px 14px rgba(102, 169, 233, 0.22);
 }
 
@@ -3250,15 +3243,29 @@ button.primary,
 .btn-playful,
 .pb-btn,
 .primary-btn {
-  background: var(--pk-red) !important;
-  color: var(--text-primary) !important;
+  background: #ff595e !important;
+  color: #ffffff !important;
   font-weight: 800;
 }
 
-.playful-btn.btn-ocean { background: var(--pk-blue) !important; }
-.playful-btn.btn-sunshine { background: var(--pk-yellow) !important; }
-.playful-btn.btn-sunrise { background: var(--pk-red) !important; }
-.playful-btn.btn-cotton-candy { background: var(--pk-orange) !important; }
+.home-page .playful-btn.btn-ocean,
+.home-page .playful-btn.btn-sunshine,
+.home-page .playful-btn.btn-sunrise,
+.home-page .playful-btn.btn-cotton-candy {
+  background: #ff595e !important;
+  color: #ffffff !important;
+}
+
+.home-page .text-foreground,
+.home-page h1,
+.home-page h2 {
+  color: #243a5e !important;
+}
+
+.home-page .text-muted-foreground,
+.home-page p {
+  color: #5f6c7b;
+}
 
 /* ===== Playful shared sky + sun components ===== */
 body {
