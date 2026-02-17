@@ -616,7 +616,7 @@ export default function TicketsPage() {
                         onClick={() => setSelectedSlot(slot)}
                         className={`slot-btn ${selectedSlot?.id === slot.id ? (timeMode === 'morning' ? 'selected-yellow' : 'selected') : ''}`}
                       >
-                        <div className="font-heading font-semibold">
+                        <div dir="ltr" className="font-heading font-semibold">
                           {slot.start_time} → {endTime}
                         </div>
                         <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground mt-1">

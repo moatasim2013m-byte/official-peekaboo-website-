@@ -463,7 +463,7 @@ export default function BirthdayPage() {
                           className={`slot-btn ${selectedSlot?.id === slot.id ? 'selected-pink' : ''} ${!slot.is_available ? 'opacity-50 cursor-not-allowed' : ''}`}
                           data-testid={`party-slot-${slot.start_time}`}
                         >
-                          <div className="font-heading font-semibold text-sm">
+                          <div dir="ltr" className="font-heading font-semibold text-sm">
                             {slot.start_time} → {endTime}
                           </div>
                           {!slot.is_available && <div className="text-xs text-destructive mt-1">محجوز</div>}
