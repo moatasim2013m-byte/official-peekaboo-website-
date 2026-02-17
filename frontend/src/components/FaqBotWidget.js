@@ -12,8 +12,9 @@ const normalizeBackendOrigin = (rawUrl) => {
 
 export default function FaqBotWidget() {
   const [open, setOpen] = useState(false);
+  const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState([
-    { role: "bot", text: "مرحبًا 👋 أنا مساعد بيكابو. اختر سؤالًا سريعًا وسأجاوبك فورًا." }
+    { role: "bot", text: "مرحبًا 👋 أنا مساعد بيكابو. اكتب سؤالك أو اختر سؤالًا سريعًا وسأساعدك فورًا." }
   ]);
   const [loading, setLoading] = useState(false);
 
@@ -36,7 +37,13 @@ export default function FaqBotWidget() {
       setMessages((prev) => [...prev, { role: "bot", text: "حصل خطأ بسيط. حاول مرة ثانية بعد قليل." }]);
     } finally {
       setLoading(false);
+      setQuestion("");
     }
+  };
+
+  const onSubmit = (event) => {
+    event.preventDefault();
+    askQuestion(question.trim());
   };
 
   return (
@@ -96,6 +103,39 @@ export default function FaqBotWidget() {
               </button>
             ))}
           </div>
+
+          <form onSubmit={onSubmit} style={{ padding: "10px", borderTop: "1px solid #f5f5f5", display: "flex", gap: "8px" }}>
+            <input
+              type="text"
+              value={question}
+              onChange={(event) => setQuestion(event.target.value)}
+              placeholder="اكتب سؤالك هنا..."
+              disabled={loading}
+              style={{
+                flex: 1,
+                border: "1px solid #ddd",
+                borderRadius: "10px",
+                padding: "8px 10px",
+                fontSize: "13px"
+              }}
+            />
+            <button
+              type="submit"
+              disabled={loading || !question.trim()}
+              style={{
+                border: "none",
+                borderRadius: "10px",
+                background: loading || !question.trim() ? "#ddd" : "#6d28d9",
+                color: "#fff",
+                cursor: loading || !question.trim() ? "not-allowed" : "pointer",
+                padding: "8px 12px",
+                fontSize: "13px",
+                fontWeight: 600
+              }}
+            >
+              إرسال
+            </button>
+          </form>
         </div>
       )}
 
