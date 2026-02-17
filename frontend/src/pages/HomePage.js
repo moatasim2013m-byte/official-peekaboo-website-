@@ -60,20 +60,10 @@ export default function HomePage() {
   }, [lightboxOpen]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      const [galleryResult, settingsResult] = await Promise.allSettled([
-        api.get('/gallery'),
-        api.get('/settings')
-      ]);
-
-      if (galleryResult.status === 'fulfilled') {
-        setGallery(galleryResult.value?.data?.media || []);
-      } else {
-        console.error('Failed to fetch gallery:', galleryResult.reason);
-      }
-
-      if (settingsResult.status === 'fulfilled') {
-        const s = settingsResult.value?.data?.settings || {};
+    const fetchSettings = async () => {
+      try {
+        const settingsResult = await api.get('/settings');
+        const s = settingsResult?.data?.settings || {};
         setHeroConfig((prev) => ({
           title: s.hero_title || prev.title,
           subtitle: s.hero_subtitle || prev.subtitle,
@@ -83,15 +73,27 @@ export default function HomePage() {
         }));
         setHeroImgSrc(s.hero_image ? resolveMediaUrl(s.hero_image) : '');
         setHeroImageError(false);
-      } else {
-        console.error('Failed to fetch settings:', settingsResult.reason);
+      } catch (error) {
+        console.error('Failed to fetch settings:', error);
         setHeroImgSrc('');
         setHeroImageError(false);
+      } finally {
+        // Keep first paint responsive and do not block hero rendering on gallery API latency
+        setHeroImageReady(true);
       }
-
-      setHeroImageReady(true);
     };
-    fetchData();
+
+    const fetchGallery = async () => {
+      try {
+        const galleryResult = await api.get('/gallery');
+        setGallery(galleryResult?.data?.media || []);
+      } catch (error) {
+        console.error('Failed to fetch gallery:', error);
+      }
+    };
+
+    fetchSettings();
+    fetchGallery();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -220,7 +222,6 @@ export default function HomePage() {
         <div className="sky-cloud cloud-2"></div>
         <div className="sky-cloud cloud-3"></div>
         <div className="sky-cloud cloud-4"></div>
-        <div className="sky-cloud cloud-5"></div>
         {/* Sun */}
         <div className="sky-sun" role="presentation">
           <span className="sky-sun-ray-layer" aria-hidden="true" />
@@ -246,7 +247,6 @@ export default function HomePage() {
         <div className="sky-sparkle sparkle-2"></div>
         <div className="sky-sparkle sparkle-3"></div>
         <div className="sky-sparkle sparkle-4"></div>
-        <div className="sky-sparkle sparkle-5"></div>
       </div>
 
       <section id="home" className="home-hero-sky pb-hero pb-section py-14 md:py-24">
