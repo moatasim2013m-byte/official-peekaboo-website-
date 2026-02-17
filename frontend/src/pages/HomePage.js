@@ -83,10 +83,15 @@ export default function HomePage() {
   }, [lightboxOpen]);
 
   useEffect(() => {
+    let isActive = true;
+
     const fetchSettings = async () => {
       try {
         const settingsResult = await api.get('/settings');
         const s = settingsResult?.data?.settings || {};
+
+        if (!isActive) return;
+
         setHeroConfig((prev) => ({
           title: s.hero_title || prev.title,
           subtitle: s.hero_subtitle || prev.subtitle,
@@ -97,34 +102,49 @@ export default function HomePage() {
         setHeroImgSrc(s.hero_image ? resolveMediaUrl(s.hero_image) : '');
         setHeroImageError(false);
       } catch (error) {
+        if (!isActive) return;
         console.error('Failed to fetch settings:', error);
         setHeroImgSrc('');
         setHeroImageError(false);
       } finally {
-        // Keep first paint responsive and do not block hero rendering on gallery API latency
-        setHeroImageReady(true);
+        if (isActive) {
+          // Keep first paint responsive and do not block hero rendering on gallery API latency
+          setHeroImageReady(true);
+        }
       }
     };
 
     fetchSettings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    return () => {
+      isActive = false;
+    };
+  }, [api]);
 
   useEffect(() => {
     if (!showDeferredSections) return;
 
+    let isActive = true;
+
     const fetchGallery = async () => {
       try {
         const galleryResult = await api.get('/gallery');
-        setGallery(galleryResult?.data?.media || []);
+        if (isActive) {
+          setGallery(galleryResult?.data?.media || []);
+        }
       } catch (error) {
-        console.error('Failed to fetch gallery:', error);
+        if (isActive) {
+          console.error('Failed to fetch gallery:', error);
+        }
       }
     };
 
     fetchGallery();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showDeferredSections]);
+
+    return () => {
+      isActive = false;
+    };
+  }, [api, showDeferredSections]);
 
   const features = [
     {
