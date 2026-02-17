@@ -25,14 +25,6 @@ const resolveMediaUrl = (url) => {
   return `${BACKEND_ORIGIN}${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
-const mapHeroSettings = (settings = {}, fallback = {}) => ({
-  title: settings.hero_title || fallback.title,
-  subtitle: settings.hero_subtitle || fallback.subtitle,
-  ctaText: settings.hero_cta_text || fallback.ctaText,
-  ctaRoute: settings.hero_cta_route || fallback.ctaRoute,
-  image: settings.hero_image || ''
-});
-
 export default function HomePage() {
   const { isAuthenticated, api } = useAuth();
   const [gallery, setGallery] = useState([]);
@@ -99,7 +91,13 @@ export default function HomePage() {
         const s = settingsResult?.data?.settings || {};
         if (!isActive) return;
 
-        setHeroConfig((prev) => mapHeroSettings(s, prev));
+        setHeroConfig((prev) => ({
+          title: s.hero_title || prev.title,
+          subtitle: s.hero_subtitle || prev.subtitle,
+          ctaText: s.hero_cta_text || prev.ctaText,
+          ctaRoute: s.hero_cta_route || prev.ctaRoute,
+          image: s.hero_image || ''
+        }));
         setHeroImgSrc(s.hero_image ? resolveMediaUrl(s.hero_image) : '');
         setHeroImageError(false);
       } catch (error) {
@@ -272,6 +270,7 @@ export default function HomePage() {
         <div className="sky-cloud cloud-2"></div>
         <div className="sky-cloud cloud-3"></div>
         <div className="sky-cloud cloud-4"></div>
+        <div className="sky-cloud cloud-5"></div>
         {/* Sun */}
         <div className="sky-sun" role="presentation">
           <span className="sky-sun-ray-layer" aria-hidden="true" />
@@ -297,6 +296,7 @@ export default function HomePage() {
         <div className="sky-sparkle sparkle-2"></div>
         <div className="sky-sparkle sparkle-3"></div>
         <div className="sky-sparkle sparkle-4"></div>
+        <div className="sky-sparkle sparkle-5"></div>
       </div>
 
       <section id="home" className="home-hero-sky pb-hero pb-section py-14 md:py-24">
