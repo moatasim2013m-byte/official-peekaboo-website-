@@ -437,7 +437,7 @@ export default function HomePage() {
                   </div>
                 )}
                 <CardContent className="feature-card-content text-center">
-                  <div className={`pk-icon-badge ${feature.badgeColor} ${feature.disabled ? 'grayscale' : ''}`}>
+                  <div className={`pk-icon-badge feature-icon-badge ${feature.disabled ? 'grayscale' : ''}`}>
                     <img src={feature.icon} alt="" className="feature-icon-svg" />
                   </div>
                   <h3 className="pk-card-title text-base feature-title">{feature.title}</h3>
