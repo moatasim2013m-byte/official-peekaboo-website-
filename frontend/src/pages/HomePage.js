@@ -276,6 +276,48 @@ export default function HomePage() {
         <div className="page-shell home-hero-shell px-2 sm:px-4 lg:px-6 relative z-10">
           <div className="hero-content-stack">
             <div className="hero-image-section">
+              <div className="hero-text-card text-right" dir="rtl">
+                <div className="hero-brand-row mr-0">
+                  <img src={logoImg} alt="شعار بيكابو" className="hero-brand-logo" />
+                </div>
+                <p className="hero-brand-slogan">We bring happiness</p>
+                <h1 className="hero-main-title font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-foreground leading-tight" data-testid="hero-title">
+                  {heroConfig.title}
+                </h1>
+                <div className="hero-title-underline mr-0"></div>
+                <p className="hero-description text-base sm:text-lg text-muted-foreground mt-6 leading-relaxed max-w-[520px] mr-0 opacity-85">
+                  {heroConfig.subtitle}
+                </p>
+
+                <ul className="hero-trust-badges" aria-label="مزايا بيكابو">
+                  <li>✔ آمن ومعقم يومياً</li>
+                  <li>✔ للأعمار 1–10 سنوات</li>
+                  <li>✔ موقعنا: إربد – وحشة سنتر</li>
+                </ul>
+
+                <div className="hero-cta-row flex flex-col sm:flex-row gap-4 justify-start">
+                  <Link to={heroConfig.ctaRoute}>
+                    <Button size="lg" className="rounded-full btn-playful pb-btn primary-btn hero-primary-btn text-base sm:text-lg px-8 py-6 w-full sm:w-auto" data-testid="hero-book-btn">
+                      <span className="cta-label-with-shroomi">
+                        <span>احجز جلسة</span>
+                        {renderShroomiIcon(0)}
+                      </span>
+                      <span className="mr-2 font-bold" aria-hidden="true">←</span>
+                    </Button>
+                  </Link>
+                  {!isAuthenticated && (
+                    <Link to="/register">
+                      <Button size="lg" variant="outline" className="rounded-full hero-secondary-btn text-base sm:text-lg px-8 py-6 border-2 w-full sm:w-auto" data-testid="hero-signup-btn">
+                        <span className="cta-label-with-shroomi">
+                          <span>سجل مجاناً</span>
+                          {renderShroomiIcon(1)}
+                        </span>
+                      </Button>
+                    </Link>
+                  )}
+                </div>
+              </div>
+
               <div
                 className={`hero-image-panel group ${canOpenLightbox ? 'is-clickable' : ''}`}
                 onClick={() => canOpenLightbox && setLightboxOpen(true)}
