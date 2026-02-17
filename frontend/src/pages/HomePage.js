@@ -252,6 +252,12 @@ export default function HomePage() {
     }
   ];
 
+  const trustBullets = [
+    'آمن ومعقم يومياً',
+    'للأعمار 1–10 سنوات',
+    'موقعنا: إربد – وحشة سنتر'
+  ];
+
   const showHeroImage = heroImageReady && !!heroImgSrc && !heroImageError;
   const canOpenLightbox = showHeroImage;
   const shroomiPoseClasses = ['shroomi-icon--wave', 'shroomi-icon--point', 'shroomi-icon--cheer'];
@@ -394,20 +400,24 @@ export default function HomePage() {
         <>
       {/* Features Section */}
       <section className="section-container home-page-section pb-section page-shell page-section-gap">
-        <div className="max-w-7xl mx-auto why-peekaboo-cloud">
-          <div className="text-center mb-12">
-            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
+        <div className="max-w-7xl mx-auto why-peekaboo-layout" dir="rtl">
+          <div className="why-peekaboo-box why-peekaboo-main-box text-right" data-testid="why-peekaboo-box">
+            <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3">
               لماذا بيكابو مميّز؟
             </h2>
-            <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
+            <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mb-5">
               لأننا نهتم بالتفاصيل التي تصنع تجربة آمنة وممتعة لطفلك.
             </p>
-          </div>
 
-          <div className="rounded-2xl border border-border/70 bg-white/90 p-2 sm:p-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-1.5 sm:gap-2">
+            <ul className="why-peekaboo-trust-list" aria-label="عوامل الثقة في بيكابو">
+              {trustBullets.map((item) => (
+                <li key={item}>✓ {item}</li>
+              ))}
+            </ul>
+
+            <div className="why-peekaboo-grid mt-5">
               {whyPeekabooFeatures.map((feature, index) => (
-                <div key={index} className="rounded-lg border border-border/50 bg-background/60 p-2 text-center">
+                <div key={index} className="why-feature-card rounded-lg border border-border/50 bg-background/60 p-2 text-center">
                   <div className={`mx-auto mb-1.5 pk-icon-badge ${feature.badgeColor}`} aria-hidden="true">
                     {feature.icon}
                   </div>
@@ -416,6 +426,22 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="why-peekaboo-box why-peekaboo-media-box" data-testid="why-peekaboo-media-box" aria-label="صورة بيكابو التعريفية">
+            {showHeroImage ? (
+              <img
+                src={heroImgSrc}
+                alt="أطفال يلعبون في بيكابو"
+                className="why-peekaboo-media"
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <div className="why-peekaboo-media-placeholder" aria-hidden="true">
+                <span className="why-peekaboo-media-placeholder__title">Peekaboo</span>
+              </div>
+            )}
           </div>
         </div>
       </section>
