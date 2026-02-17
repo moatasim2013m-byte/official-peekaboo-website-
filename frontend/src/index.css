@@ -1269,6 +1269,35 @@ button.primary,
     }
 }
 
+/* Desktop performance mode: keep sky visuals but reduce continuous motion cost */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+    .sky-theme::before,
+    .sky-theme::after {
+        animation: none;
+    }
+
+    .sky-theme::before {
+        opacity: 0.24;
+    }
+
+    .sky-theme::after {
+        opacity: 0.14;
+    }
+
+    .home-page .sky-balloon,
+    .home-page .sky-sparkle {
+        display: none;
+    }
+
+    .home-page .sky-sun {
+        animation: none;
+    }
+
+    .home-page .sky-cloud {
+        animation-duration: 70s;
+    }
+}
+
 /* Ensure content stays above decorations */
 .sky-theme > * {
     position: relative;

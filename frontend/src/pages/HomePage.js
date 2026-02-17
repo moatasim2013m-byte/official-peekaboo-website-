@@ -320,7 +320,7 @@ export default function HomePage() {
                     className="hero-photo"
                     loading="eager"
                     decoding="async"
-                    fetchPriority="high"
+                    fetchPriority="auto"
                     onError={() => setHeroImageError(true)}
                   />
                 )}

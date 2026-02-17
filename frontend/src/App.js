@@ -1,5 +1,5 @@
 import "@/App.css";
-import { Suspense, lazy } from "react";
+import { Suspense, lazy, useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthProvider, useAuth } from "./context/AuthContext";
@@ -7,7 +7,6 @@ import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import { useTranslation } from "./i18n/useT";
-import FaqBotWidget from "./components/FaqBotWidget";
 
 const HomePage = lazy(() => import("./pages/HomePage"));
 const LoginPage = lazy(() => import("./pages/LoginPage"));
@@ -36,6 +35,7 @@ const ContactPage = lazy(() => import("./pages/ContactPage"));
 const RulesPage = lazy(() => import("./pages/RulesPage"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage"));
+const FaqBotWidget = lazy(() => import("./components/FaqBotWidget"));
 
 const RouteLoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -178,12 +178,40 @@ function AppRoutes() {
 }
 
 function App() {
+  const [showFaqWidget, setShowFaqWidget] = useState(false);
+
+  useEffect(() => {
+    let timeoutId;
+    let idleId;
+
+    const showWidget = () => setShowFaqWidget(true);
+
+    if (typeof window !== "undefined" && typeof window.requestIdleCallback === "function") {
+      idleId = window.requestIdleCallback(showWidget, { timeout: 1200 });
+    } else {
+      timeoutId = window.setTimeout(showWidget, 700);
+    }
+
+    return () => {
+      if (typeof window !== "undefined" && typeof window.cancelIdleCallback === "function" && idleId) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, []);
+
   return (
     <BrowserRouter>
       <ScrollToTop />
       <AuthProvider>
         <AppRoutes />
-        <FaqBotWidget />
+        {showFaqWidget && (
+          <Suspense fallback={null}>
+            <FaqBotWidget />
+          </Suspense>
+        )}
         <Toaster
           position="top-center"
           richColors
