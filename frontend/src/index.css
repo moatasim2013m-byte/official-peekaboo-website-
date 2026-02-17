@@ -980,32 +980,34 @@ button.primary,
 .pk-card-accent.accent-purple { background: var(--pk-purple); }
 .pk-card-accent.accent-rainbow { background: linear-gradient(90deg, var(--pk-red), var(--pk-orange), var(--pk-yellow), var(--pk-green), var(--pk-blue)); }
 
-/* Icon badge - circular with shadow */
+/* Icon badge - standalone large icon (no circle) */
 .pk-icon-badge {
-    width: 86px;
-    height: 86px;
-    border-radius: 50%;
+    width: auto;
+    height: auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 1rem;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
-    font-size: clamp(2rem, 3.3vw, 2.4rem);
+    margin: 0 auto 1.1rem;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent !important;
+    font-size: clamp(2.6rem, 5vw, 3.2rem);
     line-height: 1;
 }
 
 .feature-icon-svg {
-    width: 2.2rem;
-    height: 2.2rem;
+    width: clamp(4rem, 8vw, 4.8rem);
+    height: clamp(4rem, 8vw, 4.8rem);
+    object-fit: contain;
 }
 
-.pk-icon-badge.badge-red { background: var(--pk-red); }
-.pk-icon-badge.badge-orange { background: var(--pk-orange); }
-.pk-icon-badge.badge-yellow { background: var(--pk-yellow); }
-.pk-icon-badge.badge-blue { background: var(--pk-blue); }
-.pk-icon-badge.badge-green { background: var(--pk-green); }
-.pk-icon-badge.badge-pink { background: linear-gradient(135deg, #ff7fb0, #ff8e63); }
-.pk-icon-badge.badge-purple { background: linear-gradient(135deg, #a55eea, #8854d0); }
+.pk-icon-badge.badge-red { color: var(--pk-red); }
+.pk-icon-badge.badge-orange { color: var(--pk-orange); }
+.pk-icon-badge.badge-yellow { color: var(--pk-yellow); }
+.pk-icon-badge.badge-blue { color: var(--pk-blue); }
+.pk-icon-badge.badge-green { color: var(--pk-green); }
+.pk-icon-badge.badge-pink { color: var(--pk-pink); }
+.pk-icon-badge.badge-purple { color: var(--pk-purple); }
 
 /* Card title styling */
 .pk-card-title {
@@ -2738,22 +2740,21 @@ button.primary,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+  width: auto;
+  height: auto;
+  border-radius: 0;
   flex-shrink: 0;
 }
 .icon-badge svg {
-  width: 22px;
-  height: 22px;
-  color: white;
+  width: 34px;
+  height: 34px;
 }
-.icon-badge-blue { background: var(--pk-blue); }
-.icon-badge-red { background: var(--pk-red); }
-.icon-badge-yellow { background: var(--pk-yellow); }
-.icon-badge-green { background: var(--pk-green); }
-.icon-badge-pink { background: var(--pk-pink); }
-.icon-badge-orange { background: var(--pk-orange); }
+.icon-badge-blue { color: var(--pk-blue); }
+.icon-badge-red { color: var(--pk-red); }
+.icon-badge-yellow { color: var(--pk-yellow); }
+.icon-badge-green { color: var(--pk-green); }
+.icon-badge-pink { color: var(--pk-pink); }
+.icon-badge-orange { color: var(--pk-orange); }
 
 /* Wonder card */
 .wonder-card {
@@ -2847,12 +2848,11 @@ button.primary,
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 .contact-info-card .icon-badge {
-  width: 40px;
-  height: 40px;
+  margin-top: 2px;
 }
 .contact-info-card .icon-badge svg {
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
 }
 
 /* Rule item */
@@ -3324,7 +3324,7 @@ body {
 }
 .mascot-variant__accessory { transform: translateY(-30%); }
 
-.feature-icon-svg { width: 30px; height: 30px; object-fit: contain; }
+.feature-icon-svg { width: clamp(4rem, 8vw, 4.8rem); height: clamp(4rem, 8vw, 4.8rem); object-fit: contain; }
 
 .birthday-playful {
     background: linear-gradient(180deg, color-mix(in srgb, var(--pk-yellow) 14%, var(--pk-white) 86%) 0%, color-mix(in srgb, var(--pk-blue) 10%, var(--pk-white) 90%) 100%);

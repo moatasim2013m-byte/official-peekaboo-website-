@@ -398,7 +398,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-1.5 sm:gap-2">
               {whyPeekabooFeatures.map((feature, index) => (
                 <div key={index} className="rounded-lg border border-border/50 bg-background/60 p-2 text-center">
-                  <div className={`mx-auto mb-1.5 pk-icon-badge ${feature.badgeColor} w-9 h-9 text-base`} aria-hidden="true">
+                  <div className={`mx-auto mb-1.5 pk-icon-badge ${feature.badgeColor}`} aria-hidden="true">
                     {feature.icon}
                   </div>
                   <h3 className="font-bold text-xs sm:text-sm leading-tight mb-1">{feature.title}</h3>
@@ -437,7 +437,7 @@ export default function HomePage() {
                   </div>
                 )}
                 <CardContent className="feature-card-content text-center">
-                  <div className={`pk-icon-badge ${feature.badgeColor} ${feature.disabled ? 'grayscale' : ''}`}>
+                  <div className={`pk-icon-badge ${feature.disabled ? 'grayscale' : ''}`}>
                     <img src={feature.icon} alt="" className="feature-icon-svg" />
                   </div>
                   <h3 className="pk-card-title text-base feature-title">{feature.title}</h3>
