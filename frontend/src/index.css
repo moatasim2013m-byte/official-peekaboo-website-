@@ -2248,12 +2248,11 @@ button.primary,
 }
 
 .home-sky-layer {
-  position: absolute;
-  top: 0;
-  right: 0;
-  left: 0;
-  height: clamp(220px, 40vh, 420px);
-  overflow: visible;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
   pointer-events: none;
   z-index: 0;
 }
@@ -2373,7 +2372,8 @@ button.primary,
 .sky-sun {
   position: absolute;
   top: 10%;
-  right: 8%;
+  left: 5%;
+  right: auto;
   width: 90px;
   height: 90px;
   display: flex;
@@ -2583,7 +2583,7 @@ button.primary,
   .cloud-4, .cloud-5 { display: none; }
   .sky-rainbow { width: 360px; height: 180px; bottom: -70px; left: 6%; opacity: 0.55; }
   .sky-sparkle { display: none; }
-  .sky-sun { width: 72px; height: 72px; top: 8%; right: 6%; }
+  .sky-sun { width: 72px; height: 72px; top: 8%; left: 6%; right: auto; }
   .sky-sun-ray-layer {
     inset: -15px;
   }
@@ -2982,8 +2982,9 @@ button.primary,
 
 /* ===== Wonderland refresh (home + tickets visual only) ===== */
 .home-sky-layer {
-  top: 0;
-  height: clamp(300px, 46vh, 500px);
+  inset: 0;
+  width: 100%;
+  height: 100vh;
 }
 
 .hero-cloud-layer {

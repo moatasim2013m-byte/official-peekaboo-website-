@@ -215,6 +215,12 @@ export default function HomePage() {
     <div className="home-page" dir="rtl">
       {/* Decorative Sky Layer (applies to whole page) */}
       <div className="home-sky-layer cloud-layer" aria-hidden="true">
+        {/* Moving Clouds */}
+        <div className="sky-cloud cloud-1"></div>
+        <div className="sky-cloud cloud-2"></div>
+        <div className="sky-cloud cloud-3"></div>
+        <div className="sky-cloud cloud-4"></div>
+        <div className="sky-cloud cloud-5"></div>
         {/* Sun */}
         <div className="sky-sun" role="presentation">
           <span className="sky-sun-ray-layer" aria-hidden="true" />
@@ -244,14 +250,6 @@ export default function HomePage() {
       </div>
 
       <section id="home" className="home-hero-sky pb-hero pb-section py-14 md:py-24">
-        <div className="hero-cloud-layer" aria-hidden="true">
-          <div className="sky-cloud cloud-1"></div>
-          <div className="sky-cloud cloud-2"></div>
-          <div className="sky-cloud cloud-3"></div>
-          <div className="sky-cloud cloud-4"></div>
-          <div className="sky-cloud cloud-5"></div>
-        </div>
-
         <div className="page-shell home-hero-shell px-2 sm:px-4 lg:px-6 relative z-10">
           <div className="hero-content-stack">
             <div className="hero-image-section">
