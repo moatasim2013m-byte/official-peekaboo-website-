@@ -354,46 +354,6 @@ export default function HomePage() {
                 )}
               </div>
 
-              <div className="hero-text-card text-center lg:text-right">
-                <div className="hero-brand-row mx-auto lg:mx-0">
-                  <img src={logoImg} alt="شعار بيكابو" className="hero-brand-logo" />
-                </div>
-                <p className="hero-brand-slogan">We bring happiness</p>
-                <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight" data-testid="hero-title">
-                  {heroConfig.title}
-                </h1>
-                <div className="hero-title-underline mx-auto lg:mx-0"></div>
-                <p className="text-base sm:text-lg text-muted-foreground mt-6 leading-relaxed max-w-[520px] mx-auto lg:mx-0 opacity-85">
-                  {heroConfig.subtitle}
-                </p>
-                <div className="hero-trust-badges" aria-label="مزايا بيكابو">
-                  <span className="hero-trust-badge">✔ آمن ومعقم يومياً</span>
-                  <span className="hero-trust-badge">✔ للأعمار 1–10 سنوات</span>
-                  <span className="hero-trust-badge">✔ موقعنا: إربد – وحشة سنتر</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="hero-cta-row flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to={heroConfig.ctaRoute}>
-                <Button size="lg" className="rounded-full btn-playful pb-btn primary-btn text-base sm:text-lg px-8 py-6 w-full sm:w-auto" data-testid="hero-book-btn">
-                  <span className="cta-label-with-shroomi">
-                    <span>{heroConfig.ctaText}</span>
-                    {renderShroomiIcon(0)}
-                  </span>
-                  <span className="mr-2 font-bold" aria-hidden="true">←</span>
-                </Button>
-              </Link>
-              {!isAuthenticated && (
-                <Link to="/register">
-                  <Button size="lg" variant="outline" className="rounded-full text-base sm:text-lg px-8 py-6 border-2 w-full sm:w-auto" data-testid="hero-signup-btn">
-                    <span className="cta-label-with-shroomi">
-                      <span>سجل مجاناً</span>
-                      {renderShroomiIcon(1)}
-                    </span>
-                  </Button>
-                </Link>
-              )}
             </div>
 
             {/* Mascot */}
