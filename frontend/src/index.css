@@ -2318,6 +2318,15 @@ button.primary,
   filter: drop-shadow(0 14px 26px rgba(29, 78, 216, 0.2));
 }
 
+.hero-brand-slogan {
+  margin-top: -0.55rem;
+  margin-bottom: 0.9rem;
+  font-size: clamp(0.95rem, 1.8vw, 1.2rem);
+  font-weight: 700;
+  color: #1f3d78;
+  letter-spacing: 0.01em;
+}
+
 /* Keep hero content above decorations */
 .home-page > *:not(.home-sky-layer) {
   position: relative;
@@ -3072,6 +3081,10 @@ button.primary,
 
   .hero-brand-logo {
     height: clamp(74px, 7vw, 112px);
+  }
+
+  .hero-brand-slogan {
+    margin-top: -0.1rem;
   }
 }
 

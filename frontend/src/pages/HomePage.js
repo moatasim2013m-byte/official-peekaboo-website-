@@ -313,6 +313,7 @@ export default function HomePage() {
                 <div className="hero-brand-row mx-auto lg:mx-0">
                   <img src={logoImg} alt="شعار بيكابو" className="hero-brand-logo" />
                 </div>
+                <p className="hero-brand-slogan">We brings happiness</p>
                 <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight" data-testid="hero-title">
                   {heroConfig.title}
                 </h1>
