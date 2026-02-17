@@ -32,9 +32,9 @@
     --pk-yellow: #F2E533;        /* Logo yellow */
     --pk-green: #97C64A;         /* Logo green */
     --pk-blue: #66A9E9;          /* Logo blue */
-    --pk-orange: #E59B35;        /* Logo orange */
-    --pk-pink: #F08E3C;          /* Brand warm accent */
-    --pk-purple: #4C88D9;        /* Brand cool accent */
+    --pk-orange: #F28A2E;        /* Logo orange */
+    --pk-pink: #F56B9C;          /* Warm playful accent */
+    --pk-purple: #6B7EF2;        /* Cool playful accent */
     --pk-white: #FFFFFF;         /* Pure white */
     
     /* Background colors - dreamy and soft */
@@ -918,14 +918,14 @@ button.primary,
 .playful-btn,
 .pb-btn,
 .home-cta-signup-btn {
-  background: #FFD93B !important;
-  color: #000 !important;
+  background: linear-gradient(135deg, var(--pk-yellow), #ffd166) !important;
+  color: #3f2d00 !important;
   border: none;
-  box-shadow: none !important;
+  box-shadow: 0 10px 24px rgba(242, 229, 51, 0.35) !important;
 }
 
 .playful-btn {
-    background: linear-gradient(135deg, #ff91a4, #ffb347);
+    background: linear-gradient(135deg, var(--pk-red), var(--pk-orange));
     color: #fff;
     border: none;
     border-radius: 999px;
@@ -936,19 +936,20 @@ button.primary,
 }
 
 .playful-btn.btn-cotton-candy {
-    background: linear-gradient(135deg, #ff8db6, #ffae7a);
+    background: linear-gradient(135deg, var(--pk-pink), var(--pk-orange));
 }
 
 .playful-btn.btn-ocean {
-    background: linear-gradient(135deg, #49b6ff, #4bd7a8);
+    background: linear-gradient(135deg, var(--pk-blue), var(--pk-green));
 }
 
 .playful-btn.btn-sunshine {
-    background: linear-gradient(135deg, #ffd65c, #ffa94f);
+    background: linear-gradient(135deg, var(--pk-yellow), var(--pk-orange));
+    color: #3f2d00;
 }
 
 .playful-btn.btn-sunrise {
-    background: linear-gradient(135deg, #ff97a5, #ff9f57);
+    background: linear-gradient(135deg, var(--pk-red), var(--pk-orange));
 }
 
 .playful-btn:hover {
@@ -3041,7 +3042,7 @@ button.primary,
 
 .hero-brand-logo {
   height: clamp(88px, 16vw, 180px);
-  filter: drop-shadow(0 14px 26px rgba(29, 78, 216, 0.2));
+  filter: drop-shadow(0 12px 22px rgba(102, 169, 233, 0.25));
   transition: transform 220ms ease, filter 220ms ease;
 }
 
@@ -3084,9 +3085,9 @@ button.primary,
 .hero-image-panel {
   border-radius: 34px;
   border: 4px solid rgba(255, 255, 255, 0.9);
-  box-shadow: 0 20px 40px rgba(59, 130, 246, 0.18);
+  box-shadow: 0 20px 40px rgba(102, 169, 233, 0.2), 0 4px 0 rgba(242, 229, 51, 0.45);
   overflow: hidden;
-  background: linear-gradient(180deg, #f0f9ff, #ffffff);
+  background: linear-gradient(180deg, #eaf7ff, #ffffff);
 }
 
 .hero-photo {
@@ -3100,11 +3101,26 @@ button.primary,
 }
 
 .why-peekaboo-cloud {
-  background: linear-gradient(180deg, #ffffff 0%, #f4fbff 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #f4fbff 60%, #fffdf5 100%);
   border-radius: 28px;
-  border: 2px solid rgba(147, 197, 253, 0.5);
+  border: 2px solid rgba(147, 197, 253, 0.45);
   padding: clamp(1rem, 2.2vw, 1.8rem);
   box-shadow: 0 12px 28px rgba(125, 170, 221, 0.18);
+}
+
+.hero-title-underline {
+  width: min(220px, 48vw);
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--pk-red) 0%,
+    var(--pk-orange) 22%,
+    var(--pk-yellow) 44%,
+    var(--pk-green) 66%,
+    var(--pk-blue) 100%
+  );
+  box-shadow: 0 6px 14px rgba(102, 169, 233, 0.22);
 }
 
 .why-peekaboo-grid {
@@ -3172,12 +3188,150 @@ button.primary,
 .btn-playful,
 .pb-btn,
 .primary-btn {
-  background: linear-gradient(135deg, #ff9db6, #ffc75f) !important;
-  color: #2f2a1f !important;
+  background: linear-gradient(135deg, var(--pk-red), var(--pk-yellow)) !important;
+  color: var(--text-primary) !important;
   font-weight: 800;
 }
 
-.playful-btn.btn-ocean { background: linear-gradient(135deg, #78d6ff, #7ef2c1) !important; }
-.playful-btn.btn-sunshine { background: linear-gradient(135deg, #ffe276, #ffb86d) !important; }
-.playful-btn.btn-sunrise { background: linear-gradient(135deg, #ff9fba, #ffb26f) !important; }
-.playful-btn.btn-cotton-candy { background: linear-gradient(135deg, #ff9fd0, #ffc39d) !important; }
+.playful-btn.btn-ocean { background: linear-gradient(135deg, var(--pk-blue), var(--pk-green)) !important; }
+.playful-btn.btn-sunshine { background: linear-gradient(135deg, var(--pk-yellow), var(--pk-orange)) !important; }
+.playful-btn.btn-sunrise { background: linear-gradient(135deg, var(--pk-red), var(--pk-orange)) !important; }
+.playful-btn.btn-cotton-candy { background: linear-gradient(135deg, var(--pk-orange), var(--pk-yellow)) !important; }
+
+/* ===== Playful shared sky + sun components ===== */
+body {
+    color: var(--text-secondary);
+    background: linear-gradient(180deg, var(--pk-bg-sky) 0%, var(--pk-bg-cream) 100%);
+}
+
+.sky-background {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.sky-background__cloud {
+    position: absolute;
+    width: clamp(110px, 14vw, 230px);
+    height: clamp(56px, 7vw, 110px);
+    background: color-mix(in srgb, var(--pk-white) 86%, var(--pk-blue) 14%);
+    border-radius: 999px;
+    filter: drop-shadow(0 8px 16px rgba(102, 169, 233, 0.22));
+    animation: cloud-float-x linear infinite;
+}
+
+.sky-background__cloud::before,
+.sky-background__cloud::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: inherit;
+}
+
+.sky-background__cloud::before { width: 46%; height: 90%; right: 14%; top: -38%; }
+.sky-background__cloud::after { width: 34%; height: 70%; right: 52%; top: -26%; }
+.sky-background__cloud--one { top: 10%; right: -20%; opacity: .72; animation-duration: 44s; }
+.sky-background__cloud--two { top: 28%; right: -22%; opacity: .45; transform: scale(0.9); animation-duration: 30s; }
+.sky-background__cloud--three { top: 42%; right: -18%; opacity: .66; transform: scale(1.2); animation-duration: 54s; }
+.sky-background__cloud--four { top: 67%; right: -24%; opacity: .54; transform: scale(0.85); animation-duration: 40s; }
+.sky-background__cloud--five { top: 80%; right: -20%; opacity: .35; transform: scale(1.3); animation-duration: 62s; }
+
+@keyframes cloud-float-x {
+    from { transform: translateX(0); }
+    to { transform: translateX(-145vw); }
+}
+
+.smiling-sun {
+    position: absolute;
+    top: 78px;
+    right: clamp(10px, 3vw, 44px);
+    width: clamp(82px, 9vw, 120px);
+    height: clamp(82px, 9vw, 120px);
+    z-index: 3;
+}
+.smiling-sun__rays {
+    position: absolute;
+    inset: -16%;
+    border-radius: 50%;
+    background: repeating-conic-gradient(from 0deg, var(--pk-yellow) 0deg 14deg, transparent 14deg 28deg);
+    animation: sun-spin 16s linear infinite;
+}
+.smiling-sun__face {
+    position: absolute;
+    inset: 16%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 36% 30%, color-mix(in srgb, var(--pk-white) 55%, var(--pk-yellow) 45%), var(--pk-orange));
+    border: 3px solid color-mix(in srgb, var(--pk-orange) 70%, var(--pk-red) 30%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.smiling-sun__eyes, .smiling-sun__cheeks { position: absolute; display: flex; width: 62%; justify-content: space-between; }
+.smiling-sun__eyes { top: 36%; }
+.smiling-sun__eye { width: 10px; height: 10px; background: var(--text-primary); border-radius: 50%; }
+.smiling-sun__cheeks { top: 54%; }
+.smiling-sun__cheek { width: 12px; height: 8px; border-radius: 50%; background: color-mix(in srgb, var(--pk-red) 65%, var(--pk-white) 35%); opacity: .55; }
+.smiling-sun__mouth { position: absolute; bottom: 22%; width: 34%; height: 18%; border-bottom: 4px solid var(--pk-red); border-radius: 0 0 999px 999px; transition: transform .22s ease; }
+.smiling-sun:hover .smiling-sun__mouth { transform: scale(1.25) translateY(-2px); }
+@keyframes sun-spin { to { transform: rotate(360deg); } }
+
+.home-page,
+.birthday-page,
+.subscriptions-page { position: relative; overflow: hidden; }
+
+.home-sun-corner { top: 88px; right: 18px; }
+.birthday-sun { top: 110px; }
+.subscriptions-sun { top: 110px; }
+
+.mascot-variant {
+    width: 30px;
+    height: 30px;
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+}
+.mascot-variant__base,
+.mascot-variant__accessory {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.mascot-variant__accessory { transform: translateY(-30%); }
+
+.feature-icon-svg { width: 30px; height: 30px; object-fit: contain; }
+
+.birthday-playful {
+    background: linear-gradient(180deg, color-mix(in srgb, var(--pk-yellow) 14%, var(--pk-white) 86%) 0%, color-mix(in srgb, var(--pk-blue) 10%, var(--pk-white) 90%) 100%);
+}
+.birthday-hero {
+    background: color-mix(in srgb, var(--pk-white) 86%, var(--pk-orange) 14%);
+    border: 2px dashed var(--pk-orange);
+    border-radius: var(--radius-xl);
+    padding: 1rem;
+}
+.birthday-hero-balloons { font-size: 1.5rem; letter-spacing: .25rem; }
+
+.subscriptions-page {
+    background: linear-gradient(135deg, color-mix(in srgb, var(--pk-blue) 12%, var(--pk-white) 88%), color-mix(in srgb, var(--pk-green) 16%, var(--pk-white) 84%), color-mix(in srgb, var(--pk-yellow) 20%, var(--pk-white) 80%));
+}
+
+
+.pk-spinner {
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 3px solid color-mix(in srgb, var(--pk-blue) 30%, transparent);
+    border-top-color: var(--pk-blue);
+    border-radius: 50%;
+    display: inline-block;
+    animation: pk-spin .8s linear infinite;
+}
+.pk-spinner--sm {
+    width: 1rem;
+    height: 1rem;
+    border-width: 2px;
+}
+@keyframes pk-spin { to { transform: rotate(360deg); } }
