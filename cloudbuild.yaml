@@ -3,13 +3,31 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'us-west1-docker.pkg.dev/gen-lang-client-0086895721/cloud-run-source-deploy/peekaboo:$SHORT_SHA'
+      - 'gcr.io/$PROJECT_ID/peekaboo:$SHORT_SHA'
       - '.'
+
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'us-west1-docker.pkg.dev/gen-lang-client-0086895721/cloud-run-source-deploy/peekaboo:$SHORT_SHA'
+      - 'gcr.io/$PROJECT_ID/peekaboo:$SHORT_SHA'
+
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - '${_SERVICE_NAME}'
+      - '--image=gcr.io/$PROJECT_ID/peekaboo:$SHORT_SHA'
+      - '--region=${_REGION}'
+      - '--platform=managed'
+      - '--quiet'
+
 images:
-  - 'us-west1-docker.pkg.dev/gen-lang-client-0086895721/cloud-run-source-deploy/peekaboo:$SHORT_SHA'
+  - 'gcr.io/$PROJECT_ID/peekaboo:$SHORT_SHA'
+
+substitutions:
+  _SERVICE_NAME: 'peekaboo-indoor-playground'
+  _REGION: 'us-west1'
+
 options:
   logging: CLOUD_LOGGING_ONLY
