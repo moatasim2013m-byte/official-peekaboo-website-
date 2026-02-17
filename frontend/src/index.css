@@ -918,14 +918,14 @@ button.primary,
 .playful-btn,
 .pb-btn,
 .home-cta-signup-btn {
-  background: linear-gradient(135deg, var(--pk-yellow), #ffd166) !important;
+  background: var(--pk-yellow) !important;
   color: #3f2d00 !important;
   border: none;
   box-shadow: 0 10px 24px rgba(242, 229, 51, 0.35) !important;
 }
 
 .playful-btn {
-    background: linear-gradient(135deg, var(--pk-red), var(--pk-orange));
+    background: var(--pk-red);
     color: #fff;
     border: none;
     border-radius: 999px;
@@ -936,20 +936,20 @@ button.primary,
 }
 
 .playful-btn.btn-cotton-candy {
-    background: linear-gradient(135deg, var(--pk-pink), var(--pk-orange));
+    background: var(--pk-orange);
 }
 
 .playful-btn.btn-ocean {
-    background: linear-gradient(135deg, var(--pk-blue), var(--pk-green));
+    background: var(--pk-blue);
 }
 
 .playful-btn.btn-sunshine {
-    background: linear-gradient(135deg, var(--pk-yellow), var(--pk-orange));
+    background: var(--pk-yellow);
     color: #3f2d00;
 }
 
 .playful-btn.btn-sunrise {
-    background: linear-gradient(135deg, var(--pk-red), var(--pk-orange));
+    background: var(--pk-red);
 }
 
 .playful-btn:hover {
@@ -3201,15 +3201,15 @@ button.primary,
 .btn-playful,
 .pb-btn,
 .primary-btn {
-  background: linear-gradient(135deg, var(--pk-red), var(--pk-yellow)) !important;
+  background: var(--pk-red) !important;
   color: var(--text-primary) !important;
   font-weight: 800;
 }
 
-.playful-btn.btn-ocean { background: linear-gradient(135deg, var(--pk-blue), var(--pk-green)) !important; }
-.playful-btn.btn-sunshine { background: linear-gradient(135deg, var(--pk-yellow), var(--pk-orange)) !important; }
-.playful-btn.btn-sunrise { background: linear-gradient(135deg, var(--pk-red), var(--pk-orange)) !important; }
-.playful-btn.btn-cotton-candy { background: linear-gradient(135deg, var(--pk-orange), var(--pk-yellow)) !important; }
+.playful-btn.btn-ocean { background: var(--pk-blue) !important; }
+.playful-btn.btn-sunshine { background: var(--pk-yellow) !important; }
+.playful-btn.btn-sunrise { background: var(--pk-red) !important; }
+.playful-btn.btn-cotton-candy { background: var(--pk-orange) !important; }
 
 /* ===== Playful shared sky + sun components ===== */
 body {
