@@ -9,10 +9,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
-import { User, LogOut, LayoutDashboard, X, Users } from 'lucide-react';
 import { useState } from 'react';
 import logoImg from '../assets/logo.png';
 import mascotImg from '../assets/mascot.png';
+import userIcon from '../assets/cartoon-icons/user.svg';
+import logoutIcon from '../assets/cartoon-icons/logout.svg';
+import dashboardIcon from '../assets/cartoon-icons/dashboard.svg';
+import closeIcon from '../assets/cartoon-icons/close.svg';
+import teamIcon from '../assets/cartoon-icons/team.svg';
 
 export const Navbar = () => {
   const { user, logout, isAdmin, isStaff, isAuthenticated } = useAuth();
@@ -71,7 +75,7 @@ export const Navbar = () => {
           {isAuthenticated && (isAdmin || isStaff) && (
             <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--peekaboo-green)]/10 border border-[var(--peekaboo-green)]">
               <img src={mascotImg} alt="" className="h-6 w-6 rounded-full" />
-              <span className="text-xs font-medium text-[#2d6a4f]">{isAdmin ? 'Admin' : 'Staff'}</span>
+              <span className="text-xs font-medium text-[var(--text-primary)]">{isAdmin ? 'Admin' : 'Staff'}</span>
             </div>
           )}
 
@@ -80,7 +84,7 @@ export const Navbar = () => {
             {isAuthenticated && isAdmin && (
               <Link to="/admin">
                 <Button variant="default" className="rounded-full gap-2 bg-primary" data-testid="nav-admin-btn">
-                  <LayoutDashboard className="h-4 w-4" />
+                  <img src={dashboardIcon} alt="" className="h-4 w-4" />
                   لوحة التحكم
                 </Button>
               </Link>
@@ -95,7 +99,7 @@ export const Navbar = () => {
                 {isStaff && !isAdmin && (
                   <Link to="/staff">
                     <Button variant="default" className="rounded-full gap-2 bg-secondary text-secondary-foreground" data-testid="nav-staff-btn">
-                      <Users className="h-4 w-4" />
+                      <img src={teamIcon} alt="" className="h-4 w-4" />
                       لوحة الموظفين
                     </Button>
                   </Link>
@@ -106,26 +110,26 @@ export const Navbar = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" className="rounded-full gap-2" data-testid="user-menu-trigger">
-                    <User className="h-4 w-4" />
+                    <img src={userIcon} alt="" className="h-4 w-4" />
                     <span>{user?.name}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-48">
                   {!isAdmin && (
                     <DropdownMenuItem onClick={() => navigate('/profile')} data-testid="menu-profile">
-                      <User className="h-4 w-4 ml-2" />
+                      <img src={userIcon} alt="" className="h-4 w-4 ml-2" />
                       الملف الشخصي
                     </DropdownMenuItem>
                   )}
                   {isAdmin && (
                     <DropdownMenuItem onClick={() => navigate('/admin')} data-testid="menu-admin">
-                      <LayoutDashboard className="h-4 w-4 ml-2" />
+                      <img src={dashboardIcon} alt="" className="h-4 w-4 ml-2" />
                       لوحة التحكم
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout} data-testid="menu-logout">
-                    <LogOut className="h-4 w-4 ml-2" />
+                    <img src={logoutIcon} alt="" className="h-4 w-4 ml-2" />
                     تسجيل الخروج
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -173,7 +177,7 @@ export const Navbar = () => {
             <span className="sr-only">القائمة</span>
             <span className="playful-menu-bars" aria-hidden="true">
               {mobileMenuOpen ? (
-                <X className="h-5 w-5 text-slate-700" />
+                <img src={closeIcon} alt="" className="h-5 w-5" />
               ) : (
                 <>
                   <span className="menu-bar menu-bar-1" />
@@ -190,7 +194,7 @@ export const Navbar = () => {
               {isAuthenticated ? (
                 <Link to="/profile">
                   <Button variant="outline" size="sm" className="rounded-full">
-                    <User className="h-4 w-4" />
+                    <img src={userIcon} alt="" className="h-4 w-4" />
                   </Button>
                 </Link>
               ) : (
@@ -218,7 +222,7 @@ export const Navbar = () => {
             {isAuthenticated && (isAdmin || isStaff) && (
               <div className="mb-4 flex items-center gap-2 px-3 py-2 rounded bg-[var(--peekaboo-green)]/10 border border-[var(--peekaboo-green)]">
                 <img src={mascotImg} alt="" className="h-6 w-6 rounded-full" />
-                <span className="text-xs font-medium text-[#2d6a4f]">{isAdmin ? 'وضع المدير' : 'وضع الموظف'}</span>
+                <span className="text-xs font-medium text-[var(--text-primary)]">{isAdmin ? 'وضع المدير' : 'وضع الموظف'}</span>
               </div>
             )}
             <div className="flex flex-col gap-3">
