@@ -38,6 +38,7 @@ export default function HomePage() {
   const [heroImgSrc, setHeroImgSrc] = useState('');
   const [heroImageReady, setHeroImageReady] = useState(false);
   const [heroImageError, setHeroImageError] = useState(false);
+  const [showDeferredSections, setShowDeferredSections] = useState(false);
   const [heroConfig, setHeroConfig] = useState({
     title: 'حيث يلعب الأطفال ويحتفلون 🎈',
     subtitle: 'أفضل تجربة ملعب داخلي! احجز جلسات اللعب، أقم حفلات أعياد ميلاد لا تُنسى، ووفّر مع باقات الاشتراك',
@@ -48,6 +49,28 @@ export default function HomePage() {
 
   useEffect(() => {
     document.title = 'بيكابو | ملعب داخلي للأطفال - إربد';
+  }, []);
+
+  useEffect(() => {
+    let timeoutId;
+    let idleId;
+
+    const markReady = () => setShowDeferredSections(true);
+
+    if (typeof window !== 'undefined' && typeof window.requestIdleCallback === 'function') {
+      idleId = window.requestIdleCallback(markReady, { timeout: 600 });
+    } else {
+      timeoutId = window.setTimeout(markReady, 250);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined' && typeof window.cancelIdleCallback === 'function' && idleId) {
+        window.cancelIdleCallback(idleId);
+      }
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
   }, []);
 
   // Handle ESC key and body scroll
@@ -89,31 +112,44 @@ export default function HomePage() {
         setHeroImgSrc('');
         setHeroImageError(false);
       } finally {
-        if (!isActive) return;
-        // Keep first paint responsive and do not block hero rendering on gallery API latency
-        setHeroImageReady(true);
-      }
-    };
-
-    const fetchGallery = async () => {
-      try {
-        const galleryResult = await api.get('/gallery');
-        if (!isActive) return;
-        setGallery(galleryResult?.data?.media || []);
-      } catch (error) {
-        if (!isActive) return;
-        console.error('Failed to fetch gallery:', error);
+        if (isActive) {
+          // Keep first paint responsive and do not block hero rendering on gallery API latency
+          setHeroImageReady(true);
+        }
       }
     };
 
     fetchSettings();
+
+    return () => {
+      isActive = false;
+    };
+  }, [api]);
+
+  useEffect(() => {
+    if (!showDeferredSections) return;
+
+    let isActive = true;
+
+    const fetchGallery = async () => {
+      try {
+        const galleryResult = await api.get('/gallery');
+        if (isActive) {
+          setGallery(galleryResult?.data?.media || []);
+        }
+      } catch (error) {
+        if (isActive) {
+          console.error('Failed to fetch gallery:', error);
+        }
+      }
+    };
+
     fetchGallery();
 
     return () => {
       isActive = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [api, showDeferredSections]);
 
   const features = [
     {
@@ -258,7 +294,7 @@ export default function HomePage() {
                     className="hero-photo"
                     loading="eager"
                     decoding="async"
-                    fetchPriority="high"
+                    fetchPriority="auto"
                     onError={() => setHeroImageError(true)}
                   />
                 )}
@@ -343,6 +379,8 @@ export default function HomePage() {
         </div>
       )}
 
+      {showDeferredSections && (
+        <>
       {/* Features Section */}
       <section className="section-container home-page-section pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto why-peekaboo-cloud">
@@ -483,7 +521,7 @@ export default function HomePage() {
               <>
                 <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-md">
                   <img 
-                    src="https://images.pexels.com/photos/19875328/pexels-photo-19875328.jpeg"
+                    src="/hero-fallback.jpg"
                     alt="أطفال يلعبون"
                     className="w-full h-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
                     loading="lazy"
@@ -492,7 +530,7 @@ export default function HomePage() {
                 </div>
                 <div className="rounded-2xl overflow-hidden shadow-md">
                   <img 
-                    src="https://images.pexels.com/photos/6148511/pexels-photo-6148511.jpeg"
+                    src="/hero-fallback.jpg"
                     alt="حفلة عيد ميلاد"
                     className="w-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
                     loading="lazy"
@@ -501,7 +539,7 @@ export default function HomePage() {
                 </div>
                 <div className="rounded-2xl overflow-hidden shadow-md">
                   <img 
-                    src="https://images.pexels.com/photos/3951099/pexels-photo-3951099.png"
+                    src="/hero-fallback.jpg"
                     alt="متعة عائلية"
                     className="w-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
                     loading="lazy"
@@ -548,6 +586,8 @@ export default function HomePage() {
             </Link>
           </div>
         </section>
+      )}
+        </>
       )}
     </div>
   );
