@@ -66,10 +66,14 @@ export default function HomePage() {
   }, [lightboxOpen]);
 
   useEffect(() => {
+    let isActive = true;
+
     const fetchSettings = async () => {
       try {
         const settingsResult = await api.get('/settings');
         const s = settingsResult?.data?.settings || {};
+        if (!isActive) return;
+
         setHeroConfig((prev) => ({
           title: s.hero_title || prev.title,
           subtitle: s.hero_subtitle || prev.subtitle,
@@ -80,10 +84,12 @@ export default function HomePage() {
         setHeroImgSrc(s.hero_image ? resolveMediaUrl(s.hero_image) : '');
         setHeroImageError(false);
       } catch (error) {
+        if (!isActive) return;
         console.error('Failed to fetch settings:', error);
         setHeroImgSrc('');
         setHeroImageError(false);
       } finally {
+        if (!isActive) return;
         // Keep first paint responsive and do not block hero rendering on gallery API latency
         setHeroImageReady(true);
       }
@@ -92,14 +98,20 @@ export default function HomePage() {
     const fetchGallery = async () => {
       try {
         const galleryResult = await api.get('/gallery');
+        if (!isActive) return;
         setGallery(galleryResult?.data?.media || []);
       } catch (error) {
+        if (!isActive) return;
         console.error('Failed to fetch gallery:', error);
       }
     };
 
     fetchSettings();
     fetchGallery();
+
+    return () => {
+      isActive = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
