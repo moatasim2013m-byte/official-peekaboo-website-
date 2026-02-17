@@ -290,7 +290,7 @@ export default function HomePage() {
                   <img src={logoImg} alt="شعار بيكابو" className="hero-brand-logo" />
                 </div>
                 <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-foreground leading-tight" data-testid="hero-title">
-                  بيكابو يصنع السعادة
+                  {heroConfig.title}
                 </h1>
                 <div className="hero-title-underline mx-auto lg:mx-0"></div>
                 <p className="text-base sm:text-lg text-muted-foreground mt-6 leading-relaxed max-w-[520px] mx-auto lg:mx-0 opacity-85">
