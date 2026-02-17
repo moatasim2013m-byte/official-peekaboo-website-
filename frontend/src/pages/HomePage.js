@@ -221,6 +221,24 @@ export default function HomePage() {
 
   const whyPeekabooFeatures = [
     {
+      icon: '✅',
+      badgeColor: 'badge-blue',
+      title: 'آمن ومعقم يومياً',
+      description: 'نحافظ على أعلى معايير النظافة والتعقيم بشكل يومي.'
+    },
+    {
+      icon: '👶',
+      badgeColor: 'badge-purple',
+      title: 'للأعمار 1–10 سنوات',
+      description: 'أنشطة وتجارب مناسبة لمراحل عمرية مختلفة داخل المكان.'
+    },
+    {
+      icon: '📍',
+      badgeColor: 'badge-green',
+      title: 'موقعنا: إربد – وحشة سنتر',
+      description: 'موقع سهل الوصول يوفر تجربة مريحة للعائلات.'
+    },
+    {
       icon: '⭐',
       badgeColor: 'badge-red',
       title: 'عناية واهتمام بكل طفل',
@@ -285,14 +303,9 @@ export default function HomePage() {
                   {heroConfig.title}
                 </h1>
                 <div className="hero-title-underline mr-0"></div>
-                <p className="hero-description text-base sm:text-lg text-muted-foreground mt-6 leading-relaxed max-w-[520px] mr-0 opacity-85">
-                  {heroConfig.subtitle}
-                </p>
-
                 <ul className="hero-trust-badges" aria-label="مزايا بيكابو">
-                  <li>✔ آمن ومعقم يومياً</li>
-                  <li>✔ للأعمار 1–10 سنوات</li>
-                  <li>✔ موقعنا: إربد – وحشة سنتر</li>
+                  <li>✔ بيئة لعب آمنة وممتعة</li>
+                  <li>✔ فريق يهتم براحة أطفالكم</li>
                 </ul>
 
                 <div className="hero-cta-row flex flex-col sm:flex-row gap-4 justify-start">
@@ -397,7 +410,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto why-peekaboo-cloud">
           <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4">
-              لماذا بيكابو مميّز؟
+              ماذا يميزنا
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mx-auto">
               لأننا نهتم بالتفاصيل التي تصنع تجربة آمنة وممتعة لطفلك.
