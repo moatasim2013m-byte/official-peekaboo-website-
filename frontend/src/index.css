@@ -999,6 +999,20 @@ button.primary,
     height: 2.2rem;
 }
 
+.feature-icon-badge {
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    box-shadow: none;
+    margin-bottom: 1.25rem;
+    background: transparent !important;
+}
+
+.feature-icon-badge .feature-icon-svg {
+    width: clamp(4rem, 8vw, 4.8rem);
+    height: clamp(4rem, 8vw, 4.8rem);
+}
+
 .pk-icon-badge.badge-red { background: var(--pk-red); }
 .pk-icon-badge.badge-orange { background: var(--pk-orange); }
 .pk-icon-badge.badge-yellow { background: var(--pk-yellow); }
