@@ -50,7 +50,7 @@ export const Footer = () => {
             className="footer-mascot"
           />
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-10">
+          <div className="footer-main-grid grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-10">
             
             {/* Column 1: Brand & Contact */}
             <div>

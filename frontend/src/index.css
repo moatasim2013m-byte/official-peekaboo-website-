@@ -1449,15 +1449,26 @@ button.primary,
 /* Footer Mascot */
 .footer-mascot {
     position: absolute;
-    bottom: 10px;
-    left: -14px;
-    width: 126px;
-    height: 126px;
+    bottom: 8px;
+    left: -30px;
+    width: 112px;
+    height: 112px;
     transform: rotate(-5deg);
-    opacity: 0.8;
-    z-index: 0;
+    opacity: 0.72;
+    z-index: 1;
     pointer-events: none;
     display: none;
+}
+
+.footer-main-grid,
+.footer-bottom-row {
+    position: relative;
+    z-index: 2;
+}
+
+.footer-payment-badge {
+    flex-wrap: nowrap;
+    white-space: nowrap;
 }
 
 @media (min-width: 768px) {
@@ -1466,19 +1477,19 @@ button.primary,
     }
 
     .footer-bottom-row {
-        padding-left: 112px;
+        padding-left: 120px;
     }
 }
 
 @media (min-width: 1200px) {
     .footer-mascot {
-        left: 20px;
-        width: 148px;
-        height: 148px;
+        left: -4px;
+        width: 128px;
+        height: 128px;
     }
 
     .footer-bottom-row {
-        padding-left: 148px;
+        padding-left: 134px;
     }
 }
 
