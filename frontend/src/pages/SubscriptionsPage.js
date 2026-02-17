@@ -7,9 +7,21 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../co
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Badge } from '../components/ui/badge';
 import { toast } from 'sonner';
-import { Star, Check, Loader2, PartyPopper, Sparkles, Crown, Gift, Rocket } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import mascotImg from '../assets/mascot.png';
+import SkyBackground from '../components/theme/SkyBackground';
+import SmilingSun from '../components/theme/SmilingSun';
+import MascotVariant from '../components/theme/MascotVariant';
+import starIcon from '../assets/cartoon-icons/star.svg';
+import checkIcon from '../assets/cartoon-icons/check.svg';
+import popperIcon from '../assets/cartoon-icons/popper.svg';
+import sparkleIcon from '../assets/cartoon-icons/sparkle.svg';
+import crownIcon from '../assets/cartoon-icons/crown.svg';
+import giftIcon from '../assets/cartoon-icons/party-cake.svg';
+import rocketIcon from '../assets/cartoon-icons/rocket.svg';
+import subscriptionAccessory from '../assets/mascot-variants/subscription-crown.svg';
+
 
 export default function SubscriptionsPage() {
   const { isAuthenticated, api } = useAuth();
@@ -127,18 +139,20 @@ export default function SubscriptionsPage() {
   };
 
   const tierIconMap = {
-    basic: { icon: Gift, bg: 'bg-[#FFE5D9]', color: 'text-[#FF6B6B]' },
-    standard: { icon: Sparkles, bg: 'bg-[#E6F7FF]', color: 'text-[#4D96FF]' },
-    premium: { icon: Crown, bg: 'bg-[#FFF5CC]', color: 'text-[#F4A100]' }
+    basic: { icon: giftIcon, bg: 'bg-[var(--pk-orange)]/15' },
+    standard: { icon: sparkleIcon, bg: 'bg-[var(--pk-blue)]/15' },
+    premium: { icon: crownIcon, bg: 'bg-[var(--pk-yellow)]/20' }
   };
 
   return (
-    <div className="min-h-screen py-8 md:py-12" dir="rtl">
+    <div className="subscriptions-page min-h-screen py-8 md:py-12" dir="rtl">
+      <SkyBackground className="subscriptions-sky" />
+      <SmilingSun className="subscriptions-sun" />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="text-center mb-10">
           <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3" data-testid="subscriptions-title">
-            <Star className="inline-block h-9 w-9 text-secondary ml-2" />
+            <img src={starIcon} className="inline-block h-9 w-9 ml-2" alt="" />
             باقات الاشتراك
           </h1>
           <div className="shroomi-promo shroomi-promo--subscriptions">
@@ -150,18 +164,18 @@ export default function SubscriptionsPage() {
           </p>
           <div className="mt-5 flex items-center justify-center gap-3 sm:gap-4">
             {[
-              { icon: PartyPopper, bg: 'bg-[#FFE8CC]', color: 'text-[#FF924C]' },
-              { icon: Rocket, bg: 'bg-[#EAF4FF]', color: 'text-[#4D96FF]' },
-              { icon: Sparkles, bg: 'bg-[#FFF5CC]', color: 'text-[#F4A100]' }
+              { icon: popperIcon, bg: 'bg-[var(--pk-orange)]/20' },
+              { icon: rocketIcon, bg: 'bg-[var(--pk-blue)]/20' },
+              { icon: sparkleIcon, bg: 'bg-[var(--pk-yellow)]/20' }
             ].map((item, index) => {
-              const Icon = item.icon;
+              const iconSrc = item.icon;
               return (
                 <span
                   key={index}
                   className={`inline-flex h-11 w-11 items-center justify-center rounded-full border border-white shadow-sm ${item.bg}`}
                   aria-hidden="true"
                 >
-                  <Icon className={`h-5 w-5 ${item.color}`} />
+                  <img src={iconSrc} className="h-5 w-5" alt="" />
                 </span>
               );
             })}
@@ -180,27 +194,27 @@ export default function SubscriptionsPage() {
                 const tier = getPlanTier(index);
                 const isPopular = index === 1;
                 const tierIcon = tierIconMap[tier] || tierIconMap.basic;
-                const TierIconComponent = tierIcon.icon;
+                const tierIconSrc = tierIcon.icon;
                 
                 return (
                   <Card
                     key={plan.id}
                     onClick={() => setSelectedPlan(plan)}
                     className={`pk-card cursor-pointer transition-all relative ${
-                      selectedPlan?.id === plan.id ? 'ring-2 ring-[#FFD93B] shadow-lg' : 'hover:shadow-lg'
+                      selectedPlan?.id === plan.id ? 'ring-2 ring-[var(--pk-yellow)] shadow-lg' : 'hover:shadow-lg'
                     } ${isPopular ? 'md:-mt-4 md:mb-4' : ''}`}
                     data-testid={`plan-${plan.id}`}
                   >
                     <div className={`pk-card-accent ${isPopular ? 'accent-rainbow' : tier === 'basic' ? 'accent-green' : 'accent-orange'}`} />
                     {isPopular && (
-                      <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-[#FFD93B] to-[#FF924C] text-white text-center py-1.5 text-xs font-bold rounded-t-[22px]">
+                      <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-[var(--pk-yellow)] to-[var(--pk-orange)] text-white text-center py-1.5 text-xs font-bold rounded-t-[22px]">
                         ⭐ الأكثر شعبية
                       </div>
                     )}
                     <CardHeader className={`text-center pb-3 ${isPopular ? 'pt-10' : 'pt-6'}`}>
                       <div className="mb-3 flex justify-center">
                         <span className={`inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-white shadow-sm ${tierIcon.bg}`}>
-                          <TierIconComponent className={`h-6 w-6 ${tierIcon.color}`} />
+                          <img src={tierIconSrc} className="h-6 w-6" alt="" />
                         </span>
                       </div>
                       <CardTitle className="font-heading text-xl font-bold">
@@ -216,20 +230,20 @@ export default function SubscriptionsPage() {
                         <span className="text-sm text-slate-500 mr-1">دينار</span>
                       </div>
                       
-                      <div className="bg-gradient-to-r from-[#FFD93B]/20 to-[#FF924C]/20 rounded-xl p-3 mb-4">
-                        <span className="text-2xl font-heading font-bold text-[#FF924C]">{plan.visits}</span>
+                      <div className="bg-gradient-to-r from-[var(--pk-yellow)]/20 to-[var(--pk-orange)]/20 rounded-xl p-3 mb-4">
+                        <span className="text-2xl font-heading font-bold text-[var(--pk-orange)]">{plan.visits}</span>
                         <span className="text-slate-600 mr-1 text-sm">زيارة</span>
                       </div>
 
                       {/* Validity Days Notice */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-2 mb-4 text-center">
-                        <p className="text-xs font-bold text-blue-700">صالحة من الأحد إلى الخميس</p>
+                      <div className="bg-[var(--pk-blue)]/10 border border-[var(--pk-blue)]/40 rounded-lg p-2 mb-4 text-center">
+                        <p className="text-xs font-bold text-[var(--pk-blue)]">صالحة من الأحد إلى الخميس</p>
                       </div>
 
                       <ul className="space-y-2 text-right mb-4" dir="rtl">
                         {planFeatures[tier]?.slice(0, 3).map((feature, i) => (
                           <li key={i} className="flex items-center gap-2 text-xs">
-                            <Check className="h-4 w-4 text-[#8AC926] flex-shrink-0" />
+                            <img src={checkIcon} className="h-4 w-4 flex-shrink-0" alt="" />
                             <span className="text-slate-600">{feature}</span>
                           </li>
                         ))}
@@ -239,8 +253,8 @@ export default function SubscriptionsPage() {
                         variant={selectedPlan?.id === plan.id ? 'default' : 'outline'}
                         className={`w-full rounded-full h-10 text-sm font-semibold ${
                           selectedPlan?.id === plan.id 
-                            ? 'bg-[#FFD93B] hover:bg-[#FFD93B]/90 text-slate-800' 
-                            : 'border-2 hover:border-[#FFD93B] hover:bg-[#FFD93B]/10'
+                            ? 'bg-[var(--pk-yellow)] hover:bg-[var(--pk-yellow)]/90 text-[var(--text-primary)]' 
+                            : 'border-2 hover:border-[var(--pk-yellow)] hover:bg-[var(--pk-yellow)]/10'
                         }`}
                       >
                         اختر الباقة
@@ -296,13 +310,13 @@ export default function SubscriptionsPage() {
                     <Button
                       onClick={handlePurchase}
                       disabled={!selectedPlan || !selectedChild || loading}
-                      className="w-full sm:w-auto px-8 rounded-full h-11 btn-playful bg-secondary hover:bg-secondary/90 text-secondary-foreground"
+                      className="w-full sm:w-auto px-8 rounded-full h-11 btn-playful bg-[var(--pk-blue)] hover:bg-[var(--pk-green)] text-white"
                       data-testid="purchase-btn"
                     >
                       {loading ? (
                         <><Loader2 className="ml-2 h-5 w-5 animate-spin" />جاري المعالجة...</>
                       ) : (
-                        <span>اشترِ الآن</span>
+                        <span className="inline-flex items-center gap-2">اشترِ الآن <MascotVariant accessory={subscriptionAccessory} alt="" /></span>
                       )}
                     </Button>
                   </div>
