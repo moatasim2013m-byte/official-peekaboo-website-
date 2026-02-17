@@ -3281,7 +3281,16 @@ body {
 .birthday-page,
 .subscriptions-page { position: relative; overflow: hidden; }
 
-.home-sun-corner { top: 88px; right: 18px; }
+.home-sun-corner {
+  top: clamp(128px, 22vw, 176px);
+  right: 18px;
+}
+
+@media (min-width: 768px) {
+  .home-sun-corner {
+    top: 104px;
+  }
+}
 .birthday-sun { top: 110px; }
 .subscriptions-sun { top: 110px; }
 
