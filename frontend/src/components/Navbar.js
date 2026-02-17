@@ -45,7 +45,7 @@ export const Navbar = () => {
 
   return (
     <nav className={`sticky top-0 z-50 ${isCustomerNav ? 'navbar-customer' : 'bg-white border-b border-border shadow-sm'}`} dir="rtl">
-      <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8">
+      <div className="max-w-7xl xl:max-w-[95rem] 2xl:max-w-[110rem] mx-auto px-3 md:px-6 lg:px-8">
         <div className={`navbar-row flex justify-between items-center py-1 ${isHomePage && isCustomerNav ? 'home-mobile-header min-h-16 flex-wrap md:flex-nowrap gap-y-1' : 'h-16'}`}>
           {/* Logo with Pill Container - wrapped for mobile positioning */}
           <div className={`nav-logo-wrap ${isHomePage && !isAdmin ? 'mobile-home-logo order-1' : ''}`}>
