@@ -50,7 +50,7 @@ export const Footer = () => {
             className="footer-mascot"
           />
           
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-10">
+          <div className="footer-main-grid grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-10">
             
             {/* Column 1: Brand & Contact */}
             <div>
@@ -140,11 +140,11 @@ export const Footer = () => {
           </div>
 
           {/* Footer Bottom */}
-          <div className="border-t border-[var(--border-light)] mt-8 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="footer-bottom-row border-t border-[var(--border-light)] mt-8 pt-6 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-[var(--text-secondary)]">&copy; {new Date().getFullYear()} بيكابو. جميع الحقوق محفوظة.</p>
             
             {/* Trust Badge - Payment Methods */}
-            <div className="inline-flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+            <div className="footer-payment-badge inline-flex items-center gap-2 text-sm text-[var(--text-secondary)]">
               <PaymentCardIcons className="[&_svg]:h-5 [&_svg]:w-auto" />
               <span className="font-medium">نقبل فيزا وماستركارد</span>
             </div>
