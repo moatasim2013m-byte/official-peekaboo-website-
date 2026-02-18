@@ -156,7 +156,7 @@ export default function SubscriptionsPage() {
       <SmilingSun className="subscriptions-sun" />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
-        <div className="text-center mb-10">
+        <div className="subscriptions-hero text-center mb-10">
           <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3" data-testid="subscriptions-title">
             <img src={starIcon} className="inline-block h-9 w-9 ml-2" alt="" />
             باقات الاشتراك
@@ -206,17 +206,13 @@ export default function SubscriptionsPage() {
                   <Card
                     key={plan.id}
                     onClick={() => setSelectedPlan(plan)}
-                    className={`pk-card cursor-pointer transition-all relative ${
+                    className={`pk-card theme-package-card cursor-pointer transition-all relative ${
                       selectedPlan?.id === plan.id ? 'ring-2 ring-[var(--pk-yellow)] shadow-lg' : 'hover:shadow-lg'
                     } ${isPopular ? 'md:-mt-4 md:mb-4' : ''}`}
                     data-testid={`plan-${plan.id}`}
                   >
                     <div className={`pk-card-accent ${isPopular ? 'accent-rainbow' : tier === 'basic' ? 'accent-green' : 'accent-orange'}`} />
-                    {isPopular && (
-                      <div className="absolute top-0 left-0 right-0 bg-gradient-to-r from-[var(--pk-yellow)] to-[var(--pk-orange)] text-white text-center py-1.5 text-xs font-bold rounded-t-[22px]">
-                        ⭐ الأكثر شعبية
-                      </div>
-                    )}
+                    {isPopular && <Badge className="absolute top-3 left-3 theme-saving-badge">الأكثر توفيراً</Badge>}
                     <CardHeader className={`text-center pb-3 ${isPopular ? 'pt-10' : 'pt-6'}`}>
                       <div className="mb-3 flex justify-center">
                         <span className={`inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-white shadow-sm ${tierIcon.bg}`}>
@@ -234,6 +230,9 @@ export default function SubscriptionsPage() {
                       <div className="mb-4">
                         <span className="text-4xl font-heading font-bold text-slate-800">{plan.price}</span>
                         <span className="text-sm text-slate-500 mr-1">دينار</span>
+                      </div>
+                      <div className="mb-4 flex justify-center">
+                        <Badge className="theme-price-badge">سعر مميز</Badge>
                       </div>
                       
                       <div className="bg-gradient-to-r from-[var(--pk-yellow)]/20 to-[var(--pk-orange)]/20 rounded-xl p-3 mb-4">
@@ -316,13 +315,13 @@ export default function SubscriptionsPage() {
                     <Button
                       onClick={handlePurchase}
                       disabled={!selectedPlan || !selectedChild || loading}
-                      className="w-full sm:w-auto px-8 rounded-full h-11 btn-playful bg-[var(--pk-blue)] hover:bg-[var(--pk-green)] text-white"
+                      className="w-full sm:w-auto px-8 rounded-full h-[52px] btn-playful theme-gradient-btn text-white"
                       data-testid="purchase-btn"
                     >
                       {loading ? (
                         <span className="inline-flex items-center gap-2"><span className="pk-spinner pk-spinner--sm" aria-hidden="true" />جاري المعالجة...</span>
                       ) : (
-                        <span className="inline-flex items-center gap-2">اشترِ الآن <MascotVariant accessory={subscriptionAccessory} alt="" /></span>
+                        <span className="inline-flex items-center gap-2">اشترك الآن <MascotVariant accessory={subscriptionAccessory} alt="" /></span>
                       )}
                     </Button>
                   </div>
