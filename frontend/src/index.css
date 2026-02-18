@@ -3399,6 +3399,7 @@ body {
   right: clamp(12px, 2.5vw, 26px);
   width: clamp(70px, 8vw, 104px);
   height: clamp(70px, 8vw, 104px);
+  pointer-events: none;
 }
 
 @media (min-width: 768px) {
@@ -3409,7 +3410,11 @@ body {
 
 @media (max-width: 640px) {
   .home-sun-corner {
-    display: none;
+    top: clamp(8px, 2vw, 14px);
+    right: clamp(6px, 2vw, 12px);
+    width: clamp(52px, 16vw, 68px);
+    height: clamp(52px, 16vw, 68px);
+    z-index: 1;
   }
 }
 .birthday-sun { top: 110px; }
