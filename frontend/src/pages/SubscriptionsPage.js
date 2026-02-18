@@ -21,6 +21,13 @@ import giftIcon from '../assets/cartoon-icons/party-cake.svg';
 import rocketIcon from '../assets/cartoon-icons/rocket.svg';
 import subscriptionAccessory from '../assets/mascot-variants/subscription-crown.svg';
 
+const stripWeekdayRangeFromPlanName = (name = '') =>
+  name
+    .replace(/\s*\((?:الأحد\s*[–-]\s*الخميس|الأحد-الخميس)\)\s*/g, ' ')
+    .replace(/\s*\((?:Sun\s*[–-]\s*Thu|Sunday\s*to\s*Thursday)\)\s*/gi, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+
 
 export default function SubscriptionsPage() {
   const { isAuthenticated, api } = useAuth();
@@ -217,7 +224,7 @@ export default function SubscriptionsPage() {
                         </span>
                       </div>
                       <CardTitle className="font-heading text-xl font-bold">
-                        {plan.name_ar || t(plan.name) || plan.name}
+                        {stripWeekdayRangeFromPlanName(plan.name_ar || t(plan.name) || plan.name)}
                       </CardTitle>
                       <CardDescription className="text-xs">
                         {plan.description_ar || t(plan.description) || plan.description}
@@ -302,7 +309,7 @@ export default function SubscriptionsPage() {
                     {selectedPlan && (
                       <div className="text-center sm:text-right">
                         <p className="text-xs text-muted-foreground">الباقة المختارة</p>
-                        <p className="font-bold">{selectedPlan.name_ar || selectedPlan.name}</p>
+                        <p className="font-bold">{stripWeekdayRangeFromPlanName(selectedPlan.name_ar || selectedPlan.name)}</p>
                         <p className="font-bold text-xl text-secondary">{selectedPlan.price} د</p>
                       </div>
                     )}
