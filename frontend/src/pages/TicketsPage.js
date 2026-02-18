@@ -433,6 +433,8 @@ export default function TicketsPage() {
     { id: 4, label: '🕒 4 الوقت', complete: Boolean(selectedSlot) }
   ];
 
+  const periodLabel = timeMode === 'morning' ? 'صباحي' : timeMode === 'afternoon' ? 'مسائي' : '---';
+
   return (
     <div className="min-h-screen py-6 md:py-12 booking-mobile-page" dir="rtl">
       <div className="page-shell booking-mobile-shell px-4 sm:px-6 lg:px-8">
@@ -776,7 +778,7 @@ export default function TicketsPage() {
                 <div className="booking-sticky-summary mt-6">
                   <div className="booking-sticky-summary__meta">
                     <span>🗓 {format(date, 'dd/MM')}</span>
-                    <span>⏰ {timeMode === 'morning' ? 'صباحي' : 'مسائي'}</span>
+                    <span>⏰ {periodLabel}</span>
                     <span>⏱ {selectedDuration} س</span>
                     <span>💰 {getFinalTotal().toFixed(1)} د</span>
                   </div>
@@ -803,13 +805,13 @@ export default function TicketsPage() {
         {!isAuthenticated && (
           <Card className="booking-card booking-auth-card">
             <CardContent className="py-8 text-center">
-              <p className="text-xl font-bold mb-2">جاهزين للعب؟ 🎈</p>
-              <p className="text-muted-foreground mb-4">سجّل الدخول أو أنشئ حساب جديد لإكمال الحجز بسهولة.</p>
+              <p className="text-2xl font-bold mb-2">جاهزين للعب؟ 🎈</p>
+              <p className="text-muted-foreground mb-5">انضموا لعائلة بيكابو وسنجهز لكم جلسة لعب ممتعة وآمنة.</p>
               <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Button onClick={() => navigate('/login')} variant="outline" className="rounded-full border-2 border-[#00BBF9] text-[#008ab9]">
+                <Button onClick={() => navigate('/login')} variant="outline" className="rounded-full border-2 border-[#00BBF9] text-[#008ab9] font-bold">
                   تسجيل الدخول
                 </Button>
-                <Button onClick={() => navigate('/register')} className="rounded-full btn-playful bg-[#FF595E] hover:bg-[#f1464b]">
+                <Button onClick={() => navigate('/register')} className="rounded-full btn-playful bg-[#FF595E] hover:bg-[#f1464b] font-bold">
                   إنشاء حساب
                 </Button>
               </div>
