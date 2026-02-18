@@ -157,6 +157,12 @@ export default function SubscriptionsPage() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="subscriptions-hero text-center mb-10">
+          <div className="subscriptions-hero-decor" aria-hidden="true">
+            <span className="subscriptions-hero-cloud subscriptions-hero-cloud--one" />
+            <span className="subscriptions-hero-cloud subscriptions-hero-cloud--two" />
+            <span className="subscriptions-hero-balloon subscriptions-hero-balloon--one" />
+            <span className="subscriptions-hero-balloon subscriptions-hero-balloon--two" />
+          </div>
           <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3" data-testid="subscriptions-title">
             <img src={starIcon} className="inline-block h-9 w-9 ml-2" alt="" />
             باقات الاشتراك
@@ -231,8 +237,9 @@ export default function SubscriptionsPage() {
                         <span className="text-4xl font-heading font-bold text-slate-800">{plan.price}</span>
                         <span className="text-sm text-slate-500 mr-1">دينار</span>
                       </div>
-                      <div className="mb-4 flex justify-center">
+                      <div className="mb-4 flex justify-center gap-2">
                         <Badge className="theme-price-badge">سعر مميز</Badge>
+                        <Badge className="theme-price-badge theme-price-badge--value">{plan.price} د</Badge>
                       </div>
                       
                       <div className="bg-gradient-to-r from-[var(--pk-yellow)]/20 to-[var(--pk-orange)]/20 rounded-xl p-3 mb-4">

@@ -494,20 +494,26 @@ export default function BirthdayPage() {
                   <Card
                     key={theme.id}
                     onClick={() => setSelectedTheme(theme)}
-                    className={`pk-card theme-package-card cursor-pointer border-2 transition-all ${selectedTheme?.id === theme.id ? 'border-accent ring-2 ring-accent shadow-lg' : 'border-transparent hover:border-accent/40 hover:shadow-md'}`}
+                    className={`pk-card theme-package-card birthday-theme-card cursor-pointer border-2 transition-all ${selectedTheme?.id === theme.id ? 'border-accent ring-2 ring-accent shadow-lg' : 'border-transparent hover:border-accent/40 hover:shadow-md'}`}
                     data-testid={`theme-${theme.id}`}
                     aria-selected={selectedTheme?.id === theme.id}
                   >
                     <div className={`pk-card-accent accent-${['pink', 'blue', 'yellow', 'green', 'orange'][index % 5]}`} />
-                    <CardContent className="p-3 pt-4 text-center">
-                      <div className="mb-2">
+                    <CardContent className="p-3 pt-4 text-center relative">
+                      <div className="mb-2 flex items-center justify-between gap-2">
                         <Badge className="theme-package-badge">باقة مرحة</Badge>
+                        {index === 1 && <Badge className="theme-saving-badge">الأكثر طلباً</Badge>}
                       </div>
                       {theme.image_url && (
                         <img src={theme.image_url} alt={theme.name_ar || theme.name} className="w-full h-20 object-cover rounded-lg mb-2" />
                       )}
                       <h3 className="font-heading font-bold text-sm">{theme.name_ar || theme.name}</h3>
-                      <p className="text-accent font-bold text-sm mt-1">{theme.price} د</p>
+                      <div className="mt-2 flex justify-center">
+                        <Badge className="theme-price-badge inline-flex items-center gap-1.5">
+                          <img src={partyCakeIcon} className="h-3.5 w-3.5" alt="" />
+                          <span>{theme.price} د</span>
+                        </Badge>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}

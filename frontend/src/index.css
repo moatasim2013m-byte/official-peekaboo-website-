@@ -1182,6 +1182,132 @@ button.primary,
   }
 }
 
+
+.home-hero-confetti {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.home-hero-confetti-dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  opacity: 0.6;
+}
+
+.home-hero-confetti-dot--one {
+  top: 18%;
+  left: 8%;
+  background: rgba(255, 89, 94, 0.7);
+}
+
+.home-hero-confetti-dot--two {
+  top: 34%;
+  right: 14%;
+  width: 12px;
+  height: 12px;
+  background: rgba(255, 217, 59, 0.7);
+}
+
+.home-hero-confetti-dot--three {
+  bottom: 14%;
+  left: 34%;
+  background: rgba(0, 187, 249, 0.7);
+}
+
+.home-hero-balloon {
+  position: absolute;
+  width: 26px;
+  height: 34px;
+  border-radius: 50% 50% 46% 46%;
+  box-shadow: inset -3px -4px 0 rgba(255, 255, 255, 0.32);
+}
+
+.home-hero-balloon::after {
+  content: '';
+  position: absolute;
+  width: 1px;
+  height: 28px;
+  background: rgba(52, 88, 122, 0.24);
+  top: 100%;
+  right: 50%;
+}
+
+.home-hero-balloon--right {
+  top: 20%;
+  right: 7%;
+  background: rgba(255, 122, 58, 0.78);
+}
+
+.home-hero-balloon--left {
+  bottom: 16%;
+  left: 7%;
+  background: rgba(255, 89, 94, 0.74);
+}
+
+.theme-service-card--core {
+  border: 1px solid rgba(255, 122, 58, 0.24);
+  position: relative;
+}
+
+.birthday-theme-card {
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffffff 0%, #fff8ec 100%);
+}
+
+.subscriptions-hero-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.subscriptions-hero-cloud {
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.subscriptions-hero-cloud--one {
+  width: 124px;
+  height: 44px;
+  top: 12px;
+  right: 9%;
+}
+
+.subscriptions-hero-cloud--two {
+  width: 96px;
+  height: 36px;
+  bottom: 18px;
+  left: 9%;
+}
+
+.subscriptions-hero-balloon {
+  position: absolute;
+  width: 22px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.subscriptions-hero-balloon--one {
+  left: 18%;
+  top: 18px;
+  background: rgba(255, 89, 94, 0.5);
+}
+
+.subscriptions-hero-balloon--two {
+  right: 18%;
+  bottom: 16px;
+  background: rgba(0, 187, 249, 0.45);
+}
+
+.theme-price-badge--value {
+  background: rgba(255, 217, 59, 0.28);
+  color: #7a4300;
+}
+
 @media (max-width: 640px) {
   .hero-image-section {
     grid-template-columns: 1fr;

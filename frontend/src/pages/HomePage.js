@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
 import { useAuth } from '../context/AuthContext';
 import SkyBackground from '../components/theme/SkyBackground';
 import SmilingSun from '../components/theme/SmilingSun';
@@ -161,7 +162,8 @@ export default function HomePage() {
       buttonText: 'احجز الآن',
       badgeColor: 'badge-blue',
       accentColor: 'accent-blue',
-      buttonVariant: 'btn-sunrise'
+      buttonVariant: 'btn-sunrise',
+      isCoreOffer: true
     },
     {
       id: 'birthdays',
@@ -172,7 +174,8 @@ export default function HomePage() {
       buttonText: 'خطط لحفلتك',
       badgeColor: 'badge-pink',
       accentColor: 'accent-pink',
-      buttonVariant: 'btn-cotton-candy'
+      buttonVariant: 'btn-cotton-candy',
+      isCoreOffer: true
     },
     {
       id: 'subscriptions',
@@ -183,7 +186,8 @@ export default function HomePage() {
       buttonText: 'اشترك الآن',
       badgeColor: 'badge-yellow',
       accentColor: 'accent-yellow',
-      buttonVariant: 'btn-sunshine'
+      buttonVariant: 'btn-sunshine',
+      isCoreOffer: true
     },
     {
       id: 'schools',
@@ -278,6 +282,13 @@ export default function HomePage() {
       <SkyBackground className="home-sky-layer" />
 
       <section id="home" className="home-hero-sky pb-hero pb-section py-14 md:py-24">
+        <div className="home-hero-confetti" aria-hidden="true">
+          <span className="home-hero-confetti-dot home-hero-confetti-dot--one" />
+          <span className="home-hero-confetti-dot home-hero-confetti-dot--two" />
+          <span className="home-hero-confetti-dot home-hero-confetti-dot--three" />
+          <span className="home-hero-balloon home-hero-balloon--right" />
+          <span className="home-hero-balloon home-hero-balloon--left" />
+        </div>
         <div className="home-hero-decor" aria-hidden="true">
           <SmilingSun className="home-sun-corner" />
         </div>
@@ -460,10 +471,13 @@ export default function HomePage() {
               <Card 
                 key={index} 
                 id={feature.id}
-                className={`pk-card pb-card feature-card theme-service-card ${feature.disabled ? 'opacity-70' : ''}`}
+                className={`pk-card pb-card feature-card theme-service-card ${feature.isCoreOffer ? 'theme-service-card--core' : ''} ${feature.disabled ? 'opacity-70' : ''}`}
                 data-testid={`feature-card-${index}`}
               >
                 <div className={`pk-card-accent ${feature.accentColor}`} />
+                {feature.isCoreOffer && (
+                  <Badge className="absolute right-3 top-3 theme-package-badge z-10">الخدمات الأكثر طلباً</Badge>
+                )}
                 {feature.disabled && (
                   <div className="absolute top-3 left-3 bg-[var(--pk-purple)] text-white text-xs font-bold px-2 py-1 rounded-full z-10">
                     قريباً
