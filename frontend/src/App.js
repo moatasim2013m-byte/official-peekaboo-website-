@@ -36,6 +36,7 @@ const RulesPage = lazy(() => import("./pages/RulesPage"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage"));
 const FaqBotWidget = lazy(() => import("./components/FaqBotWidget"));
+const PeekabooHappyThemePage = lazy(() => import("./pages/PeekabooHappyThemePage"));
 
 const RouteLoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -96,6 +97,7 @@ function AppRoutes() {
     <Suspense fallback={<RouteLoadingFallback />}>
       <Routes>
         <Route path="/" element={<Layout><HomePage /></Layout>} />
+        <Route path="/peekaboo-happy-theme" element={<Layout><PeekabooHappyThemePage /></Layout>} />
         <Route path="/login" element={<Layout><LoginPage /></Layout>} />
         <Route path="/staff/login" element={<StaffLoginPage />} />
         <Route path="/register" element={<Layout><RegisterPage /></Layout>} />
