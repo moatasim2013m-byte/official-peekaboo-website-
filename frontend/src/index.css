@@ -1946,7 +1946,16 @@ button.primary,
 
 .booking-mobile-page {
     background: #f4faff;
-    font-family: var(--font-heading-ar);
+    font-family: 'Cairo', sans-serif;
+    font-weight: 400;
+}
+
+.booking-mobile-page .font-heading,
+.booking-mobile-page h1,
+.booking-mobile-page h2,
+.booking-mobile-page h3 {
+    font-family: 'Cairo', sans-serif;
+    font-weight: 700;
 }
 
 .booking-mobile-shell {
@@ -1972,20 +1981,23 @@ button.primary,
     border: 1px solid #d8e8f8;
     background: #fff;
     color: #4c6073;
-    font-size: 0.78rem;
+    font-size: 0.8rem;
     font-weight: 700;
+    box-shadow: 0 4px 10px rgba(20, 67, 112, 0.06);
 }
 
 .booking-step-pill.is-active {
     background: #ff595e;
     border-color: #ff595e;
     color: white;
+    box-shadow: 0 8px 18px rgba(255, 89, 94, 0.32);
 }
 
 .booking-step-pill.is-complete {
     background: #8ac926;
     border-color: #8ac926;
     color: #fff;
+    box-shadow: 0 8px 16px rgba(138, 201, 38, 0.3);
 }
 
 /* Booking card container */
@@ -2069,7 +2081,7 @@ button.primary,
 }
 
 .period-card {
-    min-height: 118px;
+    min-height: 132px;
     text-align: right;
 }
 
@@ -2105,8 +2117,8 @@ button.primary,
 }
 
 .disabled-period {
-    background: #f7f7f7 !important;
-    border-color: #dfdfdf !important;
+    background: linear-gradient(145deg, #f8fafc, #eef2f6) !important;
+    border-color: #d5dde6 !important;
 }
 
 .cartoon-option::after {
@@ -2168,19 +2180,21 @@ button.primary,
 
 .option-btn.selected {
     border-color: #ff595e;
-    background: rgba(255, 89, 94, 0.12);
+    background: #ff595e;
+    color: #fff;
     box-shadow: 0 4px 16px rgba(255, 89, 94, 0.25);
 }
 
 .option-btn.selected-yellow {
     border-color: #ffd93b;
-    background: rgba(255, 217, 59, 0.22);
+    background: #ffd93b;
+    color: #5f4500;
     box-shadow: 0 4px 16px rgba(255, 217, 61, 0.25);
 }
 
 .option-btn.morning-option.selected-yellow {
-    border-color: #3b82f6;
-    background: linear-gradient(145deg, #d9ecff, #b9ddff);
+    border-color: #ffd93b;
+    background: linear-gradient(145deg, #fff1a4, #ffd93b);
     box-shadow: 0 10px 22px rgba(59, 130, 246, 0.28);
 }
 
@@ -2214,6 +2228,7 @@ button.primary,
 
 .duration-pill {
     min-height: 110px;
+    border-radius: 20px;
 }
 
 .slot-pill {
@@ -2228,7 +2243,24 @@ button.primary,
 
 .slot-btn.selected {
     border-color: #ff595e;
-    background: rgba(255, 89, 94, 0.12);
+    background: #ff595e;
+    color: #fff;
+}
+
+.slot-btn.selected .text-muted-foreground,
+.slot-btn.selected svg {
+    color: rgba(255, 255, 255, 0.92) !important;
+}
+
+.slot-btn.selected-yellow {
+    border-color: #ffd93b;
+    background: #ffd93b;
+    color: #5f4500;
+}
+
+.slot-btn.selected-yellow .text-muted-foreground,
+.slot-btn.selected-yellow svg {
+    color: rgba(95, 69, 0, 0.86) !important;
 }
 
 .slot-btn.selected-pink {
@@ -2268,12 +2300,12 @@ button.primary,
 
 .booking-sticky-summary {
     position: sticky;
-    bottom: 12px;
-    background: white;
-    border: 1px solid #d9e8f8;
-    border-radius: 22px;
-    box-shadow: 0 12px 32px rgba(30, 56, 90, 0.14);
-    padding: 0.8rem;
+    bottom: 10px;
+    background: linear-gradient(160deg, #ffffff, #f8fcff);
+    border: 1px solid #cbe4ff;
+    border-radius: 24px;
+    box-shadow: 0 14px 34px rgba(30, 56, 90, 0.18);
+    padding: 0.95rem;
     z-index: 20;
 }
 
@@ -2290,6 +2322,22 @@ button.primary,
 .booking-auth-card {
     background: linear-gradient(165deg, rgba(255, 89, 94, 0.09), rgba(0, 187, 249, 0.08));
     border-color: rgba(255, 89, 94, 0.25) !important;
+}
+
+@media (max-width: 420px) {
+    .booking-mobile-shell {
+        max-width: 390px;
+        padding-inline: 12px;
+        padding-bottom: 5.75rem;
+    }
+
+    .booking-step-pills {
+        grid-template-columns: 1fr;
+    }
+
+    .booking-sticky-summary__meta {
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 /* Slot button states */
