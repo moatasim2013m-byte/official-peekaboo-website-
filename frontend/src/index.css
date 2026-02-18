@@ -1944,10 +1944,54 @@ button.primary,
     background: var(--pk-green);
 }
 
+.booking-mobile-page {
+    background: #f4faff;
+    font-family: var(--font-heading-ar);
+}
+
+.booking-mobile-shell {
+    max-width: 390px;
+    margin-inline: auto;
+    padding-bottom: 1.5rem;
+}
+
+.booking-step-pills {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+.booking-step-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.28rem;
+    min-height: 42px;
+    padding: 0.45rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid #d8e8f8;
+    background: #fff;
+    color: #4c6073;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.booking-step-pill.is-active {
+    background: #ff595e;
+    border-color: #ff595e;
+    color: white;
+}
+
+.booking-step-pill.is-complete {
+    background: #8ac926;
+    border-color: #8ac926;
+    color: #fff;
+}
+
 /* Booking card container */
 .booking-card {
     background: white;
-    border-radius: 16px !important;
+    border-radius: 24px !important;
     border: 1px solid rgba(69, 170, 242, 0.12) !important;
     box-shadow: 0 8px 24px rgba(24, 39, 75, 0.08);
     overflow: visible;
@@ -1959,7 +2003,7 @@ button.primary,
 }
 
 .booking-card-header {
-    padding: 1.75rem 1.75rem;
+    padding: 1.25rem 1.25rem;
     border-bottom: 1px solid var(--border-light);
 }
 
@@ -1971,6 +2015,40 @@ button.primary,
     font-weight: 700;
     font-size: 1.125rem;
     color: var(--text-primary);
+}
+
+.booking-card-calendar {
+    position: relative;
+}
+
+.booking-card-calendar::before,
+.booking-card-calendar::after {
+    position: absolute;
+    opacity: 0.3;
+    font-size: 1.15rem;
+    pointer-events: none;
+}
+
+.booking-card-calendar::before {
+    content: '☁️';
+    top: 16px;
+    left: 18px;
+}
+
+.booking-card-calendar::after {
+    content: '⭐';
+    bottom: 18px;
+    right: 22px;
+}
+
+.booking-calendar button[aria-selected="true"] {
+    background: #ff595e !important;
+    color: #fff !important;
+}
+
+.booking-calendar button.rdp-day_today:not([aria-selected="true"]) {
+    border: 2px solid #00bbf9;
+    color: #0b7ca5;
 }
 
 /* Option selector buttons */
@@ -1988,6 +2066,47 @@ button.primary,
 .cartoon-option {
     overflow: visible;
     border-width: 2.5px;
+}
+
+.period-card {
+    min-height: 118px;
+    text-align: right;
+}
+
+.period-icon-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.period-icon-circle-morning {
+    background: #e4f5ff;
+}
+
+.period-icon-circle-afternoon {
+    background: #eceff6;
+}
+
+.period-check {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 24px;
+    height: 24px;
+    border-radius: 999px;
+    background: #8ac926;
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.disabled-period {
+    background: #f7f7f7 !important;
+    border-color: #dfdfdf !important;
 }
 
 .cartoon-option::after {
@@ -2048,14 +2167,14 @@ button.primary,
 }
 
 .option-btn.selected {
-    border-color: var(--pk-blue);
-    background: var(--pk-bg-light-blue);
-    box-shadow: 0 4px 16px rgba(69, 170, 242, 0.2);
+    border-color: #ff595e;
+    background: rgba(255, 89, 94, 0.12);
+    box-shadow: 0 4px 16px rgba(255, 89, 94, 0.25);
 }
 
 .option-btn.selected-yellow {
-    border-color: var(--pk-yellow);
-    background: var(--pk-bg-light-yellow);
+    border-color: #ffd93b;
+    background: rgba(255, 217, 59, 0.22);
     box-shadow: 0 4px 16px rgba(255, 217, 61, 0.25);
 }
 
@@ -2093,14 +2212,23 @@ button.primary,
     padding: 0.9rem 1rem;
 }
 
+.duration-pill {
+    min-height: 110px;
+}
+
+.slot-pill {
+    min-height: 88px;
+    border-radius: 18px;
+}
+
 .slot-btn:hover:not(:disabled) {
     border-color: var(--pk-blue);
     transform: translateY(-2px);
 }
 
 .slot-btn.selected {
-    border-color: var(--pk-blue);
-    background: var(--pk-bg-light-blue);
+    border-color: #ff595e;
+    background: rgba(255, 89, 94, 0.12);
 }
 
 .slot-btn.selected-pink {
@@ -2136,6 +2264,32 @@ button.primary,
     border-radius: var(--radius-lg);
     padding: 1rem 1.25rem;
     border: 1px solid rgba(255, 217, 61, 0.3);
+}
+
+.booking-sticky-summary {
+    position: sticky;
+    bottom: 12px;
+    background: white;
+    border: 1px solid #d9e8f8;
+    border-radius: 22px;
+    box-shadow: 0 12px 32px rgba(30, 56, 90, 0.14);
+    padding: 0.8rem;
+    z-index: 20;
+}
+
+.booking-sticky-summary__meta {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.35rem 0.6rem;
+    margin-bottom: 0.7rem;
+    font-size: 0.84rem;
+    color: #3f5468;
+    font-weight: 700;
+}
+
+.booking-auth-card {
+    background: linear-gradient(165deg, rgba(255, 89, 94, 0.09), rgba(0, 187, 249, 0.08));
+    border-color: rgba(255, 89, 94, 0.25) !important;
 }
 
 /* Slot button states */

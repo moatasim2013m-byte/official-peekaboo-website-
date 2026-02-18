@@ -10,7 +10,7 @@ import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
-import { Clock, Users, Loader2, AlertCircle, Star, Sun, Moon } from 'lucide-react';
+import { Clock, Users, Loader2, AlertCircle, Star, Sun, Moon, Check, Cloud } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import mascotImg from '../assets/mascot.png';
 
@@ -425,9 +425,17 @@ export default function TicketsPage() {
     </div>
   );
 
+  const activeStep = !date ? 1 : !timeMode ? 2 : !selectedDuration ? 3 : 4;
+  const stepPills = [
+    { id: 1, label: '📅 1 التاريخ', complete: Boolean(date) },
+    { id: 2, label: '☀️🌙 2 الفترة', complete: Boolean(timeMode) },
+    { id: 3, label: '⏱ 3 المدة', complete: Boolean(selectedDuration) },
+    { id: 4, label: '🕒 4 الوقت', complete: Boolean(selectedSlot) }
+  ];
+
   return (
-    <div className="min-h-screen py-8 md:py-12" dir="rtl">
-      <div className="page-shell max-w-5xl px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-6 md:py-12 booking-mobile-page" dir="rtl">
+      <div className="page-shell booking-mobile-shell px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="text-center mb-8">
           <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3">
@@ -441,20 +449,22 @@ export default function TicketsPage() {
             اختر التاريخ، الفترة، المدة، ثم الوقت المناسب
           </p>
           
-          {/* Progress Indicator */}
-          <div className="booking-progress mt-6 inline-flex">
-            <div className={`booking-progress-step ${date ? 'complete' : 'active'}`}></div>
-            <div className={`booking-progress-step ${timeMode ? 'complete' : date ? 'active' : ''}`}></div>
-            <div className={`booking-progress-step ${selectedDuration ? 'complete' : timeMode ? 'active' : ''}`}></div>
-            <div className={`booking-progress-step ${selectedSlot ? 'complete' : selectedDuration ? 'active' : ''}`}></div>
-            <span className="text-sm mr-2">
-              {!date ? '1/4' : !timeMode ? '2/4' : !selectedDuration ? '3/4' : !selectedSlot ? '4/4' : '✓'}
-            </span>
+          <div className="booking-step-pills mt-6" role="list" aria-label="مراحل الحجز">
+            {stepPills.map((step) => (
+              <span
+                key={step.id}
+                role="listitem"
+                className={`booking-step-pill ${step.complete ? 'is-complete' : ''} ${activeStep === step.id && !step.complete ? 'is-active' : ''}`}
+              >
+                {step.complete ? <Check className="h-4 w-4" /> : null}
+                {step.label}
+              </span>
+            ))}
           </div>
         </div>
 
         {/* STEP 1: Date Selection */}
-        <Card className="booking-card mb-6">
+        <Card className="booking-card booking-card-calendar mb-6">
           <CardHeader className="booking-card-header">
             <CardTitle className="booking-card-title">
               <span className={`step-badge ${date ? 'step-badge-complete' : ''}`}>1</span>
@@ -478,7 +488,7 @@ export default function TicketsPage() {
                 }
               }}
               disabled={(d) => d < todayStart || d > maxDate}
-              className="rounded-xl"
+              className="rounded-xl booking-calendar"
             />
           </CardContent>
         </Card>
@@ -497,35 +507,34 @@ export default function TicketsPage() {
                 <button
                   onClick={() => !morningExpired && handleTimeModeChange('morning')}
                   disabled={morningExpired}
-                  className={`option-btn cartoon-option morning-option ${timeMode === 'morning' ? 'selected-yellow' : ''} ${morningExpired ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  className={`option-btn cartoon-option period-card morning-option ${timeMode === 'morning' ? 'selected-yellow' : ''} ${morningExpired ? 'opacity-50 cursor-not-allowed disabled-period' : ''}`}
                 >
-                  <Badge className={`absolute -top-3 left-1/2 -translate-x-1/2 ${morningExpired ? 'bg-gray-400' : 'bg-gradient-to-r from-sky-500 to-blue-600'} text-white text-xs`}>
-                    عرض الصباح
-                  </Badge>
                   <span className="cartoon-blob morning-blob" aria-hidden="true"></span>
                   <div className="flex items-center justify-between gap-3 pt-2 px-2">
-                    <Sun className={`h-8 w-8 shrink-0 ${morningExpired ? 'text-gray-400' : 'text-blue-500'}`} />
+                    <span className="period-icon-circle period-icon-circle-morning"><Sun className={`h-7 w-7 shrink-0 ${morningExpired ? 'text-gray-400' : 'text-blue-500'}`} /></span>
                     <div className="flex-1 text-right">
                       <div className={`font-heading text-xl font-bold ${morningExpired ? 'text-gray-400' : ''}`}>صباحي</div>
                       <div className="text-sm text-muted-foreground">10 ص - 2 م</div>
                       {morningExpired && (
-                        <div className="text-xs text-red-500 mt-1">غير متاح اليوم</div>
+                        <div className="text-xs text-red-500 mt-1 flex items-center gap-1 justify-end"><Cloud className="h-3.5 w-3.5" /> غير متاح اليوم</div>
                       )}
                     </div>
+                    {timeMode === 'morning' && !morningExpired && <span className="period-check"><Check className="h-4 w-4" /></span>}
                   </div>
                 </button>
                 
                 <button
                   onClick={() => handleTimeModeChange('afternoon')}
-                  className={`option-btn cartoon-option afternoon-option ${timeMode === 'afternoon' ? 'selected-afternoon' : ''}`}
+                  className={`option-btn cartoon-option period-card afternoon-option ${timeMode === 'afternoon' ? 'selected-afternoon' : ''}`}
                 >
                   <span className="cartoon-blob afternoon-blob" aria-hidden="true"></span>
                   <div className="flex items-center justify-between gap-3 px-2">
-                    <Moon className="h-8 w-8 shrink-0 text-slate-600" />
+                    <span className="period-icon-circle period-icon-circle-afternoon"><Moon className="h-7 w-7 shrink-0 text-slate-600" /></span>
                     <div className="flex-1 text-right">
                       <div className="font-heading text-xl font-bold">مسائي</div>
                       <div className="text-sm text-muted-foreground">2 م - 12 ص</div>
                     </div>
+                    {timeMode === 'afternoon' && <span className="period-check"><Check className="h-4 w-4" /></span>}
                   </div>
                 </button>
               </div>
@@ -544,7 +553,7 @@ export default function TicketsPage() {
               {extraHourText && <CardDescription className="text-sm mt-1 mr-10">{extraHourText}</CardDescription>}
             </CardHeader>
             <CardContent className="py-6">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 {pricing.map((option) => (
                   <button
                     key={option.hours}
@@ -552,7 +561,7 @@ export default function TicketsPage() {
                       setSelectedDuration(option.hours);
                       setSelectedSlot(null);
                     }}
-                    className={`option-btn ${selectedDuration === option.hours ? (timeMode === 'morning' ? 'selected-yellow' : 'selected') : ''}`}
+                    className={`option-btn duration-pill ${selectedDuration === option.hours ? (timeMode === 'morning' ? 'selected-yellow' : 'selected') : ''}`}
                   >
                     {option.best_value && (
                       <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-xs">
@@ -606,15 +615,12 @@ export default function TicketsPage() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {slots.filter(s => s.is_available).map((slot) => {
                     const endTime = getEndTime(slot.start_time, selectedDuration);
-                    const pricePerHour = getSlotPrice(slot.start_time);
-                    const totalPrice = getSlotTotalPrice(slot.start_time);
-                    const isHappyHour = pricePerHour === 3.5;
                     
                     return (
                       <button
                         key={slot.id}
                         onClick={() => setSelectedSlot(slot)}
-                        className={`slot-btn ${selectedSlot?.id === slot.id ? (timeMode === 'morning' ? 'selected-yellow' : 'selected') : ''}`}
+                        className={`slot-btn slot-pill ${selectedSlot?.id === slot.id ? (timeMode === 'morning' ? 'selected-yellow' : 'selected') : ''}`}
                       >
                         <div dir="ltr" className="font-heading font-semibold">
                           {slot.start_time} → {endTime}
@@ -767,11 +773,17 @@ export default function TicketsPage() {
                 )}
 
                 {/* Sticky CTA Container */}
-                <div className="sticky bottom-0 left-0 right-0 bg-white border-t-2 border-gray-200 shadow-lg p-4 -mx-6 -mb-6 mt-6 z-50">
+                <div className="booking-sticky-summary mt-6">
+                  <div className="booking-sticky-summary__meta">
+                    <span>🗓 {format(date, 'dd/MM')}</span>
+                    <span>⏰ {timeMode === 'morning' ? 'صباحي' : 'مسائي'}</span>
+                    <span>⏱ {selectedDuration} س</span>
+                    <span>💰 {getFinalTotal().toFixed(1)} د</span>
+                  </div>
                   <Button
                     onClick={handleBooking}
                     disabled={!selectedSlot || selectedChildren.length === 0 || loading}
-                    className={`w-full md:w-auto px-8 rounded-full h-12 text-base ${timeMode === 'morning' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : 'btn-playful'}`}
+                    className={`w-full px-8 rounded-full h-12 text-base ${timeMode === 'morning' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : 'btn-playful'}`}
                   >
                     {loading ? (
                       <>
@@ -779,7 +791,7 @@ export default function TicketsPage() {
                         جاري المعالجة...
                       </>
                     ) : (
-                      <span>احجز - {getFinalTotal().toFixed(1)} د</span>
+                      <span>احجز الآن</span>
                     )}
                   </Button>
                 </div>
@@ -789,14 +801,15 @@ export default function TicketsPage() {
         )}
 
         {!isAuthenticated && (
-          <Card className="booking-card bg-primary/5">
+          <Card className="booking-card booking-auth-card">
             <CardContent className="py-8 text-center">
-              <p className="text-lg mb-4">سجّل الدخول أو أنشئ حساب للحجز</p>
-              <div className="flex gap-4 justify-center">
-                <Button onClick={() => navigate('/login')} variant="outline" className="rounded-full">
+              <p className="text-xl font-bold mb-2">جاهزين للعب؟ 🎈</p>
+              <p className="text-muted-foreground mb-4">سجّل الدخول أو أنشئ حساب جديد لإكمال الحجز بسهولة.</p>
+              <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                <Button onClick={() => navigate('/login')} variant="outline" className="rounded-full border-2 border-[#00BBF9] text-[#008ab9]">
                   تسجيل الدخول
                 </Button>
-                <Button onClick={() => navigate('/register')} className="rounded-full btn-playful">
+                <Button onClick={() => navigate('/register')} className="rounded-full btn-playful bg-[#FF595E] hover:bg-[#f1464b]">
                   إنشاء حساب
                 </Button>
               </div>
