@@ -427,10 +427,10 @@ export default function TicketsPage() {
 
   const activeStep = !date ? 1 : !timeMode ? 2 : !selectedDuration ? 3 : 4;
   const stepPills = [
-    { id: 1, label: '📅 1 التاريخ', complete: Boolean(date) },
-    { id: 2, label: '☀️🌙 2 الفترة', complete: Boolean(timeMode) },
-    { id: 3, label: '⏱ 3 المدة', complete: Boolean(selectedDuration) },
-    { id: 4, label: '🕒 4 الوقت', complete: Boolean(selectedSlot) }
+    { id: 1, label: '1 التاريخ', complete: Boolean(date) },
+    { id: 2, label: '2 الفترة', complete: Boolean(timeMode) },
+    { id: 3, label: '3 المدة', complete: Boolean(selectedDuration) },
+    { id: 4, label: '4 الوقت', complete: Boolean(selectedSlot) }
   ];
 
   const periodLabel = timeMode === 'morning' ? 'صباحي' : timeMode === 'afternoon' ? 'مسائي' : '---';
@@ -775,27 +775,31 @@ export default function TicketsPage() {
                 )}
 
                 {/* Sticky CTA Container */}
-                <div className="booking-sticky-summary mt-6">
-                  <div className="booking-sticky-summary__meta">
-                    <span>🗓 {format(date, 'dd/MM')}</span>
-                    <span>⏰ {periodLabel}</span>
-                    <span>⏱ {selectedDuration} س</span>
-                    <span>💰 {getFinalTotal().toFixed(1)} د</span>
+                <div className="booking-sticky-wrap mt-6">
+                  <div className="booking-sticky-summary-bar">
+                    <div className="booking-sticky-summary__meta">
+                      <span>🗓 {format(date, 'dd/MM')}</span>
+                      <span>⏰ {periodLabel}</span>
+                      <span>⏱ {selectedDuration} س</span>
+                      <span>💰 {getFinalTotal().toFixed(1)} د</span>
+                    </div>
                   </div>
-                  <Button
-                    onClick={handleBooking}
-                    disabled={!selectedSlot || selectedChildren.length === 0 || loading}
-                    className={`w-full px-8 rounded-full h-12 text-base ${timeMode === 'morning' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : 'btn-playful'}`}
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 className="ml-2 h-5 w-5 animate-spin" />
-                        جاري المعالجة...
-                      </>
-                    ) : (
-                      <span>احجز الآن</span>
-                    )}
-                  </Button>
+                  <div className="booking-sticky-summary">
+                    <Button
+                      onClick={handleBooking}
+                      disabled={!selectedSlot || selectedChildren.length === 0 || loading}
+                      className={`w-full px-8 rounded-full h-12 text-base ${timeMode === 'morning' ? 'bg-yellow-500 hover:bg-yellow-600 text-white' : 'btn-playful'}`}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="ml-2 h-5 w-5 animate-spin" />
+                          جاري المعالجة...
+                        </>
+                      ) : (
+                        <span>احجز - {getFinalTotal().toFixed(1)} د</span>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
