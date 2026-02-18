@@ -4174,3 +4174,174 @@ body {
     animation: none !important;
   }
 }
+
+/* ===== Peekaboo Happy Theme alignment: Home + Birthday + Subscriptions ===== */
+.home-page {
+  background: #f4faff;
+}
+
+.home-hero-sky {
+  background:
+    radial-gradient(circle at 14% 18%, rgba(255, 89, 94, 0.2) 0 7%, transparent 8%),
+    radial-gradient(circle at 85% 22%, rgba(255, 217, 59, 0.26) 0 8%, transparent 9%),
+    radial-gradient(circle at 76% 76%, rgba(0, 187, 249, 0.16) 0 10%, transparent 11%),
+    linear-gradient(180deg, #f4faff 0%, #ecf8ff 100%);
+}
+
+.home-hero-sky::before,
+.home-hero-sky::after {
+  content: '';
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+}
+
+.home-hero-sky::before {
+  width: clamp(130px, 18vw, 220px);
+  height: clamp(48px, 7vw, 82px);
+  top: clamp(44px, 10vw, 88px);
+  right: clamp(18px, 16vw, 180px);
+}
+
+.home-hero-sky::after {
+  width: clamp(110px, 14vw, 190px);
+  height: clamp(42px, 6vw, 70px);
+  top: clamp(116px, 16vw, 190px);
+  left: clamp(18px, 10vw, 140px);
+}
+
+.hero-text-card,
+.theme-service-card,
+.theme-package-card,
+.subscriptions-page .booking-card,
+.birthday-page .booking-card,
+.why-peekaboo-single-card {
+  border-radius: 24px;
+  box-shadow: 0 12px 28px rgba(34, 111, 156, 0.12);
+  background: #fff;
+}
+
+.why-peekaboo-single-card {
+  border: 1px solid rgba(0, 187, 249, 0.18);
+  padding: clamp(16px, 2.4vw, 24px);
+}
+
+.why-peekaboo-inline-media {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px dashed rgba(255, 89, 94, 0.35);
+}
+
+.theme-gradient-btn {
+  background: linear-gradient(120deg, #ff595e, #ff7a3a) !important;
+  border: 0;
+  box-shadow: 0 10px 20px rgba(255, 89, 94, 0.22);
+}
+
+.theme-gradient-btn:hover {
+  filter: saturate(1.05);
+}
+
+.birthday-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 122, 58, 0.34);
+  background: linear-gradient(160deg, #fff8ec 0%, #f4faff 60%, #fff 100%);
+  padding: clamp(20px, 3vw, 30px) 16px;
+}
+
+.birthday-hero-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.birthday-hero-cloud {
+  position: absolute;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+}
+
+.birthday-hero-cloud--one {
+  width: 144px;
+  height: 54px;
+  top: 14px;
+  right: 8%;
+}
+
+.birthday-hero-cloud--two {
+  width: 104px;
+  height: 42px;
+  top: 56px;
+  left: 10%;
+}
+
+.birthday-hero-cake {
+  position: absolute;
+  bottom: 14px;
+  left: 16px;
+  font-size: 1.9rem;
+  opacity: 0.75;
+}
+
+.theme-package-card {
+  border-radius: 22px;
+  border-color: rgba(0, 187, 249, 0.2);
+}
+
+.theme-package-badge {
+  background: rgba(255, 217, 59, 0.3);
+  color: #27405a;
+  border-radius: 999px;
+}
+
+.subscriptions-page {
+  background: linear-gradient(180deg, #f4faff 0%, #edf8ff 100%);
+}
+
+.subscriptions-hero {
+  position: relative;
+  border-radius: 24px;
+  border: 1px solid rgba(0, 187, 249, 0.2);
+  background: linear-gradient(150deg, rgba(255, 255, 255, 0.95), rgba(255, 248, 236, 0.86));
+  padding: clamp(20px, 3vw, 28px);
+  overflow: hidden;
+}
+
+.subscriptions-hero::before {
+  content: '🎈 ✨';
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  opacity: 0.5;
+}
+
+.theme-saving-badge {
+  border-radius: 999px;
+  background: linear-gradient(120deg, #ffd93b, #ffb13b);
+  color: #374151;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.theme-price-badge {
+  border-radius: 999px;
+  background: rgba(0, 187, 249, 0.12);
+  color: #126ca3;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+@media (max-width: 640px) {
+  .theme-gradient-btn {
+    width: 100%;
+  }
+
+  .why-peekaboo-inline-media {
+    max-width: 100%;
+  }
+}

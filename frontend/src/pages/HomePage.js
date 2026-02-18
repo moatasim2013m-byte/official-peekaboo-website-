@@ -300,7 +300,7 @@ export default function HomePage() {
 
                 <div className="hero-cta-row flex flex-col sm:flex-row gap-4 justify-start">
                   <Link to={heroConfig.ctaRoute}>
-                    <Button size="lg" className="rounded-full btn-playful pb-btn primary-btn hero-primary-btn text-base sm:text-lg px-8 py-6 w-full sm:w-auto" data-testid="hero-book-btn">
+                    <Button size="lg" className="rounded-full btn-playful pb-btn primary-btn hero-primary-btn theme-gradient-btn text-base sm:text-lg px-8 h-[52px] w-full sm:w-auto" data-testid="hero-book-btn">
                       <span className="cta-label-with-shroomi">
                         <span>احجز جلسة</span>
                         {renderShroomiIcon(0)}
@@ -397,8 +397,8 @@ export default function HomePage() {
         <>
       {/* Features Section */}
       <section className="section-container home-page-section pb-section page-shell page-section-gap">
-        <div className="max-w-7xl mx-auto why-peekaboo-layout" dir="rtl">
-          <div className="why-peekaboo-box why-peekaboo-main-box text-right" data-testid="why-peekaboo-box">
+        <div className="max-w-7xl mx-auto" dir="rtl">
+          <div className="why-peekaboo-box why-peekaboo-single-card text-right" data-testid="why-peekaboo-box">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3">
               ماذا يميزنا؟
             </h2>
@@ -406,13 +406,13 @@ export default function HomePage() {
               لأننا نهتم بالتفاصيل التي تصنع تجربة آمنة وممتعة لطفلك.
             </p>
 
-            <ul className="why-peekaboo-trust-list" aria-label="عوامل الثقة في بيكابو">
+            <ul className="why-peekaboo-trust-list mb-5" aria-label="عوامل الثقة في بيكابو">
               {trustBullets.map((item) => (
                 <li key={item}>✓ {item}</li>
               ))}
             </ul>
 
-            <div className="why-peekaboo-grid mt-5">
+            <div className="why-peekaboo-grid">
               {whyPeekabooFeatures.map((feature, index) => (
                 <div key={index} className="why-feature-card rounded-lg border border-border/50 bg-background/60 p-2 text-center">
                   <div className={`mx-auto mb-1.5 pk-icon-badge ${feature.badgeColor}`} aria-hidden="true">
@@ -423,22 +423,22 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
-          </div>
 
-          <div className="why-peekaboo-box why-peekaboo-media-box" data-testid="why-peekaboo-media-box" aria-label="صورة بيكابو التعريفية">
-            {showHeroImage ? (
-              <img
-                src={heroImgSrc}
-                alt="أطفال يلعبون في بيكابو"
-                className="why-peekaboo-media"
-                loading="lazy"
-                decoding="async"
-              />
-            ) : (
-              <div className="why-peekaboo-media-placeholder" aria-hidden="true">
-                <span className="why-peekaboo-media-placeholder__title">Peekaboo</span>
-              </div>
-            )}
+            <div className="why-peekaboo-inline-media mt-5" data-testid="why-peekaboo-media-box" aria-label="صورة بيكابو التعريفية">
+              {showHeroImage ? (
+                <img
+                  src={heroImgSrc}
+                  alt="أطفال يلعبون في بيكابو"
+                  className="why-peekaboo-media"
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <div className="why-peekaboo-media-placeholder" aria-hidden="true">
+                  <span className="why-peekaboo-media-placeholder__title">Peekaboo</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
@@ -460,7 +460,7 @@ export default function HomePage() {
               <Card 
                 key={index} 
                 id={feature.id}
-                className={`pk-card pb-card feature-card ${feature.disabled ? 'opacity-70' : ''}`}
+                className={`pk-card pb-card feature-card theme-service-card ${feature.disabled ? 'opacity-70' : ''}`}
                 data-testid={`feature-card-${index}`}
               >
                 <div className={`pk-card-accent ${feature.accentColor}`} />

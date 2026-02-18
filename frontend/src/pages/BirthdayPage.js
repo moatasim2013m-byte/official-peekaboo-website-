@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTranslation } from '../i18n/useT';
 import { Button } from '../components/ui/button';
+import { Badge } from '../components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Calendar } from '../components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -377,6 +378,11 @@ export default function BirthdayPage() {
 
         {/* Page Header */}
         <div className="birthday-hero text-center mb-8">
+          <div className="birthday-hero-decor" aria-hidden="true">
+            <span className="birthday-hero-cloud birthday-hero-cloud--one" />
+            <span className="birthday-hero-cloud birthday-hero-cloud--two" />
+            <span className="birthday-hero-cake">🎂</span>
+          </div>
           <h1 className="birthday-page-title font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3" data-testid="birthday-title">
             <img src={partyCakeIcon} className="inline-block h-9 w-9 ml-2" alt="" />
             حفلات أعياد الميلاد
@@ -488,12 +494,15 @@ export default function BirthdayPage() {
                   <Card
                     key={theme.id}
                     onClick={() => setSelectedTheme(theme)}
-                    className={`pk-card cursor-pointer border-2 transition-all ${selectedTheme?.id === theme.id ? 'border-accent ring-2 ring-accent shadow-lg' : 'border-transparent hover:border-accent/40 hover:shadow-md'}`}
+                    className={`pk-card theme-package-card cursor-pointer border-2 transition-all ${selectedTheme?.id === theme.id ? 'border-accent ring-2 ring-accent shadow-lg' : 'border-transparent hover:border-accent/40 hover:shadow-md'}`}
                     data-testid={`theme-${theme.id}`}
                     aria-selected={selectedTheme?.id === theme.id}
                   >
                     <div className={`pk-card-accent accent-${['pink', 'blue', 'yellow', 'green', 'orange'][index % 5]}`} />
                     <CardContent className="p-3 pt-4 text-center">
+                      <div className="mb-2">
+                        <Badge className="theme-package-badge">باقة مرحة</Badge>
+                      </div>
                       {theme.image_url && (
                         <img src={theme.image_url} alt={theme.name_ar || theme.name} className="w-full h-20 object-cover rounded-lg mb-2" />
                       )}
@@ -698,13 +707,13 @@ export default function BirthdayPage() {
                     <Button
                       onClick={handleStandardBooking}
                       disabled={!selectedSlot || !selectedTheme || !selectedChild || loading}
-                      className="w-full sm:w-auto px-8 rounded-full h-12 btn-playful bg-[var(--pk-red)] hover:bg-[var(--pk-orange)]"
+                      className="w-full sm:w-auto px-8 rounded-full h-[52px] btn-playful theme-gradient-btn"
                       data-testid="book-party-btn"
                     >
                       {loading ? (
                         <span className="inline-flex items-center gap-2"><span className="pk-spinner pk-spinner--sm" aria-hidden="true" />جاري المعالجة...</span>
                       ) : (
-                        <span className="inline-flex items-center gap-2">احجز وادفع <MascotVariant accessory={birthdayAccessory} alt="" /></span>
+                        <span className="inline-flex items-center gap-2">احجز عيد ميلاد <MascotVariant accessory={birthdayAccessory} alt="" /></span>
                       )}
                     </Button>
                   </div>
