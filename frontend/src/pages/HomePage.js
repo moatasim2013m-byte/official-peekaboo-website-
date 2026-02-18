@@ -278,7 +278,9 @@ export default function HomePage() {
       <SkyBackground className="home-sky-layer" />
 
       <section id="home" className="home-hero-sky pb-hero pb-section py-14 md:py-24">
-        <SmilingSun className="home-sun-corner" />
+        <div className="home-hero-decor" aria-hidden="true">
+          <SmilingSun className="home-sun-corner" />
+        </div>
         <div className="page-shell home-hero-shell px-2 sm:px-4 lg:px-6 relative z-10">
           <div className="hero-content-stack">
             <div className="hero-image-section">
@@ -295,11 +297,6 @@ export default function HomePage() {
                   {heroConfig.subtitle}
                 </p>
 
-                <ul className="hero-trust-badges" aria-label="مزايا بيكابو">
-                  <li>✔ آمن ومعقم يومياً</li>
-                  <li>✔ للأعمار 1–10 سنوات</li>
-                  <li>✔ موقعنا: إربد – وحشة سنتر</li>
-                </ul>
 
                 <div className="hero-cta-row flex flex-col sm:flex-row gap-4 justify-start">
                   <Link to={heroConfig.ctaRoute}>
@@ -403,7 +400,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto why-peekaboo-layout" dir="rtl">
           <div className="why-peekaboo-box why-peekaboo-main-box text-right" data-testid="why-peekaboo-box">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3">
-              لماذا بيكابو مميّز؟
+              ماذا يميزنا؟
             </h2>
             <p className="text-muted-foreground text-base sm:text-lg max-w-2xl mb-5">
               لأننا نهتم بالتفاصيل التي تصنع تجربة آمنة وممتعة لطفلك.

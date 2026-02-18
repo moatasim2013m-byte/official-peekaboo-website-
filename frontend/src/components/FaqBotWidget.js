@@ -23,6 +23,11 @@ export default function FaqBotWidget() {
     return origin ? `${origin}/api` : "/api";
   }, []);
 
+  const isSmallScreen = typeof window !== "undefined" && window.matchMedia("(max-width: 640px)").matches;
+  const widgetOffsetBottom = isSmallScreen
+    ? "calc(env(safe-area-inset-bottom, 0px) + 10px)"
+    : "calc(env(safe-area-inset-bottom, 0px) + 18px)";
+
   const askQuestion = async (question) => {
     if (!question || loading) return;
 
@@ -47,12 +52,12 @@ export default function FaqBotWidget() {
   };
 
   return (
-    <div style={{ position: "fixed", bottom: "20px", right: "20px", zIndex: 1100 }} dir="rtl">
+    <div style={{ position: "fixed", bottom: widgetOffsetBottom, right: isSmallScreen ? "10px" : "18px", zIndex: 900 }} dir="rtl">
       {open && (
         <div
           style={{
-            width: "320px",
-            maxHeight: "420px",
+            width: isSmallScreen ? "min(92vw, 300px)" : "320px",
+            maxHeight: isSmallScreen ? "min(62vh, 390px)" : "420px",
             background: "#fff",
             borderRadius: "14px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.16)",
@@ -143,13 +148,13 @@ export default function FaqBotWidget() {
         type="button"
         onClick={() => setOpen((prev) => !prev)}
         style={{
-          width: "56px",
-          height: "56px",
+          width: isSmallScreen ? "50px" : "56px",
+          height: isSmallScreen ? "50px" : "56px",
           borderRadius: "50%",
           border: "none",
           background: "#6d28d9",
           color: "#fff",
-          fontSize: "24px",
+          fontSize: isSmallScreen ? "22px" : "24px",
           cursor: "pointer",
           boxShadow: "0 8px 20px rgba(109,40,217,0.35)"
         }}

@@ -3782,3 +3782,97 @@ body {
     order: 2;
   }
 }
+
+/* ===== Homepage credit-control fixes ===== */
+.home-page {
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+
+.home-sky-layer {
+  position: fixed;
+  inset: 0;
+  opacity: 0.42;
+  z-index: 0;
+}
+
+.home-hero-sky {
+  position: relative;
+  overflow: visible;
+  padding-top: clamp(2.75rem, 8vw, 4.5rem);
+  padding-bottom: clamp(1.25rem, 4vw, 2.25rem);
+}
+
+.home-hero-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.home-hero-shell {
+  position: relative;
+  z-index: 2;
+}
+
+.home-sun-corner {
+  position: absolute;
+  top: clamp(8px, 2vw, 24px);
+  right: clamp(8px, 2vw, 24px);
+  opacity: 0.96;
+  z-index: 2;
+}
+
+.hero-image-section {
+  min-height: auto;
+}
+
+.hero-image-panel {
+  min-height: clamp(220px, 32vw, 420px);
+}
+
+.why-peekaboo-layout,
+.why-peekaboo-main-box,
+.why-peekaboo-trust-list {
+  direction: rtl;
+}
+
+@media (max-width: 1023px) {
+  .home-page .page-section-gap {
+    margin-top: 1rem;
+  }
+
+  .hero-image-section {
+    min-height: auto;
+    padding: 0.9rem;
+    gap: 0.9rem;
+  }
+
+  .hero-image-panel {
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  .why-peekaboo-media-box {
+    min-height: 0;
+  }
+
+  .why-peekaboo-media,
+  .why-peekaboo-media-placeholder {
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+  }
+
+  .home-sun-corner {
+    transform: none;
+    width: clamp(58px, 15vw, 78px);
+    height: clamp(58px, 15vw, 78px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky-background__cloud,
+  .smiling-sun__rays {
+    animation: none !important;
+  }
+}
