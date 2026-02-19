@@ -4507,7 +4507,8 @@ body {
 .home-theme-section::after {
   content: '';
   position: absolute;
-  inset: 0;
+  right: 0;
+  left: 0;
   pointer-events: none;
   z-index: 0;
 }
@@ -4517,77 +4518,92 @@ body {
   z-index: 1;
 }
 
-.home-theme-section + .home-theme-section::before {
-  top: -1px;
-  bottom: auto;
-  height: clamp(48px, 8vw, 92px);
-  background:
-    radial-gradient(120% 160% at 50% 0%, rgba(255, 255, 255, 0.88) 26%, transparent 27%) center top / 52% 100% repeat-x;
-  opacity: 0.85;
-}
-
 .home-theme-section--sky {
   background:
-    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.65) 0 7%, transparent 8%),
-    radial-gradient(circle at 85% 20%, rgba(255, 217, 59, 0.22) 0 9%, transparent 10%),
-    linear-gradient(180deg, #f2faff 0%, #dff3ff 45%, #eaf7ff 100%);
+    linear-gradient(180deg, #eaf8ff 0%, #d8efff 46%, #ebf7ff 100%);
 }
 
 .home-theme-section--sky::after {
+  top: 0;
+  bottom: 0;
   background:
-    radial-gradient(120px 48px at 14% 20%, rgba(255, 255, 255, 0.82) 0 62%, transparent 63%),
-    radial-gradient(138px 54px at 80% 26%, rgba(255, 255, 255, 0.74) 0 62%, transparent 63%),
-    radial-gradient(circle at 38% 15%, rgba(255, 89, 94, 0.2) 0 1.6%, transparent 1.8%),
-    radial-gradient(circle at 57% 22%, rgba(151, 198, 74, 0.2) 0 1.4%, transparent 1.7%),
-    radial-gradient(circle at 74% 14%, rgba(0, 187, 249, 0.18) 0 1.4%, transparent 1.7%);
+    radial-gradient(144px 58px at 14% 20%, rgba(255, 255, 255, 0.58) 0 62%, transparent 63%),
+    radial-gradient(160px 62px at 82% 24%, rgba(255, 255, 255, 0.55) 0 62%, transparent 63%),
+    radial-gradient(circle at 34% 14%, rgba(255, 89, 94, 0.1) 0 1.2%, transparent 1.4%),
+    radial-gradient(circle at 56% 19%, rgba(151, 198, 74, 0.09) 0 1.1%, transparent 1.3%),
+    radial-gradient(circle at 74% 12%, rgba(0, 187, 249, 0.1) 0 1.2%, transparent 1.4%);
 }
 
 .home-theme-section--jungle {
-  background: linear-gradient(180deg, #f3fff2 0%, #ebfaec 45%, #f8fff6 100%);
+  background: linear-gradient(180deg, #effbe9 0%, #e6f7de 48%, #f2fbe9 100%);
+}
+
+.home-theme-section--jungle::before {
+  top: clamp(-1px, -0.25vw, -2px);
+  bottom: auto;
+  height: clamp(48px, 7vw, 88px);
+  background:
+    radial-gradient(130% 170% at 50% 0%, rgba(255, 255, 255, 0.84) 0 52%, transparent 54%) center top / 54% 100% repeat-x;
+  opacity: 0.76;
 }
 
 .home-theme-section--jungle::after {
+  top: 0;
+  bottom: 0;
   background:
-    radial-gradient(42% 55% at 0% 0%, rgba(151, 198, 74, 0.26) 0 42%, transparent 44%),
-    radial-gradient(35% 45% at 100% 100%, rgba(151, 198, 74, 0.24) 0 34%, transparent 36%),
-    radial-gradient(26% 35% at 92% 12%, rgba(123, 180, 53, 0.16) 0 30%, transparent 32%),
-    radial-gradient(24% 30% at 8% 90%, rgba(123, 180, 53, 0.14) 0 26%, transparent 28%);
+    radial-gradient(40% 52% at -4% -3%, rgba(133, 187, 70, 0.11) 0 46%, transparent 47%),
+    radial-gradient(30% 42% at 103% 98%, rgba(133, 187, 70, 0.1) 0 42%, transparent 44%),
+    radial-gradient(80% 30% at 102% 35%, rgba(111, 173, 72, 0.08) 0 8%, transparent 9%),
+    radial-gradient(80% 30% at -2% 62%, rgba(111, 173, 72, 0.08) 0 8%, transparent 9%);
 }
 
 .home-theme-section--water {
-  background: linear-gradient(180deg, #e8fbff 0%, #d8f4ff 48%, #edfaff 100%);
+  background: linear-gradient(180deg, #e5fbff 0%, #d2f5fb 52%, #e8f9ff 100%);
 }
 
 .home-theme-section--water::before {
-  top: clamp(-10px, -2vw, -4px);
-  height: clamp(40px, 7vw, 78px);
+  top: clamp(-1px, -0.25vw, -2px);
+  bottom: auto;
+  height: clamp(44px, 7vw, 86px);
   background:
-    radial-gradient(50% 120% at 10% 100%, rgba(255, 255, 255, 0.92) 0 58%, transparent 59%) top left / 40% 100% repeat-x;
-  opacity: 0.95;
+    radial-gradient(122% 168% at 50% 0%, rgba(225, 246, 235, 0.84) 0 52%, transparent 54%) center top / 54% 100% repeat-x;
+  opacity: 0.72;
 }
 
 .home-theme-section--water::after {
+  top: 0;
+  bottom: 0;
   background:
-    radial-gradient(circle at 12% 22%, rgba(255, 255, 255, 0.6) 0 1.4%, transparent 1.6%),
-    radial-gradient(circle at 22% 38%, rgba(255, 255, 255, 0.52) 0 1.2%, transparent 1.4%),
-    radial-gradient(circle at 88% 34%, rgba(255, 255, 255, 0.5) 0 1.1%, transparent 1.3%),
-    radial-gradient(circle at 76% 62%, rgba(255, 255, 255, 0.45) 0 1.2%, transparent 1.4%);
+    radial-gradient(circle at 14% 24%, rgba(255, 255, 255, 0.6) 0 1.2%, transparent 1.4%),
+    radial-gradient(circle at 21% 42%, rgba(255, 255, 255, 0.58) 0 1%, transparent 1.2%),
+    radial-gradient(circle at 85% 30%, rgba(255, 255, 255, 0.55) 0 1.1%, transparent 1.3%),
+    radial-gradient(circle at 75% 60%, rgba(255, 255, 255, 0.5) 0 1.3%, transparent 1.5%),
+    linear-gradient(180deg, transparent 0 84%, rgba(71, 196, 230, 0.09) 84% 87%, transparent 87% 100%);
 }
 
 .home-theme-section--party {
   background:
-    radial-gradient(circle at 9% 16%, rgba(255, 89, 94, 0.2) 0 4%, transparent 4.5%),
-    radial-gradient(circle at 86% 18%, rgba(255, 217, 59, 0.2) 0 4.2%, transparent 4.7%),
-    radial-gradient(circle at 78% 74%, rgba(0, 187, 249, 0.14) 0 4%, transparent 4.5%),
-    linear-gradient(180deg, #fff7f0 0%, #fff3f8 45%, #f8f6ff 100%);
+    linear-gradient(180deg, #fff7ef 0%, #fff0f8 48%, #f7f3ff 100%);
+}
+
+.home-theme-section--party::before {
+  top: clamp(-1px, -0.25vw, -2px);
+  bottom: auto;
+  height: clamp(46px, 7vw, 84px);
+  background:
+    radial-gradient(125% 166% at 50% 0%, rgba(221, 247, 255, 0.84) 0 52%, transparent 54%) center top / 54% 100% repeat-x;
+  opacity: 0.72;
 }
 
 .home-theme-section--party::after {
+  top: 0;
+  bottom: 0;
   background:
-    radial-gradient(40px 56px at 12% 22%, rgba(255, 89, 94, 0.14) 0 48%, transparent 50%),
-    radial-gradient(44px 62px at 86% 26%, rgba(0, 187, 249, 0.14) 0 46%, transparent 48%),
-    radial-gradient(circle at 26% 32%, rgba(151, 198, 74, 0.18) 0 1.1%, transparent 1.3%),
-    radial-gradient(circle at 64% 24%, rgba(255, 122, 58, 0.22) 0 1.2%, transparent 1.4%);
+    radial-gradient(48px 70px at 12% 22%, rgba(255, 89, 94, 0.11) 0 48%, transparent 50%),
+    radial-gradient(50px 72px at 86% 24%, rgba(0, 187, 249, 0.11) 0 46%, transparent 48%),
+    radial-gradient(circle at 22% 32%, rgba(151, 198, 74, 0.09) 0 1.1%, transparent 1.3%),
+    radial-gradient(circle at 62% 22%, rgba(255, 122, 58, 0.1) 0 1.1%, transparent 1.3%),
+    radial-gradient(circle at 74% 14%, rgba(255, 217, 59, 0.09) 0 1.3%, transparent 1.5%);
 }
 
 .home-hero-decor {
@@ -4600,15 +4616,15 @@ body {
 
 .home-sun-corner {
   position: absolute;
-  top: clamp(8px, 1.8vw, 20px);
-  right: clamp(10px, 2.2vw, 30px);
+  top: clamp(10px, 1.8vw, 24px);
+  left: clamp(10px, 2.2vw, 30px);
   width: clamp(72px, 9vw, 116px);
   height: clamp(72px, 9vw, 116px);
-  opacity: 0.35;
+  opacity: 0.3;
   filter: none;
   pointer-events: none;
   z-index: 0;
-  transform: none !important;
+  transform: translate3d(0, 0, 0) rotate(-8deg);
   animation: sun-gentle-float 4.6s ease-in-out infinite;
 }
 
@@ -4620,21 +4636,17 @@ body {
 
 @keyframes sun-gentle-float {
   0%,
-  100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  100% { transform: translate3d(0, 0, 0) rotate(-8deg); }
+  50% { transform: translate3d(0, -4px, 0) rotate(-6deg); }
 }
 
 @media (max-width: 768px) {
   .home-sun-corner {
     top: clamp(14px, 3vw, 20px);
-    right: clamp(8px, 3vw, 14px);
+    left: clamp(8px, 3vw, 14px);
     width: clamp(58px, 15vw, 84px);
     height: clamp(58px, 15vw, 84px);
-    opacity: 0.28;
-  }
-
-  .home-theme-section + .home-theme-section::before {
-    opacity: 0.65;
+    opacity: 0.24;
   }
 }
 
