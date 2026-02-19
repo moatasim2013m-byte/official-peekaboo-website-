@@ -381,7 +381,7 @@ export default function BirthdayPage() {
           <div className="birthday-hero-decor" aria-hidden="true">
             <span className="birthday-hero-cloud birthday-hero-cloud--one" />
             <span className="birthday-hero-cloud birthday-hero-cloud--two" />
-            <span className="birthday-hero-cake">🎂</span>
+            <img src={partyCakeIcon} className="birthday-hero-cake-icon" alt="" />
           </div>
           <h1 className="birthday-page-title font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3" data-testid="birthday-title">
             <img src={partyCakeIcon} className="inline-block h-9 w-9 ml-2" alt="" />
@@ -394,7 +394,13 @@ export default function BirthdayPage() {
           <p className="birthday-page-subtitle text-base md:text-lg max-w-xl mx-auto">
             أجواء احتفالية، بالونات مرحة، وتجربة لا تُنسى لطفلك!
           </p>
-          <div className="birthday-hero-balloons" aria-hidden="true">🎈 🎉 🎈</div>
+          <div className="birthday-hero-balloons" aria-hidden="true">
+            <span className="birthday-hero-balloon birthday-hero-balloon--one" />
+            <span className="birthday-hero-balloon birthday-hero-balloon--two" />
+            <span className="birthday-hero-confetti birthday-hero-confetti--one" />
+            <span className="birthday-hero-confetti birthday-hero-confetti--two" />
+            <span className="birthday-hero-confetti birthday-hero-confetti--three" />
+          </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
@@ -505,7 +511,7 @@ export default function BirthdayPage() {
                         {index === 1 && <Badge className="theme-saving-badge">الأكثر طلباً</Badge>}
                       </div>
                       {theme.image_url && (
-                        <img src={theme.image_url} alt={theme.name_ar || theme.name} className="w-full h-20 object-cover rounded-lg mb-2" />
+                        <img src={theme.image_url} alt={theme.name_ar || theme.name} className="theme-package-image" />
                       )}
                       <h3 className="font-heading font-bold text-sm">{theme.name_ar || theme.name}</h3>
                       <div className="mt-2 flex justify-center">
@@ -627,7 +633,7 @@ export default function BirthdayPage() {
 
             {/* Booking Form */}
             {isAuthenticated && (
-              <Card className="booking-card">
+              <Card className="booking-card birthday-summary-card">
                 <CardHeader className="booking-card-header">
                   <CardTitle className="booking-card-title">أكمل حجزك</CardTitle>
                 </CardHeader>
