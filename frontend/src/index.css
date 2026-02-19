@@ -4494,3 +4494,301 @@ body {
     max-width: 100%;
   }
 }
+
+/* ===== Birthday + Subscriptions premium celebration polish ===== */
+.birthday-sun,
+.subscriptions-sun {
+  position: absolute;
+  top: clamp(10px, 2.4vw, 24px);
+  left: clamp(8px, 2vw, 20px);
+  right: auto;
+  transform: none;
+  width: clamp(84px, 9vw, 114px);
+  height: clamp(84px, 9vw, 114px);
+  z-index: 0;
+  opacity: 0.82;
+  pointer-events: none;
+}
+
+.birthday-page .page-shell,
+.subscriptions-page > .max-w-5xl {
+  position: relative;
+  z-index: 2;
+}
+
+.birthday-page .booking-card,
+.subscriptions-page .booking-card {
+  border-radius: 24px !important;
+  box-shadow: 0 14px 30px rgba(34, 111, 156, 0.12);
+}
+
+.birthday-page .booking-card-header,
+.subscriptions-page .booking-card-header {
+  padding: 1.35rem 1.4rem 1rem;
+}
+
+.birthday-page .booking-card .booking-card-header + div,
+.birthday-page .booking-card .booking-card-header + .card-content,
+.birthday-page .booking-card .booking-card-header + [class*='CardContent'],
+.subscriptions-page .booking-card .booking-card-header + div,
+.subscriptions-page .booking-card .booking-card-header + .card-content,
+.subscriptions-page .booking-card .booking-card-header + [class*='CardContent'] {
+  padding: 1rem 1.4rem 1.35rem;
+}
+
+.birthday-page .booking-card-title,
+.subscriptions-page .booking-card-title {
+  align-items: center;
+}
+
+.step-badge {
+  flex: 0 0 32px;
+  margin-inline-start: 0;
+  margin-inline-end: 0.2rem;
+}
+
+.birthday-hero {
+  isolation: isolate;
+}
+
+.birthday-hero-decor {
+  z-index: 0;
+}
+
+.birthday-hero > *:not(.birthday-hero-decor) {
+  position: relative;
+  z-index: 2;
+}
+
+.birthday-hero-cake-icon {
+  position: absolute;
+  bottom: 16px;
+  left: 20px;
+  width: 40px;
+  height: 40px;
+  opacity: 0.86;
+  filter: drop-shadow(0 8px 10px rgba(255, 122, 58, 0.22));
+}
+
+@keyframes pk-balloon-float {
+  0%,
+  100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.birthday-hero-balloons {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  margin-top: 0;
+}
+
+.birthday-hero-balloon {
+  position: absolute;
+  width: 20px;
+  height: 27px;
+  border-radius: 50%;
+  opacity: 0.35;
+  animation: pk-balloon-float 6s ease-in-out infinite;
+}
+
+.birthday-hero-balloon::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 1px;
+  height: 20px;
+  background: rgba(54, 88, 118, 0.2);
+}
+
+.birthday-hero-balloon--one {
+  right: 20%;
+  top: 16%;
+  background: rgba(255, 89, 94, 0.45);
+}
+
+.birthday-hero-balloon--two {
+  left: 19%;
+  top: 20%;
+  background: rgba(0, 187, 249, 0.4);
+  animation-delay: 1.2s;
+}
+
+.birthday-hero-confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  opacity: 0.32;
+}
+
+.birthday-hero-confetti--one { top: 24%; right: 36%; background: rgba(255, 217, 59, 0.9); }
+.birthday-hero-confetti--two { top: 30%; left: 35%; background: rgba(138, 201, 38, 0.88); }
+.birthday-hero-confetti--three { top: 37%; right: 48%; background: rgba(255, 122, 58, 0.88); }
+
+.slot-btn.selected-pink {
+  border-color: rgba(255, 71, 87, 0.95);
+  border-width: 2px;
+  background: linear-gradient(145deg, rgba(255, 89, 94, 0.14), rgba(255, 255, 255, 0.96));
+  box-shadow: 0 10px 24px rgba(255, 71, 87, 0.2);
+  position: relative;
+}
+
+.slot-btn.selected-pink::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: rgba(255, 89, 94, 0.94);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+}
+
+.birthday-theme-card {
+  min-height: 228px;
+}
+
+.theme-package-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+}
+
+.theme-package-image {
+  width: 100%;
+  height: 88px;
+  object-fit: cover;
+  border-radius: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.theme-package-card .theme-package-badge,
+.theme-package-card .theme-saving-badge {
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.birthday-summary-card {
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.97), rgba(255, 240, 247, 0.92) 48%, rgba(236, 248, 255, 0.95));
+  border: 1px solid rgba(255, 122, 160, 0.25) !important;
+}
+
+.subscriptions-hero {
+  isolation: isolate;
+}
+
+.subscriptions-hero-decor {
+  z-index: 0;
+}
+
+.subscriptions-hero > *:not(.subscriptions-hero-decor) {
+  position: relative;
+  z-index: 2;
+}
+
+.subscriptions-hero-balloon {
+  opacity: 0.34;
+  animation: pk-balloon-float 7.5s ease-in-out infinite;
+}
+
+.subscriptions-hero-balloon--two {
+  animation-delay: 1.5s;
+}
+
+.subscription-plan-card {
+  overflow: visible;
+}
+
+.subscription-plan-card.is-selected {
+  border-color: rgba(255, 217, 59, 0.8);
+  box-shadow: 0 0 0 4px rgba(255, 217, 59, 0.2), 0 20px 30px rgba(255, 177, 59, 0.2);
+}
+
+.subscription-plan-card.is-selected::after {
+  content: '✓';
+  position: absolute;
+  top: -10px;
+  right: -8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #ffd93b, #ffb13b);
+  color: #5e4100;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 28px;
+  text-align: center;
+  box-shadow: 0 8px 18px rgba(255, 177, 59, 0.35);
+}
+
+.theme-saving-badge--subscriptions {
+  font-size: 0.7rem;
+  padding: 0.26rem 0.6rem;
+  max-width: calc(100% - 1.25rem);
+}
+
+.subscription-validity-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  background: linear-gradient(120deg, rgba(0, 187, 249, 0.1), rgba(255, 255, 255, 0.96));
+  border: 1px solid rgba(0, 187, 249, 0.34);
+  border-radius: 999px;
+  padding: 0.34rem 0.66rem;
+  margin-bottom: 0.9rem;
+}
+
+.subscription-purchase-card {
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.96), rgba(255, 248, 236, 0.82));
+}
+
+.subscription-purchase-row {
+  align-items: stretch;
+}
+
+.subscription-selected-summary {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 217, 59, 0.35);
+  border-radius: 16px;
+  padding: 0.65rem 0.9rem;
+  min-width: 210px;
+}
+
+@media (max-width: 640px) {
+  .birthday-sun,
+  .subscriptions-sun {
+    top: 6px;
+    left: 6px;
+    width: 72px;
+    height: 72px;
+    opacity: 0.65;
+  }
+
+  .subscriptions-hero-balloon--one {
+    top: 50px;
+    left: 10%;
+  }
+
+  .subscriptions-hero-balloon--two {
+    top: 56px;
+    right: 8%;
+    bottom: auto;
+  }
+
+  .birthday-hero-cake-icon {
+    width: 34px;
+    height: 34px;
+  }
+}
