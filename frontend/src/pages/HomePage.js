@@ -281,7 +281,7 @@ export default function HomePage() {
     <div className="home-page" dir="rtl">
       <SkyBackground className="home-sky-layer" />
 
-      <section id="home" className="home-hero-sky pb-hero pb-section py-14 md:py-24">
+      <section id="home" className="home-hero-sky home-theme-section home-theme-section--sky pb-hero pb-section py-14 md:py-24">
         <div className="home-hero-confetti" aria-hidden="true">
           <span className="home-hero-confetti-dot home-hero-confetti-dot--one" />
           <span className="home-hero-confetti-dot home-hero-confetti-dot--two" />
@@ -407,7 +407,7 @@ export default function HomePage() {
       {showDeferredSections && (
         <>
       {/* Features Section */}
-      <section className="section-container home-page-section pb-section page-shell page-section-gap">
+      <section className="section-container home-page-section home-theme-section home-theme-section--jungle pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto" dir="rtl">
           <div className="why-peekaboo-box why-peekaboo-single-card text-right" data-testid="why-peekaboo-box">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-3">
@@ -455,7 +455,7 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="section-container home-page-section pb-section page-shell page-section-gap">
+      <section className="section-container home-page-section home-theme-section home-theme-section--jungle pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="features-title">
@@ -518,7 +518,7 @@ export default function HomePage() {
       </section>
 
       {/* Gallery Section */}
-      <section className="section-container home-page-section pb-section page-shell page-section-gap">
+      <section className="section-container home-page-section home-theme-section home-theme-section--water pb-section page-shell page-section-gap">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-heading text-2xl sm:text-3xl md:text-4xl font-bold text-foreground mb-4" data-testid="gallery-title">
@@ -602,7 +602,7 @@ export default function HomePage() {
 
       {/* CTA Section */}
       {!isAuthenticated && (
-        <section className="pb-section py-16 md:py-20 page-shell page-section-gap">
+        <section className="pb-section py-16 md:py-20 page-shell page-section-gap home-theme-section home-theme-section--party">
           <div className="relative overflow-hidden max-w-4xl mx-auto px-6 py-12 md:py-16 home-cta-panel rounded-[var(--radius-2xl)] shadow-xl text-center">
             <div className="cta-cloud-layer" aria-hidden="true">
               <div className="cta-cloud cta-cloud-1"></div>
