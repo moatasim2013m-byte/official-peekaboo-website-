@@ -436,8 +436,8 @@ export default function TicketsPage() {
   const periodLabel = timeMode === 'morning' ? 'صباحي' : timeMode === 'afternoon' ? 'مسائي' : '---';
 
   return (
-    <div className="min-h-screen py-6 md:py-12 booking-mobile-page" dir="rtl">
-      <div className="page-shell booking-mobile-shell px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-6 md:py-12 booking-mobile-page tickets-themed-page" dir="rtl">
+      <div className="page-shell booking-mobile-shell tickets-themed-wrap px-4 sm:px-6 lg:px-8">
         {/* Page Header */}
         <div className="text-center mb-8">
           <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3">
