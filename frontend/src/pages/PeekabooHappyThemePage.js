@@ -1,157 +1,151 @@
 import './PeekabooHappyThemePage.css';
 
-const colors = [
-  { name: 'الأحمر الأساسي', value: '#FF595E', className: '', style: { background: '#FF595E' } },
-  { name: 'الأصفر المضيء', value: '#FFD93B', className: 'yellow', style: { background: '#FFD93B' } },
-  { name: 'الأزرق المعلوماتي', value: '#00BBF9', className: '', style: { background: '#00BBF9' } },
-  { name: 'الأخضر النجاح', value: '#8AC926', className: '', style: { background: '#8AC926' } },
-  { name: 'خلفية السماء', value: '#F4FAFF', className: 'sky', style: { background: '#F4FAFF' } },
-  { name: 'البطاقات البيضاء', value: '#FFFFFF', className: 'white', style: { background: '#FFFFFF' } }
+const featureCards = [
+  { icon: '🛡️', title: 'أمان مدروس', text: 'رقابة مستمرة ومساحات لعب آمنة لكل الأعمار.' },
+  { icon: '🧼', title: 'نظافة يومية', text: 'تعقيم مستمر للألعاب والمناطق على مدار اليوم.' },
+  { icon: '🎉', title: 'حفلات مبهجة', text: 'تنظيم احترافي لحفلات عيد الميلاد مع تفاصيل مميزة.' },
+  { icon: '👩‍🏫', title: 'فريق متخصص', text: 'طاقم ودود ومدرب على التعامل مع الأطفال بلطف.' },
+  { icon: '📍', title: 'موقع مناسب', text: 'في الأردن بخدمات حجز سهلة وتجربة عائلية مريحة.' }
 ];
 
-const bookingSteps = ['📅 التاريخ', '🌤 الفترة', '⏱ المدة', '🎯 الأوقات'];
+const galleryTiles = ['فقاعات المرح', 'مدينة القفز', 'زاوية الرسم', 'مسار المغامرة', 'ركن الرضع', 'ركن الأنشطة'];
+
+const uiComponents = [
+  { title: 'Sky Layer', subtitle: 'غيم + شمس + كونفيتي' },
+  { title: 'Leaf Layer', subtitle: 'زوايا أوراق ناعمة' },
+  { title: 'Wave Divider', subtitle: 'فاصل مائي مرن' },
+  { title: 'Cloud Divider', subtitle: 'فاصل سحابي لطيف' },
+  { title: 'Icon Badge', subtitle: 'شارة دائرية للأيقونات' },
+  { title: 'Premium Card', subtitle: 'بطاقات بزوايا دائرية' }
+];
+
+const colorPalette = [
+  '#FFD93B',
+  '#FF595E',
+  '#FF924C',
+  '#8AC926',
+  '#00BBF9'
+];
 
 export default function PeekabooHappyThemePage() {
   return (
     <section className="peekaboo-theme-page" dir="rtl">
-      <div className="ph-shell">
-        <header className="ph-card">
-          <p className="ph-chip">Peekaboo Happy Theme</p>
-          <h1 className="ph-title">ثيم PEEKABOO السعيد</h1>
-          <p className="ph-subtitle">مظهر مرح واحترافي مستوحى من البالونات والغيوم والاحتفالات مع تجربة عربية RTL واضحة.</p>
+      <div className="pk-shell">
+        <header className="pk-intro-card">
+          <p className="pk-label">Peekaboo UI Direction</p>
+          <h1>تصميم واجهة منزلية مرحة وPremium لملاهي Peekaboo</h1>
+          <p>
+            تصميم عربي بالكامل (RTL) يحافظ على البساطة الاحترافية مع طاقة طفولية مليئة بالألوان والود.
+            المخرجات تتضمن إطار Desktop بعرض 1440px وإطار Mobile بعرض 390px مع مكتبة مكونات جاهزة.
+          </p>
         </header>
 
-        <article className="ph-card">
-          <h2 className="ph-section-title">1) Design Tokens + Components</h2>
-          <div className="ph-grid ph-grid-2">
-            <div className="ph-grid">
-              <h3>لوحة الألوان</h3>
-              <div className="ph-grid ph-grid-2">
-                {colors.map((color) => (
-                  <div key={color.value} className={`ph-color-swatch ${color.className}`} style={color.style}>
-                    <span>{color.name}</span>
-                    <small>{color.value}</small>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="ph-grid">
-              <h3>الخطوط والإيقاع</h3>
-              <p>الخط: Cairo / Tajawal / Noto Kufi Arabic</p>
-              <div className="ph-row">
-                <span className="ph-chip">Regular 400</span>
-                <span className="ph-chip" style={{ fontWeight: 700 }}>Bold 700</span>
-              </div>
-              <div className="ph-row">
-                <span className="ph-chip">Radius 16</span>
-                <span className="ph-chip">Radius 20</span>
-                <span className="ph-chip">Radius 24</span>
-              </div>
-              <div className="ph-row">
-                <span className="ph-chip">8px Grid Spacing</span>
-                <span className="ph-chip">Soft Shadows</span>
-                <span className="ph-chip">Button Height: 52px</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="ph-components" style={{ marginTop: 16 }}>
-            <h3>مكوّنات الواجهة</h3>
-            <div className="ph-row">
-              <button className="ph-btn ph-btn-primary">احجز جلسة</button>
-              <button className="ph-btn ph-btn-outline">سجل مجاناً</button>
-            </div>
-            <div className="ph-row">
-              {bookingSteps.map((step, index) => (
-                <span className="ph-pill" key={step}>{index + 1}. {step}</span>
+        <section className="pk-components-card">
+          <div className="pk-components-head">
+            <h2>مكتبة المكونات</h2>
+            <div className="pk-palette-row">
+              {colorPalette.map((color) => (
+                <span key={color} className="pk-color-dot" style={{ background: color }} aria-hidden="true" />
               ))}
             </div>
-            <div className="ph-row">
-              <div className="ph-selection">بطاقة اختيار - افتراضي</div>
-              <div className="ph-selection selected">بطاقة اختيار - محدد</div>
-              <div className="ph-selection disabled">بطاقة اختيار - غير متاح</div>
-            </div>
-            <div className="ph-row">
-              <span className="ph-pill">25 د.أ</span>
-              <span className="ph-pill active">35 د.أ (محدد)</span>
-            </div>
-            <div className="ph-sticky-demo">
-              <div>
-                <strong>ملخص الحجز</strong>
-                <p style={{ margin: 0, color: '#60758a' }}>اليوم • 4:00 م • طفلان</p>
-              </div>
-              <button className="ph-btn ph-btn-primary">متابعة</button>
-            </div>
           </div>
-        </article>
 
-        <article className="ph-card">
-          <h2 className="ph-section-title">2) Mockups (Mobile-first + Desktop)</h2>
-          <div className="ph-mockup-grid">
-            <section className="ph-frame">
-              <div className="ph-frame-header"><span>A) صفحة الحجز بالساعة</span><span>390px + Desktop</span></div>
-              <div className="ph-frame-body">
-                <div className="ph-row">{bookingSteps.map((step) => <span className="ph-pill" key={step}>{step}</span>)}</div>
-                <div className="ph-selection selected">فترة صباحية 10:00 - 14:00</div>
-                <div className="ph-row"><span className="ph-pill active">1 ساعة</span><span className="ph-pill">2 ساعة</span></div>
-                <div className="ph-feature-box">الأوقات المتاحة: 10:30 - 11:30 - 12:00</div>
-                <div className="ph-sticky-demo"><span>الإجمالي: 14 د.أ</span><button className="ph-btn ph-btn-primary">التالي</button></div>
-              </div>
-            </section>
+          <div className="pk-component-grid">
+            {uiComponents.map((item) => (
+              <article key={item.title} className="pk-component-item">
+                <span className="pk-badge-icon">✨</span>
+                <strong>{item.title}</strong>
+                <p>{item.subtitle}</p>
+              </article>
+            ))}
+          </div>
 
-            <section className="ph-frame">
-              <div className="ph-frame-header"><span>B) الصفحة الرئيسية</span><span>Hero + Sections</span></div>
-              <div className="ph-frame-body">
-                <div className="ph-hero">
-                  <strong>مرح وفرح بانتظار أطفالكم 🎉</strong>
-                  <p style={{ margin: '8px 0', color: '#60758a' }}>تجربة لعب آمنة، حفلات ممتعة، واشتراكات موفرة.</p>
-                  <div className="ph-row"><button className="ph-btn ph-btn-primary">احجز جلسة</button><button className="ph-btn ph-btn-outline">سجل مجاناً</button></div>
+          <div className="pk-button-row">
+            <button className="pk-btn pk-btn-primary" type="button">🐣 احجز جلسة</button>
+            <button className="pk-btn pk-btn-secondary" type="button">🎈 سجل مجاناً</button>
+          </div>
+        </section>
+
+        <section className="pk-frames-grid">
+          <article className="pk-frame desktop">
+            <div className="pk-frame-title">
+              <strong>Desktop Frame</strong>
+              <span>1440px</span>
+            </div>
+
+            <div className="pk-home-preview">
+              <section className="pk-section pk-sky-section">
+                <span className="pk-sun" aria-hidden="true">😊</span>
+                <div className="pk-hero-grid">
+                  <div className="pk-hero-card">
+                    <span className="pk-logo-pill">Peekaboo Jordan</span>
+                    <h3>نحن نصنع السعادة</h3>
+                    <p className="pk-headline">مساحة لعب داخلية آمنة ومبهجة لأطفالكم في الأردن</p>
+                    <p className="pk-sub">أنشطة ممتعة، حفلات مميزة، وتجربة عائلية مريحة بطابع عربي حديث.</p>
+                    <div className="pk-button-row">
+                      <button className="pk-btn pk-btn-primary" type="button">🐥 احجز جلسة</button>
+                      <button className="pk-btn pk-btn-secondary" type="button">🎀 سجل مجاناً</button>
+                    </div>
+                  </div>
+                  <div className="pk-photo-panel">
+                    <span>صورة البطل الرئيسية</span>
+                  </div>
                 </div>
-                <div className="ph-feature-box"><strong>ماذا يميزنا</strong><p style={{ margin: '6px 0 0' }}>نظافة عالية • طاقم مختص • ألعاب متنوعة • حجز سريع</p></div>
-                <div className="ph-row"><div className="ph-package">التذاكر</div><div className="ph-package">أعياد الميلاد</div><div className="ph-package">الاشتراكات</div></div>
-              </div>
-            </section>
+                <div className="pk-cloud-divider" aria-hidden="true" />
+              </section>
 
-            <section className="ph-frame">
-              <div className="ph-frame-header"><span>C) صفحة أعياد الميلاد</span><span>Cake + Balloons</span></div>
-              <div className="ph-frame-body">
-                <div className="ph-hero"><strong>🎂 حفلة عيد ميلاد لا تُنسى</strong><p style={{ margin: '8px 0', color: '#60758a' }}>كيك + زينة + فعاليات + طاقم تنظيم.</p></div>
-                <div className="ph-grid">
-                  {[1, 2, 3, 4].map((item) => (
-                    <div className="ph-package" key={item}>
-                      <strong>باقة {item}</strong>
-                      <div className="ph-row" style={{ justifyContent: 'space-between' }}>
-                        <span>🎁 مزايا الباقة</span>
-                        <span className="ph-badge">{item * 55} د.أ</span>
-                      </div>
+              <section className="pk-section pk-jungle-section">
+                <div className="pk-single-box">
+                  <h3>ماذا يميزنا؟</h3>
+                  <div className="pk-features-grid">
+                    {featureCards.map((feature) => (
+                      <article className="pk-feature-card" key={feature.title}>
+                        <span>{feature.icon}</span>
+                        <strong>{feature.title}</strong>
+                        <p>{feature.text}</p>
+                      </article>
+                    ))}
+                  </div>
+                </div>
+                <div className="pk-leaf-divider" aria-hidden="true" />
+              </section>
+
+              <section className="pk-section pk-water-section">
+                <h3>معرض Peekaboo</h3>
+                <div className="pk-gallery-grid">
+                  {galleryTiles.map((tile, index) => (
+                    <div className="pk-gallery-tile" key={tile}>
+                      <span>{index + 1}</span>
+                      <p>{tile}</p>
                     </div>
                   ))}
                 </div>
-                <button className="ph-btn ph-btn-primary">احجز عيد ميلاد</button>
-              </div>
-            </section>
+                <div className="pk-wave-divider" aria-hidden="true" />
+              </section>
 
-            <section className="ph-frame">
-              <div className="ph-frame-header"><span>D) صفحة الاشتراكات</span><span>Saving Plans</span></div>
-              <div className="ph-frame-body">
-                <div className="ph-grid">
-                  {['شهري', '3 أشهر', '6 أشهر'].map((plan, index) => (
-                    <div className="ph-package" key={plan}>
-                      <div className="ph-row" style={{ justifyContent: 'space-between' }}>
-                        <strong>{plan}</strong>
-                        {index === 1 && <span className="ph-badge">الأكثر توفيراً</span>}
-                      </div>
-                      <p style={{ margin: '8px 0', color: '#60758a' }}>مقارنة مبسطة كمجموعة بطاقات بدلاً من جدول معقد.</p>
-                      <span className="ph-pill active">من {45 + (index * 30)} د.أ</span>
-                    </div>
-                  ))}
+              <section className="pk-section pk-party-section">
+                <div className="pk-party-card">
+                  <h3>جاهزون لاحتفال لا يُنسى؟</h3>
+                  <p>احجزوا حفلة Peekaboo الآن ودعوا أطفالكم يعيشون أجمل اللحظات.</p>
+                  <button className="pk-btn pk-btn-primary" type="button">🎂 ابدأ الحجز الآن</button>
                 </div>
-                <button className="ph-btn ph-btn-primary">اشترك الآن</button>
-              </div>
-            </section>
-          </div>
-        </article>
+              </section>
+            </div>
+          </article>
+
+          <article className="pk-frame mobile">
+            <div className="pk-frame-title">
+              <strong>Mobile Frame</strong>
+              <span>390px</span>
+            </div>
+            <div className="pk-mobile-preview">
+              <div className="pk-mobile-block sky">Hero Sky</div>
+              <div className="pk-mobile-block jungle">Jungle Features</div>
+              <div className="pk-mobile-block water">Water Gallery</div>
+              <div className="pk-mobile-block party">Party CTA</div>
+            </div>
+          </article>
+        </section>
       </div>
     </section>
   );
