@@ -37,6 +37,15 @@ export default function ProfilePage() {
   const [editPhone, setEditPhone] = useState('');
   const [savingPhone, setSavingPhone] = useState(false);
 
+  const formatDateSafe = useCallback((value, formatPattern, fallback = '--/--/----') => {
+    if (!value) return fallback;
+
+    const dateValue = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(dateValue.getTime())) return fallback;
+
+    return format(dateValue, formatPattern);
+  }, []);
+
   // Defense in depth: Redirect admin users
   useEffect(() => {
     if (isAdmin) {
@@ -344,7 +353,7 @@ export default function ProfilePage() {
                             <div>
                               <p className="font-semibold">{child.name}</p>
                               <p className="text-sm text-muted-foreground">
-                                تاريخ الميلاد: {format(new Date(child.birthday), 'yyyy/MM/dd')}
+                                تاريخ الميلاد: {formatDateSafe(child.birthday, 'yyyy/MM/dd', 'غير محدد')}
                               </p>
                             </div>
                           </div>
@@ -535,7 +544,7 @@ export default function ProfilePage() {
                                 {sub.status === 'pending' 
                                   ? 'ينتهي بعد 30 يوم من أول تسجيل دخول'
                                   : sub.expires_at 
-                                    ? `ينتهي: ${format(new Date(sub.expires_at), 'yyyy/MM/dd')}`
+                                    ? `ينتهي: ${formatDateSafe(sub.expires_at, 'yyyy/MM/dd', 'غير محدد')}`
                                     : 'لم يتم تحديد تاريخ انتهاء'
                                 }
                               </p>
@@ -610,7 +619,7 @@ export default function ProfilePage() {
                             <p className="font-medium">{entry.reason || entry.description || 'عملية نقاط'}</p>
                             <p className="text-sm text-muted-foreground">
                               {entry.createdAt || entry.created_at
-                                ? format(new Date(entry.createdAt || entry.created_at), 'dd/MM/yyyy')
+                                ? formatDateSafe(entry.createdAt || entry.created_at, 'dd/MM/yyyy')
                                 : '--/--/----'}
                             </p>
                           </div>
