@@ -9,13 +9,15 @@ const { authMiddleware } = require('../middleware/auth');
 const loyaltyRouter = require('./loyalty');
 const { awardPoints } = loyaltyRouter;
 const { validateCoupon } = require('../utils/coupons');
+const { createPayment: createCapitalBankRestPayment } = require('../utils/cybersourceRest');
 
 const router = express.Router();
 
 const PAYMENT_PROVIDERS = {
   MANUAL: 'manual',
   STRIPE: 'stripe',
-  CAPITAL_BANK: 'capital_bank'
+  CAPITAL_BANK: 'capital_bank',
+  CAPITAL_BANK_REST: 'capital_bank_rest'
 };
 
 const CYBERSOURCE_ENDPOINTS = {
@@ -82,23 +84,38 @@ const capitalBankConfig = {
   paymentEndpoint: process.env.CAPITAL_BANK_PAYMENT_ENDPOINT || CYBERSOURCE_ENDPOINTS.payment
 };
 
-const capitalBankReady = Boolean(
+const capitalBankHostedReady = Boolean(
   paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK
   && capitalBankConfig.accessKey
   && capitalBankConfig.profileId
   && capitalBankConfig.secretKey
 );
 
+const capitalBankRestReady = Boolean(
+  paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK_REST
+  && capitalBankConfig.merchantId
+  && capitalBankConfig.accessKey
+  && capitalBankConfig.secretKey
+);
+
 if (paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK) {
-  if (capitalBankReady) {
+  if (capitalBankHostedReady) {
     console.log('[Payments] Capital Bank provider enabled (hosted checkout)');
   } else {
-    console.warn('[Payments] Capital Bank selected but required env vars are missing. Falling back to manual mode.');
+    console.warn('[Payments] Capital Bank selected but required hosted checkout env vars are missing. Falling back to manual mode.');
+  }
+}
+
+if (paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK_REST) {
+  if (capitalBankRestReady) {
+    console.log('[Payments] Capital Bank REST provider enabled');
+  } else {
+    console.warn('[Payments] Capital Bank REST selected but required REST env vars are missing.');
   }
 }
 
 const getEffectiveProvider = () => {
-  if (paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK && capitalBankReady) return PAYMENT_PROVIDERS.CAPITAL_BANK;
+  if (paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK && capitalBankHostedReady) return PAYMENT_PROVIDERS.CAPITAL_BANK;
   if (paymentProvider === PAYMENT_PROVIDERS.STRIPE && stripe) return PAYMENT_PROVIDERS.STRIPE;
   return PAYMENT_PROVIDERS.MANUAL;
 };
@@ -634,6 +651,50 @@ router.get('/capital-bank/secure-acceptance/form/:sessionId', async (req, res) =
   } catch (error) {
     console.error('Capital Bank checkout form error:', error);
     return res.status(500).send('Failed to build checkout form');
+  }
+});
+
+router.post('/capital-bank/rest/test-payment', async (req, res) => {
+  try {
+    if (paymentProvider !== PAYMENT_PROVIDERS.CAPITAL_BANK_REST || !capitalBankRestReady) {
+      return res.status(400).json({
+        error: 'Capital Bank REST provider is not enabled',
+        expected_provider: PAYMENT_PROVIDERS.CAPITAL_BANK_REST
+      });
+    }
+
+    const {
+      amount = 1,
+      currency = 'JOD',
+      reference_number: referenceNumber,
+      card,
+      bill_to: billTo,
+      order_information: orderInformation
+    } = req.body || {};
+
+    const paymentReference = referenceNumber || `rest-test-${Date.now()}`;
+
+    const response = await createCapitalBankRestPayment({
+      amount,
+      currency,
+      referenceNumber: paymentReference,
+      card,
+      billTo,
+      orderInformation
+    });
+
+    return res.status(200).json({
+      ok: true,
+      provider: PAYMENT_PROVIDERS.CAPITAL_BANK_REST,
+      reference_number: paymentReference,
+      cybersource: response
+    });
+  } catch (error) {
+    console.error('Capital Bank REST test payment error:', error);
+    return res.status(500).json({
+      error: 'Failed to run Capital Bank REST test payment',
+      details: error?.message || 'Unknown error'
+    });
   }
 });
 
