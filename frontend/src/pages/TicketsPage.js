@@ -566,7 +566,7 @@ export default function TicketsPage() {
                     className={`option-btn duration-pill ${selectedDuration === option.hours ? (timeMode === 'morning' ? 'selected-yellow' : 'selected') : ''}`}
                   >
                     {option.best_value && (
-                      <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white text-xs">
+                      <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-400 to-orange-600 text-white text-xs">
                         <Star className="h-3 w-3 ml-1" />
                         أفضل قيمة
                       </Badge>
