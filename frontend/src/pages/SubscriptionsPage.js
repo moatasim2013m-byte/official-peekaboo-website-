@@ -212,13 +212,13 @@ export default function SubscriptionsPage() {
                   <Card
                     key={plan.id}
                     onClick={() => setSelectedPlan(plan)}
-                    className={`pk-card theme-package-card cursor-pointer transition-all relative ${
-                      selectedPlan?.id === plan.id ? 'ring-2 ring-[var(--pk-yellow)] shadow-lg' : 'hover:shadow-lg'
+                    className={`pk-card theme-package-card subscription-plan-card cursor-pointer transition-all relative ${
+                      selectedPlan?.id === plan.id ? 'is-selected ring-2 ring-[var(--pk-yellow)] shadow-lg' : 'hover:shadow-lg'
                     } ${isPopular ? 'md:-mt-4 md:mb-4' : ''}`}
                     data-testid={`plan-${plan.id}`}
                   >
                     <div className={`pk-card-accent ${isPopular ? 'accent-rainbow' : tier === 'basic' ? 'accent-green' : 'accent-orange'}`} />
-                    {isPopular && <Badge className="absolute top-3 left-3 theme-saving-badge">الأكثر توفيراً</Badge>}
+                    {isPopular && <Badge className="absolute top-3 left-3 theme-saving-badge theme-saving-badge--subscriptions">الأكثر توفيراً</Badge>}
                     <CardHeader className={`text-center pb-3 ${isPopular ? 'pt-10' : 'pt-6'}`}>
                       <div className="mb-3 flex justify-center">
                         <span className={`inline-flex h-12 w-12 items-center justify-center rounded-full border-2 border-white shadow-sm ${tierIcon.bg}`}>
@@ -248,7 +248,8 @@ export default function SubscriptionsPage() {
                       </div>
 
                       {/* Validity Days Notice */}
-                      <div className="bg-[var(--pk-blue)]/10 border border-[var(--pk-blue)]/40 rounded-lg p-2 mb-4 text-center">
+                      <div className="subscription-validity-pill">
+                        <img src={starIcon} className="h-3.5 w-3.5" alt="" />
                         <p className="text-xs font-bold text-[var(--pk-blue)]">صالحة من الأحد إلى الخميس</p>
                       </div>
 
@@ -279,7 +280,7 @@ export default function SubscriptionsPage() {
 
             {/* Purchase Section */}
             {isAuthenticated ? (
-              <Card className="booking-card max-w-xl mx-auto">
+              <Card className="booking-card max-w-xl mx-auto subscription-purchase-card">
                 <CardHeader className="booking-card-header">
                   <CardTitle className="booking-card-title">أكمل عملية الشراء</CardTitle>
                 </CardHeader>
@@ -311,9 +312,9 @@ export default function SubscriptionsPage() {
                     <PaymentMethodSelector value={paymentMethod} onChange={setPaymentMethod} />
                   </div>
 
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t">
+                  <div className="subscription-purchase-row flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t">
                     {selectedPlan && (
-                      <div className="text-center sm:text-right">
+                      <div className="subscription-selected-summary text-center sm:text-right">
                         <p className="text-xs text-muted-foreground">الباقة المختارة</p>
                         <p className="font-bold">{stripWeekdayRangeFromPlanName(selectedPlan.name_ar || selectedPlan.name)}</p>
                         <p className="font-bold text-xl text-secondary">{selectedPlan.price} د</p>
