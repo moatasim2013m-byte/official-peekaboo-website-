@@ -721,7 +721,7 @@ const processCapitalBankResponse = async (req, res, source) => {
   try {
     verifySignature(payload, { validateSignedDateTime: true });
   } catch (error) {
-    console.error('[SECURITY] Invalid Capital Bank signature', { source, message: error.message });
+    console.error('[ALERT][SECURITY] Invalid Capital Bank signature', { source, message: error.message });
     return res.status(400).json({ error: 'Invalid signature' });
   }
 
@@ -731,10 +731,22 @@ const processCapitalBankResponse = async (req, res, source) => {
     return res.status(400).json({ error: 'reference_number is required' });
   }
 
-  const transactionId = signedFields.transaction_id || `${sessionId}:${signedFields.decision || 'unknown'}`;
-  const isSuccess = signedFields.reason_code === '100' || String(signedFields.decision || '').toUpperCase() === 'ACCEPT';
-  const status = isSuccess ? 'paid' : 'failed';
-  const paymentStatus = isSuccess ? 'paid' : (signedFields.decision || 'failed').toLowerCase();
+  const decision = String(signedFields.decision || '').toUpperCase();
+  const reason = String(signedFields.message || signedFields.reason_code || 'unknown');
+  const transactionId = signedFields.transaction_id || `${sessionId}:${decision || 'unknown'}`;
+
+  let status = 'failed';
+  let paymentStatus = (decision || 'failed').toLowerCase();
+  if (decision === 'ACCEPT') {
+    status = 'paid';
+    paymentStatus = 'paid';
+  } else if (decision === 'REVIEW') {
+    status = 'pending';
+    paymentStatus = 'review';
+  } else if (decision === 'DECLINE') {
+    status = 'failed';
+    paymentStatus = 'decline';
+  }
 
   const updateResult = await PaymentTransaction.findOneAndUpdate(
     {
@@ -750,6 +762,7 @@ const processCapitalBankResponse = async (req, res, source) => {
         payment_status: paymentStatus,
         payment_id: signedFields.transaction_id || null,
         updated_at: new Date(),
+        error_message: decision === 'DECLINE' ? reason : null,
         'metadata.cybersource_last_source': source,
         'metadata.cybersource_last_response': signedFields
       },
@@ -765,13 +778,37 @@ const processCapitalBankResponse = async (req, res, source) => {
   if (!updateResult) {
     const existing = await PaymentTransaction.findOne({ session_id: sessionId });
     if (!existing) return res.status(404).json({ error: 'Transaction not found' });
-    return res.status(200).json({ received: true, duplicate: true, status: existing.status });
+    if (source !== 'return') {
+      return res.status(200).json({ received: true, duplicate: true, status: existing.status });
+    }
+    const duplicateDecision = String(existing?.metadata?.cybersource_last_response?.decision || decision).toUpperCase();
+    if (duplicateDecision === 'ACCEPT') {
+      return res.redirect(303, `/payment/success?orderId=${encodeURIComponent(sessionId)}`);
+    }
+    if (duplicateDecision === 'REVIEW') {
+      return res.redirect(303, `/payment/pending?orderId=${encodeURIComponent(sessionId)}`);
+    }
+    return res.redirect(303, `/payment/failed?reason=${encodeURIComponent(reason)}`);
+  }
+
+  if (source === 'return') {
+    if (decision === 'ACCEPT') {
+      return res.redirect(303, `/payment/success?orderId=${encodeURIComponent(sessionId)}`);
+    }
+    if (decision === 'DECLINE') {
+      return res.redirect(303, `/payment/failed?reason=${encodeURIComponent(reason)}`);
+    }
+    if (decision === 'REVIEW') {
+      return res.redirect(303, `/payment/pending?orderId=${encodeURIComponent(sessionId)}`);
+    }
+
+    return res.redirect(303, `/payment/failed?reason=${encodeURIComponent(reason)}`);
   }
 
   return res.status(200).json({
     received: true,
     sessionId,
-    decision: signedFields.decision,
+    decision,
     reason_code: signedFields.reason_code,
     status: updateResult.status
   });
