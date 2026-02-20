@@ -1,130 +1,81 @@
 const crypto = require('crypto');
 
-const REQUIRED_SIGNED_FIELDS = [
-  'access_key',
-  'amount',
-  'currency',
-  'locale',
-  'profile_id',
-  'reference_number',
-  'signed_date_time',
-  'signed_field_names',
-  'transaction_type',
-  'transaction_uuid'
-];
-
-const SIGNATURE_EXCLUDED_FIELDS = new Set(['card_number', 'card_cvn', 'signature']);
-
-const getSecretKey = () => {
-  const secret = process.env.CAPITAL_BANK_SECRET_KEY || process.env.CYBERSOURCE_SECRET_KEY;
-  if (!secret) {
-    throw new Error('CAPITAL_BANK_SECRET_KEY is required for CyberSource signing');
-  }
-  return secret;
+const getRequiredSecret = (secretKey) => {
+  const key = secretKey || process.env.CAPITAL_BANK_SECRET_KEY;
+  if (!key) throw new Error('CAPITAL_BANK_SECRET_KEY is required');
+  return key;
 };
 
-const getSignedFieldNames = (fields = {}) => {
-  const provided = String(fields.signed_field_names || '')
-    .split(',')
-    .map((field) => field.trim())
-    .filter(Boolean);
-
-  if (provided.length) return provided;
-
-  return Object.keys(fields)
-    .filter((key) => !SIGNATURE_EXCLUDED_FIELDS.has(key))
-    .sort();
+const buildDigestHeader = (payload) => {
+  const body = typeof payload === 'string' ? payload : JSON.stringify(payload || {});
+  const digest = crypto.createHash('sha256').update(body, 'utf8').digest('base64');
+  return `SHA-256=${digest}`;
 };
 
-const buildDataToSign = (fields = {}, signedFieldNames = []) => {
-  return signedFieldNames
-    .map((fieldName) => `${fieldName}=${fields[fieldName] ?? ''}`)
-    .join(',');
+const buildSignatureHeader = ({ method, url, body, merchantId, accessKey, secretKey, date }) => {
+  const parsedUrl = new URL(url);
+  const requestTarget = `${String(method || 'POST').toLowerCase()} ${parsedUrl.pathname}${parsedUrl.search || ''}`;
+  const host = parsedUrl.host;
+  const digest = buildDigestHeader(body);
+  const messageDate = date || new Date().toUTCString();
+  const signedHeaders = 'host date (request-target) digest v-c-merchant-id';
+
+  const signaturePayload = [
+    `host: ${host}`,
+    `date: ${messageDate}`,
+    `(request-target): ${requestTarget}`,
+    `digest: ${digest}`,
+    `v-c-merchant-id: ${merchantId}`
+  ].join('\n');
+
+  const signature = crypto
+    .createHmac('sha256', getRequiredSecret(secretKey))
+    .update(signaturePayload, 'utf8')
+    .digest('base64');
+
+  return {
+    date: messageDate,
+    host,
+    digest,
+    signature: `keyid="${accessKey}", algorithm="HmacSHA256", headers="${signedHeaders}", signature="${signature}"`
+  };
 };
 
-const signData = (dataToSign, secretKey = getSecretKey()) => {
-  return crypto.createHmac('sha256', secretKey).update(dataToSign, 'utf8').digest('base64');
+const buildCyberSourceAuthHeaders = ({ method = 'POST', url, body = {}, merchantId, accessKey, secretKey }) => {
+  if (!url) throw new Error('CyberSource URL is required');
+  if (!merchantId) throw new Error('CAPITAL_BANK_MERCHANT_ID is required');
+  if (!accessKey) throw new Error('CAPITAL_BANK_ACCESS_KEY is required');
+
+  const signed = buildSignatureHeader({ method, url, body, merchantId, accessKey, secretKey });
+
+  return {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'v-c-merchant-id': merchantId,
+    Date: signed.date,
+    Host: signed.host,
+    Digest: signed.digest,
+    Signature: signed.signature
+  };
 };
 
-const buildSignedFields = (fields = {}) => {
-  const signedFieldNames = getSignedFieldNames(fields);
-  if (!signedFieldNames.length) {
-    throw new Error('signed_field_names cannot be empty');
-  }
-
-  const signedFields = { ...fields, signed_field_names: signedFieldNames.join(',') };
-  const dataToSign = buildDataToSign(signedFields, signedFieldNames);
-  signedFields.signature = signData(dataToSign);
-
-  return signedFields;
+const buildCapitalBankCallbackSignature = (payload = {}, secretKey) => {
+  const canonical = JSON.stringify(payload || {});
+  return crypto.createHmac('sha256', getRequiredSecret(secretKey)).update(canonical, 'utf8').digest('base64');
 };
 
-const assertRequiredRequestFields = (fields = {}) => {
-  const signedFieldNames = getSignedFieldNames(fields);
-  const missing = REQUIRED_SIGNED_FIELDS.filter((field) => !signedFieldNames.includes(field));
-  if (missing.length) {
-    throw new Error(`Missing required signed fields: ${missing.join(', ')}`);
-  }
-};
-
-const validateSignedDateTimeWindow = (signedDateTime, windowMinutes = 15) => {
-  const signedDate = new Date(signedDateTime);
-  if (Number.isNaN(signedDate.getTime())) {
-    throw new Error('Invalid signed_date_time format');
-  }
-
-  const now = Date.now();
-  const delta = Math.abs(now - signedDate.getTime());
-  if (delta > windowMinutes * 60 * 1000) {
-    throw new Error('signed_date_time outside the accepted window');
-  }
-};
-
-const extractTrustedSignedFields = (responseBody = {}) => {
-  const signedFieldNames = getSignedFieldNames(responseBody);
-  return signedFieldNames.reduce((acc, fieldName) => {
-    acc[fieldName] = responseBody[fieldName] ?? '';
-    return acc;
-  }, {});
-};
-
-const verifySignature = (responseBody = {}, options = {}) => {
-  const { validateSignedDateTime = true } = options;
-  const signature = responseBody.signature;
-  if (!signature) {
-    throw new Error('Missing signature');
-  }
-
-  const signedFieldNames = getSignedFieldNames(responseBody);
-  if (!signedFieldNames.length) {
-    throw new Error('Missing signed_field_names');
-  }
-
-  const trustedFields = extractTrustedSignedFields(responseBody);
-  const dataToSign = buildDataToSign({ ...responseBody, ...trustedFields }, signedFieldNames);
-  const expected = signData(dataToSign);
-
-  const providedBuffer = Buffer.from(signature, 'utf8');
-  const expectedBuffer = Buffer.from(expected, 'utf8');
-
-  if (providedBuffer.length !== expectedBuffer.length || !crypto.timingSafeEqual(providedBuffer, expectedBuffer)) {
-    throw new Error('Invalid CyberSource signature');
-  }
-
-  if (validateSignedDateTime) {
-    validateSignedDateTimeWindow(trustedFields.signed_date_time);
-  }
-
-  return { signedFieldNames, trustedFields };
+const verifyCapitalBankCallbackSignature = (payload = {}, signature, secretKey) => {
+  if (!signature) return false;
+  const expected = buildCapitalBankCallbackSignature(payload, secretKey);
+  const sigBuf = Buffer.from(String(signature), 'utf8');
+  const expBuf = Buffer.from(String(expected), 'utf8');
+  return sigBuf.length === expBuf.length && crypto.timingSafeEqual(sigBuf, expBuf);
 };
 
 module.exports = {
-  REQUIRED_SIGNED_FIELDS,
-  SIGNATURE_EXCLUDED_FIELDS,
-  buildDataToSign,
-  buildSignedFields,
-  assertRequiredRequestFields,
-  extractTrustedSignedFields,
-  validateSignedDateTimeWindow,
-  verifySignature
+  buildDigestHeader,
+  buildSignatureHeader,
+  buildCyberSourceAuthHeaders,
+  buildCapitalBankCallbackSignature,
+  verifyCapitalBankCallbackSignature
 };

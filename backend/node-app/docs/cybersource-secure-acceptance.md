@@ -1,46 +1,34 @@
-# CyberSource Secure Acceptance (Capital Bank) - Node.js Integration
-
-## Stack in this repository
-- Backend: **Node.js + Express** (`backend/node-app`)
-- Frontend: React (CRACO) (`frontend/`)
+# CyberSource REST (Capital Bank) - Node.js Integration
 
 ## Environment variables
-Set these on Cloud Run backend service and redeploy after updating env vars:
+Set on Cloud Run backend and redeploy after any change:
 
-- `PAYMENT_PROVIDER=capital_bank` for hosted Secure Acceptance checkout.
-- `PAYMENT_PROVIDER=capital_bank_rest` for REST API test/scaffold mode.
+- `PAYMENT_PROVIDER=capital_bank_rest`
 - `CAPITAL_BANK_MERCHANT_ID=903897720102`
 - `CAPITAL_BANK_ACCESS_KEY=<bank access key>`
 - `CAPITAL_BANK_SECRET_KEY=<bank secret key>`
+- `CAPITAL_BANK_PAYMENT_ENDPOINT=https://apitest.cybersource.com`
 - `CYBERSOURCE_ENV=test`
-- Optional: `CYBERSOURCE_RUN_ENV=cybersource.environment.sandbox`
-- Hosted checkout also requires `CAPITAL_BANK_PROFILE_ID` (or `CYBERSOURCE_PROFILE_ID`).
-- Optional hosted tuning:
-  - `CAPITAL_BANK_TRANSACTION_TYPE` (default: `sale`)
-  - `CAPITAL_BANK_LOCALE` (default: `ar`)
-  - `CAPITAL_BANK_PAYMENT_ENDPOINT` (default test endpoint)
+- `CAPITAL_BANK_LOCALE=ar`
+- `CAPITAL_BANK_CURRENCY=JOD`
 
-## Implemented flow
-1. Client calls `POST /api/payments/create-checkout`.
-2. Server calculates trusted amount and signs CyberSource fields with HMAC-SHA256.
-3. Server stores signed payload in `PaymentTransaction.metadata.cybersource` and returns:
-   - `/api/payments/capital-bank/secure-acceptance/form/:sessionId`
-4. Browser loads that server-side page; the page auto-submits a hidden HTTPS `POST` form to CyberSource `/pay`.
-5. CyberSource posts browser callbacks to backend endpoints, then backend redirects with `303` to frontend SPA routes:
-   - Browser return: `POST /api/payments/capital-bank/secure-acceptance/response`
-   - Browser cancel: `POST /api/payments/capital-bank/secure-acceptance/cancel`
-   - Backup notification: `POST /api/payments/capital-bank/secure-acceptance/notify`
-6. Server validates response signature from `signed_field_names` only; invalid signatures are rejected.
+> REST integration does **not** use `profile`.
 
-## Signed request fields
-The server signs these fields:
-
-`access_key, profile_id, transaction_uuid, signed_date_time, signed_field_names, reference_number, transaction_type, amount, currency, locale`
+## Implemented API flow
+1. Client creates pending order transaction via existing checkout flow.
+2. Client calls `POST /api/payments/capital-bank/initiate` with `orderId` and card payload/token.
+3. Backend reads amount from `PaymentTransaction` only.
+4. Backend signs REST request headers (`v-c-merchant-id`, `Date`, `Host`, `Digest`, `Signature`) and calls:
+   - `POST https://apitest.cybersource.com/pts/v2/payments`
+5. Backend validates response, performs atomic idempotent update, and returns decision/result.
+6. Callback endpoints:
+   - `POST /api/payments/capital-bank/return`
+   - `POST /api/payments/capital-bank/notify`
 
 ## Security controls
-- Secret key is server-side only.
-- Signature validation uses a timing-safe compare.
-- Only fields listed in `signed_field_names` are trusted.
-- Checkout handoff page has clickjacking headers:
-  - `X-Frame-Options: DENY`
-  - `Content-Security-Policy: frame-ancestors 'none'`
+- Secret key never logged.
+- Amount sourced from DB transaction only.
+- HTTPS enforced on Capital Bank endpoints.
+- CSRF token required on initiation endpoint.
+- Idempotency guard via `metadata.processed_transaction_ids`.
+- Global clickjacking headers remain enabled (`X-Frame-Options`, CSP frame-ancestors).
