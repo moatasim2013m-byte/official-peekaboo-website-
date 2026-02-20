@@ -1,5 +1,16 @@
 const cybersourceRestClient = require('cybersource-rest-client');
 
+const getRunEnvironment = () => {
+  if (process.env.CYBERSOURCE_RUN_ENV) {
+    return process.env.CYBERSOURCE_RUN_ENV;
+  }
+
+  const env = (process.env.CYBERSOURCE_ENV || 'test').toLowerCase();
+  return env === 'production'
+    ? 'cybersource.environment.production'
+    : 'cybersource.environment.sandbox';
+};
+
 const getConfigObject = () => {
   const merchantID = process.env.CAPITAL_BANK_MERCHANT_ID;
   const merchantKeyId = process.env.CAPITAL_BANK_ACCESS_KEY;
@@ -14,7 +25,7 @@ const getConfigObject = () => {
     merchantID,
     merchantKeyId,
     merchantsecretKey,
-    runEnvironment: process.env.CYBERSOURCE_RUN_ENV || 'cybersource.environment.sandbox'
+    runEnvironment: getRunEnvironment()
   };
 };
 
