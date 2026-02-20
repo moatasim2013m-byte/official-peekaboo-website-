@@ -1,156 +1,32 @@
-import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { CheckCircle } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Button } from '../components/ui/button';
-import { Loader2, CheckCircle, XCircle } from 'lucide-react';
 
 export default function PaymentSuccessPage() {
-  const [searchParams] = useSearchParams();
-  const sessionId = searchParams.get('session_id');
-  const { api, isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [status, setStatus] = useState('checking');
-  const [paymentData, setPaymentData] = useState(null);
-  const [attempts, setAttempts] = useState(0);
-
-  useEffect(() => {
-    if (!sessionId || !isAuthenticated) {
-      setStatus('error');
-      return;
-    }
-
-    const pollStatus = async () => {
-      try {
-        const response = await api.get(`/payments/status/${sessionId}`);
-        const data = response.data;
-        setPaymentData(data);
-
-        if (data.payment_status === 'paid') {
-          setStatus('success');
-          
-          // Create the actual booking based on type
-          const { type, child_ids, child_id, line_items, coupon_code } = data.metadata;
-          // Parse child_ids (stored as JSON string in metadata)
-          const parsedChildIds = child_ids ? JSON.parse(child_ids) : (child_id ? [child_id] : []);
-          const parsedLineItems = line_items ? JSON.parse(line_items) : [];
-          
-          if (type === 'hourly') {
-            await api.post('/bookings/hourly', {
-              slot_id: data.metadata.slot_id,
-              child_ids: parsedChildIds,
-              duration_hours: data.metadata.duration_hours,
-              custom_notes: data.metadata.custom_notes,
-              payment_id: data.payment_id,
-              amount: data.amount,
-              lineItems: parsedLineItems,
-              coupon_code
-            });
-          } else if (type === 'birthday') {
-            await api.post('/bookings/birthday', {
-              slot_id: data.metadata.slot_id,
-              child_id: parsedChildIds[0],
-              theme_id: data.metadata.theme_id,
-              payment_id: data.payment_id,
-              amount: data.amount,
-              lineItems: parsedLineItems
-            });
-          } else if (type === 'subscription') {
-            await api.post('/subscriptions/purchase', {
-              plan_id: data.metadata.plan_id,
-              child_id: parsedChildIds[0],
-              payment_id: data.payment_id
-            });
-          }
-        } else if (data.status === 'expired') {
-          setStatus('expired');
-        } else if (attempts < 5) {
-          setTimeout(() => setAttempts(a => a + 1), 2000);
-        } else {
-          setStatus('pending');
-        }
-      } catch (error) {
-        console.error('Payment status check error:', error);
-        if (attempts < 5) {
-          setTimeout(() => setAttempts(a => a + 1), 2000);
-        } else {
-          setStatus('error');
-        }
-      }
-    };
-
-    pollStatus();
-  }, [sessionId, isAuthenticated, api, attempts]);
+  const [searchParams] = useSearchParams();
+  const orderId = searchParams.get('orderId') || searchParams.get('order_id') || searchParams.get('id');
 
   return (
-    <div className="min-h-[80vh] flex items-center justify-center bg-hero-gradient py-12 px-4">
-      <Card className="w-full max-w-md border-2 rounded-3xl shadow-xl">
-        <CardContent className="py-12 text-center">
-          {status === 'checking' && (
-            <>
-              <Loader2 className="h-16 w-16 animate-spin text-primary mx-auto mb-6" />
-              <h2 className="font-heading text-2xl font-bold mb-2">Processing Payment...</h2>
-              <p className="text-muted-foreground">Please wait while we confirm your payment</p>
-            </>
-          )}
+    <div className="min-h-[80vh] flex items-center justify-center bg-hero-gradient py-12 px-4" dir="rtl">
+      <Card className="w-full max-w-xl border-2 rounded-3xl shadow-xl">
+        <CardContent className="py-12 text-center space-y-4">
+          <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto">
+            <CheckCircle className="h-12 w-12 text-green-600" />
+          </div>
 
-          {status === 'success' && (
-            <>
-              <div className="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="h-12 w-12 text-green-600" />
-              </div>
-              <h2 className="font-heading text-2xl font-bold mb-2 text-green-600">Payment Successful!</h2>
-              <p className="text-muted-foreground mb-6">
-                Your booking has been confirmed. Check your email for details.
-              </p>
-              <Button onClick={() => navigate('/profile')} className="rounded-full btn-playful" data-testid="go-to-profile">
-                View My Bookings
-              </Button>
-            </>
-          )}
+          <h1 className="font-heading text-3xl font-bold text-green-700">تم قبول الدفع بنجاح</h1>
+          <p className="text-lg text-green-700">Your payment was accepted</p>
 
-          {status === 'expired' && (
-            <>
-              <div className="bg-yellow-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <XCircle className="h-12 w-12 text-yellow-600" />
-              </div>
-              <h2 className="font-heading text-2xl font-bold mb-2 text-yellow-600">Session Expired</h2>
-              <p className="text-muted-foreground mb-6">
-                Your payment session has expired. Please try booking again.
-              </p>
-              <Button onClick={() => navigate('/tickets')} className="rounded-full" data-testid="try-again">
-                Book Again
-              </Button>
-            </>
-          )}
+          <div className="bg-green-50 border border-green-200 rounded-xl py-3 px-4">
+            <p className="text-sm text-muted-foreground">رقم الطلب / Order ID</p>
+            <p className="font-semibold text-base">{orderId || '—'}</p>
+          </div>
 
-          {status === 'pending' && (
-            <>
-              <Loader2 className="h-16 w-16 text-yellow-500 mx-auto mb-6" />
-              <h2 className="font-heading text-2xl font-bold mb-2">Payment Pending</h2>
-              <p className="text-muted-foreground mb-6">
-                We're still processing your payment. Please check back in a moment.
-              </p>
-              <Button onClick={() => navigate('/profile')} variant="outline" className="rounded-full">
-                Go to Profile
-              </Button>
-            </>
-          )}
-
-          {status === 'error' && (
-            <>
-              <div className="bg-red-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <XCircle className="h-12 w-12 text-red-600" />
-              </div>
-              <h2 className="font-heading text-2xl font-bold mb-2 text-red-600">Something Went Wrong</h2>
-              <p className="text-muted-foreground mb-6">
-                We couldn't verify your payment. Please contact support if you were charged.
-              </p>
-              <Button onClick={() => navigate('/')} className="rounded-full">
-                Go Home
-              </Button>
-            </>
-          )}
+          <Button onClick={() => navigate('/profile')} className="rounded-full btn-playful">
+            الذهاب إلى الطلبات / Go to Orders
+          </Button>
         </CardContent>
       </Card>
     </div>
