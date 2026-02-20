@@ -1,5 +1,4 @@
 const express = require('express');
-const Stripe = require('stripe');
 const crypto = require('crypto');
 const PaymentTransaction = require('../models/PaymentTransaction');
 const Settings = require('../models/Settings');
@@ -9,24 +8,14 @@ const { authMiddleware } = require('../middleware/auth');
 const loyaltyRouter = require('./loyalty');
 const { awardPoints } = loyaltyRouter;
 const { validateCoupon } = require('../utils/coupons');
-const { createPayment: createCapitalBankRestPayment } = require('../utils/cybersourceRest');
 
 const router = express.Router();
 
 const PAYMENT_PROVIDERS = {
   MANUAL: 'manual',
-  STRIPE: 'stripe',
-  CAPITAL_BANK: 'capital_bank',
-  CAPITAL_BANK_REST: 'capital_bank_rest'
+  CAPITAL_BANK: 'capital_bank'
 };
 
-const CYBERSOURCE_ENDPOINTS = {
-  payment: 'https://testsecureacceptance.cybersource.com/pay',
-  tokenCreate: 'https://testsecureacceptance.cybersource.com/token/create',
-  tokenUpdate: 'https://testsecureacceptance.cybersource.com/token/update',
-  oneClick: 'https://testsecureacceptance.cybersource.com/oneclick/pay',
-  iframe: 'https://testsecureacceptance.cybersource.com/embedded/pay'
-};
 
 const paymentProvider = (process.env.PAYMENT_PROVIDER || PAYMENT_PROVIDERS.MANUAL).toLowerCase();
 
@@ -61,27 +50,15 @@ const maybeAwardProductLoyaltyPoints = async (transaction) => {
   }
 };
 
-// Initialize Stripe when explicitly selected.
-let stripe = null;
-if (paymentProvider === PAYMENT_PROVIDERS.STRIPE && process.env.STRIPE_SECRET_KEY) {
-  stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-  console.log('[Payments] Stripe provider enabled');
-} else if (paymentProvider === PAYMENT_PROVIDERS.STRIPE) {
-  console.warn('[Payments] Stripe selected but STRIPE_SECRET_KEY is missing. Falling back to manual mode.');
-}
-
 const capitalBankConfig = {
-  merchantId: process.env.CAPITAL_BANK_MERCHANT_ID,
-  terminalId: process.env.CAPITAL_BANK_TERMINAL_ID,
-  apiKey: process.env.CAPITAL_BANK_API_KEY,
-  hostedCheckoutUrl: process.env.CAPITAL_BANK_HOSTED_CHECKOUT_URL,
-  callbackSecret: process.env.CAPITAL_BANK_CALLBACK_SECRET,
   accessKey: process.env.CAPITAL_BANK_ACCESS_KEY || process.env.CYBERSOURCE_ACCESS_KEY,
   profileId: process.env.CAPITAL_BANK_PROFILE_ID || process.env.CYBERSOURCE_PROFILE_ID,
   secretKey: process.env.CAPITAL_BANK_SECRET_KEY || process.env.CYBERSOURCE_SECRET_KEY,
   transactionType: process.env.CAPITAL_BANK_TRANSACTION_TYPE || 'sale',
   locale: process.env.CAPITAL_BANK_LOCALE || 'ar',
-  paymentEndpoint: process.env.CAPITAL_BANK_PAYMENT_ENDPOINT || CYBERSOURCE_ENDPOINTS.payment
+  paymentEndpoint:
+    process.env.CAPITAL_BANK_PAYMENT_ENDPOINT
+    || 'https://testsecureacceptance.cybersource.com/pay'
 };
 
 const capitalBankHostedReady = Boolean(
@@ -91,31 +68,16 @@ const capitalBankHostedReady = Boolean(
   && capitalBankConfig.secretKey
 );
 
-const capitalBankRestReady = Boolean(
-  capitalBankConfig.merchantId
-  && capitalBankConfig.accessKey
-  && capitalBankConfig.secretKey
-);
-
 if (paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK) {
   if (capitalBankHostedReady) {
-    console.log('[Payments] Capital Bank provider enabled (hosted checkout)');
+    console.log('[Payments] Capital Bank Secure Acceptance TEST mode active');
   } else {
     console.warn('[Payments] Capital Bank selected but required hosted checkout env vars are missing. Falling back to manual mode.');
   }
 }
 
-if (paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK_REST) {
-  if (capitalBankRestReady) {
-    console.log('[Payments] Capital Bank REST provider enabled');
-  } else {
-    console.warn('[Payments] Capital Bank REST selected but required REST env vars are missing.');
-  }
-}
-
 const getEffectiveProvider = () => {
   if (paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK && capitalBankHostedReady) return PAYMENT_PROVIDERS.CAPITAL_BANK;
-  if (paymentProvider === PAYMENT_PROVIDERS.STRIPE && stripe) return PAYMENT_PROVIDERS.STRIPE;
   return PAYMENT_PROVIDERS.MANUAL;
 };
 
@@ -516,44 +478,14 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'Invalid price configuration' });
     }
 
-    // Build success/cancel URLs from frontend origin
-    const successUrl = `${frontendOrigin}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${frontendOrigin}/payment/cancel`;
-
     console.log('Creating checkout session:', { type, amount, metadata });
 
     let sessionId;
     let checkoutUrl;
-    let currency = 'jod';
-
-    if (effectiveProvider === PAYMENT_PROVIDERS.STRIPE) {
-      // Create Stripe checkout session
-      const session = await stripe.checkout.sessions.create({
-        payment_method_types: ['card'],
-        line_items: [{
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: `Peekaboo ${type.charAt(0).toUpperCase() + type.slice(1)} Booking`,
-            },
-            unit_amount: Math.round(amount * 100), // Stripe uses cents
-          },
-          quantity: 1,
-        }],
-        mode: 'payment',
-        success_url: successUrl,
-        cancel_url: cancelUrl,
-        metadata,
-      });
-
-      sessionId = session.id;
-      checkoutUrl = session.url;
-      currency = 'usd';
-    }
+    const currency = 'jod';
 
     if (effectiveProvider === PAYMENT_PROVIDERS.CAPITAL_BANK) {
       sessionId = `cb_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-      currency = 'jod';
 
       metadata.frontend_origin = frontendOrigin;
       metadata.cybersource = buildSignedCybersourceRequest({
@@ -602,39 +534,6 @@ router.get('/status/:sessionId', authMiddleware, async (req, res) => {
     const effectiveProvider = getEffectiveProvider();
 
     const { sessionId } = req.params;
-
-    if (effectiveProvider === PAYMENT_PROVIDERS.STRIPE) {
-      // Get session from Stripe
-      const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-      // Update our transaction record
-      const transaction = await PaymentTransaction.findOne({ session_id: sessionId });
-      if (transaction && transaction.status !== 'paid') {
-        transaction.payment_status = session.payment_status;
-
-        if (session.payment_status === 'paid') {
-          transaction.status = 'paid';
-          transaction.payment_id = session.payment_intent;
-        } else if (session.status === 'expired') {
-          transaction.status = 'expired';
-        }
-
-        transaction.updated_at = new Date();
-        await transaction.save();
-
-        if (transaction.status === 'paid' && transaction.type === 'product') {
-          await maybeAwardProductLoyaltyPoints(transaction);
-        }
-      }
-
-      return res.json({
-        status: session.status,
-        payment_status: session.payment_status,
-        payment_id: session.payment_intent,
-        metadata: session.metadata,
-        payment_provider: effectiveProvider
-      });
-    }
 
     const transaction = await PaymentTransaction.findOne({ session_id: sessionId, user_id: req.userId });
     if (!transaction) {
@@ -707,54 +606,6 @@ router.get('/capital-bank/secure-acceptance/form/:sessionId', async (req, res) =
   } catch (error) {
     console.error('Capital Bank checkout form error:', error);
     return res.status(500).send('Failed to build checkout form');
-  }
-});
-
-router.post('/capital-bank/rest/test-payment', async (req, res) => {
-  try {
-    if (!capitalBankRestReady) {
-      return res.status(400).json({
-        error: 'Capital Bank REST credentials are not configured',
-        required_env: [
-          'CAPITAL_BANK_MERCHANT_ID',
-          'CAPITAL_BANK_ACCESS_KEY',
-          'CAPITAL_BANK_SECRET_KEY'
-        ]
-      });
-    }
-
-    const {
-      amount = 1,
-      currency = 'JOD',
-      reference_number: referenceNumber,
-      card,
-      bill_to: billTo,
-      order_information: orderInformation
-    } = req.body || {};
-
-    const paymentReference = referenceNumber || `rest-test-${Date.now()}`;
-
-    const response = await createCapitalBankRestPayment({
-      amount,
-      currency,
-      referenceNumber: paymentReference,
-      card,
-      billTo,
-      orderInformation
-    });
-
-    return res.status(200).json({
-      ok: true,
-      provider: PAYMENT_PROVIDERS.CAPITAL_BANK_REST,
-      reference_number: paymentReference,
-      cybersource: response
-    });
-  } catch (error) {
-    console.error('Capital Bank REST test payment error:', error);
-    return res.status(500).json({
-      error: 'Failed to run Capital Bank REST test payment',
-      details: error?.message || 'Unknown error'
-    });
   }
 });
 
@@ -857,91 +708,7 @@ router.post('/capital-bank/secure-acceptance/notify', cybersourceUrlencodedParse
   }
 });
 
-// Backward-compatible callback route to support older Capital Bank integrations.
-router.post('/capital-bank/callback', async (req, res) => {
-  try {
-    const { order_id, transaction_id, status, payment_status, amount, signature } = req.body || {};
-
-    if (!order_id) {
-      return res.status(400).json({ error: 'order_id is required' });
-    }
-
-    if (capitalBankConfig.callbackSecret && signature) {
-      const expected = crypto
-        .createHmac('sha256', capitalBankConfig.callbackSecret)
-        .update(`${order_id}|${status || ''}|${amount || ''}`)
-        .digest('hex');
-
-      if (expected !== signature) {
-        return res.status(401).json({ error: 'Invalid callback signature' });
-      }
-    }
-
-    const transaction = await PaymentTransaction.findOne({ session_id: order_id });
-    if (!transaction) {
-      return res.status(404).json({ error: 'Transaction not found' });
-    }
-
-    const normalizedStatus = (payment_status || status || '').toLowerCase();
-    const isPaid = ['paid', 'success', 'successful', 'captured', 'approved'].includes(normalizedStatus);
-    const isFailed = ['failed', 'declined', 'cancelled', 'canceled'].includes(normalizedStatus);
-
-    if (isPaid) {
-      transaction.status = 'paid';
-      transaction.payment_status = 'paid';
-      transaction.payment_id = transaction_id || transaction.payment_id;
-    } else if (isFailed) {
-      transaction.status = 'failed';
-      transaction.payment_status = normalizedStatus || 'failed';
-    } else {
-      transaction.payment_status = normalizedStatus || transaction.payment_status || 'pending';
-    }
-
-    transaction.updated_at = new Date();
-    await transaction.save();
-
-    if (transaction.status === 'paid' && transaction.type === 'product') {
-      await maybeAwardProductLoyaltyPoints(transaction);
-    }
-
-    return res.json({ received: true, session_id: order_id, status: transaction.status });
-  } catch (error) {
-    console.error('Capital Bank callback error:', error);
-    res.status(500).json({ error: 'Failed to process callback' });
-  }
-});
-
-// Webhook for Stripe events
-router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-  try {
-    const event = req.body;
-
-    if (event.type === 'checkout.session.completed') {
-      const session = event.data.object;
-
-      // Update transaction
-      const transaction = await PaymentTransaction.findOne({ session_id: session.id });
-      if (transaction && transaction.status !== 'paid') {
-        transaction.status = 'paid';
-        transaction.payment_status = 'paid';
-        transaction.payment_id = session.payment_intent;
-        transaction.updated_at = new Date();
-        await transaction.save();
-
-        if (transaction.type === 'product') {
-          await maybeAwardProductLoyaltyPoints(transaction);
-        }
-      }
-    }
-
-    res.json({ received: true });
-  } catch (error) {
-    console.error('Webhook error:', error);
-    res.status(500).json({ error: 'Webhook processing failed' });
-  }
-});
-
-// Store transaction (called by Python gateway after Stripe checkout creation)
+// Store transaction
 router.post('/store-transaction', authMiddleware, async (req, res) => {
   try {
     const { session_id, user_id, amount, currency, type, reference_id, metadata } = req.body;
@@ -950,7 +717,7 @@ router.post('/store-transaction', authMiddleware, async (req, res) => {
       session_id,
       user_id: user_id || req.userId,
       amount,
-      currency: currency || 'usd',
+      currency: currency || 'jod',
       status: 'pending',
       type,
       reference_id,
