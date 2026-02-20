@@ -111,7 +111,7 @@ router.post('/purchase', authMiddleware, async (req, res) => {
   }
 });
 
-// Purchase subscription with cash/cliq payment (no Stripe)
+// Purchase subscription with cash/cliq payment (offline providers)
 router.post('/purchase/offline', authMiddleware, async (req, res) => {
   try {
     const { plan_id, child_id, payment_method } = req.body;
