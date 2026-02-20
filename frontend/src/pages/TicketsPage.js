@@ -10,7 +10,7 @@ import { Badge } from '../components/ui/badge';
 import { Input } from '../components/ui/input';
 import { toast } from 'sonner';
 import { format, addDays } from 'date-fns';
-import { Clock, Users, Loader2, AlertCircle, Star, Sun, Moon, Check, Cloud } from 'lucide-react';
+import { Clock, Users, Loader2, AlertCircle, Star, Sun, Moon, Check, Cloud, Sparkles } from 'lucide-react';
 import { PaymentMethodSelector } from '../components/PaymentMethodSelector';
 import mascotImg from '../assets/mascot.png';
 
@@ -443,9 +443,16 @@ export default function TicketsPage() {
           <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl font-bold text-foreground mb-3">
             احجز وقت اللعب
           </h1>
-          <div className="shroomi-promo shroomi-promo--booking">
-            <img src={mascotImg} alt="Shroomi with ticket" className="shroomi-promo__img shroomi-promo__img--ticket" />
-            <span className="shroomi-promo__text">احجز جلستك!</span>
+          <div className="booking-hero-intro" aria-label="مقدمة الحجز">
+            <span className="booking-hero-badge">
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
+              تصميم مرح وتجربة أسهل
+            </span>
+            <div className="shroomi-promo shroomi-promo--booking shroomi-promo--mega">
+              <img src={mascotImg} alt="Shroomi with ticket" className="shroomi-promo__img shroomi-promo__img--ticket shroomi-promo__img--ticket-mega" />
+              <span className="shroomi-promo__text shroomi-promo__text--mega">احجز جلستك!</span>
+              <span className="shroomi-promo__subtext">خلّي المرح يبدأ الآن 🎉</span>
+            </div>
           </div>
           <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto">
             اختر التاريخ، الفترة، المدة، ثم الوقت المناسب
