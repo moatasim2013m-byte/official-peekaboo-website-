@@ -652,9 +652,11 @@ router.post('/capital-bank/initiate', authMiddleware, requireCsrfToken, ensureHt
 
 const processCapitalBankCallback = async (req, source) => {
   const payload = req.body || {};
-  const callbackSignature = req.get('x-callback-signature') || req.get('x-capital-bank-signature');
-  if (!verifyCapitalBankCallbackSignature(payload, callbackSignature)) {
-    return { code: 400, body: { error: 'Invalid signature' } };
+  try {
+    verifySignature(payload, { validateSignedDateTime: true });
+  } catch (error) {
+    console.error('[ALERT][SECURITY] Invalid Capital Bank signature', { source, message: error.message });
+    return res.status(400).json({ error: 'Invalid signature' });
   }
 
   const sessionId = payload.req_reference_number || payload.reference_number || payload.session_id;
@@ -662,10 +664,22 @@ const processCapitalBankCallback = async (req, source) => {
     return { code: 400, body: { error: 'reference_number is required' } };
   }
 
-  const decision = String(payload.decision || '').toUpperCase();
-  const reasonCode = String(payload.reason_code || payload.reasonCode || '102');
-  const transactionId = String(payload.transaction_id || payload.id || `${sessionId}:${decision || 'UNKNOWN'}`);
-  const isAccepted = decision === 'ACCEPT' && reasonCode === '100';
+  const decision = String(signedFields.decision || '').toUpperCase();
+  const reason = String(signedFields.message || signedFields.reason_code || 'unknown');
+  const transactionId = signedFields.transaction_id || `${sessionId}:${decision || 'unknown'}`;
+
+  let status = 'failed';
+  let paymentStatus = (decision || 'failed').toLowerCase();
+  if (decision === 'ACCEPT') {
+    status = 'paid';
+    paymentStatus = 'paid';
+  } else if (decision === 'REVIEW') {
+    status = 'pending';
+    paymentStatus = 'review';
+  } else if (decision === 'DECLINE') {
+    status = 'failed';
+    paymentStatus = 'decline';
+  }
 
   const updated = await PaymentTransaction.findOneAndUpdate(
     {
@@ -681,16 +695,68 @@ const processCapitalBankCallback = async (req, source) => {
         payment_status: isAccepted ? 'paid' : 'failed',
         payment_id: payload.transaction_id || payload.id || null,
         updated_at: new Date(),
-        'metadata.cybersource_rest_last_source': source,
-        'metadata.cybersource_rest_last_response': payload
+        error_message: decision === 'DECLINE' ? reason : null,
+        'metadata.cybersource_last_source': source,
+        'metadata.cybersource_last_response': signedFields
       },
       $addToSet: { 'metadata.processed_transaction_ids': transactionId }
     },
     { new: true }
   );
 
-  if (!updated) {
-    return { code: 200, body: { received: true, duplicate: true } };
+  if (source === 'notify') {
+    return res.status(200).json({ received: true, duplicate: !updateResult });
+  }
+
+  if (!updateResult) {
+    const existing = await PaymentTransaction.findOne({ session_id: sessionId });
+    if (!existing) return res.status(404).json({ error: 'Transaction not found' });
+    if (source !== 'return') {
+      return res.status(200).json({ received: true, duplicate: true, status: existing.status });
+    }
+    const duplicateDecision = String(existing?.metadata?.cybersource_last_response?.decision || decision).toUpperCase();
+    if (duplicateDecision === 'ACCEPT') {
+      return res.redirect(303, `/payment/success?orderId=${encodeURIComponent(sessionId)}`);
+    }
+    if (duplicateDecision === 'REVIEW') {
+      return res.redirect(303, `/payment/pending?orderId=${encodeURIComponent(sessionId)}`);
+    }
+    return res.redirect(303, `/payment/failed?reason=${encodeURIComponent(reason)}`);
+  }
+
+  if (source === 'return') {
+    if (decision === 'ACCEPT') {
+      return res.redirect(303, `/payment/success?orderId=${encodeURIComponent(sessionId)}`);
+    }
+    if (decision === 'DECLINE') {
+      return res.redirect(303, `/payment/failed?reason=${encodeURIComponent(reason)}`);
+    }
+    if (decision === 'REVIEW') {
+      return res.redirect(303, `/payment/pending?orderId=${encodeURIComponent(sessionId)}`);
+    }
+
+    return res.redirect(303, `/payment/failed?reason=${encodeURIComponent(reason)}`);
+  }
+
+  return res.status(200).json({
+    received: true,
+    sessionId,
+    decision,
+    reason_code: signedFields.reason_code,
+    status: updateResult.status
+  });
+};
+
+router.post('/capital-bank/return', cybersourceUrlencodedParser, ensureHttpsForCapitalBank, async (req, res) => {
+  return processCapitalBankResponse(req, res, 'return');
+});
+
+router.post('/capital-bank/notify', cybersourceUrlencodedParser, ensureHttpsForCapitalBank, async (req, res) => {
+  try {
+    return await processCapitalBankResponse(req, res, 'notify');
+  } catch (error) {
+    console.error('Capital Bank notify processing error:', error?.message);
+    return res.status(200).json({ received: true });
   }
 
   return {
