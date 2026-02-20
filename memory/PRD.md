@@ -21,7 +21,7 @@
 - ✅ Payment card icons and trust badges
 
 ### Payment Methods
-- ✅ **Card**: Stripe checkout redirect
+- ✅ **Card**: Online card checkout redirect (provider-managed)
 - ✅ **Cash**: Direct booking → Confirmation page
 - ✅ **CliQ**: Direct booking → Confirmation page + Bank info
 
@@ -46,7 +46,7 @@
 - **Frontend**: React.js + Tailwind + Shadcn/UI
 - **Backend**: Node.js/Express (FastAPI wrapper)
 - **Database**: MongoDB
-- **Payments**: Stripe
+- **Payments**: capital_bank + offline methods (cash/CliQ/manual)
 - **Email**: Resend
 
 ---
@@ -78,8 +78,6 @@ REACT_APP_BACKEND_URL=https://peekaboojor.com
 MONGO_URL=mongodb+srv://...
 DB_NAME=peekaboo
 JWT_SECRET=<secure-random-string>
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
 RESEND_API_KEY=re_...
 SENDER_EMAIL=noreply@peekaboojor.com
 ```
@@ -93,8 +91,7 @@ SENDER_EMAIL=noreply@peekaboojor.com
 4. Configure environment variables
 5. Point DNS (peekaboojor.com) to Cloud Run
 6. Enable HTTPS (automatic with Cloud Run)
-7. Configure Stripe webhook endpoint
-8. Final smoke test
+7. Final smoke test
 
 ---
 

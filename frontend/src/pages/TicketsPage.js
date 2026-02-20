@@ -270,7 +270,7 @@ export default function TicketsPage() {
       const lineItems = buildLineItems();
       
       if (paymentMethod === 'card') {
-        // Stripe checkout flow
+        // Online card provider checkout flow
         const response = await api.post('/payments/create-checkout', {
           type: 'hourly',
           reference_id: selectedSlot.id,

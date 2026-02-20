@@ -173,7 +173,7 @@ export default function BirthdayPage() {
       const lineItems = buildLineItems();
       
       if (paymentMethod === 'card') {
-        // Stripe checkout flow
+        // Online card provider checkout flow
         const response = await api.post('/payments/create-checkout', {
           type: 'birthday',
           reference_id: selectedSlot.id,

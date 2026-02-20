@@ -42,6 +42,7 @@ const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 
 const app = express();
+app.set('trust proxy', 1);
 
 // Ignore favicon early to avoid middleware crashes
 app.get('/favicon.ico', (req, res) => res.status(204).end());

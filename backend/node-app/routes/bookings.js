@@ -328,7 +328,7 @@ router.post('/hourly', authMiddleware, async (req, res) => {
   }
 });
 
-// Create hourly booking with cash/cliq payment (no Stripe)
+// Create hourly booking with cash/cliq payment (offline providers)
 router.post('/hourly/offline', authMiddleware, async (req, res) => {
   try {
     const { slot_id, child_ids, child_id, duration_hours, custom_notes, payment_method, slot_start_time, lineItems, coupon_code } = req.body;
@@ -644,7 +644,7 @@ router.post('/birthday', authMiddleware, async (req, res) => {
   }
 });
 
-// Create birthday booking with cash/cliq payment (no Stripe)
+// Create birthday booking with cash/cliq payment (offline providers)
 router.post('/birthday/offline', authMiddleware, async (req, res) => {
   try {
     const { slot_id, child_id, theme_id, guest_count, special_notes, payment_method, lineItems } = req.body;

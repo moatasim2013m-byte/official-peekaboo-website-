@@ -91,7 +91,7 @@ export default function SubscriptionsPage() {
       const amount = selectedPlan.price;
       
       if (paymentMethod === 'card') {
-        // Stripe checkout flow
+        // Online card provider checkout flow
         const response = await api.post('/payments/create-checkout', {
           type: 'subscription',
           reference_id: selectedPlan.id,
