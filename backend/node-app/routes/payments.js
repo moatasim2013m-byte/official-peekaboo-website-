@@ -92,8 +92,7 @@ const capitalBankHostedReady = Boolean(
 );
 
 const capitalBankRestReady = Boolean(
-  paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK_REST
-  && capitalBankConfig.merchantId
+  capitalBankConfig.merchantId
   && capitalBankConfig.accessKey
   && capitalBankConfig.secretKey
 );
@@ -122,6 +121,57 @@ const getEffectiveProvider = () => {
 
 const cybersourceUrlencodedParser = express.urlencoded({ extended: false });
 
+const getRequestBaseUrl = (req) => {
+  const forwardedProto = (req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
+  const forwardedHost = (req.headers['x-forwarded-host'] || '').split(',')[0].trim();
+  const protocol = forwardedProto || req.protocol;
+  const host = forwardedHost || req.get('host');
+  return `${protocol}://${host}`;
+};
+
+const normalizeOrigin = (value) => {
+  if (!value || typeof value !== 'string') return null;
+  try {
+    const candidate = new URL(value);
+    if (!['http:', 'https:'].includes(candidate.protocol)) return null;
+    return candidate.origin;
+  } catch (_) {
+    return null;
+  }
+};
+
+const getAllowedFrontendOrigins = () => {
+  const configured = [process.env.FRONTEND_URL, process.env.CORS_ORIGINS]
+    .filter(Boolean)
+    .flatMap((entry) => entry.split(',').map((item) => item.trim()))
+    .map(normalizeOrigin)
+    .filter(Boolean);
+
+  return new Set(configured);
+};
+
+const resolveFrontendOrigin = (originUrl, req) => {
+  const allowedOrigins = getAllowedFrontendOrigins();
+  const requestOrigin = normalizeOrigin(req.get('origin'));
+  const payloadOrigin = normalizeOrigin(originUrl);
+
+  if (payloadOrigin && allowedOrigins.has(payloadOrigin)) return payloadOrigin;
+  if (requestOrigin && allowedOrigins.has(requestOrigin)) return requestOrigin;
+
+  const configuredFrontend = normalizeOrigin(process.env.FRONTEND_URL);
+  if (configuredFrontend) return configuredFrontend;
+
+  return null;
+};
+
+const buildFrontendRedirectUrl = (frontendOrigin, pathName, sessionId) => {
+  const safeOrigin = normalizeOrigin(frontendOrigin);
+  if (!safeOrigin) return null;
+  const redirectUrl = new URL(pathName, safeOrigin);
+  redirectUrl.searchParams.set('session_id', sessionId);
+  return redirectUrl.toString();
+};
+
 const signCybersourceFields = (fields, signedFieldNames, secretKey) => {
   const dataToSign = signedFieldNames
     .map((fieldName) => `${fieldName}=${fields[fieldName] ?? ''}`)
@@ -133,7 +183,7 @@ const signCybersourceFields = (fields, signedFieldNames, secretKey) => {
     .digest('base64');
 };
 
-const buildSignedCybersourceRequest = ({ sessionId, amount, currency, originUrl, customerReference }) => {
+const buildSignedCybersourceRequest = ({ sessionId, amount, currency, backendBaseUrl, customerReference }) => {
   const signedDateTime = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
   const signedFieldNames = [
     'access_key',
@@ -162,8 +212,8 @@ const buildSignedCybersourceRequest = ({ sessionId, amount, currency, originUrl,
     locale: capitalBankConfig.locale,
     customer_ip_address: '',
     customer_reference: customerReference,
-    override_custom_receipt_page: `${originUrl}/payment/success?session_id=${encodeURIComponent(sessionId)}`,
-    override_custom_cancel_page: `${originUrl}/payment/cancel?session_id=${encodeURIComponent(sessionId)}`
+    override_custom_receipt_page: `${backendBaseUrl}/api/payments/capital-bank/secure-acceptance/response`,
+    override_custom_cancel_page: `${backendBaseUrl}/api/payments/capital-bank/secure-acceptance/cancel`
   };
 
   fields.signature = signCybersourceFields(fields, signedFieldNames, capitalBankConfig.secretKey);
@@ -372,8 +422,13 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
 
     const { type, reference_id, origin_url, duration_hours, custom_notes, timeMode, lineItems, coupon_code } = req.body;
 
-    if (!type || !origin_url) {
-      return res.status(400).json({ error: 'type and origin_url are required' });
+    if (!type) {
+      return res.status(400).json({ error: 'type is required' });
+    }
+
+    const frontendOrigin = resolveFrontendOrigin(origin_url, req);
+    if (!frontendOrigin) {
+      return res.status(400).json({ error: 'Invalid or unauthorized frontend origin' });
     }
 
     const { normalizedLineItems, productsTotal } = await buildLineItems(lineItems);
@@ -462,8 +517,8 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
     }
 
     // Build success/cancel URLs from frontend origin
-    const successUrl = `${origin_url}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl = `${origin_url}/payment/cancel`;
+    const successUrl = `${frontendOrigin}/payment/success?session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${frontendOrigin}/payment/cancel`;
 
     console.log('Creating checkout session:', { type, amount, metadata });
 
@@ -500,11 +555,12 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       sessionId = `cb_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
       currency = 'jod';
 
+      metadata.frontend_origin = frontendOrigin;
       metadata.cybersource = buildSignedCybersourceRequest({
         sessionId,
         amount,
         currency,
-        originUrl: origin_url,
+        backendBaseUrl: getRequestBaseUrl(req),
         customerReference: req.userId.toString()
       });
 
@@ -656,10 +712,14 @@ router.get('/capital-bank/secure-acceptance/form/:sessionId', async (req, res) =
 
 router.post('/capital-bank/rest/test-payment', async (req, res) => {
   try {
-    if (paymentProvider !== PAYMENT_PROVIDERS.CAPITAL_BANK_REST || !capitalBankRestReady) {
+    if (!capitalBankRestReady) {
       return res.status(400).json({
-        error: 'Capital Bank REST provider is not enabled',
-        expected_provider: PAYMENT_PROVIDERS.CAPITAL_BANK_REST
+        error: 'Capital Bank REST credentials are not configured',
+        required_env: [
+          'CAPITAL_BANK_MERCHANT_ID',
+          'CAPITAL_BANK_ACCESS_KEY',
+          'CAPITAL_BANK_SECRET_KEY'
+        ]
       });
     }
 
@@ -725,7 +785,10 @@ const processCybersourceResponse = async (req, res, source = 'browser_return') =
   const paidDecisions = new Set(['accept', 'authorized', 'authorized_pending_review']);
   const failedDecisions = new Set(['reject', 'decline', 'error', 'cancel']);
 
-  if (paidDecisions.has(decision) || paymentStatus === 'paid') {
+  if (source === 'browser_cancel') {
+    transaction.status = 'failed';
+    transaction.payment_status = 'cancel';
+  } else if (paidDecisions.has(decision) || paymentStatus === 'paid') {
     transaction.status = 'paid';
     transaction.payment_status = 'paid';
     transaction.payment_id = signedFieldsOnly.transaction_id || transaction.payment_id;
@@ -748,6 +811,14 @@ const processCybersourceResponse = async (req, res, source = 'browser_return') =
     await maybeAwardProductLoyaltyPoints(transaction);
   }
 
+  if (source === 'browser_return' || source === 'browser_cancel') {
+    const pathName = transaction.status === 'paid' ? '/payment/success' : '/payment/cancel';
+    const redirectUrl = buildFrontendRedirectUrl(transaction.metadata?.frontend_origin, pathName, referenceNumber);
+    if (redirectUrl) {
+      return res.redirect(303, redirectUrl);
+    }
+  }
+
   return res.json({
     received: true,
     session_id: referenceNumber,
@@ -763,6 +834,16 @@ router.post('/capital-bank/secure-acceptance/response', cybersourceUrlencodedPar
   } catch (error) {
     console.error('Capital Bank response endpoint error:', error);
     return res.status(500).json({ error: 'Failed to process payment response' });
+  }
+});
+
+
+router.post('/capital-bank/secure-acceptance/cancel', cybersourceUrlencodedParser, async (req, res) => {
+  try {
+    return await processCybersourceResponse(req, res, 'browser_cancel');
+  } catch (error) {
+    console.error('Capital Bank cancel endpoint error:', error);
+    return res.status(500).json({ error: 'Failed to process cancel response' });
   }
 });
 
