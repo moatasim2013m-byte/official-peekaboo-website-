@@ -18,6 +18,14 @@ const PAYMENT_PROVIDERS = {
   CAPITAL_BANK: 'capital_bank'
 };
 
+const CYBERSOURCE_ENDPOINTS = {
+  payment: 'https://testsecureacceptance.cybersource.com/pay',
+  tokenCreate: 'https://testsecureacceptance.cybersource.com/token/create',
+  tokenUpdate: 'https://testsecureacceptance.cybersource.com/token/update',
+  oneClick: 'https://testsecureacceptance.cybersource.com/oneclick/pay',
+  iframe: 'https://testsecureacceptance.cybersource.com/embedded/pay'
+};
+
 const paymentProvider = (process.env.PAYMENT_PROVIDER || PAYMENT_PROVIDERS.MANUAL).toLowerCase();
 
 const DEV_ENVIRONMENTS = new Set(['development', 'dev', 'local', 'test']);
@@ -65,15 +73,20 @@ const capitalBankConfig = {
   terminalId: process.env.CAPITAL_BANK_TERMINAL_ID,
   apiKey: process.env.CAPITAL_BANK_API_KEY,
   hostedCheckoutUrl: process.env.CAPITAL_BANK_HOSTED_CHECKOUT_URL,
-  callbackSecret: process.env.CAPITAL_BANK_CALLBACK_SECRET
+  callbackSecret: process.env.CAPITAL_BANK_CALLBACK_SECRET,
+  accessKey: process.env.CAPITAL_BANK_ACCESS_KEY || process.env.CYBERSOURCE_ACCESS_KEY,
+  profileId: process.env.CAPITAL_BANK_PROFILE_ID || process.env.CYBERSOURCE_PROFILE_ID,
+  secretKey: process.env.CAPITAL_BANK_SECRET_KEY || process.env.CYBERSOURCE_SECRET_KEY,
+  transactionType: process.env.CAPITAL_BANK_TRANSACTION_TYPE || 'sale',
+  locale: process.env.CAPITAL_BANK_LOCALE || 'ar',
+  paymentEndpoint: process.env.CAPITAL_BANK_PAYMENT_ENDPOINT || CYBERSOURCE_ENDPOINTS.payment
 };
 
 const capitalBankReady = Boolean(
   paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK
-  && capitalBankConfig.merchantId
-  && capitalBankConfig.terminalId
-  && capitalBankConfig.apiKey
-  && capitalBankConfig.hostedCheckoutUrl
+  && capitalBankConfig.accessKey
+  && capitalBankConfig.profileId
+  && capitalBankConfig.secretKey
 );
 
 if (paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK) {
@@ -88,6 +101,83 @@ const getEffectiveProvider = () => {
   if (paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK && capitalBankReady) return PAYMENT_PROVIDERS.CAPITAL_BANK;
   if (paymentProvider === PAYMENT_PROVIDERS.STRIPE && stripe) return PAYMENT_PROVIDERS.STRIPE;
   return PAYMENT_PROVIDERS.MANUAL;
+};
+
+const cybersourceUrlencodedParser = express.urlencoded({ extended: false });
+
+const signCybersourceFields = (fields, signedFieldNames, secretKey) => {
+  const dataToSign = signedFieldNames
+    .map((fieldName) => `${fieldName}=${fields[fieldName] ?? ''}`)
+    .join(',');
+
+  return crypto
+    .createHmac('sha256', secretKey)
+    .update(dataToSign, 'utf8')
+    .digest('base64');
+};
+
+const buildSignedCybersourceRequest = ({ sessionId, amount, currency, originUrl, customerReference }) => {
+  const signedDateTime = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
+  const signedFieldNames = [
+    'access_key',
+    'profile_id',
+    'transaction_uuid',
+    'signed_date_time',
+    'signed_field_names',
+    'reference_number',
+    'transaction_type',
+    'amount',
+    'currency',
+    'locale'
+  ];
+
+  const fields = {
+    access_key: capitalBankConfig.accessKey,
+    profile_id: capitalBankConfig.profileId,
+    transaction_uuid: crypto.randomUUID(),
+    signed_date_time: signedDateTime,
+    signed_field_names: signedFieldNames.join(','),
+    unsigned_field_names: 'customer_ip_address,customer_reference,override_custom_receipt_page,override_custom_cancel_page',
+    reference_number: sessionId,
+    transaction_type: capitalBankConfig.transactionType,
+    amount: Number(amount).toFixed(2),
+    currency: currency.toUpperCase(),
+    locale: capitalBankConfig.locale,
+    customer_ip_address: '',
+    customer_reference: customerReference,
+    override_custom_receipt_page: `${originUrl}/payment/success?session_id=${encodeURIComponent(sessionId)}`,
+    override_custom_cancel_page: `${originUrl}/payment/cancel?session_id=${encodeURIComponent(sessionId)}`
+  };
+
+  fields.signature = signCybersourceFields(fields, signedFieldNames, capitalBankConfig.secretKey);
+  return fields;
+};
+
+const normalizeSignedPayload = (payload = {}) => {
+  const signedFieldNames = (payload.signed_field_names || '')
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean);
+
+  const signedFieldsOnly = signedFieldNames.reduce((acc, fieldName) => {
+    acc[fieldName] = payload[fieldName] ?? '';
+    return acc;
+  }, {});
+
+  return { signedFieldNames, signedFieldsOnly };
+};
+
+const isValidCybersourceSignature = (payload = {}) => {
+  if (!payload.signature || !payload.signed_field_names || !capitalBankConfig.secretKey) {
+    return false;
+  }
+
+  const { signedFieldNames, signedFieldsOnly } = normalizeSignedPayload(payload);
+  const expectedSignature = signCybersourceFields(signedFieldsOnly, signedFieldNames, capitalBankConfig.secretKey);
+  const expectedBuffer = Buffer.from(expectedSignature);
+  const receivedBuffer = Buffer.from(payload.signature);
+  if (expectedBuffer.length !== receivedBuffer.length) return false;
+  return crypto.timingSafeEqual(expectedBuffer, receivedBuffer);
 };
 
 
@@ -391,43 +481,17 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
 
     if (effectiveProvider === PAYMENT_PROVIDERS.CAPITAL_BANK) {
       sessionId = `cb_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+      currency = 'jod';
 
-      const callbackUrl = `${origin_url}/payment/success`;
-      const payload = {
-        merchant_id: capitalBankConfig.merchantId,
-        terminal_id: capitalBankConfig.terminalId,
-        order_id: sessionId,
-        amount: amount.toFixed(2),
-        currency: 'JOD',
-        description: `Peekaboo ${type} booking`,
-        return_url: callbackUrl,
-        cancel_url: cancelUrl,
-        customer_reference: req.userId.toString(),
-        timestamp: new Date().toISOString()
-      };
-
-      const signatureSeed = [
-        payload.merchant_id,
-        payload.terminal_id,
-        payload.order_id,
-        payload.amount,
-        payload.currency,
-        capitalBankConfig.apiKey
-      ].join('|');
-
-      const signature = crypto
-        .createHmac('sha256', capitalBankConfig.apiKey)
-        .update(signatureSeed)
-        .digest('hex');
-
-      const checkoutParams = new URLSearchParams({
-        ...payload,
-        signature
+      metadata.cybersource = buildSignedCybersourceRequest({
+        sessionId,
+        amount,
+        currency,
+        originUrl: origin_url,
+        customerReference: req.userId.toString()
       });
 
-      checkoutUrl = `${capitalBankConfig.hostedCheckoutUrl}?${checkoutParams.toString()}`;
-      currency = 'jod';
-      metadata.capital_bank_signature = signature;
+      checkoutUrl = `/api/payments/capital-bank/secure-acceptance/form/${sessionId}`;
     }
 
     // Create pending payment transaction
@@ -527,7 +591,131 @@ router.get('/status/:sessionId', authMiddleware, async (req, res) => {
   }
 });
 
-// Capital Bank payment callback/webhook to finalize pending transactions
+// Server-side checkout form builder for CyberSource Secure Acceptance Hosted Checkout
+router.get('/capital-bank/secure-acceptance/form/:sessionId', async (req, res) => {
+  try {
+    if (getEffectiveProvider() !== PAYMENT_PROVIDERS.CAPITAL_BANK) {
+      return res.status(404).send('Capital Bank payment gateway is not enabled');
+    }
+
+    const transaction = await PaymentTransaction.findOne({ session_id: req.params.sessionId });
+    if (!transaction || transaction.provider !== PAYMENT_PROVIDERS.CAPITAL_BANK) {
+      return res.status(404).send('Transaction not found');
+    }
+
+    const fields = transaction.metadata?.cybersource;
+    if (!fields?.signature) {
+      return res.status(400).send('Signed checkout payload is missing');
+    }
+
+    const hiddenInputs = Object.entries(fields)
+      .map(([name, value]) => `<input type="hidden" name="${name}" value="${String(value).replace(/"/g, '&quot;')}" />`)
+      .join('\n');
+
+    res.set('X-Frame-Options', 'DENY');
+    res.set('Content-Security-Policy', "frame-ancestors 'none'");
+
+    return res.status(200).send(`<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>جاري تحويلك للدفع</title>
+</head>
+<body>
+  <p>جاري تحويلك إلى بوابة الدفع الآمنة...</p>
+  <form id="cybersource-hosted-checkout" method="post" action="${capitalBankConfig.paymentEndpoint}">
+    ${hiddenInputs}
+    <noscript><button type="submit">متابعة الدفع</button></noscript>
+  </form>
+  <script>document.getElementById('cybersource-hosted-checkout').submit();</script>
+</body>
+</html>`);
+  } catch (error) {
+    console.error('Capital Bank checkout form error:', error);
+    return res.status(500).send('Failed to build checkout form');
+  }
+});
+
+const processCybersourceResponse = async (req, res, source = 'browser_return') => {
+  const payload = req.body || {};
+
+  if (!payload.signed_field_names || !payload.signature) {
+    return res.status(400).json({ error: 'Missing signed CyberSource response fields' });
+  }
+
+  if (!isValidCybersourceSignature(payload)) {
+    return res.status(401).json({ error: 'Invalid CyberSource response signature' });
+  }
+
+  const { signedFieldsOnly } = normalizeSignedPayload(payload);
+  const referenceNumber = signedFieldsOnly.req_reference_number || signedFieldsOnly.reference_number;
+  if (!referenceNumber) {
+    return res.status(400).json({ error: 'reference_number is required' });
+  }
+
+  const transaction = await PaymentTransaction.findOne({ session_id: referenceNumber });
+  if (!transaction) {
+    return res.status(404).json({ error: 'Transaction not found' });
+  }
+
+  const decision = (signedFieldsOnly.decision || '').toLowerCase();
+  const paymentStatus = (signedFieldsOnly.payment_status || '').toLowerCase();
+  const paidDecisions = new Set(['accept', 'authorized', 'authorized_pending_review']);
+  const failedDecisions = new Set(['reject', 'decline', 'error', 'cancel']);
+
+  if (paidDecisions.has(decision) || paymentStatus === 'paid') {
+    transaction.status = 'paid';
+    transaction.payment_status = 'paid';
+    transaction.payment_id = signedFieldsOnly.transaction_id || transaction.payment_id;
+  } else if (failedDecisions.has(decision)) {
+    transaction.status = 'failed';
+    transaction.payment_status = paymentStatus || decision;
+  } else {
+    transaction.payment_status = paymentStatus || decision || transaction.payment_status || 'pending';
+  }
+
+  transaction.metadata = {
+    ...transaction.metadata,
+    cybersource_response_source: source,
+    cybersource_response: signedFieldsOnly
+  };
+  transaction.updated_at = new Date();
+  await transaction.save();
+
+  if (transaction.status === 'paid' && transaction.type === 'product') {
+    await maybeAwardProductLoyaltyPoints(transaction);
+  }
+
+  return res.json({
+    received: true,
+    session_id: referenceNumber,
+    status: transaction.status,
+    payment_status: transaction.payment_status
+  });
+};
+
+// Merchant POST URL (browser return endpoint)
+router.post('/capital-bank/secure-acceptance/response', cybersourceUrlencodedParser, async (req, res) => {
+  try {
+    return await processCybersourceResponse(req, res, 'browser_return');
+  } catch (error) {
+    console.error('Capital Bank response endpoint error:', error);
+    return res.status(500).json({ error: 'Failed to process payment response' });
+  }
+});
+
+// Merchant POST URL backup notification receiver
+router.post('/capital-bank/secure-acceptance/notify', cybersourceUrlencodedParser, async (req, res) => {
+  try {
+    return await processCybersourceResponse(req, res, 'backend_notification');
+  } catch (error) {
+    console.error('Capital Bank notification endpoint error:', error);
+    return res.status(500).json({ error: 'Failed to process notification' });
+  }
+});
+
+// Backward-compatible callback route to support older Capital Bank integrations.
 router.post('/capital-bank/callback', async (req, res) => {
   try {
     const { order_id, transaction_id, status, payment_status, amount, signature } = req.body || {};
