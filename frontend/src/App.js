@@ -20,6 +20,8 @@ const SubscriptionsPage = lazy(() => import("./pages/SubscriptionsPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage"));
 const PaymentCancelPage = lazy(() => import("./pages/PaymentCancelPage"));
+const PaymentFailedPage = lazy(() => import("./pages/PaymentFailedPage"));
+const PaymentPendingPage = lazy(() => import("./pages/PaymentPendingPage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const StaffPage = lazy(() => import("./pages/StaffPage"));
 const ReceptionPage = lazy(() => import("./pages/ReceptionPage"));
@@ -119,6 +121,8 @@ function AppRoutes() {
         <Route path="/pricing" element={<Layout><PricingPage /></Layout>} />
 
         <Route path="/payment/success" element={<Layout><PaymentSuccessPage /></Layout>} />
+        <Route path="/payment/failed" element={<Layout><PaymentFailedPage /></Layout>} />
+        <Route path="/payment/pending" element={<Layout><PaymentPendingPage /></Layout>} />
         <Route path="/payment/cancel" element={<Layout><PaymentCancelPage /></Layout>} />
         <Route path="/booking-confirmation" element={<Layout><BookingConfirmationPage /></Layout>} />
 
