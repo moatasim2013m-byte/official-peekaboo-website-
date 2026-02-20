@@ -32,6 +32,7 @@ const BookingConfirmationPage = lazy(() => import("./pages/BookingConfirmationPa
 const AboutPage = lazy(() => import("./pages/AboutPage"));
 const FAQPage = lazy(() => import("./pages/FAQPage"));
 const ContactPage = lazy(() => import("./pages/ContactPage"));
+const EmploymentPage = lazy(() => import("./pages/EmploymentPage"));
 const RulesPage = lazy(() => import("./pages/RulesPage"));
 const PricingPage = lazy(() => import("./pages/PricingPage"));
 const VerifyEmailPage = lazy(() => import("./pages/VerifyEmailPage"));
@@ -115,6 +116,7 @@ function AppRoutes() {
         <Route path="/about" element={<Layout><AboutPage /></Layout>} />
         <Route path="/faq" element={<Layout><FAQPage /></Layout>} />
         <Route path="/contact" element={<Layout><ContactPage /></Layout>} />
+        <Route path="/employment" element={<Layout><EmploymentPage /></Layout>} />
         <Route path="/rules" element={<Layout><RulesPage /></Layout>} />
         <Route path="/pricing" element={<Layout><PricingPage /></Layout>} />
 
