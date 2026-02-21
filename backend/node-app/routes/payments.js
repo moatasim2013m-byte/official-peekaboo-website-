@@ -676,19 +676,44 @@ router.post('/capital-bank/notify', ensureHttpsForCapitalBank, async (req, res) 
         session_id: orderId,
         'metadata.processed_transaction_ids': { $ne: transactionId }
       },
-      {
-        $set: {
-          status: mapped.status,
-          payment_status: mapped.paymentStatus,
-          payment_id: transactionId,
-          updated_at: new Date(),
-          provider: DB_PROVIDER_CAPITAL_BANK,
-          'metadata.cybersource_last_notification': body
-        },
-        $addToSet: { 'metadata.processed_transaction_ids': transactionId }
-      },
-      { new: true }
-    );
+      $addToSet: { 'metadata.processed_transaction_ids': transactionId }
+    },
+    { new: true }
+  );
+
+  const transaction = updated || await PaymentTransaction.findOne({ session_id: sessionId });
+  if (!transaction) {
+    if (source === 'notify') return res.status(200).json({ received: true, ignored: true });
+    return res.redirect(303, '/payment/failed?reason=transaction_not_found');
+  }
+
+  if (source === 'notify') {
+    return res.status(200).json({
+      received: true,
+      duplicate: !updated,
+      sessionId,
+      decision,
+      status: transaction.status
+    });
+  }
+
+  if (transaction.status === 'paid') {
+    return res.redirect(303, `/payment/success?orderId=${encodeURIComponent(sessionId)}`);
+  }
+  if (transaction.status === 'pending') {
+    return res.redirect(303, `/payment/pending?orderId=${encodeURIComponent(sessionId)}`);
+  }
+  return res.redirect(303, `/payment/failed?orderId=${encodeURIComponent(sessionId)}&reason=${encodeURIComponent(reason)}`);
+};
+
+router.post('/capital-bank/return', capitalBankCallbackParser, ensureHttpsForCapitalBank, async (req, res) => {
+  try {
+    return await processCapitalBankCallback(req, res, 'return');
+  } catch (error) {
+    console.error('Capital Bank return processing error:', error?.message);
+    return res.redirect(303, '/payment/failed?reason=callback_processing_error');
+  }
+});
 
     if (!updateResult) return;
   } catch (error) {
