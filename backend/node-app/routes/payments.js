@@ -578,6 +578,15 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
 
     const endpointPath = '/pts/v2/payments';
     const requestBody = JSON.stringify(payload);
+    const merchantIdRaw = process.env.CAPITAL_BANK_MERCHANT_ID;
+    const merchantIdTrimmed = String(merchantIdRaw || '').trim();
+    if (merchantIdTrimmed !== '903897720102') {
+      console.error('[CAPITAL BANK DEBUG] CAPITAL_BANK_MERCHANT_ID mismatch:', JSON.stringify({
+        configured: merchantIdRaw,
+        trimmed: merchantIdTrimmed,
+        expected: '903897720102'
+      }, null, 2));
+    }
     const headers = buildRestHeaders(
       capitalBankConfig.merchantId,
       capitalBankConfig.accessKey,
@@ -586,6 +595,25 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       requestBody
     );
 
+    const signingString = [
+      `host: apitest.cybersource.com`,
+      `date: ${headers.Date}`,
+      `request-target: post ${endpointPath}`,
+      `v-c-merchant-id: ${capitalBankConfig.merchantId}`,
+      `digest: ${headers.Digest}`
+    ].join('\n');
+
+    console.log('[CAPITAL BANK DEBUG] HTTP signature signing string:', signingString);
+    console.log('[CAPITAL BANK DEBUG] Sending to CyberSource:', JSON.stringify({
+      merchantId: process.env.CAPITAL_BANK_MERCHANT_ID,
+      endpoint: process.env.CAPITAL_BANK_PAYMENT_ENDPOINT,
+      amount: payload.orderInformation?.amountDetails?.totalAmount,
+      currency: payload.orderInformation?.amountDetails?.currency,
+      cardType: payload.paymentInformation?.card?.type,
+      expirationMonth: payload.paymentInformation?.card?.expirationMonth,
+      expirationYear: payload.paymentInformation?.card?.expirationYear
+    }, null, 2));
+
     const response = await fetch(`${capitalBankConfig.paymentEndpoint}${endpointPath}`, {
       method: 'POST',
       headers,
@@ -593,23 +621,28 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
     });
 
     const rawResponseBody = await response.text();
-    let result = {};
+    let responseBody = {};
     try {
-      result = rawResponseBody ? JSON.parse(rawResponseBody) : {};
+      responseBody = rawResponseBody ? JSON.parse(rawResponseBody) : {};
     } catch (_error) {
-      result = { rawResponseBody };
+      responseBody = { rawResponseBody };
     }
+
+    console.error('[CAPITAL BANK DEBUG] CyberSource full response:', JSON.stringify({
+      status: response.status,
+      body: responseBody
+    }, null, 2));
 
     if (response.status !== 201) {
       console.error('Capital Bank initiate non-201 response body:', {
         status: response.status,
         statusText: response.statusText,
-        body: result,
+        body: responseBody,
         rawResponseBody
       });
     }
-    const decision = String(result?.status || result?.processorInformation?.responseCode || '').toUpperCase();
-    const transactionId = String(result?.id || result?.reconciliationId || '');
+    const decision = String(responseBody?.status || responseBody?.processorInformation?.responseCode || '').toUpperCase();
+    const transactionId = String(responseBody?.id || responseBody?.reconciliationId || '');
 
     if (response.status === 201 && decision !== 'DECLINE') {
       await PaymentTransaction.findByIdAndUpdate(transaction._id, {
@@ -625,11 +658,11 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       return res.status(200).json({ success: true, orderId: transaction.session_id });
     }
 
-    const reason = sanitizeReason(result?.errorInformation?.message || result?.message || 'payment_declined');
+    const reason = sanitizeReason(responseBody?.errorInformation?.message || responseBody?.message || 'payment_declined');
     console.log('Capital Bank/CyberSource payment failure response body:', {
       status: response.status,
       statusText: response.statusText,
-      body: result,
+      body: responseBody,
       rawResponseBody
     });
     await PaymentTransaction.findByIdAndUpdate(transaction._id, {
