@@ -767,7 +767,7 @@ const processCapitalBankCallback = async (req, res, source) => {
   if (transaction.status === 'pending') {
     return res.redirect(303, `/payment/pending?orderId=${encodeURIComponent(sessionId)}`);
   }
-  return res.redirect(303, `/payment/failed?reason=${encodeURIComponent(reason)}`);
+  return res.redirect(303, `/payment/failed?orderId=${encodeURIComponent(sessionId)}&reason=${encodeURIComponent(reason)}`);
 };
 
 router.post('/capital-bank/return', requireJsonCallback, capitalBankCallbackParser, ensureHttpsForCapitalBank, async (req, res) => {
