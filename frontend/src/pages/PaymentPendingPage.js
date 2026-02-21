@@ -1,10 +1,12 @@
 import { Clock3 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
 
 export default function PaymentPendingPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sessionId = searchParams.get('sessionId') || searchParams.get('session_id');
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center bg-hero-gradient py-12 px-4" dir="rtl">
@@ -22,6 +24,14 @@ export default function PaymentPendingPage() {
           <p className="text-muted-foreground">
             سيتم إشعارك فور تحديث حالة الدفع. / We will notify you once the payment status is updated.
           </p>
+
+
+          {sessionId ? (
+            <div className="bg-white/80 border border-yellow-200 rounded-xl py-3 px-4">
+              <p className="text-sm text-muted-foreground">رقم العملية / Session ID</p>
+              <p className="font-semibold text-base break-all">{sessionId}</p>
+            </div>
+          ) : null}
 
           <Button onClick={() => navigate('/profile')} className="rounded-full btn-playful">
             حجوزاتي / My Bookings

@@ -8,31 +8,23 @@ const loyaltyRouter = require('./loyalty');
 const { awardPoints } = loyaltyRouter;
 const { validateCoupon } = require('../utils/coupons');
 const { signSecureAcceptanceFields, verifySecureAcceptanceSignature } = require('../utils/cybersourceSign');
-
 const router = express.Router();
-
 const PAYMENT_PROVIDERS = {
   MANUAL: 'manual',
   CAPITAL_BANK: 'capital_bank'
 };
-
-
 const requestedPaymentProvider = (process.env.PAYMENT_PROVIDER || PAYMENT_PROVIDERS.MANUAL).toLowerCase();
 const supportedPaymentProviders = new Set(Object.values(PAYMENT_PROVIDERS));
 const paymentProvider = supportedPaymentProviders.has(requestedPaymentProvider)
   ? requestedPaymentProvider
   : PAYMENT_PROVIDERS.MANUAL;
-
 const DEV_ENVIRONMENTS = new Set(['development', 'dev', 'local', 'test']);
-
 const isLoyaltyDuplicateError = (error) => {
   return error?.code === 'LOYALTY_DUPLICATE_REFERENCE' || error?.code === 11000;
 };
-
 const maybeAwardProductLoyaltyPoints = async (transaction) => {
   const points = Math.round(Number(transaction?.amount || 0) * 10);
   if (!transaction?.user_id || points <= 0) return;
-
   try {
     await awardPoints(
       transaction.user_id,
@@ -53,7 +45,6 @@ const maybeAwardProductLoyaltyPoints = async (transaction) => {
     if (!isLoyaltyDuplicateError(error)) throw error;
   }
 };
-
 const capitalBankConfig = {
   profileId: process.env.CAPITAL_BANK_PROFILE_ID,
   accessKey: process.env.CAPITAL_BANK_ACCESS_KEY,
@@ -62,22 +53,17 @@ const capitalBankConfig = {
   currency: (process.env.CAPITAL_BANK_CURRENCY || 'JOD').toUpperCase(),
   paymentEndpoint: process.env.CAPITAL_BANK_PAYMENT_ENDPOINT || 'https://testsecureacceptance.cybersource.com/pay'
 };
-
 const requestedCapitalBankProvider = paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK;
-
 const missingCapitalBankEnvVars = [
   ['CAPITAL_BANK_PROFILE_ID', capitalBankConfig.profileId],
   ['CAPITAL_BANK_ACCESS_KEY', capitalBankConfig.accessKey],
   ['CAPITAL_BANK_SECRET_KEY', capitalBankConfig.secretKey],
   ['CAPITAL_BANK_PAYMENT_ENDPOINT', capitalBankConfig.paymentEndpoint]
 ].filter(([, value]) => !value).map(([name]) => name);
-
 const capitalBankHostedReady = requestedCapitalBankProvider && missingCapitalBankEnvVars.length === 0;
-
 if (!supportedPaymentProviders.has(requestedPaymentProvider)) {
   console.warn(`[Payments] Unsupported PAYMENT_PROVIDER "${requestedPaymentProvider}". Falling back to ${PAYMENT_PROVIDERS.MANUAL}. Supported values: ${Object.values(PAYMENT_PROVIDERS).join(', ')}`);
 }
-
 if (requestedCapitalBankProvider) {
   if (capitalBankHostedReady) {
     console.log(`[Payments] Active provider: ${paymentProvider} (CyberSource Secure Acceptance Hosted)`);
@@ -88,12 +74,10 @@ if (requestedCapitalBankProvider) {
 } else {
   console.log(`[Payments] Active provider: ${PAYMENT_PROVIDERS.MANUAL}`);
 }
-
 const getEffectiveProvider = () => {
   if (capitalBankHostedReady) return paymentProvider;
   return PAYMENT_PROVIDERS.MANUAL;
 };
-
 const ensureHttpsForCapitalBank = (req, res, next) => {
   const forwardedProto = (req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
   const protocol = forwardedProto || req.protocol;
@@ -103,7 +87,6 @@ const ensureHttpsForCapitalBank = (req, res, next) => {
   }
   return next();
 };
-
 const normalizeOrigin = (value) => {
   if (!value || typeof value !== 'string') return null;
   try {
@@ -114,38 +97,30 @@ const normalizeOrigin = (value) => {
     return null;
   }
 };
-
 const getAllowedFrontendOrigins = () => {
   const configured = [process.env.FRONTEND_URL, process.env.CORS_ORIGINS]
     .filter(Boolean)
     .flatMap((entry) => entry.split(',').map((item) => item.trim()))
     .map(normalizeOrigin)
     .filter(Boolean);
-
   return new Set(configured);
 };
-
 const resolveFrontendOrigin = (originUrl, req) => {
   const allowedOrigins = getAllowedFrontendOrigins();
   const requestOrigin = normalizeOrigin(req.get('origin'));
   const payloadOrigin = normalizeOrigin(originUrl);
-
   if (payloadOrigin && allowedOrigins.has(payloadOrigin)) return payloadOrigin;
   if (requestOrigin && allowedOrigins.has(requestOrigin)) return requestOrigin;
-
   const configuredFrontend = normalizeOrigin(process.env.FRONTEND_URL);
   if (configuredFrontend) return configuredFrontend;
-
   return null;
 };
-
 const resolveOrderTransaction = async (orderId, userId) => {
   const search = [
     { _id: orderId },
     { session_id: orderId },
     { reference_id: orderId }
   ];
-
   for (const criteria of search) {
     try {
       const record = await PaymentTransaction.findOne({ ...criteria, user_id: userId });
@@ -156,14 +131,11 @@ const resolveOrderTransaction = async (orderId, userId) => {
   }
   return null;
 };
-
 // Morning (Happy Hour) price: 3.5 JD per hour
 const MORNING_PRICE_PER_HOUR = 3.5;
-
 // Get hourly price from Settings or use defaults
 const getHourlyPrice = async (duration_hours = 2, slot_start_time = null) => {
   const hours = parseInt(duration_hours) || 2;
-
   // Happy Hour logic: 10:00-13:59 => 3.5 JD per hour
   if (slot_start_time) {
     try {
@@ -178,22 +150,18 @@ const getHourlyPrice = async (duration_hours = 2, slot_start_time = null) => {
       // Fall through to normal pricing
     }
   }
-
   try {
     // Fetch pricing from Settings
     const pricing = await Settings.find({
       key: { $in: ['hourly_1hr', 'hourly_2hr', 'hourly_3hr', 'hourly_extra_hr'] }
     });
-
     const prices = {
       hourly_1hr: 7,
       hourly_2hr: 10,
       hourly_3hr: 13,
       hourly_extra_hr: 3
     };
-
     pricing.forEach(p => { prices[p.key] = parseFloat(p.value); });
-
     if (hours === 1) return prices.hourly_1hr;
     if (hours === 2) return prices.hourly_2hr;
     if (hours === 3) return prices.hourly_3hr;
@@ -208,24 +176,20 @@ const getHourlyPrice = async (duration_hours = 2, slot_start_time = null) => {
     return 10 + (hours - 2) * 3;
   }
 };
-
 const getBirthdayThemePrice = async (themeId) => {
   const Theme = require('../models/Theme');
   const theme = await Theme.findById(themeId);
   return parseFloat(theme?.price) || 100.00;
 };
-
 const getSubscriptionPrice = async (planId) => {
   const SubscriptionPlan = require('../models/SubscriptionPlan');
   const plan = await SubscriptionPlan.findById(planId);
   return parseFloat(plan?.price) || 50.00;
 };
-
 const buildLineItems = async (lineItems = []) => {
   if (!Array.isArray(lineItems) || lineItems.length === 0) {
     return { normalizedLineItems: [], productsTotal: 0 };
   }
-
   const quantityByProduct = new Map();
   lineItems.forEach((item) => {
     const productId = (item?.productId || item?.product_id || '').toString().trim();
@@ -233,24 +197,18 @@ const buildLineItems = async (lineItems = []) => {
     if (!productId || qty <= 0) return;
     quantityByProduct.set(productId, (quantityByProduct.get(productId) || 0) + qty);
   });
-
   const productIds = [...quantityByProduct.keys()];
   if (productIds.length === 0) return { normalizedLineItems: [], productsTotal: 0 };
-
   const products = await Product.find({ _id: { $in: productIds }, active: true });
   const productsMap = new Map(products.map((product) => [product._id.toString(), product]));
-
   const normalizedLineItems = [];
   let productsTotal = 0;
-
   quantityByProduct.forEach((quantity, productId) => {
     const product = productsMap.get(productId);
     if (!product) return;
-
     const unitPriceJD = Number(product.priceJD) || 0;
     const lineTotalJD = unitPriceJD * quantity;
     productsTotal += lineTotalJD;
-
     normalizedLineItems.push({
       productId: product._id.toString(),
       sku: product.sku,
@@ -261,10 +219,8 @@ const buildLineItems = async (lineItems = []) => {
       lineTotalJD
     });
   });
-
   return { normalizedLineItems, productsTotal };
 };
-
 // Get hourly pricing info (public endpoint for frontend)
 router.get('/hourly-pricing', async (req, res) => {
   try {
@@ -289,16 +245,13 @@ router.get('/hourly-pricing', async (req, res) => {
     const pricing = await Settings.find({
       key: { $in: ['hourly_1hr', 'hourly_2hr', 'hourly_3hr', 'hourly_extra_hr'] }
     });
-
     const prices = {
       hourly_1hr: 7,
       hourly_2hr: 10,
       hourly_3hr: 13,
       hourly_extra_hr: 3
     };
-
     pricing.forEach(p => { prices[p.key] = parseFloat(p.value); });
-
     res.json({
       pricing: [
         { hours: 1, price: prices.hourly_1hr, label: '1 Hour', label_ar: 'ساعة واحدة' },
@@ -315,12 +268,10 @@ router.get('/hourly-pricing', async (req, res) => {
     res.status(500).json({ error: 'Failed to get pricing' });
   }
 });
-
 // Create checkout session
 router.post('/create-checkout', authMiddleware, async (req, res) => {
   try {
     const effectiveProvider = getEffectiveProvider();
-
     // Manual payment mode
     if (effectiveProvider === PAYMENT_PROVIDERS.MANUAL) {
       return res.status(200).json({
@@ -328,26 +279,20 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
         payment_method: 'manual'
       });
     }
-
     const { type, reference_id, origin_url, duration_hours, custom_notes, timeMode, lineItems, coupon_code } = req.body;
-
     if (!type) {
       return res.status(400).json({ error: 'type is required' });
     }
-
     const frontendOrigin = resolveFrontendOrigin(origin_url, req);
     if (!frontendOrigin) {
       return res.status(400).json({ error: 'Invalid or unauthorized frontend origin' });
     }
-
     const { normalizedLineItems, productsTotal } = await buildLineItems(lineItems);
-
     let amount;
     let metadata = { type, user_id: req.userId.toString() };
     if (normalizedLineItems.length > 0) {
       metadata.line_items = JSON.stringify(normalizedLineItems);
     }
-
     // Get amount from server-side pricing
     switch (type) {
       case 'hourly': {
@@ -355,7 +300,6 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
         const childIds = req.body.child_ids || (req.body.child_id ? [req.body.child_id] : []);
         const childCount = childIds.length || 1;
         const slotStartTime = req.body.slot_start_time || null;
-
         // Check capacity before creating checkout
         const slot = await TimeSlot.findById(reference_id);
         if (!slot) {
@@ -365,7 +309,6 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
         if (availableSpots < childCount) {
           return res.status(400).json({ error: `عذراً، المتاح ${availableSpots} مكان فقط. اخترت ${childCount} أطفال.` });
         }
-
         const basePrice = await getHourlyPrice(hours, slotStartTime);
         amount = (basePrice * childCount) + productsTotal;
         metadata.slot_id = reference_id;
@@ -395,14 +338,12 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       default:
         return res.status(400).json({ error: 'Invalid payment type' });
     }
-
     // Handle child_ids for multi-child booking (backward compat with child_id)
     if (req.body.child_ids && req.body.child_ids.length > 0) {
       metadata.child_ids = JSON.stringify(req.body.child_ids);
     } else if (req.body.child_id) {
       metadata.child_ids = JSON.stringify([req.body.child_id]);
     }
-
     // Apply coupon discount when provided
     if (coupon_code) {
       const couponValidation = await validateCoupon({
@@ -418,25 +359,20 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       metadata.coupon_code = normalizedCode;
       metadata.discount_amount = discountAmount;
     }
-
     // Ensure amount is a valid float
     amount = parseFloat(amount);
     if (isNaN(amount) || amount <= 0) {
       return res.status(400).json({ error: 'Invalid price configuration' });
     }
-
     console.log('Creating checkout session:', { type, amount, metadata });
-
     let sessionId;
     let checkoutUrl;
     const currency = 'jod';
-
     if (effectiveProvider === PAYMENT_PROVIDERS.CAPITAL_BANK) {
       sessionId = `cb_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
       metadata.frontend_origin = frontendOrigin;
       checkoutUrl = `/payment/capital-bank/${sessionId}`;
     }
-
     // Create pending payment transaction
     const transaction = new PaymentTransaction({
       session_id: sessionId,
@@ -450,7 +386,6 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       metadata
     });
     await transaction.save();
-
     console.log('Checkout session created:', sessionId, 'provider:', effectiveProvider);
     res.json({
       url: checkoutUrl,
@@ -465,19 +400,15 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
     });
   }
 });
-
 // Get checkout status
 router.get('/status/:sessionId', authMiddleware, async (req, res) => {
   try {
     const effectiveProvider = getEffectiveProvider();
-
     const { sessionId } = req.params;
-
     const transaction = await PaymentTransaction.findOne({ session_id: sessionId, user_id: req.userId });
     if (!transaction) {
       return res.status(404).json({ error: 'Transaction not found' });
     }
-
     if (effectiveProvider === PAYMENT_PROVIDERS.CAPITAL_BANK) {
       return res.json({
         status: transaction.status,
@@ -487,7 +418,6 @@ router.get('/status/:sessionId', authMiddleware, async (req, res) => {
         payment_provider: effectiveProvider
       });
     }
-
     return res.json({
       status: transaction.status,
       payment_status: transaction.payment_status || 'pending',
@@ -500,83 +430,80 @@ router.get('/status/:sessionId', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Failed to get checkout status' });
   }
 });
-
-
-
-
 const buildSignedDateTime = () => new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
-
-const buildApiCallbackUrl = (req, pathName) => {
-  const forwardedProto = (req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
-  const protocol = forwardedProto || req.protocol || 'https';
-  const host = req.get('host');
-  return `${protocol}://${host}${pathName}`;
-};
-
-const buildSecureAcceptanceFields = (req, transaction) => {
+const buildSecureAcceptanceFields = (transaction) => {
   const sessionId = transaction.session_id;
   const signedFieldNames = [
     'access_key',
-    'profile_id',
-    'transaction_uuid',
-    'signed_field_names',
-    'signed_date_time',
-    'locale',
-    'transaction_type',
-    'reference_number',
     'amount',
     'currency',
-    'override_custom_receipt_page',
-    'override_custom_cancel_page',
-    'unsigned_field_names'
+    'locale',
+    'profile_id',
+    'reference_number',
+    'signed_date_time',
+    'signed_field_names',
+    'transaction_type',
+    'transaction_uuid'
   ];
-
   const fields = {
     access_key: capitalBankConfig.accessKey,
-    profile_id: capitalBankConfig.profileId,
-    transaction_uuid: `${sessionId}-${Date.now()}`,
-    signed_field_names: signedFieldNames.join(','),
-    signed_date_time: buildSignedDateTime(),
-    locale: capitalBankConfig.locale,
-    transaction_type: 'sale',
-    reference_number: sessionId,
     amount: Number(transaction.amount || 0).toFixed(2),
-    currency: capitalBankConfig.currency,
-    override_custom_receipt_page: buildApiCallbackUrl(req, '/api/payments/capital-bank/secure-acceptance/response'),
-    override_custom_cancel_page: buildApiCallbackUrl(req, '/api/payments/capital-bank/secure-acceptance/cancel'),
-    unsigned_field_names: 'merchant_defined_data1',
-    merchant_defined_data1: sessionId
+    currency: 'JOD',
+    locale: 'ar',
+    profile_id: capitalBankConfig.profileId,
+    reference_number: sessionId,
+    signed_date_time: buildSignedDateTime(),
+    signed_field_names: signedFieldNames.join(','),
+    transaction_type: 'sale',
+    transaction_uuid: `${sessionId}-${Date.now()}`
   };
-
   fields.signature = signSecureAcceptanceFields(fields, capitalBankConfig.secretKey);
   return fields;
 };
-
 const escapeHtml = (value) => String(value || '')
   .replace(/&/g, '&amp;')
   .replace(/</g, '&lt;')
   .replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;')
   .replace(/'/g, '&#39;');
-
+router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank, async (req, res) => {
+  try {
+    const activeProvider = getEffectiveProvider();
+    if (activeProvider !== PAYMENT_PROVIDERS.CAPITAL_BANK) {
+      return res.status(503).json({ error: 'Capital Bank hosted payment gateway is not enabled', missing_env_vars: missingCapitalBankEnvVars });
+    }
+    const { orderId } = req.body || {};
+    if (!orderId) {
+      return res.status(400).json({ error: 'orderId is required' });
+    }
+    const transaction = await resolveOrderTransaction(orderId, req.userId);
+    if (!transaction) {
+      return res.status(404).json({ error: 'Transaction not found' });
+    }
+    return res.status(200).json({
+      sessionId: transaction.session_id,
+      redirectUrl: `/api/payments/capital-bank/secure-acceptance/form/${encodeURIComponent(transaction.session_id)}`
+    });
+  } catch (error) {
+    console.error('Capital Bank initiate error:', error?.message);
+    return res.status(500).json({ error: 'Failed to initiate hosted payment' });
+  }
+});
 router.get('/capital-bank/secure-acceptance/form/:sessionId', authMiddleware, ensureHttpsForCapitalBank, async (req, res) => {
   try {
     const activeProvider = getEffectiveProvider();
     if (activeProvider !== PAYMENT_PROVIDERS.CAPITAL_BANK) {
       return res.status(503).json({ error: 'Capital Bank hosted payment gateway is not enabled', missing_env_vars: missingCapitalBankEnvVars });
     }
-
     const { sessionId } = req.params;
     const transaction = await resolveOrderTransaction(sessionId, req.userId);
     if (!transaction) {
       return res.status(404).json({ error: 'Transaction not found' });
     }
-
-    const fields = buildSecureAcceptanceFields(req, transaction);
+    const fields = buildSecureAcceptanceFields(transaction);
     const formInputs = Object.entries(fields)
       .map(([key, value]) => `<input type="hidden" name="${escapeHtml(key)}" value="${escapeHtml(value)}" />`)
       .join('\n');
-
     return res.status(200).send(`<!doctype html>
 <html lang="ar" dir="rtl">
 <head><meta charset="utf-8" /><title>Redirecting to secure payment...</title></head>
@@ -593,7 +520,6 @@ ${formInputs}
     return res.status(500).json({ error: 'Failed to prepare hosted payment form' });
   }
 });
-
 const mapCapitalBankDecisionToState = (decision, reason = '') => {
   const normalized = String(decision || '').toUpperCase();
   if (normalized === 'ACCEPT') {
@@ -604,50 +530,61 @@ const mapCapitalBankDecisionToState = (decision, reason = '') => {
   }
   return { status: 'failed', paymentStatus: normalized ? normalized.toLowerCase() : 'failed', redirectPath: '/payment/failed', reason };
 };
-
-const getCallbackPayload = (req) => req.body || {};
-
+const extractTrustedSignedFields = (payload = {}) => {
+  const signedNames = String(payload.signed_field_names || '')
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean);
+  const trusted = {};
+  signedNames.forEach((name) => {
+    trusted[name] = payload[name];
+  });
+  trusted.signed_field_names = payload.signed_field_names;
+  trusted.signature = payload.signature;
+  return trusted;
+};
 const getRedirectForState = (state, sessionId) => {
+  if (state.redirectPath === '/payment/success') {
+    return `${state.redirectPath}?orderId=${encodeURIComponent(sessionId)}`;
+  }
   if (state.redirectPath === '/payment/failed') {
     const reason = state.reason || 'payment_declined';
-    return `${state.redirectPath}?session_id=${encodeURIComponent(sessionId)}&reason=${encodeURIComponent(reason)}`;
+    return `${state.redirectPath}?sessionId=${encodeURIComponent(sessionId)}&reason=${encodeURIComponent(reason)}`;
   }
-  return `${state.redirectPath}?session_id=${encodeURIComponent(sessionId)}`;
+  return `${state.redirectPath}?sessionId=${encodeURIComponent(sessionId)}`;
 };
-
-const processCapitalBankHostedCallback = async (req, res, source) => {
-  const payload = getCallbackPayload(req);
+const processCapitalBankHostedCallback = async (payload, source) => {
   if (!verifySecureAcceptanceSignature(payload, capitalBankConfig.secretKey)) {
-    return res.status(400).send('invalid signature');
+    console.error('[ALERT][SECURITY] Invalid Capital Bank callback signature', { source });
+    return { statusCode: 400, body: 'invalid signature' };
   }
-
-  const sessionId = payload.req_reference_number || payload.reference_number;
+  const trustedPayload = extractTrustedSignedFields(payload);
+  const sessionId = trustedPayload.reference_number || trustedPayload.req_reference_number;
   if (!sessionId) {
-    return res.status(400).send('missing reference');
+    return { statusCode: 400, body: 'missing reference' };
   }
-
-  const decision = String(payload.decision || payload.payment_status || '').toUpperCase() || 'DECLINE';
-  const reason = String(payload.message || payload.reason || payload.reason_code || 'payment_declined');
-  const transactionId = String(payload.transaction_id || payload.transaction_uuid || `${sessionId}:${decision}`);
+  const decision = String(trustedPayload.decision || '').toUpperCase() || 'DECLINE';
+  const reason = String(trustedPayload.message || trustedPayload.reason_code || 'payment_declined');
+  const transactionId = String(trustedPayload.transaction_id || trustedPayload.transaction_uuid || `${sessionId}:${decision}`);
   const mapped = mapCapitalBankDecisionToState(decision, reason);
-
+  const filter = { session_id: sessionId };
+  if (source === 'notify') {
+    filter.$or = [
+      { 'metadata.processed_transaction_ids': { $exists: false } },
+      { 'metadata.processed_transaction_ids': { $ne: transactionId } }
+    ];
+  }
   const updated = await PaymentTransaction.findOneAndUpdate(
-    {
-      session_id: sessionId,
-      $or: [
-        { 'metadata.processed_transaction_ids': { $exists: false } },
-        { 'metadata.processed_transaction_ids': { $ne: transactionId } }
-      ]
-    },
+    filter,
     {
       $set: {
         status: mapped.status,
         payment_status: mapped.paymentStatus,
-        payment_id: payload.transaction_id || payload.req_transaction_uuid || null,
+        payment_id: trustedPayload.transaction_id || trustedPayload.req_transaction_uuid || null,
         updated_at: new Date(),
         error_message: mapped.status === 'failed' ? reason : null,
         'metadata.cybersource_last_source': source,
-        'metadata.cybersource_last_response': payload,
+        'metadata.cybersource_last_response': trustedPayload,
         'metadata.cybersource_last_decision': decision,
         provider: PAYMENT_PROVIDERS.CAPITAL_BANK
       },
@@ -655,52 +592,61 @@ const processCapitalBankHostedCallback = async (req, res, source) => {
     },
     { new: true }
   );
-
   const transaction = updated || await PaymentTransaction.findOne({ session_id: sessionId });
   if (!transaction) {
-    if (source === 'notify') return res.status(200).send('ok');
-    return res.redirect(303, '/payment/failed?reason=transaction_not_found');
+    return { statusCode: source === 'notify' ? 200 : 303, redirect: '/payment/failed?reason=transaction_not_found', body: 'ok' };
   }
-
   if (source === 'notify') {
-    return res.status(200).send('ok');
+    return { statusCode: 200, body: 'ok' };
   }
-
-  return res.redirect(303, getRedirectForState(mapped, sessionId));
+  return { statusCode: 303, redirect: getRedirectForState(mapped, sessionId) };
 };
-
 router.post('/capital-bank/secure-acceptance/response', express.urlencoded({ extended: false }), ensureHttpsForCapitalBank, async (req, res) => {
   try {
-    return await processCapitalBankHostedCallback(req, res, 'response');
+    const result = await processCapitalBankHostedCallback(req.body || {}, 'response');
+    if (result.redirect) return res.redirect(result.statusCode, result.redirect);
+    return res.status(result.statusCode).send(result.body);
   } catch (error) {
     console.error('Capital Bank response processing error:', error?.message);
     return res.redirect(303, '/payment/failed?reason=callback_processing_error');
   }
 });
-
 router.post('/capital-bank/secure-acceptance/cancel', express.urlencoded({ extended: false }), ensureHttpsForCapitalBank, async (req, res) => {
   try {
-    return await processCapitalBankHostedCallback(req, res, 'cancel');
+    const sessionId = String(req.body?.reference_number || req.body?.req_reference_number || '');
+    if (sessionId) {
+      await PaymentTransaction.findOneAndUpdate(
+        { session_id: sessionId },
+        {
+          $set: {
+            status: 'cancelled',
+            payment_status: 'cancelled',
+            updated_at: new Date(),
+            error_message: 'cancelled',
+            'metadata.cybersource_last_source': 'cancel'
+          }
+        }
+      );
+    }
+    return res.redirect(303, '/payment/failed?reason=cancelled');
   } catch (error) {
     console.error('Capital Bank cancel processing error:', error?.message);
     return res.redirect(303, '/payment/failed?reason=callback_processing_error');
   }
 });
-
 router.post('/capital-bank/secure-acceptance/notify', express.urlencoded({ extended: false }), ensureHttpsForCapitalBank, async (req, res) => {
   try {
-    return await processCapitalBankHostedCallback(req, res, 'notify');
+    const result = await processCapitalBankHostedCallback(req.body || {}, 'notify');
+    return res.status(result.statusCode).send('ok');
   } catch (error) {
     console.error('Capital Bank notify processing error:', error?.message);
     return res.status(200).send('ok');
   }
 });
-
 // Store transaction
 router.post('/store-transaction', authMiddleware, async (req, res) => {
   try {
     const { session_id, user_id, amount, currency, type, reference_id, metadata } = req.body;
-
     const transaction = new PaymentTransaction({
       session_id,
       user_id: user_id || req.userId,
@@ -712,14 +658,12 @@ router.post('/store-transaction', authMiddleware, async (req, res) => {
       metadata
     });
     await transaction.save();
-
     res.status(201).json({ transaction: transaction.toJSON() });
   } catch (error) {
     console.error('Store transaction error:', error);
     res.status(500).json({ error: 'Failed to store transaction' });
   }
 });
-
 // Get payment history
 router.get('/history', authMiddleware, async (req, res) => {
   try {
@@ -727,12 +671,10 @@ router.get('/history', authMiddleware, async (req, res) => {
       user_id: req.userId,
       status: 'paid'
     }).sort({ created_at: -1 });
-
     res.json({ transactions: transactions.map(t => t.toJSON()) });
   } catch (error) {
     console.error('Get payment history error:', error);
     res.status(500).json({ error: 'Failed to get payment history' });
   }
 });
-
 module.exports = router;
