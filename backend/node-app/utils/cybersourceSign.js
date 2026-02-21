@@ -72,10 +72,53 @@ const verifyCapitalBankCallbackSignature = (payload = {}, signature, secretKey) 
   return sigBuf.length === expBuf.length && crypto.timingSafeEqual(sigBuf, expBuf);
 };
 
+const stringifyFieldValue = (value) => {
+  if (value === undefined || value === null) return '';
+  return String(value);
+};
+
+const buildSecureAcceptanceSignedData = (fields = {}, signedFieldNames = []) => {
+  return signedFieldNames
+    .map((name) => `${name}=${stringifyFieldValue(fields[name])}`)
+    .join(',');
+};
+
+const signSecureAcceptanceFields = (fields = {}, secretKey) => {
+  const signedFieldNames = String(fields.signed_field_names || '')
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean);
+
+  if (signedFieldNames.length === 0) {
+    throw new Error('signed_field_names is required');
+  }
+
+  const dataToSign = buildSecureAcceptanceSignedData(fields, signedFieldNames);
+  return crypto
+    .createHmac('sha256', getRequiredSecret(secretKey))
+    .update(dataToSign, 'utf8')
+    .digest('base64');
+};
+
+const verifySecureAcceptanceSignature = (fields = {}, secretKey) => {
+  const receivedSignature = String(fields.signature || '');
+  if (!receivedSignature) return false;
+
+  const expected = signSecureAcceptanceFields(fields, secretKey);
+  const receivedBuffer = Buffer.from(receivedSignature, 'utf8');
+  const expectedBuffer = Buffer.from(expected, 'utf8');
+
+  return receivedBuffer.length === expectedBuffer.length
+    && crypto.timingSafeEqual(receivedBuffer, expectedBuffer);
+};
+
 module.exports = {
   buildDigestHeader,
   buildSignatureHeader,
   buildCyberSourceAuthHeaders,
   buildCapitalBankCallbackSignature,
-  verifyCapitalBankCallbackSignature
+  verifyCapitalBankCallbackSignature,
+  buildSecureAcceptanceSignedData,
+  signSecureAcceptanceFields,
+  verifySecureAcceptanceSignature
 };

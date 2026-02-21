@@ -7,14 +7,13 @@ const { authMiddleware } = require('../middleware/auth');
 const loyaltyRouter = require('./loyalty');
 const { awardPoints } = loyaltyRouter;
 const { validateCoupon } = require('../utils/coupons');
-const { buildCyberSourceAuthHeaders, verifyCapitalBankCallbackSignature } = require('../utils/cybersourceSign');
+const { signSecureAcceptanceFields, verifySecureAcceptanceSignature } = require('../utils/cybersourceSign');
 
 const router = express.Router();
 
 const PAYMENT_PROVIDERS = {
   MANUAL: 'manual',
-  CAPITAL_BANK: 'capital_bank',
-  CAPITAL_BANK_REST: 'capital_bank_rest'
+  CAPITAL_BANK: 'capital_bank'
 };
 
 
@@ -56,32 +55,32 @@ const maybeAwardProductLoyaltyPoints = async (transaction) => {
 };
 
 const capitalBankConfig = {
-  merchantId: process.env.CAPITAL_BANK_MERCHANT_ID,
+  profileId: process.env.CAPITAL_BANK_PROFILE_ID,
   accessKey: process.env.CAPITAL_BANK_ACCESS_KEY,
   secretKey: process.env.CAPITAL_BANK_SECRET_KEY,
   locale: process.env.CAPITAL_BANK_LOCALE || 'ar',
   currency: (process.env.CAPITAL_BANK_CURRENCY || 'JOD').toUpperCase(),
-  paymentEndpoint: process.env.CAPITAL_BANK_PAYMENT_ENDPOINT || 'https://apitest.cybersource.com'
+  paymentEndpoint: process.env.CAPITAL_BANK_PAYMENT_ENDPOINT || 'https://testsecureacceptance.cybersource.com/pay'
 };
 
-const requestedCapitalBankProvider = [PAYMENT_PROVIDERS.CAPITAL_BANK, PAYMENT_PROVIDERS.CAPITAL_BANK_REST].includes(paymentProvider);
+const requestedCapitalBankProvider = paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK;
 
 const missingCapitalBankEnvVars = [
-  ['CAPITAL_BANK_MERCHANT_ID', capitalBankConfig.merchantId],
+  ['CAPITAL_BANK_PROFILE_ID', capitalBankConfig.profileId],
   ['CAPITAL_BANK_ACCESS_KEY', capitalBankConfig.accessKey],
   ['CAPITAL_BANK_SECRET_KEY', capitalBankConfig.secretKey],
   ['CAPITAL_BANK_PAYMENT_ENDPOINT', capitalBankConfig.paymentEndpoint]
 ].filter(([, value]) => !value).map(([name]) => name);
 
-const capitalBankRestReady = requestedCapitalBankProvider && missingCapitalBankEnvVars.length === 0;
+const capitalBankHostedReady = requestedCapitalBankProvider && missingCapitalBankEnvVars.length === 0;
 
 if (!supportedPaymentProviders.has(requestedPaymentProvider)) {
   console.warn(`[Payments] Unsupported PAYMENT_PROVIDER "${requestedPaymentProvider}". Falling back to ${PAYMENT_PROVIDERS.MANUAL}. Supported values: ${Object.values(PAYMENT_PROVIDERS).join(', ')}`);
 }
 
 if (requestedCapitalBankProvider) {
-  if (capitalBankRestReady) {
-    console.log(`[Payments] Active provider: ${paymentProvider} (CyberSource REST)`);
+  if (capitalBankHostedReady) {
+    console.log(`[Payments] Active provider: ${paymentProvider} (CyberSource Secure Acceptance Hosted)`);
     console.log(`[Payments] Capital Bank endpoint: ${capitalBankConfig.paymentEndpoint}`);
   } else {
     console.warn(`[Payments] Active provider fallback: manual. Missing env vars for ${paymentProvider}: ${missingCapitalBankEnvVars.join(', ')}`);
@@ -91,7 +90,7 @@ if (requestedCapitalBankProvider) {
 }
 
 const getEffectiveProvider = () => {
-  if (capitalBankRestReady) return paymentProvider;
+  if (capitalBankHostedReady) return paymentProvider;
   return PAYMENT_PROVIDERS.MANUAL;
 };
 
@@ -140,27 +139,6 @@ const resolveFrontendOrigin = (originUrl, req) => {
   return null;
 };
 
-const buildFrontendRedirectUrl = (frontendOrigin, pathName, sessionId) => {
-  const safeOrigin = normalizeOrigin(frontendOrigin);
-  if (!safeOrigin) return null;
-  const redirectUrl = new URL(pathName, safeOrigin);
-  redirectUrl.searchParams.set('session_id', sessionId);
-  return redirectUrl.toString();
-};
-
-const requireCsrfToken = (req, res, next) => {
-  const csrfToken = req.get('x-csrf-token');
-  const frontendOrigin = resolveFrontendOrigin(null, req);
-  const requestOrigin = normalizeOrigin(req.get('origin') || req.get('referer'));
-  if (!csrfToken || csrfToken.length < 16) {
-    return res.status(403).json({ error: 'Missing CSRF token' });
-  }
-  if (frontendOrigin && requestOrigin && frontendOrigin !== requestOrigin) {
-    return res.status(403).json({ error: 'Untrusted request origin' });
-  }
-  return next();
-};
-
 const resolveOrderTransaction = async (orderId, userId) => {
   const search = [
     { _id: orderId },
@@ -179,37 +157,6 @@ const resolveOrderTransaction = async (orderId, userId) => {
   return null;
 };
 
-const toAmountString = (amount) => Number(amount || 0).toFixed(2);
-
-const mapCyberSourceDecision = (responsePayload = {}) => {
-  const status = String(responsePayload.status || '').toUpperCase();
-  const acceptedStatuses = new Set(['AUTHORIZED', 'TRANSMITTED', 'SUCCEEDED']);
-  const pendingStatuses = new Set(['PENDING', 'REVIEW']);
-  const decision = acceptedStatuses.has(status)
-    ? 'ACCEPT'
-    : (pendingStatuses.has(status) ? 'PENDING' : (status || 'DECLINE'));
-  const reasonCode = String(
-    responsePayload?.processorInformation?.responseCode
-      || responsePayload?.errorInformation?.reason
-      || (decision === 'ACCEPT' ? '100' : '102')
-  );
-  return { decision, reasonCode, status };
-};
-
-const buildBillToFromMetadata = (transaction) => {
-  const billing = transaction?.metadata?.billing || {};
-  return {
-    firstName: billing.firstName || 'Guest',
-    lastName: billing.lastName || 'User',
-    address1: billing.address1 || 'Amman',
-    locality: billing.city || 'Amman',
-    administrativeArea: billing.state || 'Amman',
-    postalCode: billing.postalCode || '11118',
-    country: billing.country || 'JO',
-    email: billing.email || 'guest@example.com',
-    phoneNumber: billing.phone || '0000000000'
-  };
-};
 // Morning (Happy Hour) price: 3.5 JD per hour
 const MORNING_PRICE_PER_HOUR = 3.5;
 
@@ -484,7 +431,7 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
     let checkoutUrl;
     const currency = 'jod';
 
-    if ([PAYMENT_PROVIDERS.CAPITAL_BANK, PAYMENT_PROVIDERS.CAPITAL_BANK_REST].includes(effectiveProvider)) {
+    if (effectiveProvider === PAYMENT_PROVIDERS.CAPITAL_BANK) {
       sessionId = `cb_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
       metadata.frontend_origin = frontendOrigin;
       checkoutUrl = `/payment/capital-bank/${sessionId}`;
@@ -531,7 +478,7 @@ router.get('/status/:sessionId', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'Transaction not found' });
     }
 
-    if ([PAYMENT_PROVIDERS.CAPITAL_BANK, PAYMENT_PROVIDERS.CAPITAL_BANK_REST].includes(effectiveProvider)) {
+    if (effectiveProvider === PAYMENT_PROVIDERS.CAPITAL_BANK) {
       return res.json({
         status: transaction.status,
         payment_status: transaction.payment_status || (transaction.status === 'paid' ? 'paid' : 'pending'),
@@ -556,167 +503,132 @@ router.get('/status/:sessionId', authMiddleware, async (req, res) => {
 
 
 
-router.post('/capital-bank/initiate', authMiddleware, requireCsrfToken, ensureHttpsForCapitalBank, async (req, res) => {
+
+const buildSignedDateTime = () => new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
+
+const buildApiCallbackUrl = (req, pathName) => {
+  const forwardedProto = (req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
+  const protocol = forwardedProto || req.protocol || 'https';
+  const host = req.get('host');
+  return `${protocol}://${host}${pathName}`;
+};
+
+const buildSecureAcceptanceFields = (req, transaction) => {
+  const sessionId = transaction.session_id;
+  const signedFieldNames = [
+    'access_key',
+    'profile_id',
+    'transaction_uuid',
+    'signed_field_names',
+    'signed_date_time',
+    'locale',
+    'transaction_type',
+    'reference_number',
+    'amount',
+    'currency',
+    'override_custom_receipt_page',
+    'override_custom_cancel_page',
+    'unsigned_field_names'
+  ];
+
+  const fields = {
+    access_key: capitalBankConfig.accessKey,
+    profile_id: capitalBankConfig.profileId,
+    transaction_uuid: `${sessionId}-${Date.now()}`,
+    signed_field_names: signedFieldNames.join(','),
+    signed_date_time: buildSignedDateTime(),
+    locale: capitalBankConfig.locale,
+    transaction_type: 'sale',
+    reference_number: sessionId,
+    amount: Number(transaction.amount || 0).toFixed(2),
+    currency: capitalBankConfig.currency,
+    override_custom_receipt_page: buildApiCallbackUrl(req, '/api/payments/capital-bank/secure-acceptance/response'),
+    override_custom_cancel_page: buildApiCallbackUrl(req, '/api/payments/capital-bank/secure-acceptance/cancel'),
+    unsigned_field_names: 'merchant_defined_data1',
+    merchant_defined_data1: sessionId
+  };
+
+  fields.signature = signSecureAcceptanceFields(fields, capitalBankConfig.secretKey);
+  return fields;
+};
+
+const escapeHtml = (value) => String(value || '')
+  .replace(/&/g, '&amp;')
+  .replace(/</g, '&lt;')
+  .replace(/>/g, '&gt;')
+  .replace(/"/g, '&quot;')
+  .replace(/'/g, '&#39;');
+
+router.get('/capital-bank/secure-acceptance/form/:sessionId', authMiddleware, ensureHttpsForCapitalBank, async (req, res) => {
   try {
     const activeProvider = getEffectiveProvider();
-    if (![PAYMENT_PROVIDERS.CAPITAL_BANK, PAYMENT_PROVIDERS.CAPITAL_BANK_REST].includes(activeProvider)) {
-      return res.status(503).json({
-        error: 'Capital Bank payment gateway is not enabled',
-        missing_env_vars: missingCapitalBankEnvVars
-      });
+    if (activeProvider !== PAYMENT_PROVIDERS.CAPITAL_BANK) {
+      return res.status(503).json({ error: 'Capital Bank hosted payment gateway is not enabled', missing_env_vars: missingCapitalBankEnvVars });
     }
 
-    const { orderId, card = {}, transientToken } = req.body || {};
-    if (!orderId) {
-      return res.status(400).json({ error: 'orderId is required' });
+    const { sessionId } = req.params;
+    const transaction = await resolveOrderTransaction(sessionId, req.userId);
+    if (!transaction) {
+      return res.status(404).json({ error: 'Transaction not found' });
     }
 
-    const order = await resolveOrderTransaction(orderId, req.userId);
-    if (!order) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
+    const fields = buildSecureAcceptanceFields(req, transaction);
+    const formInputs = Object.entries(fields)
+      .map(([key, value]) => `<input type="hidden" name="${escapeHtml(key)}" value="${escapeHtml(value)}" />`)
+      .join('\n');
 
-    // Security invariant: the authoritative amount is always loaded from the stored server-side transaction.
-    const amount = toAmountString(order.amount);
-    const payload = {
-      clientReferenceInformation: { code: order.session_id },
-      processingInformation: { capture: true },
-      orderInformation: {
-        amountDetails: {
-          totalAmount: amount,
-          currency: capitalBankConfig.currency
-        },
-        billTo: buildBillToFromMetadata(order)
-      }
-    };
-
-    if (transientToken) {
-      payload.tokenInformation = { transientToken };
-    } else {
-      const { number, expirationMonth, expirationYear, securityCode } = card;
-      if (!number || !expirationMonth || !expirationYear || !securityCode) {
-        return res.status(400).json({ error: 'Card data or transientToken is required' });
-      }
-      payload.paymentInformation = {
-        card: {
-          number: String(number).replace(/\s+/g, ''),
-          expirationMonth: String(expirationMonth),
-          expirationYear: String(expirationYear),
-          securityCode: String(securityCode)
-        }
-      };
-    }
-
-    const paymentsUrl = new URL('/pts/v2/payments', capitalBankConfig.paymentEndpoint);
-    const headers = buildCyberSourceAuthHeaders({
-      method: 'POST',
-      url: paymentsUrl.toString(),
-      body: payload,
-      merchantId: capitalBankConfig.merchantId,
-      accessKey: capitalBankConfig.accessKey,
-      secretKey: capitalBankConfig.secretKey
-    });
-
-    const response = await fetch(paymentsUrl, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload)
-    });
-
-    const responseData = await response.json().catch(() => ({}));
-    const { decision, reasonCode } = mapCyberSourceDecision(responseData);
-    const transactionId = responseData.id || `${order.session_id}:${decision}`;
-    const isAccepted = response.ok && decision === 'ACCEPT';
-    const isPending = response.ok && (decision === 'PENDING' || decision === 'REVIEW');
-
-    const updated = await PaymentTransaction.findOneAndUpdate(
-      {
-        _id: order._id,
-        $or: [
-          { 'metadata.processed_transaction_ids': { $exists: false } },
-          { 'metadata.processed_transaction_ids': { $ne: transactionId } }
-        ]
-      },
-      {
-        $set: {
-          provider: activeProvider,
-          currency: capitalBankConfig.currency.toLowerCase(),
-          payment_id: responseData.id || null,
-          status: isAccepted ? 'paid' : (isPending ? 'pending' : 'failed'),
-          payment_status: isAccepted ? 'paid' : (isPending ? 'review' : 'failed'),
-          updated_at: new Date(),
-          'metadata.cybersource_rest_last_response': responseData,
-          'metadata.cybersource_rest_last_decision': decision,
-          'metadata.cybersource_rest_last_reason_code': reasonCode
-        },
-        $addToSet: { 'metadata.processed_transaction_ids': transactionId }
-      },
-      { new: true }
-    );
-
-    if (!updated) {
-      return res.status(200).json({ received: true, duplicate: true, sessionId: order.session_id });
-    }
-
-    const statusCode = isAccepted || isPending ? 200 : 402;
-    return res.status(statusCode).json({
-      received: true,
-      sessionId: order.session_id,
-      transaction_id: responseData.id,
-      decision,
-      reason_code: reasonCode,
-      status: updated.status,
-      provider_response: responseData
-    });
+    return res.status(200).send(`<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8" /><title>Redirecting to secure payment...</title></head>
+<body>
+  <p>جاري تحويلك إلى صفحة الدفع الآمنة...</p>
+  <form id="capitalBankHostedForm" method="post" action="${escapeHtml(capitalBankConfig.paymentEndpoint)}">
+${formInputs}
+  </form>
+  <script>document.getElementById('capitalBankHostedForm').submit();</script>
+</body>
+</html>`);
   } catch (error) {
-    console.error('Capital Bank initiate error:', error?.message);
-    return res.status(500).json({ error: 'Failed to initiate Capital Bank payment' });
+    console.error('Secure Acceptance form error:', error?.message);
+    return res.status(500).json({ error: 'Failed to prepare hosted payment form' });
   }
 });
-
-const capitalBankCallbackParser = express.json({ type: ['application/json', 'application/*+json'] });
 
 const mapCapitalBankDecisionToState = (decision, reason = '') => {
   const normalized = String(decision || '').toUpperCase();
   if (normalized === 'ACCEPT') {
-    return { status: 'paid', paymentStatus: 'paid', redirectPath: '/payment/success', redirectParams: { orderId: null } };
+    return { status: 'paid', paymentStatus: 'paid', redirectPath: '/payment/success' };
   }
   if (normalized === 'REVIEW' || normalized === 'PENDING') {
-    return { status: 'pending', paymentStatus: 'review', redirectPath: '/payment/pending', redirectParams: { orderId: null } };
+    return { status: 'pending', paymentStatus: 'review', redirectPath: '/payment/pending' };
   }
-  return { status: 'failed', paymentStatus: normalized ? normalized.toLowerCase() : 'failed', redirectPath: '/payment/failed', redirectParams: { reason } };
+  return { status: 'failed', paymentStatus: normalized ? normalized.toLowerCase() : 'failed', redirectPath: '/payment/failed', reason };
 };
 
-const CALLBACK_SIGNATURE_HEADER = 'x-cb-signature';
+const getCallbackPayload = (req) => req.body || {};
 
-
-const requireJsonCallback = (req, res, next) => {
-  if (!req.is('application/json') && !req.is('application/*+json')) {
-    return res.status(415).json({ error: 'Callback content type must be application/json' });
+const getRedirectForState = (state, sessionId) => {
+  if (state.redirectPath === '/payment/failed') {
+    const reason = state.reason || 'payment_declined';
+    return `${state.redirectPath}?session_id=${encodeURIComponent(sessionId)}&reason=${encodeURIComponent(reason)}`;
   }
-  return next();
+  return `${state.redirectPath}?session_id=${encodeURIComponent(sessionId)}`;
 };
 
-const extractCapitalBankSignature = (req) => req.get(CALLBACK_SIGNATURE_HEADER) || null;
-
-const processCapitalBankCallback = async (req, res, source) => {
-  const payload = req.body || {};
-  const signature = extractCapitalBankSignature(req);
-
-  if (!verifyCapitalBankCallbackSignature(payload, signature, capitalBankConfig.secretKey)) {
-    console.error('[ALERT][SECURITY] Invalid Capital Bank callback signature', { source });
-    return res.status(400).json({ error: 'Invalid signature' });
+const processCapitalBankHostedCallback = async (req, res, source) => {
+  const payload = getCallbackPayload(req);
+  if (!verifySecureAcceptanceSignature(payload, capitalBankConfig.secretKey)) {
+    return res.status(400).send('invalid signature');
   }
 
-  const sessionId = payload.req_reference_number || payload.reference_number || payload.session_id || payload.transaction_uuid;
+  const sessionId = payload.req_reference_number || payload.reference_number;
   if (!sessionId) {
-    return res.status(400).json({ error: 'Missing session reference' });
+    return res.status(400).send('missing reference');
   }
 
-  const decision = String(payload.decision || payload.status || payload.reason_code || '').toUpperCase() || 'DECLINE';
+  const decision = String(payload.decision || payload.payment_status || '').toUpperCase() || 'DECLINE';
   const reason = String(payload.message || payload.reason || payload.reason_code || 'payment_declined');
-  const transactionId = String(payload.transaction_id || payload.id || `${sessionId}:${decision}`);
-
+  const transactionId = String(payload.transaction_id || payload.transaction_uuid || `${sessionId}:${decision}`);
   const mapped = mapCapitalBankDecisionToState(decision, reason);
 
   const updated = await PaymentTransaction.findOneAndUpdate(
@@ -731,14 +643,13 @@ const processCapitalBankCallback = async (req, res, source) => {
       $set: {
         status: mapped.status,
         payment_status: mapped.paymentStatus,
-        payment_id: payload.transaction_id || payload.id || null,
+        payment_id: payload.transaction_id || payload.req_transaction_uuid || null,
         updated_at: new Date(),
         error_message: mapped.status === 'failed' ? reason : null,
         'metadata.cybersource_last_source': source,
         'metadata.cybersource_last_response': payload,
         'metadata.cybersource_last_decision': decision,
-        'metadata.cybersource_last_reason': reason,
-        provider: getEffectiveProvider()
+        provider: PAYMENT_PROVIDERS.CAPITAL_BANK
       },
       $addToSet: { 'metadata.processed_transaction_ids': transactionId }
     },
@@ -747,44 +658,41 @@ const processCapitalBankCallback = async (req, res, source) => {
 
   const transaction = updated || await PaymentTransaction.findOne({ session_id: sessionId });
   if (!transaction) {
-    if (source === 'notify') return res.status(200).json({ received: true, ignored: true });
+    if (source === 'notify') return res.status(200).send('ok');
     return res.redirect(303, '/payment/failed?reason=transaction_not_found');
   }
 
   if (source === 'notify') {
-    return res.status(200).json({
-      received: true,
-      duplicate: !updated,
-      sessionId,
-      decision,
-      status: transaction.status
-    });
+    return res.status(200).send('ok');
   }
 
-  if (transaction.status === 'paid') {
-    return res.redirect(303, `/payment/success?orderId=${encodeURIComponent(sessionId)}`);
-  }
-  if (transaction.status === 'pending') {
-    return res.redirect(303, `/payment/pending?orderId=${encodeURIComponent(sessionId)}`);
-  }
-  return res.redirect(303, `/payment/failed?orderId=${encodeURIComponent(sessionId)}&reason=${encodeURIComponent(reason)}`);
+  return res.redirect(303, getRedirectForState(mapped, sessionId));
 };
 
-router.post('/capital-bank/return', requireJsonCallback, capitalBankCallbackParser, ensureHttpsForCapitalBank, async (req, res) => {
+router.post('/capital-bank/secure-acceptance/response', express.urlencoded({ extended: false }), ensureHttpsForCapitalBank, async (req, res) => {
   try {
-    return await processCapitalBankCallback(req, res, 'return');
+    return await processCapitalBankHostedCallback(req, res, 'response');
   } catch (error) {
-    console.error('Capital Bank return processing error:', error?.message);
+    console.error('Capital Bank response processing error:', error?.message);
     return res.redirect(303, '/payment/failed?reason=callback_processing_error');
   }
 });
 
-router.post('/capital-bank/notify', requireJsonCallback, capitalBankCallbackParser, ensureHttpsForCapitalBank, async (req, res) => {
+router.post('/capital-bank/secure-acceptance/cancel', express.urlencoded({ extended: false }), ensureHttpsForCapitalBank, async (req, res) => {
   try {
-    return await processCapitalBankCallback(req, res, 'notify');
+    return await processCapitalBankHostedCallback(req, res, 'cancel');
+  } catch (error) {
+    console.error('Capital Bank cancel processing error:', error?.message);
+    return res.redirect(303, '/payment/failed?reason=callback_processing_error');
+  }
+});
+
+router.post('/capital-bank/secure-acceptance/notify', express.urlencoded({ extended: false }), ensureHttpsForCapitalBank, async (req, res) => {
+  try {
+    return await processCapitalBankHostedCallback(req, res, 'notify');
   } catch (error) {
     console.error('Capital Bank notify processing error:', error?.message);
-    return res.status(200).json({ received: true });
+    return res.status(200).send('ok');
   }
 });
 
