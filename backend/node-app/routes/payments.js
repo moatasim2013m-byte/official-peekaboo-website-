@@ -552,8 +552,8 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
 
     cardData = {
       number: String(cardNumber).replace(/\s+/g, ''),
-      expirationMonth: String(expiryMonth).padStart(2, '0').slice(-2),
-      expirationYear: normalizeExpirationYear(expiryYear),
+      expirationMonth: String(String(expiryMonth).padStart(2, '0').slice(-2)),
+      expirationYear: String(normalizeExpirationYear(expiryYear)),
       securityCode: String(cvn),
       type: normalizeCardType(cardType)
     };
@@ -572,7 +572,7 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
     const payload = buildCyberSourcePaymentPayload({
       orderId: transaction.session_id,
       amount,
-      billTo: getBillingDataFromUser(transaction),
+      billTo: { ...TEST_BILLING_DEFAULTS },
       card: cardData
     });
 
@@ -626,6 +626,12 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
     }
 
     const reason = sanitizeReason(result?.errorInformation?.message || result?.message || 'payment_declined');
+    console.log('Capital Bank/CyberSource payment failure response body:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: result,
+      rawResponseBody
+    });
     await PaymentTransaction.findByIdAndUpdate(transaction._id, {
       $set: {
         status: 'failed',
