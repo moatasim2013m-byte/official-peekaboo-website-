@@ -6,11 +6,11 @@ const paymentTransactionSchema = new mongoose.Schema({
   user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   amount: { type: Number, required: true },
   currency: { type: String, default: 'usd' },
-  status: { type: String, enum: ['pending', 'paid', 'failed', 'expired'], default: 'pending' },
+  status: { type: String, enum: ['pending', 'paid', 'failed', 'expired', 'cancelled'], default: 'pending' },
   payment_status: { type: String },
   type: { type: String, enum: ['hourly', 'birthday', 'subscription'], required: true },
   reference_id: { type: String }, // booking_id or subscription_id
-  provider: { type: String, enum: ['manual', 'capital_bank', 'capital_bank_rest'], default: 'manual' },
+  provider: { type: String, enum: ['manual', 'capital_bank'], default: 'manual' },
   metadata: { type: Object },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now }

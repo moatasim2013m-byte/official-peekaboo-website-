@@ -1,94 +1,48 @@
-const cybersourceRestClient = require('cybersource-rest-client');
+const crypto = require('crypto');
 
-const getRunEnvironment = () => {
-  if (process.env.CYBERSOURCE_RUN_ENV) {
-    return process.env.CYBERSOURCE_RUN_ENV;
-  }
+const buildDigest = (requestBody = '') => {
+  const digest = crypto
+    .createHash('sha256')
+    .update(requestBody, 'utf8')
+    .digest('base64');
 
-  const env = (process.env.CYBERSOURCE_ENV || 'test').toLowerCase();
-  return env === 'production'
-    ? 'cybersource.environment.production'
-    : 'cybersource.environment.sandbox';
+  return `SHA-256=${digest}`;
 };
 
-const getConfigObject = () => {
-  const merchantID = process.env.CAPITAL_BANK_MERCHANT_ID;
-  const merchantKeyId = process.env.CAPITAL_BANK_ACCESS_KEY;
-  const merchantsecretKey = process.env.CAPITAL_BANK_SECRET_KEY;
+const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, requestBody = '') => {
+  if (!merchantId) throw new Error('CAPITAL_BANK_MERCHANT_ID is required');
+  if (!accessKey) throw new Error('CAPITAL_BANK_ACCESS_KEY is required');
+  if (!secretKey) throw new Error('CAPITAL_BANK_SECRET_KEY is required');
+  if (!endpointPath) throw new Error('CyberSource endpoint path is required');
 
-  if (!merchantID || !merchantKeyId || !merchantsecretKey) {
-    throw new Error('Missing Capital Bank REST credentials');
-  }
+  const date = new Date().toUTCString();
+  const host = 'apitest.cybersource.com';
+  const digest = buildDigest(requestBody);
+  const requestTarget = `post ${endpointPath}`;
+  const signingString = [
+    `host: ${host}`,
+    `date: ${date}`,
+    `request-target: ${requestTarget}`,
+    `v-c-merchant-id: ${merchantId}`,
+    `digest: ${digest}`
+  ].join('\n');
+
+  const signatureValue = crypto
+    .createHmac('sha256', secretKey)
+    .update(signingString, 'utf8')
+    .digest('base64');
 
   return {
-    authenticationType: 'http_signature',
-    merchantID,
-    merchantKeyId,
-    merchantsecretKey,
-    runEnvironment: getRunEnvironment()
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    'v-c-merchant-id': merchantId,
+    Date: date,
+    Host: host,
+    Digest: digest,
+    Signature: `keyId="${merchantId}", algorithm="HmacSHA256", headers="host date request-target v-c-merchant-id digest", signature="${signatureValue}"`
   };
-};
-
-const createPayment = ({
-  amount,
-  currency = 'JOD',
-  referenceNumber,
-  card,
-  billTo,
-  orderInformation
-}) => {
-  const configObject = new cybersourceRestClient.Configuration(getConfigObject());
-  const apiClient = new cybersourceRestClient.ApiClient();
-  const paymentsApi = new cybersourceRestClient.PaymentsApi(configObject, apiClient);
-
-  const requestObj = {
-    clientReferenceInformation: {
-      code: referenceNumber
-    },
-    processingInformation: {
-      capture: true
-    },
-    orderInformation: orderInformation || {
-      amountDetails: {
-        totalAmount: Number(amount).toFixed(2),
-        currency: String(currency).toUpperCase()
-      },
-      billTo: billTo || {
-        firstName: 'Test',
-        lastName: 'User',
-        address1: 'Amman',
-        locality: 'Amman',
-        administrativeArea: 'AM',
-        postalCode: '11118',
-        country: 'JO',
-        email: 'test@example.com'
-      }
-    },
-    paymentInformation: {
-      card: card || {
-        number: '4111111111111111',
-        expirationMonth: '12',
-        expirationYear: '2031',
-        securityCode: '123'
-      }
-    }
-  };
-
-  return new Promise((resolve, reject) => {
-    paymentsApi.createPayment(requestObj, (error, data, response) => {
-      if (error) {
-        return reject(error);
-      }
-
-      return resolve({
-        data,
-        status: response?.status,
-        headers: response?.headers
-      });
-    });
-  });
 };
 
 module.exports = {
-  createPayment
+  buildRestHeaders
 };

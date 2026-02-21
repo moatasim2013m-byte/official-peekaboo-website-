@@ -7,29 +7,25 @@ const { authMiddleware } = require('../middleware/auth');
 const loyaltyRouter = require('./loyalty');
 const { awardPoints } = loyaltyRouter;
 const { validateCoupon } = require('../utils/coupons');
-const { buildCyberSourceAuthHeaders, verifyCapitalBankCallbackSignature } = require('../utils/cybersourceSign');
-
+const { buildRestHeaders } = require('../utils/cybersourceRest');
 const router = express.Router();
-
 const PAYMENT_PROVIDERS = {
   MANUAL: 'manual',
-  CAPITAL_BANK: 'capital_bank',
-  CAPITAL_BANK_REST: 'capital_bank_rest'
+  CAPITAL_BANK: 'capital_bank_rest'
 };
-
-
-const paymentProvider = (process.env.PAYMENT_PROVIDER || PAYMENT_PROVIDERS.MANUAL).toLowerCase();
-
+const requestedPaymentProvider = (process.env.PAYMENT_PROVIDER || PAYMENT_PROVIDERS.MANUAL).toLowerCase();
+const supportedPaymentProviders = new Set(Object.values(PAYMENT_PROVIDERS));
+const paymentProvider = supportedPaymentProviders.has(requestedPaymentProvider)
+  ? requestedPaymentProvider
+  : PAYMENT_PROVIDERS.MANUAL;
 const DEV_ENVIRONMENTS = new Set(['development', 'dev', 'local', 'test']);
-
+const DB_PROVIDER_CAPITAL_BANK = 'capital_bank';
 const isLoyaltyDuplicateError = (error) => {
   return error?.code === 'LOYALTY_DUPLICATE_REFERENCE' || error?.code === 11000;
 };
-
 const maybeAwardProductLoyaltyPoints = async (transaction) => {
   const points = Math.round(Number(transaction?.amount || 0) * 10);
   if (!transaction?.user_id || points <= 0) return;
-
   try {
     await awardPoints(
       transaction.user_id,
@@ -50,30 +46,26 @@ const maybeAwardProductLoyaltyPoints = async (transaction) => {
     if (!isLoyaltyDuplicateError(error)) throw error;
   }
 };
-
 const capitalBankConfig = {
   merchantId: process.env.CAPITAL_BANK_MERCHANT_ID,
   accessKey: process.env.CAPITAL_BANK_ACCESS_KEY,
   secretKey: process.env.CAPITAL_BANK_SECRET_KEY,
-  locale: process.env.CAPITAL_BANK_LOCALE || 'ar',
-  currency: (process.env.CAPITAL_BANK_CURRENCY || 'JOD').toUpperCase(),
   paymentEndpoint: process.env.CAPITAL_BANK_PAYMENT_ENDPOINT || 'https://apitest.cybersource.com'
 };
-
-const requestedCapitalBankProvider = [PAYMENT_PROVIDERS.CAPITAL_BANK, PAYMENT_PROVIDERS.CAPITAL_BANK_REST].includes(paymentProvider);
-
+const requestedCapitalBankProvider = paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK;
 const missingCapitalBankEnvVars = [
   ['CAPITAL_BANK_MERCHANT_ID', capitalBankConfig.merchantId],
   ['CAPITAL_BANK_ACCESS_KEY', capitalBankConfig.accessKey],
   ['CAPITAL_BANK_SECRET_KEY', capitalBankConfig.secretKey],
   ['CAPITAL_BANK_PAYMENT_ENDPOINT', capitalBankConfig.paymentEndpoint]
 ].filter(([, value]) => !value).map(([name]) => name);
-
 const capitalBankRestReady = requestedCapitalBankProvider && missingCapitalBankEnvVars.length === 0;
-
+if (!supportedPaymentProviders.has(requestedPaymentProvider)) {
+  console.warn(`[Payments] Unsupported PAYMENT_PROVIDER "${requestedPaymentProvider}". Falling back to ${PAYMENT_PROVIDERS.MANUAL}. Supported values: ${Object.values(PAYMENT_PROVIDERS).join(', ')}`);
+}
 if (requestedCapitalBankProvider) {
   if (capitalBankRestReady) {
-    console.log(`[Payments] Active provider: ${paymentProvider} (CyberSource REST)`);
+    console.log(`[Payments] Active provider: ${paymentProvider} (CyberSource REST API)`);
     console.log(`[Payments] Capital Bank endpoint: ${capitalBankConfig.paymentEndpoint}`);
   } else {
     console.warn(`[Payments] Active provider fallback: manual. Missing env vars for ${paymentProvider}: ${missingCapitalBankEnvVars.join(', ')}`);
@@ -81,12 +73,10 @@ if (requestedCapitalBankProvider) {
 } else {
   console.log(`[Payments] Active provider: ${PAYMENT_PROVIDERS.MANUAL}`);
 }
-
 const getEffectiveProvider = () => {
   if (capitalBankRestReady) return paymentProvider;
   return PAYMENT_PROVIDERS.MANUAL;
 };
-
 const ensureHttpsForCapitalBank = (req, res, next) => {
   const forwardedProto = (req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
   const protocol = forwardedProto || req.protocol;
@@ -96,7 +86,6 @@ const ensureHttpsForCapitalBank = (req, res, next) => {
   }
   return next();
 };
-
 const normalizeOrigin = (value) => {
   if (!value || typeof value !== 'string') return null;
   try {
@@ -107,59 +96,30 @@ const normalizeOrigin = (value) => {
     return null;
   }
 };
-
 const getAllowedFrontendOrigins = () => {
   const configured = [process.env.FRONTEND_URL, process.env.CORS_ORIGINS]
     .filter(Boolean)
     .flatMap((entry) => entry.split(',').map((item) => item.trim()))
     .map(normalizeOrigin)
     .filter(Boolean);
-
   return new Set(configured);
 };
-
 const resolveFrontendOrigin = (originUrl, req) => {
   const allowedOrigins = getAllowedFrontendOrigins();
   const requestOrigin = normalizeOrigin(req.get('origin'));
   const payloadOrigin = normalizeOrigin(originUrl);
-
   if (payloadOrigin && allowedOrigins.has(payloadOrigin)) return payloadOrigin;
   if (requestOrigin && allowedOrigins.has(requestOrigin)) return requestOrigin;
-
   const configuredFrontend = normalizeOrigin(process.env.FRONTEND_URL);
   if (configuredFrontend) return configuredFrontend;
-
   return null;
 };
-
-const buildFrontendRedirectUrl = (frontendOrigin, pathName, sessionId) => {
-  const safeOrigin = normalizeOrigin(frontendOrigin);
-  if (!safeOrigin) return null;
-  const redirectUrl = new URL(pathName, safeOrigin);
-  redirectUrl.searchParams.set('session_id', sessionId);
-  return redirectUrl.toString();
-};
-
-const requireCsrfToken = (req, res, next) => {
-  const csrfToken = req.get('x-csrf-token');
-  const frontendOrigin = resolveFrontendOrigin(null, req);
-  const requestOrigin = normalizeOrigin(req.get('origin') || req.get('referer'));
-  if (!csrfToken || csrfToken.length < 16) {
-    return res.status(403).json({ error: 'Missing CSRF token' });
-  }
-  if (frontendOrigin && requestOrigin && frontendOrigin !== requestOrigin) {
-    return res.status(403).json({ error: 'Untrusted request origin' });
-  }
-  return next();
-};
-
 const resolveOrderTransaction = async (orderId, userId) => {
   const search = [
     { _id: orderId },
     { session_id: orderId },
     { reference_id: orderId }
   ];
-
   for (const criteria of search) {
     try {
       const record = await PaymentTransaction.findOne({ ...criteria, user_id: userId });
@@ -170,42 +130,11 @@ const resolveOrderTransaction = async (orderId, userId) => {
   }
   return null;
 };
-
-const toAmountString = (amount) => Number(amount || 0).toFixed(2);
-
-const mapCyberSourceDecision = (responsePayload = {}) => {
-  const status = String(responsePayload.status || '').toUpperCase();
-  const acceptedStatuses = new Set(['AUTHORIZED', 'PENDING', 'TRANSMITTED', 'SUCCEEDED']);
-  const decision = acceptedStatuses.has(status) ? 'ACCEPT' : (status || 'REJECT');
-  const reasonCode = String(
-    responsePayload?.processorInformation?.responseCode
-      || responsePayload?.errorInformation?.reason
-      || (decision === 'ACCEPT' ? '100' : '102')
-  );
-  return { decision, reasonCode, status };
-};
-
-const buildBillToFromMetadata = (transaction) => {
-  const billing = transaction?.metadata?.billing || {};
-  return {
-    firstName: billing.firstName || 'Guest',
-    lastName: billing.lastName || 'User',
-    address1: billing.address1 || 'Amman',
-    locality: billing.city || 'Amman',
-    administrativeArea: billing.state || 'Amman',
-    postalCode: billing.postalCode || '11118',
-    country: billing.country || 'JO',
-    email: billing.email || 'guest@example.com',
-    phoneNumber: billing.phone || '0000000000'
-  };
-};
 // Morning (Happy Hour) price: 3.5 JD per hour
 const MORNING_PRICE_PER_HOUR = 3.5;
-
 // Get hourly price from Settings or use defaults
 const getHourlyPrice = async (duration_hours = 2, slot_start_time = null) => {
   const hours = parseInt(duration_hours) || 2;
-
   // Happy Hour logic: 10:00-13:59 => 3.5 JD per hour
   if (slot_start_time) {
     try {
@@ -220,22 +149,18 @@ const getHourlyPrice = async (duration_hours = 2, slot_start_time = null) => {
       // Fall through to normal pricing
     }
   }
-
   try {
     // Fetch pricing from Settings
     const pricing = await Settings.find({
       key: { $in: ['hourly_1hr', 'hourly_2hr', 'hourly_3hr', 'hourly_extra_hr'] }
     });
-
     const prices = {
       hourly_1hr: 7,
       hourly_2hr: 10,
       hourly_3hr: 13,
       hourly_extra_hr: 3
     };
-
     pricing.forEach(p => { prices[p.key] = parseFloat(p.value); });
-
     if (hours === 1) return prices.hourly_1hr;
     if (hours === 2) return prices.hourly_2hr;
     if (hours === 3) return prices.hourly_3hr;
@@ -250,24 +175,20 @@ const getHourlyPrice = async (duration_hours = 2, slot_start_time = null) => {
     return 10 + (hours - 2) * 3;
   }
 };
-
 const getBirthdayThemePrice = async (themeId) => {
   const Theme = require('../models/Theme');
   const theme = await Theme.findById(themeId);
   return parseFloat(theme?.price) || 100.00;
 };
-
 const getSubscriptionPrice = async (planId) => {
   const SubscriptionPlan = require('../models/SubscriptionPlan');
   const plan = await SubscriptionPlan.findById(planId);
   return parseFloat(plan?.price) || 50.00;
 };
-
 const buildLineItems = async (lineItems = []) => {
   if (!Array.isArray(lineItems) || lineItems.length === 0) {
     return { normalizedLineItems: [], productsTotal: 0 };
   }
-
   const quantityByProduct = new Map();
   lineItems.forEach((item) => {
     const productId = (item?.productId || item?.product_id || '').toString().trim();
@@ -275,24 +196,18 @@ const buildLineItems = async (lineItems = []) => {
     if (!productId || qty <= 0) return;
     quantityByProduct.set(productId, (quantityByProduct.get(productId) || 0) + qty);
   });
-
   const productIds = [...quantityByProduct.keys()];
   if (productIds.length === 0) return { normalizedLineItems: [], productsTotal: 0 };
-
   const products = await Product.find({ _id: { $in: productIds }, active: true });
   const productsMap = new Map(products.map((product) => [product._id.toString(), product]));
-
   const normalizedLineItems = [];
   let productsTotal = 0;
-
   quantityByProduct.forEach((quantity, productId) => {
     const product = productsMap.get(productId);
     if (!product) return;
-
     const unitPriceJD = Number(product.priceJD) || 0;
     const lineTotalJD = unitPriceJD * quantity;
     productsTotal += lineTotalJD;
-
     normalizedLineItems.push({
       productId: product._id.toString(),
       sku: product.sku,
@@ -303,10 +218,8 @@ const buildLineItems = async (lineItems = []) => {
       lineTotalJD
     });
   });
-
   return { normalizedLineItems, productsTotal };
 };
-
 // Get hourly pricing info (public endpoint for frontend)
 router.get('/hourly-pricing', async (req, res) => {
   try {
@@ -331,16 +244,13 @@ router.get('/hourly-pricing', async (req, res) => {
     const pricing = await Settings.find({
       key: { $in: ['hourly_1hr', 'hourly_2hr', 'hourly_3hr', 'hourly_extra_hr'] }
     });
-
     const prices = {
       hourly_1hr: 7,
       hourly_2hr: 10,
       hourly_3hr: 13,
       hourly_extra_hr: 3
     };
-
     pricing.forEach(p => { prices[p.key] = parseFloat(p.value); });
-
     res.json({
       pricing: [
         { hours: 1, price: prices.hourly_1hr, label: '1 Hour', label_ar: 'ساعة واحدة' },
@@ -357,12 +267,10 @@ router.get('/hourly-pricing', async (req, res) => {
     res.status(500).json({ error: 'Failed to get pricing' });
   }
 });
-
 // Create checkout session
 router.post('/create-checkout', authMiddleware, async (req, res) => {
   try {
     const effectiveProvider = getEffectiveProvider();
-
     // Manual payment mode
     if (effectiveProvider === PAYMENT_PROVIDERS.MANUAL) {
       return res.status(200).json({
@@ -370,26 +278,20 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
         payment_method: 'manual'
       });
     }
-
     const { type, reference_id, origin_url, duration_hours, custom_notes, timeMode, lineItems, coupon_code } = req.body;
-
     if (!type) {
       return res.status(400).json({ error: 'type is required' });
     }
-
     const frontendOrigin = resolveFrontendOrigin(origin_url, req);
     if (!frontendOrigin) {
       return res.status(400).json({ error: 'Invalid or unauthorized frontend origin' });
     }
-
     const { normalizedLineItems, productsTotal } = await buildLineItems(lineItems);
-
     let amount;
     let metadata = { type, user_id: req.userId.toString() };
     if (normalizedLineItems.length > 0) {
       metadata.line_items = JSON.stringify(normalizedLineItems);
     }
-
     // Get amount from server-side pricing
     switch (type) {
       case 'hourly': {
@@ -397,7 +299,6 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
         const childIds = req.body.child_ids || (req.body.child_id ? [req.body.child_id] : []);
         const childCount = childIds.length || 1;
         const slotStartTime = req.body.slot_start_time || null;
-
         // Check capacity before creating checkout
         const slot = await TimeSlot.findById(reference_id);
         if (!slot) {
@@ -407,7 +308,6 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
         if (availableSpots < childCount) {
           return res.status(400).json({ error: `عذراً، المتاح ${availableSpots} مكان فقط. اخترت ${childCount} أطفال.` });
         }
-
         const basePrice = await getHourlyPrice(hours, slotStartTime);
         amount = (basePrice * childCount) + productsTotal;
         metadata.slot_id = reference_id;
@@ -437,14 +337,12 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       default:
         return res.status(400).json({ error: 'Invalid payment type' });
     }
-
     // Handle child_ids for multi-child booking (backward compat with child_id)
     if (req.body.child_ids && req.body.child_ids.length > 0) {
       metadata.child_ids = JSON.stringify(req.body.child_ids);
     } else if (req.body.child_id) {
       metadata.child_ids = JSON.stringify([req.body.child_id]);
     }
-
     // Apply coupon discount when provided
     if (coupon_code) {
       const couponValidation = await validateCoupon({
@@ -460,25 +358,20 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       metadata.coupon_code = normalizedCode;
       metadata.discount_amount = discountAmount;
     }
-
     // Ensure amount is a valid float
     amount = parseFloat(amount);
     if (isNaN(amount) || amount <= 0) {
       return res.status(400).json({ error: 'Invalid price configuration' });
     }
-
     console.log('Creating checkout session:', { type, amount, metadata });
-
     let sessionId;
     let checkoutUrl;
     const currency = 'jod';
-
-    if ([PAYMENT_PROVIDERS.CAPITAL_BANK, PAYMENT_PROVIDERS.CAPITAL_BANK_REST].includes(effectiveProvider)) {
+    if (effectiveProvider === PAYMENT_PROVIDERS.CAPITAL_BANK) {
       sessionId = `cb_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
       metadata.frontend_origin = frontendOrigin;
       checkoutUrl = `/payment/capital-bank/${sessionId}`;
     }
-
     // Create pending payment transaction
     const transaction = new PaymentTransaction({
       session_id: sessionId,
@@ -488,16 +381,15 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       status: 'pending',
       type,
       reference_id,
-      provider: effectiveProvider,
+      provider: effectiveProvider === PAYMENT_PROVIDERS.CAPITAL_BANK ? DB_PROVIDER_CAPITAL_BANK : effectiveProvider,
       metadata
     });
     await transaction.save();
-
     console.log('Checkout session created:', sessionId, 'provider:', effectiveProvider);
     res.json({
       url: checkoutUrl,
       session_id: sessionId,
-      payment_provider: effectiveProvider
+      payment_provider: effectiveProvider === PAYMENT_PROVIDERS.CAPITAL_BANK ? DB_PROVIDER_CAPITAL_BANK : effectiveProvider
     });
   } catch (error) {
     console.error('Create checkout error:', error);
@@ -507,223 +399,282 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
     });
   }
 });
-
 // Get checkout status
 router.get('/status/:sessionId', authMiddleware, async (req, res) => {
   try {
     const effectiveProvider = getEffectiveProvider();
-
     const { sessionId } = req.params;
-
     const transaction = await PaymentTransaction.findOne({ session_id: sessionId, user_id: req.userId });
     if (!transaction) {
       return res.status(404).json({ error: 'Transaction not found' });
     }
-
-    if ([PAYMENT_PROVIDERS.CAPITAL_BANK, PAYMENT_PROVIDERS.CAPITAL_BANK_REST].includes(effectiveProvider)) {
+    if (effectiveProvider === PAYMENT_PROVIDERS.CAPITAL_BANK) {
       return res.json({
         status: transaction.status,
         payment_status: transaction.payment_status || (transaction.status === 'paid' ? 'paid' : 'pending'),
         payment_id: transaction.payment_id,
         metadata: transaction.metadata,
-        payment_provider: effectiveProvider
+        payment_provider: effectiveProvider === PAYMENT_PROVIDERS.CAPITAL_BANK ? DB_PROVIDER_CAPITAL_BANK : effectiveProvider
       });
     }
-
     return res.json({
       status: transaction.status,
       payment_status: transaction.payment_status || 'pending',
       payment_id: transaction.payment_id,
       metadata: transaction.metadata,
-      payment_provider: effectiveProvider
+      payment_provider: effectiveProvider === PAYMENT_PROVIDERS.CAPITAL_BANK ? DB_PROVIDER_CAPITAL_BANK : effectiveProvider
     });
   } catch (error) {
     console.error('Get checkout status error:', error);
     res.status(500).json({ error: 'Failed to get checkout status' });
   }
 });
-
-
-
-router.post('/capital-bank/initiate', authMiddleware, requireCsrfToken, ensureHttpsForCapitalBank, async (req, res) => {
-  try {
-    const activeProvider = getEffectiveProvider();
-    if (![PAYMENT_PROVIDERS.CAPITAL_BANK, PAYMENT_PROVIDERS.CAPITAL_BANK_REST].includes(activeProvider)) {
-      return res.status(503).json({
-        error: 'Capital Bank payment gateway is not enabled',
-        missing_env_vars: missingCapitalBankEnvVars
-      });
-    }
-
-    const { orderId, card = {}, transientToken } = req.body || {};
-    if (!orderId) {
-      return res.status(400).json({ error: 'orderId is required' });
-    }
-
-    const order = await resolveOrderTransaction(orderId, req.userId);
-    if (!order) {
-      return res.status(404).json({ error: 'Order not found' });
-    }
-
-    // Security invariant: the authoritative amount is always loaded from the stored server-side transaction.
-    const amount = toAmountString(order.amount);
-    const payload = {
-      clientReferenceInformation: { code: order.session_id },
-      processingInformation: { capture: true },
-      orderInformation: {
-        amountDetails: {
-          totalAmount: amount,
-          currency: capitalBankConfig.currency
-        },
-        billTo: buildBillToFromMetadata(order)
-      }
-    };
-
-    if (transientToken) {
-      payload.tokenInformation = { transientToken };
-    } else {
-      const { number, expirationMonth, expirationYear, securityCode } = card;
-      if (!number || !expirationMonth || !expirationYear || !securityCode) {
-        return res.status(400).json({ error: 'Card data or transientToken is required' });
-      }
-      payload.paymentInformation = {
-        card: {
-          number: String(number).replace(/\s+/g, ''),
-          expirationMonth: String(expirationMonth),
-          expirationYear: String(expirationYear),
-          securityCode: String(securityCode)
-        }
-      };
-    }
-
-    const paymentsUrl = new URL('/pts/v2/payments', capitalBankConfig.paymentEndpoint);
-    const headers = buildCyberSourceAuthHeaders({
-      method: 'POST',
-      url: paymentsUrl.toString(),
-      body: payload,
-      merchantId: capitalBankConfig.merchantId,
-      accessKey: capitalBankConfig.accessKey,
-      secretKey: capitalBankConfig.secretKey
-    });
-
-    const response = await fetch(paymentsUrl, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload)
-    });
-
-    const responseData = await response.json().catch(() => ({}));
-    const { decision, reasonCode } = mapCyberSourceDecision(responseData);
-    const transactionId = responseData.id || `${order.session_id}:${decision}`;
-    const isAccepted = response.ok && decision === 'ACCEPT';
-
-    const updated = await PaymentTransaction.findOneAndUpdate(
-      {
-        _id: order._id,
-        $or: [
-          { 'metadata.processed_transaction_ids': { $exists: false } },
-          { 'metadata.processed_transaction_ids': { $ne: transactionId } }
-        ]
-      },
-      {
-        $set: {
-          provider: activeProvider,
-          currency: capitalBankConfig.currency.toLowerCase(),
-          payment_id: responseData.id || null,
-          status: isAccepted ? 'paid' : 'failed',
-          payment_status: isAccepted ? 'paid' : 'failed',
-          updated_at: new Date(),
-          'metadata.cybersource_rest_last_response': responseData,
-          'metadata.cybersource_rest_last_decision': decision,
-          'metadata.cybersource_rest_last_reason_code': reasonCode
-        },
-        $addToSet: { 'metadata.processed_transaction_ids': transactionId }
-      },
-      { new: true }
-    );
-
-    if (!updated) {
-      return res.status(200).json({ received: true, duplicate: true, sessionId: order.session_id });
-    }
-
-    return res.status(isAccepted ? 200 : 402).json({
-      received: true,
-      sessionId: order.session_id,
-      transaction_id: responseData.id,
-      decision,
-      reason_code: reasonCode,
-      status: updated.status,
-      provider_response: responseData
-    });
-  } catch (error) {
-    console.error('Capital Bank initiate error:', error?.message);
-    return res.status(500).json({ error: 'Failed to initiate Capital Bank payment' });
-  }
-});
-
-const capitalBankCallbackParser = express.urlencoded({ extended: false });
-
-const mapCapitalBankDecisionToState = (decision, reason = '') => {
+const sanitizeReason = (reason = 'payment_failed') => String(reason).replace(/[^a-zA-Z0-9_\-]/g, '_').slice(0, 80) || 'payment_failed';
+const TEST_BILLING_DEFAULTS = {
+  firstName: 'Test',
+  lastName: 'User',
+  address1: '1 Test Street',
+  locality: 'Amman',
+  administrativeArea: 'AM',
+  postalCode: '11111',
+  country: 'JO',
+  email: 'test@test.com',
+  phoneNumber: '0791234567'
+};
+const REQUIRED_BILL_TO_FIELDS = [
+  'firstName',
+  'lastName',
+  'address1',
+  'locality',
+  'administrativeArea',
+  'postalCode',
+  'country',
+  'email',
+  'phoneNumber'
+];
+const mapDecisionToStatus = (decision = '') => {
   const normalized = String(decision || '').toUpperCase();
   if (normalized === 'ACCEPT') {
-    return { status: 'paid', paymentStatus: 'paid', redirectPath: '/payment/success', redirectParams: { orderId: null } };
+    return { status: 'paid', paymentStatus: 'paid' };
   }
   if (normalized === 'REVIEW' || normalized === 'PENDING') {
-    return { status: 'pending', paymentStatus: 'review', redirectPath: '/payment/pending', redirectParams: { orderId: null } };
+    return { status: 'pending', paymentStatus: 'pending' };
   }
-  return { status: 'failed', paymentStatus: normalized ? normalized.toLowerCase() : 'failed', redirectPath: '/payment/failed', redirectParams: { reason } };
+  return { status: 'failed', paymentStatus: normalized ? normalized.toLowerCase() : 'failed' };
 };
+const getBillingDataFromUser = (transaction) => {
+  const isTestEnvironment = process.env.NODE_ENV === 'test';
+  const user = transaction?.metadata?.billing_user || {};
+  const fullName = String(user.name || user.full_name || 'Guest User').trim();
+  const nameParts = fullName.split(/\s+/).filter(Boolean);
+  const firstName = nameParts[0] || 'Guest';
+  const lastName = nameParts.slice(1).join(' ') || 'User';
 
-const extractCapitalBankSignature = (req) => (
-  req.get('x-capital-bank-signature')
-  || req.get('x-cybersource-signature')
-  || req.get('x-signature')
-  || req.body?.signature
-  || null
-);
+  const billingData = isTestEnvironment ? { ...TEST_BILLING_DEFAULTS } : {
+    firstName,
+    lastName,
+    address1: String(user.address1 || 'Amman').slice(0, 60),
+    locality: String(user.locality || 'Amman').slice(0, 50),
+    administrativeArea: String(user.administrativeArea || 'Amman').slice(0, 50),
+    postalCode: String(user.postalCode || '11118').slice(0, 10),
+    country: 'JO',
+    email: String(user.email || 'payments@peekaboo.local').slice(0, 100),
+    phoneNumber: String(user.phoneNumber || user.phone || '962790000000').slice(0, 20)
+  };
 
-const processCapitalBankCallback = async (req, res, source) => {
-  const payload = req.body || {};
-  const signature = extractCapitalBankSignature(req);
-
-  if (!verifyCapitalBankCallbackSignature(payload, signature, capitalBankConfig.secretKey)) {
-    console.error('[ALERT][SECURITY] Invalid Capital Bank callback signature', { source });
-    if (source === 'notify') return res.status(200).json({ received: true, ignored: true });
-    return res.redirect(303, '/payment/failed?reason=invalid_signature');
-  }
-
-  const sessionId = payload.req_reference_number || payload.reference_number || payload.session_id || payload.transaction_uuid;
-  if (!sessionId) {
-    if (source === 'notify') return res.status(200).json({ received: true, ignored: true });
-    return res.redirect(303, '/payment/failed?reason=missing_reference');
-  }
-
-  const decision = String(payload.decision || payload.status || payload.reason_code || '').toUpperCase() || 'DECLINE';
-  const reason = String(payload.message || payload.reason || payload.reason_code || 'payment_declined');
-  const transactionId = String(payload.transaction_id || payload.id || `${sessionId}:${decision}`);
-
-  const mapped = mapCapitalBankDecisionToState(decision, reason);
-
-  const updated = await PaymentTransaction.findOneAndUpdate(
-    {
-      session_id: sessionId,
-      $or: [
-        { 'metadata.processed_transaction_ids': { $exists: false } },
-        { 'metadata.processed_transaction_ids': { $ne: transactionId } }
-      ]
+  return REQUIRED_BILL_TO_FIELDS.reduce((acc, field) => {
+    const value = String(billingData[field] || '').trim();
+    acc[field] = value || TEST_BILLING_DEFAULTS[field];
+    return acc;
+  }, {});
+};
+const normalizeExpirationYear = (value) => {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (digits.length === 4) return digits;
+  if (digits.length === 2) return `20${digits}`;
+  if (digits.length > 4) return digits.slice(-4);
+  return digits.padStart(4, '0');
+};
+const normalizeCardType = (value) => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized === '001' || normalized === 'visa' || normalized === 'v') return '001';
+  if (normalized === '002' || normalized === 'mastercard' || normalized === 'master card' || normalized === 'mc' || normalized === 'm') return '002';
+  return String(value || '').trim();
+};
+const buildCyberSourcePaymentPayload = ({ orderId, amount, billTo, card }) => ({
+  clientReferenceInformation: { code: orderId },
+  processingInformation: { capture: true },
+  orderInformation: {
+    amountDetails: {
+      totalAmount: Number(amount).toFixed(2),
+      currency: 'JOD'
     },
-    {
+    billTo
+  },
+  paymentInformation: {
+    card: {
+      number: card.number,
+      expirationMonth: card.expirationMonth,
+      expirationYear: card.expirationYear,
+      securityCode: card.securityCode,
+      type: card.type
+    }
+  }
+});
+const isCyberSourceNotifyRequest = (req) => {
+  const merchantHeader = String(req.get('v-c-merchant-id') || '').trim();
+  const signature = String(req.get('signature') || '').trim();
+  const digest = String(req.get('digest') || '').trim();
+  return merchantHeader === String(capitalBankConfig.merchantId || '') && Boolean(signature) && Boolean(digest);
+};
+router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank, async (req, res) => {
+  let cardData = null;
+  try {
+    const activeProvider = getEffectiveProvider();
+    if (activeProvider !== PAYMENT_PROVIDERS.CAPITAL_BANK) {
+      return res.status(503).json({ error: 'Capital Bank REST payment gateway is not enabled', missing_env_vars: missingCapitalBankEnvVars });
+    }
+
+    const { orderId, cardNumber, expiryMonth, expiryYear, cvn, cardType } = req.body || {};
+    if (!orderId || !cardNumber || !expiryMonth || !expiryYear || !cvn || !cardType) {
+      return res.status(400).json({ error: 'orderId and card details are required' });
+    }
+
+    const transaction = await resolveOrderTransaction(orderId, req.userId);
+    if (!transaction) {
+      return res.status(404).json({ error: 'Transaction not found' });
+    }
+
+    const amount = Number(transaction.amount || 0);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid transaction amount' });
+    }
+
+    cardData = {
+      number: String(cardNumber).replace(/\s+/g, ''),
+      expirationMonth: String(String(expiryMonth).padStart(2, '0').slice(-2)),
+      expirationYear: String(normalizeExpirationYear(expiryYear)),
+      securityCode: String(cvn),
+      type: normalizeCardType(cardType)
+    };
+
+    if (!['001', '002'].includes(cardData.type)) {
+      return res.status(400).json({ error: 'Unsupported card type. Use 001 for Visa or 002 for Mastercard.' });
+    }
+
+    if (!/^\d{2}$/.test(cardData.expirationMonth)) {
+      return res.status(400).json({ error: 'expiryMonth must be a 2-digit string (MM).' });
+    }
+    if (!/^\d{4}$/.test(cardData.expirationYear)) {
+      return res.status(400).json({ error: 'expiryYear must be a 4-digit string (YYYY).' });
+    }
+
+    const payload = buildCyberSourcePaymentPayload({
+      orderId: transaction.session_id,
+      amount,
+      billTo: { ...TEST_BILLING_DEFAULTS },
+      card: cardData
+    });
+
+    const endpointPath = '/pts/v2/payments';
+    const requestBody = JSON.stringify(payload);
+    const headers = buildRestHeaders(
+      capitalBankConfig.merchantId,
+      capitalBankConfig.accessKey,
+      capitalBankConfig.secretKey,
+      endpointPath,
+      requestBody
+    );
+
+    const response = await fetch(`${capitalBankConfig.paymentEndpoint}${endpointPath}`, {
+      method: 'POST',
+      headers,
+      body: requestBody
+    });
+
+    const rawResponseBody = await response.text();
+    let result = {};
+    try {
+      result = rawResponseBody ? JSON.parse(rawResponseBody) : {};
+    } catch (_error) {
+      result = { rawResponseBody };
+    }
+
+    if (response.status !== 201) {
+      console.error('Capital Bank initiate non-201 response body:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: result,
+        rawResponseBody
+      });
+    }
+    const decision = String(result?.status || result?.processorInformation?.responseCode || '').toUpperCase();
+    const transactionId = String(result?.id || result?.reconciliationId || '');
+
+    if (response.status === 201 && decision !== 'DECLINE') {
+      await PaymentTransaction.findByIdAndUpdate(transaction._id, {
+        $set: {
+          status: 'paid',
+          payment_status: 'paid',
+          payment_id: transactionId || null,
+          updated_at: new Date(),
+          provider: DB_PROVIDER_CAPITAL_BANK
+        }
+      });
+
+      return res.status(200).json({ success: true, orderId: transaction.session_id });
+    }
+
+    const reason = sanitizeReason(result?.errorInformation?.message || result?.message || 'payment_declined');
+    console.log('Capital Bank/CyberSource payment failure response body:', {
+      status: response.status,
+      statusText: response.statusText,
+      body: result,
+      rawResponseBody
+    });
+    await PaymentTransaction.findByIdAndUpdate(transaction._id, {
       $set: {
-        status: mapped.status,
-        payment_status: mapped.paymentStatus,
-        payment_id: payload.transaction_id || payload.id || null,
+        status: 'failed',
+        payment_status: 'failed',
         updated_at: new Date(),
-        error_message: mapped.status === 'failed' ? reason : null,
-        'metadata.cybersource_last_source': source,
-        'metadata.cybersource_last_response': payload,
-        'metadata.cybersource_last_decision': decision,
-        'metadata.cybersource_last_reason': reason,
-        provider: getEffectiveProvider()
+        error_message: reason,
+        provider: DB_PROVIDER_CAPITAL_BANK
+      }
+    });
+
+    if (response.status === 400 || decision === 'DECLINE') {
+      return res.status(402).json({ success: false, reason });
+    }
+
+    return res.status(500).json({ error: 'Payment processing failed' });
+  } catch (error) {
+    console.error('Capital Bank initiate error:', error?.message);
+    return res.status(500).json({ error: 'Failed to process payment' });
+  } finally {
+    cardData = null;
+  }
+});
+router.post('/capital-bank/notify', ensureHttpsForCapitalBank, async (req, res) => {
+  res.status(200).send('ok');
+
+  if (!isCyberSourceNotifyRequest(req)) {
+    console.error('[SECURITY] Rejected Capital Bank notify request: invalid signature headers');
+    return;
+  }
+
+  try {
+    const body = req.body || {};
+    const orderId = String(body?.clientReferenceInformation?.code || body?.orderInformation?.invoiceNumber || body?.reference_number || '').trim();
+    const decision = String(body?.decision || body?.status || '').toUpperCase();
+    const transactionId = String(body?.id || body?.transaction_id || body?.reconciliationId || '').trim();
+
+    if (!orderId || !transactionId) return;
+
+    const mapped = mapDecisionToStatus(decision);
+    const updateResult = await PaymentTransaction.findOneAndUpdate(
+      {
+        session_id: orderId,
+        'metadata.processed_transaction_ids': { $ne: transactionId }
       },
       $addToSet: { 'metadata.processed_transaction_ids': transactionId }
     },
@@ -764,20 +715,15 @@ router.post('/capital-bank/return', capitalBankCallbackParser, ensureHttpsForCap
   }
 });
 
-router.post('/capital-bank/notify', capitalBankCallbackParser, ensureHttpsForCapitalBank, async (req, res) => {
-  try {
-    return await processCapitalBankCallback(req, res, 'notify');
+    if (!updateResult) return;
   } catch (error) {
     console.error('Capital Bank notify processing error:', error?.message);
-    return res.status(200).json({ received: true });
   }
 });
-
 // Store transaction
 router.post('/store-transaction', authMiddleware, async (req, res) => {
   try {
     const { session_id, user_id, amount, currency, type, reference_id, metadata } = req.body;
-
     const transaction = new PaymentTransaction({
       session_id,
       user_id: user_id || req.userId,
@@ -789,14 +735,12 @@ router.post('/store-transaction', authMiddleware, async (req, res) => {
       metadata
     });
     await transaction.save();
-
     res.status(201).json({ transaction: transaction.toJSON() });
   } catch (error) {
     console.error('Store transaction error:', error);
     res.status(500).json({ error: 'Failed to store transaction' });
   }
 });
-
 // Get payment history
 router.get('/history', authMiddleware, async (req, res) => {
   try {
@@ -804,12 +748,10 @@ router.get('/history', authMiddleware, async (req, res) => {
       user_id: req.userId,
       status: 'paid'
     }).sort({ created_at: -1 });
-
     res.json({ transactions: transactions.map(t => t.toJSON()) });
   } catch (error) {
     console.error('Get payment history error:', error);
     res.status(500).json({ error: 'Failed to get payment history' });
   }
 });
-
 module.exports = router;
