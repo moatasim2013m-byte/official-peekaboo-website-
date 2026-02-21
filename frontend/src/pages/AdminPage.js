@@ -14,7 +14,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { 
   LayoutDashboard, Users, Clock, Cake, Star, Settings, Image, 
-  Plus, Edit, Trash2, Loader2, Gift, Calendar, DollarSign, Home, Upload, Search, UserPlus, Eye, Ban, Check, X
+  Plus, Edit, Trash2, Loader2, Gift, Calendar, DollarSign, Home, Upload, Search, UserPlus, Eye, Ban, Check, X, Briefcase
 } from 'lucide-react';
 import mascotImg from '../assets/mascot.png';
 
@@ -41,6 +41,7 @@ export default function AdminPage() {
   const [hourlyBookings, setHourlyBookings] = useState([]);
   const [birthdayBookings, setBirthdayBookings] = useState([]);
   const [subscriptions, setSubscriptions] = useState([]);
+  const [employmentApplications, setEmploymentApplications] = useState([]);
   const [themes, setThemes] = useState([]);
   const [plans, setPlans] = useState([]);
   const [gallery, setGallery] = useState([]);
@@ -244,6 +245,30 @@ export default function AdminPage() {
       setSubscriptions(response.data.subscriptions || []);
     } catch (error) {
       console.error('Failed to fetch subscriptions:', error);
+    }
+  };
+
+  const fetchEmploymentApplications = async () => {
+    try {
+      const response = await api.get('/employment/applications');
+      setEmploymentApplications(response.data.applications || []);
+    } catch (error) {
+      console.error('Failed to fetch employment applications:', error);
+      toast.error('فشل تحميل طلبات التوظيف');
+    }
+  };
+
+  const handleEmploymentStatusUpdate = async (applicationId, status) => {
+    try {
+      await api.patch(`/employment/applications/${applicationId}/status`, { status });
+      setEmploymentApplications((prev) =>
+        prev.map((application) =>
+          application.id === applicationId ? { ...application, status } : application
+        )
+      );
+      toast.success('تم تحديث حالة الطلب');
+    } catch (error) {
+      toast.error('فشل تحديث حالة الطلب');
     }
   };
 
@@ -455,6 +480,7 @@ export default function AdminPage() {
     if (tab === 'birthday') fetchBirthdayBookings();
     if (tab === 'subscriptions') fetchSubscriptions();
     if (tab === 'products') fetchProducts();
+    if (tab === 'employment') fetchEmploymentApplications();
   };
 
   // Dashboard card click handlers
@@ -933,6 +959,9 @@ export default function AdminPage() {
             </TabsTrigger>
             <TabsTrigger value="homepage" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <Home className="h-4 w-4" /> الصفحة الرئيسية
+            </TabsTrigger>
+            <TabsTrigger value="employment" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
+              <Briefcase className="h-4 w-4" /> التوظيف
             </TabsTrigger>
             <TabsTrigger value="settings" className="rounded-full gap-2 text-xs sm:text-sm px-3 sm:px-4">
               <Settings className="h-4 w-4" /> Settings
@@ -2025,6 +2054,63 @@ export default function AdminPage() {
                     )}
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="employment">
+            <Card className="rounded-2xl">
+              <CardHeader>
+                <CardTitle>طلبات التوظيف</CardTitle>
+                <CardDescription>جميع الطلبات المرسلة من صفحة التوظيف</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {employmentApplications.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">لا يوجد طلبات حالياً</p>
+                ) : (
+                  <div className="space-y-4">
+                    {employmentApplications.map((application) => (
+                      <Card key={application.id} className="rounded-2xl border">
+                        <CardContent className="p-4 space-y-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                            <h3 className="font-bold text-base">{application.full_name}</h3>
+                            <Badge className={application.status === 'reviewed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}>
+                              {application.status === 'reviewed' ? 'تمت المراجعة' : 'جديد'}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                            <p><span className="font-semibold">الهاتف:</span> <span dir="ltr">{application.phone}</span></p>
+                            <p><span className="font-semibold">البريد:</span> {application.email || '-'}</p>
+                            <p><span className="font-semibold">الوظيفة:</span> {application.position}</p>
+                            <p><span className="font-semibold">التفرغ:</span> {application.availability || '-'}</p>
+                          </div>
+                          <p className="text-sm"><span className="font-semibold">الخبرة:</span> {application.experience || '-'}</p>
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <p className="text-xs text-muted-foreground">
+                              تم الإرسال: {application.created_at ? format(new Date(application.created_at), 'yyyy-MM-dd HH:mm') : '-'}
+                            </p>
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant={application.status === 'reviewed' ? 'outline' : 'default'}
+                                onClick={() => handleEmploymentStatusUpdate(application.id, 'reviewed')}
+                              >
+                                تمّت المراجعة
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant={application.status === 'new' ? 'outline' : 'secondary'}
+                                onClick={() => handleEmploymentStatusUpdate(application.id, 'new')}
+                              >
+                                وضع جديد
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

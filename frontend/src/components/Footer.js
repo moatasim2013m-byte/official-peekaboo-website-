@@ -88,6 +88,7 @@ export const Footer = () => {
                 <li><Link to="/#birthdays" className="footer-link-new">حفلات أعياد الميلاد</Link></li>
                 <li><Link to="/#subscriptions" className="footer-link-new">الاشتراكات</Link></li>
                 <li><Link to="/#schools" className="footer-link-new">المدارس والمجموعات</Link></li>
+                <li><Link to="/employment" className="footer-link-new">التوظيف</Link></li>
               </ul>
             </div>
 
