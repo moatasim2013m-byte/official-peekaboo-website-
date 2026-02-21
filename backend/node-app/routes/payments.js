@@ -654,43 +654,53 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
     cardData = null;
   }
 });
-router.post('/capital-bank/notify', ensureHttpsForCapitalBank, async (req, res) => {
-  res.status(200).send('ok');
+const capitalBankCallbackParser = express.urlencoded({ extended: false });
+const processCapitalBankCallback = async (req, res, source = 'notify') => {
+  const body = req.body || {};
+  const sessionId = String(body?.clientReferenceInformation?.code || body?.orderInformation?.invoiceNumber || body?.reference_number || body?.orderId || '').trim();
+  const decision = String(body?.decision || body?.status || '').toUpperCase();
+  const transactionId = String(body?.id || body?.transaction_id || body?.reconciliationId || '').trim();
+  const mapped = mapDecisionToStatus(decision);
 
-  if (!isCyberSourceNotifyRequest(req)) {
-    console.error('[SECURITY] Rejected Capital Bank notify request: invalid signature headers');
-    return;
+  if (!sessionId) {
+    if (source === 'notify') return res.status(200).json({ received: true, ignored: true });
+    return res.redirect(303, '/payment/failed?reason=missing_session_id');
   }
 
-  try {
-    const body = req.body || {};
-    const orderId = String(body?.clientReferenceInformation?.code || body?.orderInformation?.invoiceNumber || body?.reference_number || '').trim();
-    const decision = String(body?.decision || body?.status || '').toUpperCase();
-    const transactionId = String(body?.id || body?.transaction_id || body?.reconciliationId || '').trim();
+  const updatePayload = {
+    $set: {
+      status: mapped.status,
+      payment_status: mapped.paymentStatus,
+      updated_at: new Date(),
+      provider: DB_PROVIDER_CAPITAL_BANK,
+      ...(transactionId ? { payment_id: transactionId } : {})
+    }
+  };
 
-    if (!orderId || !transactionId) return;
+  if (transactionId) {
+    updatePayload.$addToSet = { 'metadata.processed_transaction_ids': transactionId };
+  }
 
-    const mapped = mapDecisionToStatus(decision);
-    const updateResult = await PaymentTransaction.findOneAndUpdate(
-      {
-        session_id: orderId,
-        'metadata.processed_transaction_ids': { $ne: transactionId }
-      },
-      $addToSet: { 'metadata.processed_transaction_ids': transactionId }
-    },
-    { new: true }
-  );
+  const query = transactionId
+    ? { session_id: sessionId, 'metadata.processed_transaction_ids': { $ne: transactionId } }
+    : { session_id: sessionId };
 
+  const updated = await PaymentTransaction.findOneAndUpdate(query, updatePayload, { new: true });
   const transaction = updated || await PaymentTransaction.findOne({ session_id: sessionId });
+
   if (!transaction) {
     if (source === 'notify') return res.status(200).json({ received: true, ignored: true });
     return res.redirect(303, '/payment/failed?reason=transaction_not_found');
   }
 
+  if (mapped.status === 'paid' && transaction.type === 'product') {
+    await maybeAwardProductLoyaltyPoints(transaction);
+  }
+
   if (source === 'notify') {
     return res.status(200).json({
       received: true,
-      duplicate: !updated,
+      duplicate: Boolean(transactionId) && !updated,
       sessionId,
       decision,
       status: transaction.status
@@ -703,8 +713,24 @@ router.post('/capital-bank/notify', ensureHttpsForCapitalBank, async (req, res) 
   if (transaction.status === 'pending') {
     return res.redirect(303, `/payment/pending?orderId=${encodeURIComponent(sessionId)}`);
   }
+
+  const reason = sanitizeReason(decision || 'payment_failed');
   return res.redirect(303, `/payment/failed?orderId=${encodeURIComponent(sessionId)}&reason=${encodeURIComponent(reason)}`);
 };
+
+router.post('/capital-bank/notify', ensureHttpsForCapitalBank, async (req, res) => {
+  if (!isCyberSourceNotifyRequest(req)) {
+    console.error('[SECURITY] Rejected Capital Bank notify request: invalid signature headers');
+    return res.status(200).json({ received: true, ignored: true });
+  }
+
+  try {
+    return await processCapitalBankCallback(req, res, 'notify');
+  } catch (error) {
+    console.error('Capital Bank notify processing error:', error?.message);
+    return res.status(200).json({ received: true, error: true });
+  }
+});
 
 router.post('/capital-bank/return', capitalBankCallbackParser, ensureHttpsForCapitalBank, async (req, res) => {
   try {
@@ -712,12 +738,6 @@ router.post('/capital-bank/return', capitalBankCallbackParser, ensureHttpsForCap
   } catch (error) {
     console.error('Capital Bank return processing error:', error?.message);
     return res.redirect(303, '/payment/failed?reason=callback_processing_error');
-  }
-});
-
-    if (!updateResult) return;
-  } catch (error) {
-    console.error('Capital Bank notify processing error:', error?.message);
   }
 });
 // Store transaction
