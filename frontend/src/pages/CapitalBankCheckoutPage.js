@@ -9,6 +9,18 @@ const CARD_TYPES = [
   { value: '003', label: 'American Express' }
 ];
 
+const TEST_BILL_TO = {
+  firstName: 'Test',
+  lastName: 'User',
+  address1: '1 Test Street',
+  locality: 'Amman',
+  administrativeArea: 'AM',
+  postalCode: '11111',
+  country: 'JO',
+  email: 'test@test.com',
+  phoneNumber: '0791234567'
+};
+
 export default function CapitalBankCheckoutPage() {
   const { sessionId } = useParams();
   const navigate = useNavigate();
@@ -43,7 +55,8 @@ export default function CapitalBankCheckoutPage() {
       expiryMonth,
       expiryYear,
       cvn,
-      cardType
+      cardType,
+      billTo: { ...TEST_BILL_TO }
     };
     clearCardFields();
 
@@ -113,6 +126,12 @@ export default function CapitalBankCheckoutPage() {
             <div className="space-y-2 text-right">
               <label className="block text-sm font-medium">CVN</label>
               <input className="w-full border rounded-xl p-3" value={cvn} onChange={(e) => setCvn(e.target.value)} required disabled={isLoading} />
+            </div>
+
+            <div className="rounded-xl border p-3 bg-slate-50 text-right space-y-2" dir="ltr">
+              <p className="text-sm font-semibold text-slate-700">Test billing details sent with request</p>
+              <p className="text-xs text-slate-600">{TEST_BILL_TO.firstName} {TEST_BILL_TO.lastName} — {TEST_BILL_TO.address1}, {TEST_BILL_TO.locality}, {TEST_BILL_TO.administrativeArea} {TEST_BILL_TO.postalCode}, {TEST_BILL_TO.country}</p>
+              <p className="text-xs text-slate-600">{TEST_BILL_TO.email} • {TEST_BILL_TO.phoneNumber}</p>
             </div>
 
             <button
