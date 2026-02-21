@@ -430,6 +430,17 @@ router.get('/status/:sessionId', authMiddleware, async (req, res) => {
   }
 });
 const sanitizeReason = (reason = 'payment_failed') => String(reason).replace(/[^a-zA-Z0-9_\-]/g, '_').slice(0, 80) || 'payment_failed';
+const TEST_BILLING_DEFAULTS = {
+  firstName: 'Test',
+  lastName: 'User',
+  address1: '1 Test Street',
+  locality: 'Amman',
+  administrativeArea: 'AM',
+  postalCode: '11111',
+  country: 'JO',
+  email: 'test@test.com',
+  phoneNumber: '0791234567'
+};
 const mapDecisionToStatus = (decision = '') => {
   const normalized = String(decision || '').toUpperCase();
   if (normalized === 'ACCEPT') {
@@ -441,6 +452,10 @@ const mapDecisionToStatus = (decision = '') => {
   return { status: 'failed', paymentStatus: normalized ? normalized.toLowerCase() : 'failed' };
 };
 const getBillingDataFromUser = (transaction) => {
+  if (process.env.NODE_ENV === 'test') {
+    return { ...TEST_BILLING_DEFAULTS };
+  }
+
   const user = transaction?.metadata?.billing_user || {};
   const fullName = String(user.name || user.full_name || 'Guest User').trim();
   const nameParts = fullName.split(/\s+/).filter(Boolean);
@@ -458,6 +473,19 @@ const getBillingDataFromUser = (transaction) => {
     email: String(user.email || 'payments@peekaboo.local').slice(0, 100),
     phoneNumber: String(user.phoneNumber || user.phone || '962790000000').slice(0, 20)
   };
+};
+const normalizeExpirationYear = (value) => {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (digits.length === 4) return digits;
+  if (digits.length === 2) return `20${digits}`;
+  if (digits.length > 4) return digits.slice(-4);
+  return digits.padStart(4, '0');
+};
+const normalizeCardType = (value) => {
+  const normalized = String(value || '').trim().toLowerCase();
+  if (normalized === '001' || normalized === 'visa' || normalized === 'v') return '001';
+  if (normalized === '002' || normalized === 'mastercard' || normalized === 'master card' || normalized === 'mc' || normalized === 'm') return '002';
+  return String(value || '').trim();
 };
 const buildCyberSourcePaymentPayload = ({ orderId, amount, billTo, card }) => ({
   clientReferenceInformation: { code: orderId },
@@ -511,10 +539,14 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
     cardData = {
       number: String(cardNumber).replace(/\s+/g, ''),
       expirationMonth: String(expiryMonth).padStart(2, '0').slice(-2),
-      expirationYear: String(expiryYear).slice(-4),
+      expirationYear: normalizeExpirationYear(expiryYear),
       securityCode: String(cvn),
-      type: String(cardType)
+      type: normalizeCardType(cardType)
     };
+
+    if (!['001', '002'].includes(cardData.type)) {
+      return res.status(400).json({ error: 'Unsupported card type. Use 001 for Visa or 002 for Mastercard.' });
+    }
 
     const payload = buildCyberSourcePaymentPayload({
       orderId: transaction.session_id,
@@ -540,6 +572,13 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
     });
 
     const result = await response.json().catch(() => ({}));
+    if (response.status !== 201) {
+      console.error('Capital Bank initiate non-201 response body:', {
+        status: response.status,
+        statusText: response.statusText,
+        body: result
+      });
+    }
     const decision = String(result?.status || result?.processorInformation?.responseCode || '').toUpperCase();
     const transactionId = String(result?.id || result?.reconciliationId || '');
 
