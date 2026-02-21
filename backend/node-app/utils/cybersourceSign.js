@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const FIFTEEN_MINUTES_IN_MS = 15 * 60 * 1000;
 
 const getRequiredSecret = (secretKey) => {
   const key = secretKey || process.env.CAPITAL_BANK_SECRET_KEY;
@@ -43,7 +44,7 @@ const buildSignatureHeader = ({ method, url, body, merchantId, accessKey, secret
 
 const buildCyberSourceAuthHeaders = ({ method = 'POST', url, body = {}, merchantId, accessKey, secretKey }) => {
   if (!url) throw new Error('CyberSource URL is required');
-  if (!merchantId) throw new Error('CAPITAL_BANK_MERCHANT_ID is required');
+  if (!merchantId) throw new Error('CAPITAL_BANK_PROFILE_ID is required');
   if (!accessKey) throw new Error('CAPITAL_BANK_ACCESS_KEY is required');
 
   const signed = buildSignatureHeader({ method, url, body, merchantId, accessKey, secretKey });
@@ -77,7 +78,7 @@ const stringifyFieldValue = (value) => {
   return String(value);
 };
 
-const buildSecureAcceptanceSignedData = (fields = {}, signedFieldNames = []) => {
+const buildSignedFields = (fields = {}, signedFieldNames = []) => {
   return signedFieldNames
     .map((name) => `${name}=${stringifyFieldValue(fields[name])}`)
     .join(',');
@@ -93,7 +94,7 @@ const signSecureAcceptanceFields = (fields = {}, secretKey) => {
     throw new Error('signed_field_names is required');
   }
 
-  const dataToSign = buildSecureAcceptanceSignedData(fields, signedFieldNames);
+  const dataToSign = buildSignedFields(fields, signedFieldNames);
   return crypto
     .createHmac('sha256', getRequiredSecret(secretKey))
     .update(dataToSign, 'utf8')
@@ -103,6 +104,11 @@ const signSecureAcceptanceFields = (fields = {}, secretKey) => {
 const verifySecureAcceptanceSignature = (fields = {}, secretKey) => {
   const receivedSignature = String(fields.signature || '');
   if (!receivedSignature) return false;
+
+  const signedDateTime = String(fields.signed_date_time || '');
+  const signedAt = Date.parse(signedDateTime);
+  if (!signedDateTime || Number.isNaN(signedAt)) return false;
+  if (Math.abs(Date.now() - signedAt) > FIFTEEN_MINUTES_IN_MS) return false;
 
   const expected = signSecureAcceptanceFields(fields, secretKey);
   const receivedBuffer = Buffer.from(receivedSignature, 'utf8');
@@ -118,7 +124,7 @@ module.exports = {
   buildCyberSourceAuthHeaders,
   buildCapitalBankCallbackSignature,
   verifyCapitalBankCallbackSignature,
-  buildSecureAcceptanceSignedData,
+  buildSignedFields,
   signSecureAcceptanceFields,
   verifySecureAcceptanceSignature
 };
