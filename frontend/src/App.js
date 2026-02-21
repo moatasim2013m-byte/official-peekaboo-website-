@@ -18,10 +18,10 @@ const TicketsPage = lazy(() => import("./pages/TicketsPage"));
 const BirthdayPage = lazy(() => import("./pages/BirthdayPage"));
 const SubscriptionsPage = lazy(() => import("./pages/SubscriptionsPage"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
-const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage"));
+const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const PaymentCancelPage = lazy(() => import("./pages/PaymentCancelPage"));
-const PaymentFailedPage = lazy(() => import("./pages/PaymentFailedPage"));
-const PaymentPendingPage = lazy(() => import("./pages/PaymentPendingPage"));
+const PaymentFailed = lazy(() => import("./pages/PaymentFailed"));
+const PaymentPending = lazy(() => import("./pages/PaymentPending"));
 const CapitalBankCheckoutPage = lazy(() => import("./pages/CapitalBankCheckoutPage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const StaffPage = lazy(() => import("./pages/StaffPage"));
@@ -121,9 +121,9 @@ function AppRoutes() {
         <Route path="/rules" element={<Layout><RulesPage /></Layout>} />
         <Route path="/pricing" element={<Layout><PricingPage /></Layout>} />
 
-        <Route path="/payment/success" element={<Layout><PaymentSuccessPage /></Layout>} />
-        <Route path="/payment/failed" element={<Layout><PaymentFailedPage /></Layout>} />
-        <Route path="/payment/pending" element={<Layout><PaymentPendingPage /></Layout>} />
+        <Route path="/payment/success" element={<Layout><PaymentSuccess /></Layout>} />
+        <Route path="/payment/failed" element={<Layout><PaymentFailed /></Layout>} />
+        <Route path="/payment/pending" element={<Layout><PaymentPending /></Layout>} />
         <Route path="/payment/capital-bank/:sessionId" element={<Layout><CapitalBankCheckoutPage /></Layout>} />
         <Route path="/payment/cancel" element={<Layout><PaymentCancelPage /></Layout>} />
         <Route path="/booking-confirmation" element={<Layout><BookingConfirmationPage /></Layout>} />
