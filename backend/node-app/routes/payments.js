@@ -441,6 +441,17 @@ const TEST_BILLING_DEFAULTS = {
   email: 'test@test.com',
   phoneNumber: '0791234567'
 };
+const REQUIRED_BILL_TO_FIELDS = [
+  'firstName',
+  'lastName',
+  'address1',
+  'locality',
+  'administrativeArea',
+  'postalCode',
+  'country',
+  'email',
+  'phoneNumber'
+];
 const mapDecisionToStatus = (decision = '') => {
   const normalized = String(decision || '').toUpperCase();
   if (normalized === 'ACCEPT') {
@@ -452,17 +463,14 @@ const mapDecisionToStatus = (decision = '') => {
   return { status: 'failed', paymentStatus: normalized ? normalized.toLowerCase() : 'failed' };
 };
 const getBillingDataFromUser = (transaction) => {
-  if (process.env.NODE_ENV === 'test') {
-    return { ...TEST_BILLING_DEFAULTS };
-  }
-
+  const isTestEnvironment = process.env.NODE_ENV === 'test';
   const user = transaction?.metadata?.billing_user || {};
   const fullName = String(user.name || user.full_name || 'Guest User').trim();
   const nameParts = fullName.split(/\s+/).filter(Boolean);
   const firstName = nameParts[0] || 'Guest';
   const lastName = nameParts.slice(1).join(' ') || 'User';
 
-  return {
+  const billingData = isTestEnvironment ? { ...TEST_BILLING_DEFAULTS } : {
     firstName,
     lastName,
     address1: String(user.address1 || 'Amman').slice(0, 60),
@@ -473,6 +481,12 @@ const getBillingDataFromUser = (transaction) => {
     email: String(user.email || 'payments@peekaboo.local').slice(0, 100),
     phoneNumber: String(user.phoneNumber || user.phone || '962790000000').slice(0, 20)
   };
+
+  return REQUIRED_BILL_TO_FIELDS.reduce((acc, field) => {
+    const value = String(billingData[field] || '').trim();
+    acc[field] = value || TEST_BILLING_DEFAULTS[field];
+    return acc;
+  }, {});
 };
 const normalizeExpirationYear = (value) => {
   const digits = String(value || '').replace(/\D/g, '');
@@ -548,6 +562,13 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       return res.status(400).json({ error: 'Unsupported card type. Use 001 for Visa or 002 for Mastercard.' });
     }
 
+    if (!/^\d{2}$/.test(cardData.expirationMonth)) {
+      return res.status(400).json({ error: 'expiryMonth must be a 2-digit string (MM).' });
+    }
+    if (!/^\d{4}$/.test(cardData.expirationYear)) {
+      return res.status(400).json({ error: 'expiryYear must be a 4-digit string (YYYY).' });
+    }
+
     const payload = buildCyberSourcePaymentPayload({
       orderId: transaction.session_id,
       amount,
@@ -571,12 +592,20 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       body: requestBody
     });
 
-    const result = await response.json().catch(() => ({}));
+    const rawResponseBody = await response.text();
+    let result = {};
+    try {
+      result = rawResponseBody ? JSON.parse(rawResponseBody) : {};
+    } catch (_error) {
+      result = { rawResponseBody };
+    }
+
     if (response.status !== 201) {
       console.error('Capital Bank initiate non-201 response body:', {
         status: response.status,
         statusText: response.statusText,
-        body: result
+        body: result,
+        rawResponseBody
       });
     }
     const decision = String(result?.status || result?.processorInformation?.responseCode || '').toUpperCase();
