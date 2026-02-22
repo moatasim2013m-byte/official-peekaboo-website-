@@ -39,7 +39,6 @@ const cors = require('cors');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
-const mongoSanitize = require('express-mongo-sanitize');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -88,21 +87,33 @@ app.use(helmet({
   contentSecurityPolicy: false
 }));
 
-const mongoSanitizeOptions = { allowDots: true, replaceWith: '_' };
+const sanitizeObject = (obj) => {
+  if (!obj || typeof obj !== 'object') return obj;
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => (typeof item === 'object' ? sanitizeObject(item) : item));
+  }
+
+  const clean = {};
+  for (const key of Object.keys(obj)) {
+    const cleanKey = key.replace(/[$\.]/g, '_');
+    const val = obj[key];
+    clean[cleanKey] = (val && typeof val === 'object') ? sanitizeObject(val) : val;
+  }
+  return clean;
+};
+
 app.use((req, res, next) => {
-  // Express exposes req.query as a getter-only property, so sanitize in-place
-  // without reassigning req.query to avoid IncomingMessage setter errors.
   if (req.body && typeof req.body === 'object') {
-    mongoSanitize.sanitize(req.body, mongoSanitizeOptions);
+    req.body = sanitizeObject(req.body);
   }
+
   if (req.params && typeof req.params === 'object') {
-    mongoSanitize.sanitize(req.params, mongoSanitizeOptions);
+    Object.assign(req.params, sanitizeObject(req.params));
   }
-  if (req.headers && typeof req.headers === 'object') {
-    mongoSanitize.sanitize(req.headers, mongoSanitizeOptions);
-  }
+
   if (req.query && typeof req.query === 'object') {
-    mongoSanitize.sanitize(req.query, mongoSanitizeOptions);
+    Object.assign(req.query, sanitizeObject(req.query));
   }
 
   return next();
