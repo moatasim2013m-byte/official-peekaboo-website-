@@ -2,12 +2,21 @@ const crypto = require('crypto');
 
 const CYBERSOURCE_REST_TEST_URL = 'https://apitest.cybersource.com';
 const CYBERSOURCE_REST_LIVE_URL = 'https://api.cybersource.com';
-const EXPECTED_CAPITAL_BANK_ACCESS_KEY = '8dd4c4e88ef6322ab79126cb4a6e6f27';
+
+const normalizeUrl = (value) => {
+  if (!value || typeof value !== 'string') return null;
+  try {
+    const parsed = new URL(value.trim());
+    if (!['http:', 'https:'].includes(parsed.protocol)) return null;
+    return parsed.origin;
+  } catch (_error) {
+    return null;
+  }
+};
 
 const getCyberSourceBaseUrl = () => (
-  process.env.CYBERSOURCE_ENV === 'production' || process.env.NODE_ENV === 'production'
-    ? CYBERSOURCE_REST_LIVE_URL
-    : CYBERSOURCE_REST_TEST_URL
+  normalizeUrl(process.env.CAPITAL_BANK_PAYMENT_ENDPOINT)
+  || CYBERSOURCE_REST_TEST_URL
 );
 
 const getCyberSourceHost = () => new URL(getCyberSourceBaseUrl()).host;
@@ -33,10 +42,6 @@ const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, reques
 
   if (sanitizedAccessKey !== accessKey) {
     throw new Error('CAPITAL_BANK_ACCESS_KEY contains leading/trailing whitespace');
-  }
-
-  if (sanitizedAccessKey !== EXPECTED_CAPITAL_BANK_ACCESS_KEY) {
-    throw new Error('CAPITAL_BANK_ACCESS_KEY does not match expected Google Secret Manager value');
   }
 
   const date = new Date().toUTCString();
