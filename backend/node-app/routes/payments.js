@@ -20,6 +20,28 @@ const paymentProvider = supportedPaymentProviders.has(requestedPaymentProvider)
   : PAYMENT_PROVIDERS.MANUAL;
 const DEV_ENVIRONMENTS = new Set(['development', 'dev', 'local', 'test']);
 const DB_PROVIDER_CAPITAL_BANK = 'capital_bank';
+const CYBERSOURCE_BASE_ORIGIN = 'https://apitest.cybersource.com';
+const CYBERSOURCE_PAYMENTS_PATH = '/pts/v2/payments';
+const normalizeCapitalBankEndpoint = (value) => {
+  const fallback = CYBERSOURCE_BASE_ORIGIN;
+  const raw = String(value || '').trim();
+  if (!raw) return fallback;
+
+  const withoutTrailingSlashes = raw.replace(/\/+$/, '');
+  try {
+    const parsed = new URL(withoutTrailingSlashes);
+    if (parsed.origin !== CYBERSOURCE_BASE_ORIGIN) {
+      console.warn(`[Payments] CAPITAL_BANK_PAYMENT_ENDPOINT should be ${CYBERSOURCE_BASE_ORIGIN}. Received: ${raw}`);
+    }
+    if (parsed.pathname !== '/' || parsed.search || parsed.hash) {
+      console.warn(`[Payments] CAPITAL_BANK_PAYMENT_ENDPOINT must not include a path/query/hash. Using origin only: ${parsed.origin}`);
+    }
+    return parsed.origin;
+  } catch (_error) {
+    console.warn(`[Payments] Invalid CAPITAL_BANK_PAYMENT_ENDPOINT: ${raw}. Falling back to ${fallback}`);
+    return fallback;
+  }
+};
 const isLoyaltyDuplicateError = (error) => {
   return error?.code === 'LOYALTY_DUPLICATE_REFERENCE' || error?.code === 11000;
 };
@@ -50,7 +72,7 @@ const capitalBankConfig = {
   merchantId: process.env.CAPITAL_BANK_MERCHANT_ID,
   accessKey: process.env.CAPITAL_BANK_ACCESS_KEY,
   secretKey: process.env.CAPITAL_BANK_SECRET_KEY,
-  paymentEndpoint: process.env.CAPITAL_BANK_PAYMENT_ENDPOINT || 'https://apitest.cybersource.com'
+  paymentEndpoint: normalizeCapitalBankEndpoint(process.env.CAPITAL_BANK_PAYMENT_ENDPOINT)
 };
 const requestedCapitalBankProvider = paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK;
 const missingCapitalBankEnvVars = [
@@ -576,7 +598,7 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       card: cardData
     });
 
-    const endpointPath = '/pts/v2/payments';
+    const endpointPath = CYBERSOURCE_PAYMENTS_PATH;
     const requestBody = JSON.stringify(payload);
     const merchantIdRaw = process.env.CAPITAL_BANK_MERCHANT_ID;
     const merchantIdTrimmed = String(merchantIdRaw || '').trim();
@@ -606,7 +628,7 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
     console.log('[CAPITAL BANK DEBUG] HTTP signature signing string:', signingString);
     console.log('[CAPITAL BANK DEBUG] Sending to CyberSource:', JSON.stringify({
       merchantId: process.env.CAPITAL_BANK_MERCHANT_ID,
-      endpoint: process.env.CAPITAL_BANK_PAYMENT_ENDPOINT,
+      endpoint: capitalBankConfig.paymentEndpoint,
       amount: payload.orderInformation?.amountDetails?.totalAmount,
       currency: payload.orderInformation?.amountDetails?.currency,
       cardType: payload.paymentInformation?.card?.type,
@@ -614,7 +636,10 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       expirationYear: payload.paymentInformation?.card?.expirationYear
     }, null, 2));
 
-    const response = await fetch(`${capitalBankConfig.paymentEndpoint}${endpointPath}`, {
+    const paymentUrl = `${capitalBankConfig.paymentEndpoint}${endpointPath}`;
+    console.log('[CAPITAL BANK DEBUG] CyberSource resolved payment URL:', paymentUrl);
+
+    const response = await fetch(paymentUrl, {
       method: 'POST',
       headers,
       body: requestBody
