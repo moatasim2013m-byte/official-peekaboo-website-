@@ -87,7 +87,26 @@ app.use(helmet({
   xXssProtection: false,
   contentSecurityPolicy: false
 }));
-app.use(mongoSanitize({ allowDots: true, replaceWith: '_' }));
+
+const mongoSanitizeOptions = { allowDots: true, replaceWith: '_' };
+app.use((req, res, next) => {
+  // Express exposes req.query as a getter-only property, so sanitize in-place
+  // without reassigning req.query to avoid IncomingMessage setter errors.
+  if (req.body && typeof req.body === 'object') {
+    mongoSanitize.sanitize(req.body, mongoSanitizeOptions);
+  }
+  if (req.params && typeof req.params === 'object') {
+    mongoSanitize.sanitize(req.params, mongoSanitizeOptions);
+  }
+  if (req.headers && typeof req.headers === 'object') {
+    mongoSanitize.sanitize(req.headers, mongoSanitizeOptions);
+  }
+  if (req.query && typeof req.query === 'object') {
+    mongoSanitize.sanitize(req.query, mongoSanitizeOptions);
+  }
+
+  return next();
+});
 
 // ==================== HEALTH CHECK (before rate limiting) ====================
 app.get('/healthz', (req, res) => res.status(200).send('ok'));
