@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { 
   User, Baby, Clock, Cake, Star, Gift, Plus, Edit, Trash2, 
-  AlertTriangle, Calendar, Loader2, Phone, Settings
+  AlertTriangle, Calendar, Loader2, Phone, Settings, QrCode
 } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -69,16 +69,12 @@ export default function ProfilePage() {
       hourlyRes,
       birthdayRes,
       subsRes,
-      loyaltyBalanceRes,
-      loyaltyHistoryRes,
       activeRes
     ] = await Promise.allSettled([
       api.get('/profile'),
       api.get('/bookings/hourly'),
       api.get('/bookings/birthday'),
       api.get('/subscriptions/my'),
-      api.get('/loyalty/balance'),
-      api.get('/loyalty/history'),
       api.get('/bookings/hourly/active')
     ]);
 
@@ -88,27 +84,31 @@ export default function ProfilePage() {
     if (subsRes.status === 'fulfilled') setSubscriptions(subsRes.value.data.subscriptions || []);
     if (activeRes.status === 'fulfilled') setActiveSession(activeRes.value.data.active_session);
 
-    if (loyaltyBalanceRes.status === 'fulfilled' && loyaltyHistoryRes.status === 'fulfilled') {
-      const pointsAvailable = Number(loyaltyBalanceRes.value.data.pointsAvailable ?? loyaltyBalanceRes.value.data.points ?? 0);
+    if ([profileRes, hourlyRes, birthdayRes, subsRes, activeRes].some((res) => res.status === 'rejected')) {
+      console.error('Failed to fetch some profile data');
+    }
+    setLoading(false);
+
+    try {
+      const [loyaltyBalanceRes, loyaltyHistoryRes] = await Promise.all([
+        api.get('/loyalty/balance'),
+        api.get('/loyalty/history')
+      ]);
+      const pointsAvailable = Number(loyaltyBalanceRes.data.pointsAvailable ?? loyaltyBalanceRes.data.points ?? 0);
       const jdValue = pointsAvailable / 100;
-      const history = loyaltyHistoryRes.value.data.history || loyaltyHistoryRes.value.data.entries || [];
+      const history = loyaltyHistoryRes.data.history || loyaltyHistoryRes.data.entries || [];
 
       setLoyaltyBalance(Number.isFinite(pointsAvailable) ? pointsAvailable : 0);
       setLoyaltyJdValue(Number.isFinite(jdValue) ? jdValue : 0);
       setLoyaltyHistory(Array.isArray(history) ? history.slice(0, 50) : []);
-    } else {
+    } catch (error) {
       setLoyaltyError('تعذر تحميل نقاط الولاء حالياً. حاول مرة أخرى لاحقاً.');
       setLoyaltyBalance(0);
       setLoyaltyJdValue(0);
       setLoyaltyHistory([]);
+    } finally {
+      setLoyaltyLoading(false);
     }
-
-    if ([profileRes, hourlyRes, birthdayRes, subsRes, activeRes].some((res) => res.status === 'rejected')) {
-      console.error('Failed to fetch some profile data');
-    }
-
-    setLoyaltyLoading(false);
-    setLoading(false);
   }, [api]);
 
   useEffect(() => {
