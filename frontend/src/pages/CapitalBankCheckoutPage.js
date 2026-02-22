@@ -6,8 +6,7 @@ import { useAuth } from '../context/AuthContext';
 
 const CARD_TYPES = [
   { value: '001', label: 'Visa' },
-  { value: '002', label: 'Mastercard' },
-  { value: '003', label: 'American Express' }
+  { value: '002', label: 'Mastercard' }
 ];
 
 const TEST_BILL_TO = {
@@ -111,6 +110,7 @@ export default function CapitalBankCheckoutPage() {
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-2 text-right">
               <label className="block text-sm font-medium">نوع البطاقة</label>
+              <p className="text-xs text-slate-500">البطاقات المدعومة حالياً: Visa / Mastercard</p>
               <select
                 className="w-full border rounded-xl p-3"
                 value={cardType}
