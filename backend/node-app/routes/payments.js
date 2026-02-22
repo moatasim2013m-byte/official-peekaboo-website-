@@ -689,10 +689,10 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
 });
 const capitalBankCallbackParser = express.urlencoded({ extended: false });
 const processCapitalBankCallback = async (req, res, source = 'notify') => {
-  const body = req.body || {};
-  const sessionId = String(body?.clientReferenceInformation?.code || body?.orderInformation?.invoiceNumber || body?.reference_number || body?.orderId || '').trim();
-  const decision = String(body?.decision || body?.status || '').toUpperCase();
-  const transactionId = String(body?.id || body?.transaction_id || body?.reconciliationId || '').trim();
+  const callbackPayload = { ...(req.query || {}), ...(req.body || {}) };
+  const sessionId = String(callbackPayload?.clientReferenceInformation?.code || callbackPayload?.orderInformation?.invoiceNumber || callbackPayload?.reference_number || callbackPayload?.orderId || '').trim();
+  const decision = String(callbackPayload?.decision || callbackPayload?.status || '').toUpperCase();
+  const transactionId = String(callbackPayload?.id || callbackPayload?.transaction_id || callbackPayload?.reconciliationId || '').trim();
   const mapped = mapDecisionToStatus(decision);
 
   if (!sessionId) {
