@@ -2,6 +2,7 @@ const crypto = require('crypto');
 
 const CYBERSOURCE_REST_TEST_URL = 'https://apitest.cybersource.com';
 const CYBERSOURCE_REST_LIVE_URL = 'https://api.cybersource.com';
+const EXPECTED_CAPITAL_BANK_ACCESS_KEY = '8dd4c4e88ef6322ab79126cb4a6e6f27';
 
 const getCyberSourceBaseUrl = () => (
   process.env.CYBERSOURCE_ENV === 'production' || process.env.NODE_ENV === 'production'
@@ -28,6 +29,16 @@ const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, reques
   if (!secretKey) throw new Error('CAPITAL_BANK_SECRET_KEY is required');
   if (!endpointPath) throw new Error('CyberSource endpoint path is required');
 
+  const sanitizedAccessKey = accessKey.trim();
+
+  if (sanitizedAccessKey !== accessKey) {
+    throw new Error('CAPITAL_BANK_ACCESS_KEY contains leading/trailing whitespace');
+  }
+
+  if (sanitizedAccessKey !== EXPECTED_CAPITAL_BANK_ACCESS_KEY) {
+    throw new Error('CAPITAL_BANK_ACCESS_KEY does not match expected Google Secret Manager value');
+  }
+
   const date = new Date().toUTCString();
   const host = getCyberSourceHost();
   const digest = buildDigest(requestBody);
@@ -45,6 +56,10 @@ const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, reques
     .update(signingString, 'utf8')
     .digest('base64');
 
+  const signatureHeader = `keyId="${sanitizedAccessKey}", algorithm="HmacSHA256", headers="host date request-target v-c-merchant-id digest", signature="${signatureValue}"`;
+
+  console.info('[CyberSource REST] Signature header:', signatureHeader);
+
   return {
     Accept: 'application/json',
     'Content-Type': 'application/json',
@@ -52,7 +67,7 @@ const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, reques
     Date: date,
     Host: host,
     Digest: digest,
-    Signature: `keyId="${merchantId}", algorithm="HmacSHA256", headers="host date request-target v-c-merchant-id digest", signature="${signatureValue}"`
+    Signature: signatureHeader
   };
 };
 
