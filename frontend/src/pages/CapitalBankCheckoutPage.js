@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { useAuth } from '../context/AuthContext';
 
 const CARD_TYPES = [
   { value: '001', label: 'Visa' },
@@ -24,6 +25,7 @@ const TEST_BILL_TO = {
 export default function CapitalBankCheckoutPage() {
   const { sessionId } = useParams();
   const navigate = useNavigate();
+  const { api, isAuthenticated, loading } = useAuth();
   const orderId = useMemo(() => sessionId || '', [sessionId]);
 
   const [cardNumber, setCardNumber] = useState('');
@@ -40,6 +42,12 @@ export default function CapitalBankCheckoutPage() {
     setCvn('');
     setCardType('001');
   };
+
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      navigate('/login', { replace: true });
+    }
+  }, [isAuthenticated, loading, navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -61,27 +69,36 @@ export default function CapitalBankCheckoutPage() {
     clearCardFields();
 
     try {
-      const response = await fetch('/api/payments/capital-bank/initiate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(payload)
+      const response = await api.post('/payments/capital-bank/initiate', payload, {
+        withCredentials: true,
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
-      const result = await response.json().catch(() => ({}));
-      if (response.ok && result?.success) {
+      const result = response?.data || {};
+      if (result?.success) {
         navigate(`/payment/success?orderId=${encodeURIComponent(result.orderId || orderId)}`, { replace: true });
         return;
       }
 
       const reason = encodeURIComponent(result?.reason || result?.error || 'payment_declined');
       navigate(`/payment/failed?reason=${reason}`, { replace: true });
-    } catch (_error) {
-      navigate('/payment/failed?reason=network_error', { replace: true });
+    } catch (error) {
+      const reason = encodeURIComponent(error?.response?.data?.reason || error?.response?.data?.error || 'network_error');
+      navigate(`/payment/failed?reason=${reason}`, { replace: true });
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (loading || !isAuthenticated) {
+    return (
+      <div className="min-h-[80vh] flex items-center justify-center" dir="rtl">
+        <Loader2 className="w-6 h-6 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[80vh] flex items-center justify-center bg-hero-gradient py-12 px-4" dir="rtl">
