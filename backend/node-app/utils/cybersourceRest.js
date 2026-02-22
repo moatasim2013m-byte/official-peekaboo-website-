@@ -1,5 +1,18 @@
 const crypto = require('crypto');
 
+const CYBERSOURCE_REST_TEST_URL = 'https://apitest.cybersource.com';
+const CYBERSOURCE_REST_LIVE_URL = 'https://api.cybersource.com';
+
+const getCyberSourceBaseUrl = () => (
+  process.env.CYBERSOURCE_ENV === 'production' || process.env.NODE_ENV === 'production'
+    ? CYBERSOURCE_REST_LIVE_URL
+    : CYBERSOURCE_REST_TEST_URL
+);
+
+const getCyberSourceHost = () => new URL(getCyberSourceBaseUrl()).host;
+
+const getCyberSourcePaymentUrl = () => `${getCyberSourceBaseUrl()}/pts/v2/payments`;
+
 const buildDigest = (requestBody = '') => {
   const digest = crypto
     .createHash('sha256')
@@ -16,7 +29,7 @@ const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, reques
   if (!endpointPath) throw new Error('CyberSource endpoint path is required');
 
   const date = new Date().toUTCString();
-  const host = 'apitest.cybersource.com';
+  const host = getCyberSourceHost();
   const digest = buildDigest(requestBody);
   const requestTarget = `post ${endpointPath}`;
   const signingString = [
@@ -44,5 +57,9 @@ const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, reques
 };
 
 module.exports = {
-  buildRestHeaders
+  buildRestHeaders,
+  CYBERSOURCE_REST_TEST_URL,
+  CYBERSOURCE_REST_LIVE_URL,
+  getCyberSourceBaseUrl,
+  getCyberSourcePaymentUrl
 };
