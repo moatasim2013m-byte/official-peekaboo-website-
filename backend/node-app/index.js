@@ -87,19 +87,25 @@ app.use(helmet({
   xXssProtection: false,
   contentSecurityPolicy: false
 }));
-const sanitize = mongoSanitize();
+
+const mongoSanitizeOptions = { allowDots: true, replaceWith: '_' };
 app.use((req, res, next) => {
-  try {
-    return sanitize(req, res, next);
-  } catch (error) {
-    console.warn('[SECURITY] Sanitization skipped for read-only property', {
-      req_id: req.req_id,
-      method: req.method,
-      path: req.originalUrl,
-      error: error?.message
-    });
-    return next();
+  // Express exposes req.query as a getter-only property, so sanitize in-place
+  // without reassigning req.query to avoid IncomingMessage setter errors.
+  if (req.body && typeof req.body === 'object') {
+    mongoSanitize.sanitize(req.body, mongoSanitizeOptions);
   }
+  if (req.params && typeof req.params === 'object') {
+    mongoSanitize.sanitize(req.params, mongoSanitizeOptions);
+  }
+  if (req.headers && typeof req.headers === 'object') {
+    mongoSanitize.sanitize(req.headers, mongoSanitizeOptions);
+  }
+  if (req.query && typeof req.query === 'object') {
+    mongoSanitize.sanitize(req.query, mongoSanitizeOptions);
+  }
+
+  return next();
 });
 
 // ==================== HEALTH CHECK (before rate limiting) ====================
