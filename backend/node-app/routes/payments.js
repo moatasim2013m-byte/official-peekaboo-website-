@@ -7,7 +7,7 @@ const { authMiddleware } = require('../middleware/auth');
 const loyaltyRouter = require('./loyalty');
 const { awardPoints } = loyaltyRouter;
 const { validateCoupon } = require('../utils/coupons');
-const { buildRestHeaders, buildSigningString, getCyberSourcePaymentUrl } = require('../utils/cybersourceRest');
+const { buildSecureAcceptanceFormFields, verifySecureAcceptanceSignature, getCyberSourcePaymentUrl } = require('../utils/cybersourceRest');
 const router = express.Router();
 const PAYMENT_PROVIDERS = {
   MANUAL: 'manual',
