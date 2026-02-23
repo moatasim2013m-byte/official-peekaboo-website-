@@ -32,6 +32,20 @@ const buildDigest = (requestBody = '') => {
   return `SHA-256=${digest}`;
 };
 
+const decodeSecretKey = (secretKey) => {
+  const normalizedSecretKey = String(secretKey || '').trim();
+  if (!normalizedSecretKey) {
+    throw new Error('CAPITAL_BANK_SECRET_KEY is required');
+  }
+
+  const isHexKey = /^[0-9a-fA-F]+$/.test(normalizedSecretKey) && normalizedSecretKey.length % 2 === 0;
+  if (isHexKey) {
+    return Buffer.from(normalizedSecretKey, 'hex');
+  }
+
+  return Buffer.from(normalizedSecretKey, 'base64');
+};
+
 const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, requestBody = '') => {
   if (!merchantId) throw new Error('CAPITAL_BANK_MERCHANT_ID is required');
   if (!accessKey) throw new Error('CAPITAL_BANK_ACCESS_KEY is required');
@@ -56,8 +70,10 @@ const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, reques
     `digest: ${digest}`
   ].join('\n');
 
+  const decodedSecretKey = decodeSecretKey(secretKey);
+
   const signatureValue = crypto
-    .createHmac('sha256', secretKey)
+    .createHmac('sha256', decodedSecretKey)
     .update(signingString, 'utf8')
     .digest('base64');
 
