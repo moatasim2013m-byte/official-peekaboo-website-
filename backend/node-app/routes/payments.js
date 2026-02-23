@@ -7,23 +7,20 @@ const { authMiddleware } = require('../middleware/auth');
 const loyaltyRouter = require('./loyalty');
 const { awardPoints } = loyaltyRouter;
 const { validateCoupon } = require('../utils/coupons');
-const { buildRestHeaders, buildSigningString, getCyberSourcePaymentUrl } = require('../utils/cybersourceRest');
+const { buildSecureAcceptanceFields, getSecureAcceptanceUrl } = require('../utils/cybersourceSecureAcceptance');
 const router = express.Router();
 const PAYMENT_PROVIDERS = {
   MANUAL: 'manual',
-  CAPITAL_BANK: 'capital_bank_rest'
+  CAPITAL_BANK: 'capital_bank_secure_acceptance',
+  CAPITAL_BANK_REST_LEGACY: 'capital_bank_rest'
 };
 const requestedPaymentProvider = (process.env.PAYMENT_PROVIDER || PAYMENT_PROVIDERS.MANUAL).toLowerCase();
 const supportedPaymentProviders = new Set(Object.values(PAYMENT_PROVIDERS));
-const paymentProvider = supportedPaymentProviders.has(requestedPaymentProvider)
-  ? requestedPaymentProvider
-  : PAYMENT_PROVIDERS.MANUAL;
+const paymentProvider = requestedPaymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK_REST_LEGACY
+  ? PAYMENT_PROVIDERS.CAPITAL_BANK
+  : (supportedPaymentProviders.has(requestedPaymentProvider) ? requestedPaymentProvider : PAYMENT_PROVIDERS.MANUAL);
 const DEV_ENVIRONMENTS = new Set(['development', 'dev', 'local', 'test']);
 const DB_PROVIDER_CAPITAL_BANK = 'capital_bank';
-const CYBERSOURCE_PAYMENTS_PATH = '/pts/v2/payments';
-const CAPITAL_BANK_AUTH_ALERT_COOLDOWN_MS = parseInt(process.env.CAPITAL_BANK_AUTH_ALERT_COOLDOWN_MS || `${10 * 60 * 1000}`, 10);
-const ALERT_WEBHOOK_URL = String(process.env.ALERT_WEBHOOK_URL || '').trim();
-let lastCapitalBankAuthAlertAt = 0;
 const isLoyaltyDuplicateError = (error) => {
   return error?.code === 'LOYALTY_DUPLICATE_REFERENCE' || error?.code === 11000;
 };
@@ -51,13 +48,13 @@ const maybeAwardProductLoyaltyPoints = async (transaction) => {
   }
 };
 const capitalBankConfig = {
-  merchantId: String(process.env.CAPITAL_BANK_MERCHANT_ID || '').trim(),
+  profileId: String(process.env.CAPITAL_BANK_PROFILE_ID || process.env.CAPITAL_BANK_MERCHANT_ID || '').trim(),
   accessKey: String(process.env.CAPITAL_BANK_ACCESS_KEY || '').trim(),
   secretKey: String(process.env.CAPITAL_BANK_SECRET_KEY || '').trim()
 };
 const requestedCapitalBankProvider = paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK;
 const missingCapitalBankEnvVars = [
-  ['CAPITAL_BANK_MERCHANT_ID', capitalBankConfig.merchantId],
+  ['CAPITAL_BANK_PROFILE_ID (Account ID)', capitalBankConfig.profileId],
   ['CAPITAL_BANK_ACCESS_KEY', capitalBankConfig.accessKey],
   ['CAPITAL_BANK_SECRET_KEY', capitalBankConfig.secretKey]
 ].filter(([, value]) => !value).map(([name]) => name);
@@ -67,8 +64,8 @@ if (!supportedPaymentProviders.has(requestedPaymentProvider)) {
 }
 if (requestedCapitalBankProvider) {
   if (capitalBankRestReady) {
-    console.log(`[Payments] Active provider: ${paymentProvider} (CyberSource REST API)`);
-    console.log(`[Payments] Capital Bank endpoint: ${getCyberSourcePaymentUrl()}`);
+    console.log(`[Payments] Active provider: ${paymentProvider} (CyberSource Secure Acceptance)`);
+    console.log(`[Payments] Capital Bank endpoint: ${getSecureAcceptanceUrl()}`);
   } else {
     console.warn(`[Payments] Active provider fallback: manual. Missing env vars for ${paymentProvider}: ${missingCapitalBankEnvVars.join(', ')}`);
   }
@@ -432,28 +429,6 @@ router.get('/status/:sessionId', authMiddleware, async (req, res) => {
   }
 });
 const sanitizeReason = (reason = 'payment_failed') => String(reason).replace(/[^a-zA-Z0-9_\-]/g, '_').slice(0, 80) || 'payment_failed';
-const TEST_BILLING_DEFAULTS = {
-  firstName: 'Test',
-  lastName: 'User',
-  address1: '1 Test Street',
-  locality: 'Amman',
-  administrativeArea: 'AM',
-  postalCode: '11111',
-  country: 'JO',
-  email: 'test@test.com',
-  phoneNumber: '0791234567'
-};
-const REQUIRED_BILL_TO_FIELDS = [
-  'firstName',
-  'lastName',
-  'address1',
-  'locality',
-  'administrativeArea',
-  'postalCode',
-  'country',
-  'email',
-  'phoneNumber'
-];
 const mapDecisionToStatus = (decision = '') => {
   const normalized = String(decision || '').toUpperCase();
   if (normalized === 'ACCEPT') {
@@ -464,125 +439,21 @@ const mapDecisionToStatus = (decision = '') => {
   }
   return { status: 'failed', paymentStatus: normalized ? normalized.toLowerCase() : 'failed' };
 };
-const getBillingDataFromUser = (transaction) => {
-  const isTestEnvironment = process.env.NODE_ENV === 'test';
-  const user = transaction?.metadata?.billing_user || {};
-  const fullName = String(user.name || user.full_name || 'Guest User').trim();
-  const nameParts = fullName.split(/\s+/).filter(Boolean);
-  const firstName = nameParts[0] || 'Guest';
-  const lastName = nameParts.slice(1).join(' ') || 'User';
-
-  const billingData = isTestEnvironment ? { ...TEST_BILLING_DEFAULTS } : {
-    firstName,
-    lastName,
-    address1: String(user.address1 || 'Amman').slice(0, 60),
-    locality: String(user.locality || 'Amman').slice(0, 50),
-    administrativeArea: String(user.administrativeArea || 'Amman').slice(0, 50),
-    postalCode: String(user.postalCode || '11118').slice(0, 10),
-    country: 'JO',
-    email: String(user.email || 'payments@peekaboo.local').slice(0, 100),
-    phoneNumber: String(user.phoneNumber || user.phone || '962790000000').slice(0, 20)
-  };
-
-  return REQUIRED_BILL_TO_FIELDS.reduce((acc, field) => {
-    const value = String(billingData[field] || '').trim();
-    acc[field] = value || TEST_BILLING_DEFAULTS[field];
-    return acc;
-  }, {});
-};
-const normalizeExpirationYear = (value) => {
-  const digits = String(value || '').replace(/\D/g, '');
-  if (digits.length === 4) return digits;
-  if (digits.length === 2) return `20${digits}`;
-  if (digits.length > 4) return digits.slice(-4);
-  return digits.padStart(4, '0');
-};
-const normalizeCardType = (value) => {
-  const normalized = String(value || '').trim().toLowerCase();
-  if (normalized === '001' || normalized === 'visa' || normalized === 'v') return '001';
-  if (normalized === '002' || normalized === 'mastercard' || normalized === 'master card' || normalized === 'mc' || normalized === 'm') return '002';
-  return String(value || '').trim();
-};
-const buildCyberSourcePaymentPayload = ({ orderId, amount, billTo, card }) => ({
-  clientReferenceInformation: { code: orderId },
-  processingInformation: { capture: true },
-  orderInformation: {
-    amountDetails: {
-      totalAmount: Number(amount).toFixed(2),
-      currency: 'JOD'
-    },
-    billTo
-  },
-  paymentInformation: {
-    card: {
-      number: card.number,
-      expirationMonth: card.expirationMonth,
-      expirationYear: card.expirationYear,
-      securityCode: card.securityCode,
-      type: card.type
-    }
-  }
-});
 const isCyberSourceNotifyRequest = (req) => {
-  const merchantHeader = String(req.get('v-c-merchant-id') || '').trim();
-  const signature = String(req.get('signature') || '').trim();
-  const digest = String(req.get('digest') || '').trim();
-  return merchantHeader === String(capitalBankConfig.merchantId || '') && Boolean(signature) && Boolean(digest);
-};
-const sendCapitalBankAuthFailureAlert = async ({ transaction, responseStatus, responseStatusText, reason, responseBody }) => {
-  const now = Date.now();
-  if (now - lastCapitalBankAuthAlertAt < CAPITAL_BANK_AUTH_ALERT_COOLDOWN_MS) {
-    return;
-  }
-  lastCapitalBankAuthAlertAt = now;
-
-  const alertPayload = {
-    level: 'critical',
-    service: 'payments',
-    event: 'capital_bank_gateway_auth_failure',
-    endpoint: '/api/payments/capital-bank/initiate',
-    status: 502,
-    gatewayStatus: responseStatus,
-    gatewayStatusText: responseStatusText,
-    reason,
-    sessionId: transaction?.session_id || null,
-    transactionId: transaction?._id?.toString() || null,
-    timestamp: new Date(now).toISOString(),
-    hint: 'Potential Capital Bank/CyberSource credential rotation or expiration issue.'
-  };
-
-  console.error('[ALERT] Capital Bank payment gateway auth failure', {
-    ...alertPayload,
-    gatewayResponse: responseBody
-  });
-
-  if (!ALERT_WEBHOOK_URL) {
-    return;
-  }
-
-  try {
-    await fetch(ALERT_WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(alertPayload)
-    });
-  } catch (alertError) {
-    console.error('[ALERT] Failed to deliver Capital Bank auth failure webhook', {
-      message: alertError?.message
-    });
-  }
+  const signature = String(req.body?.signature || req.query?.signature || '').trim();
+  const signedFieldNames = String(req.body?.signed_field_names || req.query?.signed_field_names || '').trim();
+  return Boolean(signature) && Boolean(signedFieldNames);
 };
 router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank, async (req, res) => {
-  let cardData = null;
   try {
     const activeProvider = getEffectiveProvider();
     if (activeProvider !== PAYMENT_PROVIDERS.CAPITAL_BANK) {
-      return res.status(503).json({ error: 'Capital Bank REST payment gateway is not enabled', missing_env_vars: missingCapitalBankEnvVars });
+      return res.status(503).json({ error: 'Capital Bank Secure Acceptance payment gateway is not enabled', missing_env_vars: missingCapitalBankEnvVars });
     }
 
-    const { orderId, cardNumber, expiryMonth, expiryYear, cvn, cardType } = req.body || {};
-    if (!orderId || !cardNumber || !expiryMonth || !expiryYear || !cvn || !cardType) {
-      return res.status(400).json({ error: 'orderId and card details are required' });
+    const { orderId } = req.body || {};
+    if (!orderId) {
+      return res.status(400).json({ error: 'orderId is required' });
     }
 
     const transaction = await resolveOrderTransaction(orderId, req.userId);
@@ -595,158 +466,44 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       return res.status(400).json({ error: 'Invalid transaction amount' });
     }
 
-    cardData = {
-      number: String(cardNumber).replace(/\s+/g, ''),
-      expirationMonth: String(String(expiryMonth).padStart(2, '0').slice(-2)),
-      expirationYear: String(normalizeExpirationYear(expiryYear)),
-      securityCode: String(cvn),
-      type: normalizeCardType(cardType)
-    };
-
-    if (!['001', '002'].includes(cardData.type)) {
-      return res.status(400).json({ error: 'Unsupported card type. Use 001 for Visa or 002 for Mastercard.' });
-    }
-
-    if (!/^\d{2}$/.test(cardData.expirationMonth)) {
-      return res.status(400).json({ error: 'expiryMonth must be a 2-digit string (MM).' });
-    }
-    if (!/^\d{4}$/.test(cardData.expirationYear)) {
-      return res.status(400).json({ error: 'expiryYear must be a 4-digit string (YYYY).' });
-    }
-
-    const payload = buildCyberSourcePaymentPayload({
-      orderId: transaction.session_id,
-      amount,
-      billTo: { ...TEST_BILLING_DEFAULTS },
-      card: cardData
-    });
-
-    const endpointPath = CYBERSOURCE_PAYMENTS_PATH;
-    const requestBody = JSON.stringify(payload);
-    const merchantIdRaw = process.env.CAPITAL_BANK_MERCHANT_ID;
-    const merchantIdTrimmed = String(merchantIdRaw || '').trim();
-    if (merchantIdTrimmed !== '903897720102') {
-      console.error('[CAPITAL BANK DEBUG] CAPITAL_BANK_MERCHANT_ID mismatch:', JSON.stringify({
-        configured: merchantIdRaw,
-        trimmed: merchantIdTrimmed,
-        expected: '903897720102'
-      }, null, 2));
-    }
-    const headers = buildRestHeaders(
-      capitalBankConfig.merchantId,
-      capitalBankConfig.accessKey,
-      capitalBankConfig.secretKey,
-      endpointPath,
-      requestBody
-    );
-
-    const signingString = buildSigningString({
-      host: headers.Host,
-      date: headers.Date,
-      '(request-target)': `post ${endpointPath}`,
-      'v-c-merchant-id': capitalBankConfig.merchantId,
-      digest: headers.Digest
-    });
-
-    console.log('[CAPITAL BANK DEBUG] HTTP signature signing string:', signingString);
-    console.log('[CAPITAL BANK DEBUG] Sending to CyberSource:', JSON.stringify({
-      merchantId: process.env.CAPITAL_BANK_MERCHANT_ID,
-      endpoint: getCyberSourcePaymentUrl(),
-      amount: payload.orderInformation?.amountDetails?.totalAmount,
-      currency: payload.orderInformation?.amountDetails?.currency,
-      cardType: payload.paymentInformation?.card?.type,
-      expirationMonth: payload.paymentInformation?.card?.expirationMonth,
-      expirationYear: payload.paymentInformation?.card?.expirationYear
-    }, null, 2));
-
-    const paymentUrl = getCyberSourcePaymentUrl();
-    console.log('[CAPITAL BANK DEBUG] CyberSource resolved payment URL:', paymentUrl);
-
-    const response = await fetch(paymentUrl, {
-      method: 'POST',
-      headers,
-      body: requestBody
-    });
-
-    const rawResponseBody = await response.text();
-    let responseBody = {};
-    try {
-      responseBody = rawResponseBody ? JSON.parse(rawResponseBody) : {};
-    } catch (_error) {
-      responseBody = { rawResponseBody };
-    }
-
-    console.error('[CAPITAL BANK DEBUG] CyberSource full response:', JSON.stringify({
-      status: response.status,
-      body: responseBody
-    }, null, 2));
-
-    if (response.status !== 201) {
-      console.error('Capital Bank initiate non-201 response body:', {
-        status: response.status,
-        statusText: response.statusText,
-        body: responseBody,
-        rawResponseBody
-      });
-    }
-    const decision = String(responseBody?.status || responseBody?.processorInformation?.responseCode || '').toUpperCase();
-    const transactionId = String(responseBody?.id || responseBody?.reconciliationId || '');
-
-    if (response.status === 201 && decision !== 'DECLINE') {
-      await PaymentTransaction.findByIdAndUpdate(transaction._id, {
-        $set: {
-          status: 'paid',
-          payment_status: 'paid',
-          payment_id: transactionId || null,
-          updated_at: new Date(),
-          provider: DB_PROVIDER_CAPITAL_BANK
-        }
-      });
-
-      return res.status(200).json({ success: true, orderId: transaction.session_id });
-    }
-
-    const reason = sanitizeReason(responseBody?.errorInformation?.message || responseBody?.message || 'payment_declined');
-    console.log('Capital Bank/CyberSource payment failure response body:', {
-      status: response.status,
-      statusText: response.statusText,
-      body: responseBody,
-      rawResponseBody
-    });
     await PaymentTransaction.findByIdAndUpdate(transaction._id, {
       $set: {
-        status: 'failed',
-        payment_status: 'failed',
+        status: 'pending',
+        payment_status: 'pending',
         updated_at: new Date(),
-        error_message: reason,
         provider: DB_PROVIDER_CAPITAL_BANK
       }
     });
 
-    if (response.status === 400 || decision === 'DECLINE') {
-      return res.status(402).json({ success: false, reason });
+    const origin = resolveFrontendOrigin(req.body?.originUrl, req);
+    if (!origin) {
+      return res.status(400).json({ error: 'Unable to resolve frontend origin for return URLs' });
     }
 
-    if (response.status === 401 || response.status === 403) {
-      await sendCapitalBankAuthFailureAlert({
-        transaction,
-        responseStatus: response.status,
-        responseStatusText: response.statusText,
-        reason,
-        responseBody
-      });
-      return res.status(502).json({
-        error: 'Payment gateway authentication failed',
-        reason: 'gateway_authentication_failed'
-      });
-    }
+    const secureAcceptance = buildSecureAcceptanceFields({
+      profileId: capitalBankConfig.profileId,
+      accessKey: capitalBankConfig.accessKey,
+      secretKey: capitalBankConfig.secretKey,
+      transactionUuid: transaction.session_id,
+      referenceNumber: transaction.session_id,
+      amount,
+      returnUrl: `${origin}/api/payments/capital-bank/return`,
+      cancelUrl: `${origin}/payment/cancel`,
+      locale: 'ar'
+    });
 
-    return res.status(500).json({ error: 'Payment processing failed' });
+    return res.status(200).json({
+      success: true,
+      orderId: transaction.session_id,
+      provider: DB_PROVIDER_CAPITAL_BANK,
+      secureAcceptance: {
+        url: getSecureAcceptanceUrl(),
+        fields: secureAcceptance
+      }
+    });
   } catch (error) {
     console.error('Capital Bank initiate error:', error?.message);
     return res.status(500).json({ error: 'Failed to process payment' });
-  } finally {
-    cardData = null;
   }
 });
 const capitalBankCallbackParser = express.urlencoded({ extended: false });
