@@ -56,9 +56,20 @@ const decodeSecretKey = (secretKey) => {
     throw new Error('CAPITAL_BANK_SECRET_KEY is required');
   }
 
-  const isHexKey = /^[0-9a-fA-F]+$/.test(normalizedSecretKey) && normalizedSecretKey.length % 2 === 0;
-  if (isHexKey) {
+  const configuredEncoding = String(process.env.CAPITAL_BANK_SECRET_KEY_ENCODING || '').trim().toLowerCase();
+  if (configuredEncoding === 'hex') {
+    if (!/^[0-9a-fA-F]+$/.test(normalizedSecretKey) || normalizedSecretKey.length % 2 !== 0) {
+      throw new Error('CAPITAL_BANK_SECRET_KEY_ENCODING=hex requires an even-length hexadecimal CAPITAL_BANK_SECRET_KEY');
+    }
     return Buffer.from(normalizedSecretKey, 'hex');
+  }
+
+  if (configuredEncoding === 'utf8' || configuredEncoding === 'text') {
+    return Buffer.from(normalizedSecretKey, 'utf8');
+  }
+
+  if (configuredEncoding && configuredEncoding !== 'base64') {
+    throw new Error('CAPITAL_BANK_SECRET_KEY_ENCODING must be one of: base64, utf8, hex');
   }
 
   if (isLikelyBase64(normalizedSecretKey)) {

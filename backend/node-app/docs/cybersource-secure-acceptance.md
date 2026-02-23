@@ -7,6 +7,7 @@ Set on Cloud Run backend and redeploy after any change:
 - `CAPITAL_BANK_MERCHANT_ID=903897720102`
 - `CAPITAL_BANK_ACCESS_KEY=<bank access key>`
 - `CAPITAL_BANK_SECRET_KEY=<bank secret key from Secret Manager>`
+- `CAPITAL_BANK_SECRET_KEY_ENCODING=base64` (optional; defaults to auto-detect base64, fallback utf8. Use `hex` only if bank explicitly provided hex secret)
 - `CAPITAL_BANK_PAYMENT_ENDPOINT=https://apitest.cybersource.com` (optional explicit override; defaults to test if omitted)
 - During current test phase, keep endpoint on `https://apitest.cybersource.com`. Switch to `https://api.cybersource.com` only after go-live approval.
 
