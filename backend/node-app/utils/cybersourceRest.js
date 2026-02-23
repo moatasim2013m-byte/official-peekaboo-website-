@@ -47,7 +47,13 @@ const buildSigningString = (headerValues) => SIGNED_HEADER_ORDER
 const isLikelyBase64 = (value) => {
   const normalized = String(value || '').trim();
   if (!normalized || normalized.length % 4 !== 0) return false;
-  return /^[A-Za-z0-9+/]+={0,2}$/.test(normalized);
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(normalized)) return false;
+
+  // Hex-like secrets (common in provider dashboards) are ambiguous and should not
+  // be auto-decoded as base64 unless explicitly requested.
+  if (/^[0-9a-fA-F]+$/.test(normalized)) return false;
+
+  return true;
 };
 
 const decodeSecretKey = (secretKey) => {
@@ -56,13 +62,39 @@ const decodeSecretKey = (secretKey) => {
     throw new Error('CAPITAL_BANK_SECRET_KEY is required');
   }
 
-  const isHexKey = /^[0-9a-fA-F]+$/.test(normalizedSecretKey) && normalizedSecretKey.length % 2 === 0;
-  if (isHexKey) {
+  const encodingOverride = String(process.env.CAPITAL_BANK_SECRET_KEY_ENCODING || '').trim().toLowerCase();
+
+  if (encodingOverride === 'base64') {
+    return Buffer.from(normalizedSecretKey, 'base64');
+  }
+
+  if (encodingOverride === 'hex') {
     return Buffer.from(normalizedSecretKey, 'hex');
   }
 
+  if (encodingOverride === 'utf8' || encodingOverride === 'text') {
+    return Buffer.from(normalizedSecretKey, 'utf8');
+  }
+
+  const prefixedEncodingMatch = normalizedSecretKey.match(/^(base64|hex|utf8|text):(.*)$/i);
+  if (prefixedEncodingMatch) {
+    const encoding = prefixedEncodingMatch[1].toLowerCase();
+    const rawValue = prefixedEncodingMatch[2];
+    if (encoding === 'base64') return Buffer.from(rawValue, 'base64');
+    if (encoding === 'hex') return Buffer.from(rawValue, 'hex');
+    return Buffer.from(rawValue, 'utf8');
+  }
+
+  const isHexKey = /^[0-9a-fA-F]+$/.test(normalizedSecretKey) && normalizedSecretKey.length % 2 === 0;
+
   if (isLikelyBase64(normalizedSecretKey)) {
     return Buffer.from(normalizedSecretKey, 'base64');
+  }
+
+  // Prefer UTF-8 for ambiguous values because bank-issued shared secrets are
+  // often displayed as plain text and may look hexadecimal.
+  if (isHexKey) {
+    return Buffer.from(normalizedSecretKey, 'utf8');
   }
 
   return Buffer.from(normalizedSecretKey, 'utf8');
