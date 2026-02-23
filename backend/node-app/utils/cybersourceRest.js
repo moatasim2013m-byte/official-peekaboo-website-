@@ -47,7 +47,13 @@ const buildSigningString = (headerValues) => SIGNED_HEADER_ORDER
 const isLikelyBase64 = (value) => {
   const normalized = String(value || '').trim();
   if (!normalized || normalized.length % 4 !== 0) return false;
-  return /^[A-Za-z0-9+/]+={0,2}$/.test(normalized);
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(normalized)) return false;
+
+  // Hex-like secrets (common in provider dashboards) are ambiguous and should not
+  // be auto-decoded as base64 unless explicitly requested.
+  if (/^[0-9a-fA-F]+$/.test(normalized)) return false;
+
+  return true;
 };
 
 const getSecretKeyEncoding = () => String(process.env.CAPITAL_BANK_SECRET_KEY_ENCODING || 'auto').trim().toLowerCase();
