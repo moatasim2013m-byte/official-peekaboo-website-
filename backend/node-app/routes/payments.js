@@ -52,12 +52,14 @@ const maybeAwardProductLoyaltyPoints = async (transaction) => {
 };
 const capitalBankConfig = {
   merchantId: String(process.env.CAPITAL_BANK_MERCHANT_ID || '').trim(),
+  profileId: String(process.env.CAPITAL_BANK_PROFILE_ID || '').trim(),
   accessKey: String(process.env.CAPITAL_BANK_ACCESS_KEY || '').trim(),
   secretKey: String(process.env.CAPITAL_BANK_SECRET_KEY || '').trim()
 };
 const requestedCapitalBankProvider = paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK;
 const missingCapitalBankEnvVars = [
   ['CAPITAL_BANK_MERCHANT_ID', capitalBankConfig.merchantId],
+  ['CAPITAL_BANK_PROFILE_ID', capitalBankConfig.profileId],
   ['CAPITAL_BANK_ACCESS_KEY', capitalBankConfig.accessKey],
   ['CAPITAL_BANK_SECRET_KEY', capitalBankConfig.secretKey]
 ].filter(([, value]) => !value).map(([name]) => name);
