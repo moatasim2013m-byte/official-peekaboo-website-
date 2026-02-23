@@ -69,8 +69,9 @@ if (!supportedPaymentProviders.has(requestedPaymentProvider)) {
 }
 if (requestedCapitalBankProvider) {
   if (capitalBankRestReady) {
-    console.log(`[Payments] Active provider: ${paymentProvider} (CyberSource REST API)`);
+    console.log(`[Payments] Active provider: ${paymentProvider} (CyberSource Secure Acceptance)`);
     console.log(`[Payments] Capital Bank endpoint: ${getCyberSourcePaymentUrl()}`);
+    console.log(`[Payments] Profile ID: ${capitalBankConfig.profileId}`);
   } else {
     console.warn(`[Payments] Active provider fallback: manual. Missing env vars for ${paymentProvider}: ${missingCapitalBankEnvVars.join(', ')}`);
   }
