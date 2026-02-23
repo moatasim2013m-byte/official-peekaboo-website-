@@ -44,6 +44,12 @@ const buildSigningString = (headerValues) => SIGNED_HEADER_ORDER
   })
   .join('\n');
 
+const isLikelyBase64 = (value) => {
+  const normalized = String(value || '').trim();
+  if (!normalized || normalized.length % 4 !== 0) return false;
+  return /^[A-Za-z0-9+/]+={0,2}$/.test(normalized);
+};
+
 const decodeSecretKey = (secretKey) => {
   const normalizedSecretKey = String(secretKey || '').trim();
   if (!normalizedSecretKey) {
@@ -55,7 +61,11 @@ const decodeSecretKey = (secretKey) => {
     return Buffer.from(normalizedSecretKey, 'hex');
   }
 
-  return Buffer.from(normalizedSecretKey, 'base64');
+  if (isLikelyBase64(normalizedSecretKey)) {
+    return Buffer.from(normalizedSecretKey, 'base64');
+  }
+
+  return Buffer.from(normalizedSecretKey, 'utf8');
 };
 
 const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, requestBody = '') => {

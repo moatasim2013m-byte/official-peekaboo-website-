@@ -681,6 +681,13 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       return res.status(402).json({ success: false, reason });
     }
 
+    if (response.status === 401 || response.status === 403) {
+      return res.status(502).json({
+        error: 'Payment gateway authentication failed',
+        reason: 'gateway_authentication_failed'
+      });
+    }
+
     return res.status(500).json({ error: 'Payment processing failed' });
   } catch (error) {
     console.error('Capital Bank initiate error:', error?.message);
