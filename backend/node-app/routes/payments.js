@@ -641,9 +641,45 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
 const capitalBankCallbackParser = express.urlencoded({ extended: false });
 const processCapitalBankCallback = async (req, res, source = 'notify') => {
   const callbackPayload = { ...(req.query || {}), ...(req.body || {}) };
-  const sessionId = String(callbackPayload?.clientReferenceInformation?.code || callbackPayload?.orderInformation?.invoiceNumber || callbackPayload?.reference_number || callbackPayload?.orderId || '').trim();
-  const decision = String(callbackPayload?.decision || callbackPayload?.status || '').toUpperCase();
-  const transactionId = String(callbackPayload?.id || callbackPayload?.transaction_id || callbackPayload?.reconciliationId || '').trim();
+  
+  // Secure Acceptance uses different field names
+  const sessionId = String(
+    callbackPayload?.req_reference_number || 
+    callbackPayload?.reference_number || 
+    callbackPayload?.orderId || 
+    ''
+  ).trim();
+  
+  const decision = String(callbackPayload?.decision || '').toUpperCase();
+  const transactionId = String(
+    callbackPayload?.transaction_id || 
+    callbackPayload?.req_transaction_uuid || 
+    ''
+  ).trim();
+
+  console.log('[Secure Acceptance Callback] Received:', {
+    source,
+    sessionId,
+    decision,
+    transactionId,
+    signature: callbackPayload?.signature ? 'present' : 'missing'
+  });
+
+  // Verify signature for security
+  if (callbackPayload?.signature && callbackPayload?.signed_field_names) {
+    try {
+      const isValid = verifySecureAcceptanceSignature(callbackPayload, capitalBankConfig.secretKey);
+      if (!isValid) {
+        console.error('[SECURITY] Invalid signature in Secure Acceptance callback');
+        if (source === 'notify') return res.status(200).json({ received: true, ignored: true });
+        return res.redirect(303, '/payment/failed?reason=invalid_signature');
+      }
+      console.log('[Secure Acceptance Callback] Signature verified ✓');
+    } catch (error) {
+      console.error('[SECURITY] Error verifying signature:', error?.message);
+    }
+  }
+
   const mapped = mapDecisionToStatus(decision);
 
   if (!sessionId) {
@@ -676,6 +712,12 @@ const processCapitalBankCallback = async (req, res, source = 'notify') => {
     if (source === 'notify') return res.status(200).json({ received: true, ignored: true });
     return res.redirect(303, '/payment/failed?reason=transaction_not_found');
   }
+
+  console.log('[Secure Acceptance Callback] Transaction updated:', {
+    sessionId,
+    status: transaction.status,
+    decision
+  });
 
   if (mapped.status === 'paid' && transaction.type === 'product') {
     await maybeAwardProductLoyaltyPoints(transaction);
