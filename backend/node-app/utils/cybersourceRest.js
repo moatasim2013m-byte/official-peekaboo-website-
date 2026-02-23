@@ -1,8 +1,9 @@
 const crypto = require('crypto');
 
-// Secure Acceptance endpoints
 const CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL = 'https://testsecureacceptance.cybersource.com';
 const CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL = 'https://secureacceptance.cybersource.com';
+const SECURE_ACCEPTANCE_PAY_PATH = '/pay';
+const SECURE_ACCEPTANCE_RESPONSE_SIGNED_FIELDS = 'signed_field_names,signature';
 
 const normalizeUrl = (value) => {
   if (!value || typeof value !== 'string') return null;
@@ -15,98 +16,46 @@ const normalizeUrl = (value) => {
   }
 };
 
-const getCyberSourceBaseUrl = () => (
-  normalizeUrl(process.env.CAPITAL_BANK_PAYMENT_ENDPOINT)
-  || CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL
+const getCyberSourceBaseUrl = () => {
+  const configured = normalizeUrl(process.env.CAPITAL_BANK_PAYMENT_ENDPOINT);
+  if (configured) return configured;
+
+  const environment = String(process.env.NODE_ENV || '').toLowerCase();
+  if (environment === 'production') return CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
+
+  return CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL;
+};
+
+const getCyberSourcePaymentUrl = () => `${getCyberSourceBaseUrl()}${SECURE_ACCEPTANCE_PAY_PATH}`;
+
+const toCyberSourceIsoDate = (date = new Date()) => (
+  new Date(date).toISOString().replace(/\.\d{3}Z$/, 'Z')
 );
 
-const getCyberSourcePaymentUrl = () => `${getCyberSourceBaseUrl()}/pay`;
-
-/**
- * Build Secure Acceptance signature for form fields
- * @param {Object} params - Form parameters to sign
- * @param {string} secretKey - Secret key (hex or utf8)
- * @returns {string} Base64 encoded signature
- */
-const buildSecureAcceptanceSignature = (params, secretKey) => {
-  if (!secretKey) {
-    throw new Error('CAPITAL_BANK_SECRET_KEY is required');
+const generateTransactionUuid = () => {
+  if (typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
   }
-
-  // Get signed field names from params
-  const signedFieldNames = params.signed_field_names;
-  if (!signedFieldNames) {
-    throw new Error('signed_field_names is required');
-  }
-
-  // Build data to sign: field1=value1,field2=value2,...
-  const fieldNames = signedFieldNames.split(',');
-  const dataToSign = fieldNames
-    .map(fieldName => {
-      const value = params[fieldName] !== undefined ? params[fieldName] : '';
-      return `${fieldName}=${value}`;
-    })
-    .join(',');
-
-  console.log('[Secure Acceptance] Signing string:', dataToSign);
-
-  // Decode secret key based on encoding
-  const decodedSecretKey = decodeSecretKey(secretKey);
-
-  // Sign with HMAC-SHA256
-  const signature = crypto
-    .createHmac('sha256', decodedSecretKey)
-    .update(dataToSign, 'utf8')
-    .digest('base64');
-
-  console.log('[Secure Acceptance] Signature generated (first 20 chars):', signature.substring(0, 20) + '...');
-
-  return signature;
+  return `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
 };
-
-/**
- * Verify Secure Acceptance signature from callback
- */
-const verifySecureAcceptanceSignature = (params, secretKey) => {
-  if (!params.signature || !params.signed_field_names) {
-    return false;
-  }
-
-  const receivedSignature = params.signature;
-  const expectedSignature = buildSecureAcceptanceSignature(params, secretKey);
-
-  return receivedSignature === expectedSignature;
-};
-
-/**
- * Decode secret key based on encoding setting or auto-detect
- */
-const getSecretKeyEncoding = () => String(process.env.CAPITAL_BANK_SECRET_KEY_ENCODING || 'auto').trim().toLowerCase();
-
-const decodeBase64Key = (value) => Buffer.from(value, 'base64');
-
-const decodeHexKey = (value) => Buffer.from(value, 'hex');
-
-const decodeUtf8Key = (value) => Buffer.from(value, 'utf8');
 
 const isLikelyBase64 = (value) => {
   const normalized = String(value || '').trim();
   if (!normalized || normalized.length % 4 !== 0) return false;
   if (!/^[A-Za-z0-9+/]+={0,2}$/.test(normalized)) return false;
-
-  // Hex-like secrets (common in provider dashboards) are ambiguous and should not
-  // be auto-decoded as base64 unless explicitly requested.
   if (/^[0-9a-fA-F]+$/.test(normalized)) return false;
-
   return true;
 };
+
+const getSecretKeyEncoding = () => String(process.env.CAPITAL_BANK_SECRET_KEY_ENCODING || 'auto').trim().toLowerCase();
+
+const decodeBase64Key = (value) => Buffer.from(value, 'base64');
+const decodeHexKey = (value) => Buffer.from(value, 'hex');
+const decodeUtf8Key = (value) => Buffer.from(value, 'utf8');
 
 const isBase64WithStrongSignal = (value) => {
   const normalized = String(value || '').trim();
   if (!isLikelyBase64(normalized)) return false;
-
-  // Avoid false positives for plain alphanumeric secrets (common in env files).
-  // Base64 keys from CyberSource commonly contain "+", "/", or "=" padding.
   return /[+/=]/.test(normalized);
 };
 
@@ -118,17 +67,9 @@ const decodeSecretKey = (secretKey) => {
 
   const requestedEncoding = getSecretKeyEncoding();
 
-  if (requestedEncoding === 'hex') {
-    return decodeHexKey(normalizedSecretKey);
-  }
-
-  if (requestedEncoding === 'base64') {
-    return decodeBase64Key(normalizedSecretKey);
-  }
-
-  if (requestedEncoding === 'utf8' || requestedEncoding === 'plain' || requestedEncoding === 'text') {
-    return decodeUtf8Key(normalizedSecretKey);
-  }
+  if (requestedEncoding === 'hex') return decodeHexKey(normalizedSecretKey);
+  if (requestedEncoding === 'base64') return decodeBase64Key(normalizedSecretKey);
+  if (requestedEncoding === 'utf8' || requestedEncoding === 'plain' || requestedEncoding === 'text') return decodeUtf8Key(normalizedSecretKey);
 
   if (requestedEncoding !== 'auto') {
     throw new Error('CAPITAL_BANK_SECRET_KEY_ENCODING must be one of: auto, base64, hex, utf8');
@@ -137,82 +78,167 @@ const decodeSecretKey = (secretKey) => {
   // Auto-detect: hex is most common for Secure Acceptance
   const isHexKey = /^[0-9a-fA-F]+$/.test(normalizedSecretKey) && normalizedSecretKey.length % 2 === 0;
   if (isHexKey) return decodeHexKey(normalizedSecretKey);
-
   if (isBase64WithStrongSignal(normalizedSecretKey)) return decodeBase64Key(normalizedSecretKey);
-
   return decodeUtf8Key(normalizedSecretKey);
 };
 
-/**
- * Build signed form fields for Secure Acceptance
- */
-const buildSecureAcceptanceFormFields = ({
+const signFields = (fieldValues, secretKey) => {
+  const signedFieldNames = String(fieldValues?.signed_field_names || '')
+    .split(',')
+    .map((fieldName) => fieldName.trim())
+    .filter(Boolean);
+
+  if (!signedFieldNames.length) {
+    throw new Error('signed_field_names is required for Secure Acceptance signatures');
+  }
+
+  const dataToSign = signedFieldNames
+    .map((fieldName) => `${fieldName}=${fieldValues[fieldName] ?? ''}`)
+    .join(',');
+
+  const decodedSecretKey = decodeSecretKey(secretKey);
+  const signature = crypto
+    .createHmac('sha256', decodedSecretKey)
+    .update(dataToSign, 'utf8')
+    .digest('base64');
+
+  return {
+    signature,
+    dataToSign,
+    signedFieldNames
+  };
+};
+
+const buildSecureAcceptanceFields = ({
   profileId,
   accessKey,
   secretKey,
   transactionUuid,
   referenceNumber,
   amount,
-  currency,
-  locale = 'en',
-  billTo
+  locale = 'en-us',
+  transactionType = 'sale',
+  currency = 'JOD',
+  billToForename = 'Customer',
+  billToSurname = 'Customer',
+  billToEmail = 'customer@example.com',
+  billToAddressLine1 = 'Amman',
+  billToAddressCity = 'Amman',
+  billToAddressCountry = 'JO',
+  overrideCustomReceiptPage,
+  overrideCustomCancelPage,
+  unsignedFieldNames = ''
 }) => {
   if (!profileId) throw new Error('CAPITAL_BANK_PROFILE_ID is required');
   if (!accessKey) throw new Error('CAPITAL_BANK_ACCESS_KEY is required');
   if (!secretKey) throw new Error('CAPITAL_BANK_SECRET_KEY is required');
-  if (!transactionUuid) throw new Error('transaction_uuid is required');
-  if (!referenceNumber) throw new Error('reference_number is required');
-  if (!amount) throw new Error('amount is required');
-  if (!currency) throw new Error('currency is required');
 
-  // Generate signed date time (ISO 8601 format)
-  const signedDateTime = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
+  const normalizedAmount = Number(amount);
+  if (!Number.isFinite(normalizedAmount) || normalizedAmount <= 0) {
+    throw new Error('Payment amount must be a positive number');
+  }
 
-  // Build form fields
-  const formFields = {
-    access_key: accessKey,
-    profile_id: profileId,
-    transaction_uuid: transactionUuid,
-    signed_field_names: 'access_key,profile_id,transaction_uuid,signed_field_names,unsigned_field_names,signed_date_time,locale,transaction_type,reference_number,amount,currency,payment_method,bill_to_forename,bill_to_surname,bill_to_email,bill_to_address_line1,bill_to_address_city,bill_to_address_country',
-    unsigned_field_names: '',
-    signed_date_time: signedDateTime,
-    locale: locale,
-    transaction_type: 'sale',
-    reference_number: referenceNumber,
-    amount: Number(amount).toFixed(2),
-    currency: currency.toUpperCase(),
+  const signedFieldNames = [
+    'access_key',
+    'profile_id',
+    'transaction_uuid',
+    'signed_field_names',
+    'unsigned_field_names',
+    'signed_date_time',
+    'locale',
+    'transaction_type',
+    'reference_number',
+    'amount',
+    'currency',
+    'payment_method',
+    'bill_to_forename',
+    'bill_to_surname',
+    'bill_to_email',
+    'bill_to_address_line1',
+    'bill_to_address_city',
+    'bill_to_address_country'
+  ].join(',');
+
+  const unsignedFields = [
+    ...String(unsignedFieldNames || '').split(',').map((fieldName) => fieldName.trim()).filter(Boolean),
+    ...(overrideCustomReceiptPage ? ['override_custom_receipt_page'] : []),
+    ...(overrideCustomCancelPage ? ['override_custom_cancel_page'] : [])
+  ];
+
+  const fields = {
+    access_key: String(accessKey),
+    profile_id: String(profileId),
+    transaction_uuid: String(transactionUuid),
+    signed_field_names: signedFieldNames,
+    unsigned_field_names: unsignedFields.join(','),
+    signed_date_time: toCyberSourceIsoDate(),
+    locale: String(locale || 'en-us').toLowerCase(),
+    transaction_type: String(transactionType || 'sale').toLowerCase(),
+    reference_number: String(referenceNumber),
+    amount: normalizedAmount.toFixed(2),
+    currency: String(currency || 'JOD').toUpperCase(),
     payment_method: 'card',
-    bill_to_forename: billTo.firstName || 'Guest',
-    bill_to_surname: billTo.lastName || 'User',
-    bill_to_email: billTo.email || 'guest@example.com',
-    bill_to_address_line1: billTo.address1 || '1 Main Street',
-    bill_to_address_city: billTo.locality || 'Amman',
-    bill_to_address_country: 'JO'
+    bill_to_forename: String(billToForename || 'Customer'),
+    bill_to_surname: String(billToSurname || 'Customer'),
+    bill_to_email: String(billToEmail || 'customer@example.com'),
+    bill_to_address_line1: String(billToAddressLine1 || 'Amman'),
+    bill_to_address_city: String(billToAddressCity || 'Amman'),
+    bill_to_address_country: String(billToAddressCountry || 'JO').toUpperCase(),
+    ...(overrideCustomReceiptPage ? { override_custom_receipt_page: String(overrideCustomReceiptPage) } : {}),
+    ...(overrideCustomCancelPage ? { override_custom_cancel_page: String(overrideCustomCancelPage) } : {})
   };
 
-  // Generate signature
-  const signature = buildSecureAcceptanceSignature(formFields, secretKey);
-  formFields.signature = signature;
+  const { signature, dataToSign, signedFieldNames: parsedSignedFields } = signFields(fields, secretKey);
+  fields.signature = signature;
 
-  console.log('[Secure Acceptance] Form fields generated:', {
-    profile_id: formFields.profile_id,
-    transaction_uuid: formFields.transaction_uuid,
-    reference_number: formFields.reference_number,
-    amount: formFields.amount,
-    currency: formFields.currency,
-    signed_date_time: formFields.signed_date_time
+  console.info('[CyberSource Secure Acceptance] Signed request fields generated', {
+    reference_number: fields.reference_number,
+    transaction_uuid: fields.transaction_uuid,
+    signed_field_count: parsedSignedFields.length,
+    signed_fields: parsedSignedFields,
+    signed_date_time: fields.signed_date_time,
+    data_to_sign_preview: dataToSign.slice(0, 200)
   });
 
-  return formFields;
+  return fields;
+};
+
+const verifySecureAcceptanceSignature = (payload, secretKey) => {
+  if (!payload || typeof payload !== 'object') {
+    return { isValid: false, reason: 'invalid_payload' };
+  }
+
+  const providedSignature = String(payload.signature || '').trim();
+  const signedFieldNames = String(payload.signed_field_names || '').trim();
+  if (!providedSignature || !signedFieldNames) {
+    return { isValid: false, reason: 'missing_signature_fields' };
+  }
+
+  const { signature: computedSignature, dataToSign, signedFieldNames: parsedSignedFields } = signFields(payload, secretKey);
+  const providedBuffer = Buffer.from(providedSignature, 'utf8');
+  const computedBuffer = Buffer.from(computedSignature, 'utf8');
+  const isValid = providedBuffer.length === computedBuffer.length
+    && crypto.timingSafeEqual(providedBuffer, computedBuffer);
+
+  return {
+    isValid,
+    reason: isValid ? null : 'signature_mismatch',
+    computedSignature,
+    providedSignature,
+    dataToSign,
+    signedFieldNames: parsedSignedFields
+  };
 };
 
 module.exports = {
-  buildSecureAcceptanceSignature,
-  verifySecureAcceptanceSignature,
-  buildSecureAcceptanceFormFields,
-  getCyberSourceBaseUrl,
-  getCyberSourcePaymentUrl,
   CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL,
   CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL,
-  decodeSecretKey
+  SECURE_ACCEPTANCE_RESPONSE_SIGNED_FIELDS,
+  buildSecureAcceptanceFields,
+  getCyberSourceBaseUrl,
+  getCyberSourcePaymentUrl,
+  generateTransactionUuid,
+  signFields,
+  toCyberSourceIsoDate,
+  verifySecureAcceptanceSignature
 };
