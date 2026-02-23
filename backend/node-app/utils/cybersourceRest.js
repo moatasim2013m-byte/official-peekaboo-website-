@@ -1,7 +1,8 @@
 const crypto = require('crypto');
 
-const CYBERSOURCE_REST_TEST_URL = 'https://apitest.cybersource.com';
-const CYBERSOURCE_REST_LIVE_URL = 'https://api.cybersource.com';
+// Secure Acceptance endpoints
+const CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL = 'https://testsecureacceptance.cybersource.com';
+const CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL = 'https://secureacceptance.cybersource.com';
 
 const normalizeUrl = (value) => {
   if (!value || typeof value !== 'string') return null;
@@ -16,33 +17,77 @@ const normalizeUrl = (value) => {
 
 const getCyberSourceBaseUrl = () => (
   normalizeUrl(process.env.CAPITAL_BANK_PAYMENT_ENDPOINT)
-  || CYBERSOURCE_REST_TEST_URL
+  || CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL
 );
 
-const getCyberSourceHost = () => new URL(getCyberSourceBaseUrl()).host;
+const getCyberSourcePaymentUrl = () => `${getCyberSourceBaseUrl()}/pay`;
 
-const getCyberSourcePaymentUrl = () => `${getCyberSourceBaseUrl()}/pts/v2/payments`;
+/**
+ * Build Secure Acceptance signature for form fields
+ * @param {Object} params - Form parameters to sign
+ * @param {string} secretKey - Secret key (hex or utf8)
+ * @returns {string} Base64 encoded signature
+ */
+const buildSecureAcceptanceSignature = (params, secretKey) => {
+  if (!secretKey) {
+    throw new Error('CAPITAL_BANK_SECRET_KEY is required');
+  }
 
-const buildDigest = (requestBody = '') => {
-  const digest = crypto
-    .createHash('sha256')
-    .update(requestBody, 'utf8')
+  // Get signed field names from params
+  const signedFieldNames = params.signed_field_names;
+  if (!signedFieldNames) {
+    throw new Error('signed_field_names is required');
+  }
+
+  // Build data to sign: field1=value1,field2=value2,...
+  const fieldNames = signedFieldNames.split(',');
+  const dataToSign = fieldNames
+    .map(fieldName => {
+      const value = params[fieldName] !== undefined ? params[fieldName] : '';
+      return `${fieldName}=${value}`;
+    })
+    .join(',');
+
+  console.log('[Secure Acceptance] Signing string:', dataToSign);
+
+  // Decode secret key based on encoding
+  const decodedSecretKey = decodeSecretKey(secretKey);
+
+  // Sign with HMAC-SHA256
+  const signature = crypto
+    .createHmac('sha256', decodedSecretKey)
+    .update(dataToSign, 'utf8')
     .digest('base64');
 
-  return `SHA-256=${digest}`;
+  console.log('[Secure Acceptance] Signature generated (first 20 chars):', signature.substring(0, 20) + '...');
+
+  return signature;
 };
 
-const SIGNED_HEADER_ORDER = ['host', 'date', '(request-target)', 'v-c-merchant-id', 'digest'];
+/**
+ * Verify Secure Acceptance signature from callback
+ */
+const verifySecureAcceptanceSignature = (params, secretKey) => {
+  if (!params.signature || !params.signed_field_names) {
+    return false;
+  }
 
-const buildSigningString = (headerValues) => SIGNED_HEADER_ORDER
-  .map((headerName) => {
-    const headerValue = headerValues?.[headerName];
-    if (!headerValue) {
-      throw new Error(`Missing required HTTP signature header value: ${headerName}`);
-    }
-    return `${headerName}: ${headerValue}`;
-  })
-  .join('\n');
+  const receivedSignature = params.signature;
+  const expectedSignature = buildSecureAcceptanceSignature(params, secretKey);
+
+  return receivedSignature === expectedSignature;
+};
+
+/**
+ * Decode secret key based on encoding setting or auto-detect
+ */
+const getSecretKeyEncoding = () => String(process.env.CAPITAL_BANK_SECRET_KEY_ENCODING || 'auto').trim().toLowerCase();
+
+const decodeBase64Key = (value) => Buffer.from(value, 'base64');
+
+const decodeHexKey = (value) => Buffer.from(value, 'hex');
+
+const decodeUtf8Key = (value) => Buffer.from(value, 'utf8');
 
 const isLikelyBase64 = (value) => {
   const normalized = String(value || '').trim();
@@ -55,14 +100,6 @@ const isLikelyBase64 = (value) => {
 
   return true;
 };
-
-const getSecretKeyEncoding = () => String(process.env.CAPITAL_BANK_SECRET_KEY_ENCODING || 'auto').trim().toLowerCase();
-
-const decodeBase64Key = (value) => Buffer.from(value, 'base64');
-
-const decodeHexKey = (value) => Buffer.from(value, 'hex');
-
-const decodeUtf8Key = (value) => Buffer.from(value, 'utf8');
 
 const isBase64WithStrongSignal = (value) => {
   const normalized = String(value || '').trim();
@@ -97,6 +134,7 @@ const decodeSecretKey = (secretKey) => {
     throw new Error('CAPITAL_BANK_SECRET_KEY_ENCODING must be one of: auto, base64, hex, utf8');
   }
 
+  // Auto-detect: hex is most common for Secure Acceptance
   const isHexKey = /^[0-9a-fA-F]+$/.test(normalizedSecretKey) && normalizedSecretKey.length % 2 === 0;
   if (isHexKey) return decodeHexKey(normalizedSecretKey);
 
@@ -105,58 +143,76 @@ const decodeSecretKey = (secretKey) => {
   return decodeUtf8Key(normalizedSecretKey);
 };
 
-const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, requestBody = '') => {
-  if (!merchantId) throw new Error('CAPITAL_BANK_MERCHANT_ID is required');
+/**
+ * Build signed form fields for Secure Acceptance
+ */
+const buildSecureAcceptanceFormFields = ({
+  profileId,
+  accessKey,
+  secretKey,
+  transactionUuid,
+  referenceNumber,
+  amount,
+  currency,
+  locale = 'en',
+  billTo
+}) => {
+  if (!profileId) throw new Error('CAPITAL_BANK_PROFILE_ID is required');
   if (!accessKey) throw new Error('CAPITAL_BANK_ACCESS_KEY is required');
   if (!secretKey) throw new Error('CAPITAL_BANK_SECRET_KEY is required');
-  if (!endpointPath) throw new Error('CyberSource endpoint path is required');
+  if (!transactionUuid) throw new Error('transaction_uuid is required');
+  if (!referenceNumber) throw new Error('reference_number is required');
+  if (!amount) throw new Error('amount is required');
+  if (!currency) throw new Error('currency is required');
 
-  const sanitizedAccessKey = accessKey.trim();
+  // Generate signed date time (ISO 8601 format)
+  const signedDateTime = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
 
-  if (sanitizedAccessKey !== accessKey) {
-    throw new Error('CAPITAL_BANK_ACCESS_KEY contains leading/trailing whitespace');
-  }
+  // Build form fields
+  const formFields = {
+    access_key: accessKey,
+    profile_id: profileId,
+    transaction_uuid: transactionUuid,
+    signed_field_names: 'access_key,profile_id,transaction_uuid,signed_field_names,unsigned_field_names,signed_date_time,locale,transaction_type,reference_number,amount,currency,payment_method,bill_to_forename,bill_to_surname,bill_to_email,bill_to_address_line1,bill_to_address_city,bill_to_address_country',
+    unsigned_field_names: '',
+    signed_date_time: signedDateTime,
+    locale: locale,
+    transaction_type: 'sale',
+    reference_number: referenceNumber,
+    amount: Number(amount).toFixed(2),
+    currency: currency.toUpperCase(),
+    payment_method: 'card',
+    bill_to_forename: billTo.firstName || 'Guest',
+    bill_to_surname: billTo.lastName || 'User',
+    bill_to_email: billTo.email || 'guest@example.com',
+    bill_to_address_line1: billTo.address1 || '1 Main Street',
+    bill_to_address_city: billTo.locality || 'Amman',
+    bill_to_address_country: 'JO'
+  };
 
-  const date = new Date().toUTCString();
-  const host = getCyberSourceHost();
-  const digest = buildDigest(requestBody);
-  const requestTarget = `post ${endpointPath}`;
-  const signingString = buildSigningString({
-    host,
-    date,
-    '(request-target)': requestTarget,
-    'v-c-merchant-id': merchantId,
-    digest
+  // Generate signature
+  const signature = buildSecureAcceptanceSignature(formFields, secretKey);
+  formFields.signature = signature;
+
+  console.log('[Secure Acceptance] Form fields generated:', {
+    profile_id: formFields.profile_id,
+    transaction_uuid: formFields.transaction_uuid,
+    reference_number: formFields.reference_number,
+    amount: formFields.amount,
+    currency: formFields.currency,
+    signed_date_time: formFields.signed_date_time
   });
 
-  const decodedSecretKey = decodeSecretKey(secretKey);
-
-  const signatureValue = crypto
-    .createHmac('sha256', decodedSecretKey)
-    .update(signingString, 'utf8')
-    .digest('base64');
-
-  const signatureHeader = `keyId="${sanitizedAccessKey}", algorithm="HmacSHA256", headers="${SIGNED_HEADER_ORDER.join(' ')}", signature="${signatureValue}"`;
-
-  console.info('[CyberSource REST] Signature header:', signatureHeader);
-
-  return {
-    Accept: 'application/json',
-    'Content-Type': 'application/json',
-    'v-c-merchant-id': merchantId,
-    Date: date,
-    Host: host,
-    Digest: digest,
-    Signature: signatureHeader
-  };
+  return formFields;
 };
 
 module.exports = {
-  buildRestHeaders,
-  buildSigningString,
-  CYBERSOURCE_REST_TEST_URL,
-  CYBERSOURCE_REST_LIVE_URL,
+  buildSecureAcceptanceSignature,
+  verifySecureAcceptanceSignature,
+  buildSecureAcceptanceFormFields,
   getCyberSourceBaseUrl,
   getCyberSourcePaymentUrl,
-  SIGNED_HEADER_ORDER
+  CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL,
+  CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL,
+  decodeSecretKey
 };
