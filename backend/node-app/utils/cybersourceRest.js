@@ -75,6 +75,7 @@ const decodeSecretKey = (secretKey) => {
     throw new Error('CAPITAL_BANK_SECRET_KEY_ENCODING must be one of: auto, base64, hex, utf8');
   }
 
+  // Auto-detect: hex is most common for Secure Acceptance
   const isHexKey = /^[0-9a-fA-F]+$/.test(normalizedSecretKey) && normalizedSecretKey.length % 2 === 0;
   if (isHexKey) return decodeHexKey(normalizedSecretKey);
   if (isBase64WithStrongSignal(normalizedSecretKey)) return decodeBase64Key(normalizedSecretKey);

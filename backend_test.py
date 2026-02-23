@@ -6,7 +6,7 @@ import json
 from datetime import datetime
 
 class PeekabooAPITester:
-    def __init__(self, base_url="https://financedefend.preview.emergentagent.com"):
+    def __init__(self, base_url="https://signature-check-mode.preview.emergentagent.com"):
         self.base_url = base_url
         self.token = None
         self.admin_token = None
@@ -320,7 +320,7 @@ class PeekabooAPITester:
             "child_id": child_id,
             "duration_hours": 2,
             "custom_notes": "Please have staff greet my child by name - Layla loves unicorns!",
-            "origin_url": "https://financedefend.preview.emergentagent.com"
+            "origin_url": "https://signature-check-mode.preview.emergentagent.com"
         }
         
         success, response = self.run_test(
