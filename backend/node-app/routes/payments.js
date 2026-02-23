@@ -745,12 +745,8 @@ const processCapitalBankCallback = async (req, res, source = 'notify') => {
 };
 
 router.post('/capital-bank/notify', ensureHttpsForCapitalBank, async (req, res) => {
-  if (!isCyberSourceNotifyRequest(req)) {
-    console.error('[SECURITY] Rejected Capital Bank notify request: invalid signature headers');
-    return res.status(200).json({ received: true, ignored: true });
-  }
-
   try {
+    console.log('[Secure Acceptance Notify] Received callback');
     return await processCapitalBankCallback(req, res, 'notify');
   } catch (error) {
     console.error('Capital Bank notify processing error:', error?.message);
