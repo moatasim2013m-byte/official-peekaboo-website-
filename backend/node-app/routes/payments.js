@@ -20,7 +20,6 @@ const paymentProvider = supportedPaymentProviders.has(requestedPaymentProvider)
   : PAYMENT_PROVIDERS.MANUAL;
 const DEV_ENVIRONMENTS = new Set(['development', 'dev', 'local', 'test']);
 const DB_PROVIDER_CAPITAL_BANK = 'capital_bank';
-const CYBERSOURCE_PAYMENTS_PATH = '/pts/v2/payments';
 const CAPITAL_BANK_AUTH_ALERT_COOLDOWN_MS = parseInt(process.env.CAPITAL_BANK_AUTH_ALERT_COOLDOWN_MS || `${10 * 60 * 1000}`, 10);
 const ALERT_WEBHOOK_URL = String(process.env.ALERT_WEBHOOK_URL || '').trim();
 let lastCapitalBankAuthAlertAt = 0;
