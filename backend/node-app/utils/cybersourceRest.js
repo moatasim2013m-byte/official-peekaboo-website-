@@ -32,6 +32,18 @@ const buildDigest = (requestBody = '') => {
   return `SHA-256=${digest}`;
 };
 
+const SIGNED_HEADER_ORDER = ['host', 'date', 'request-target', 'v-c-merchant-id', 'digest'];
+
+const buildSigningString = (headerValues) => SIGNED_HEADER_ORDER
+  .map((headerName) => {
+    const headerValue = headerValues?.[headerName];
+    if (!headerValue) {
+      throw new Error(`Missing required HTTP signature header value: ${headerName}`);
+    }
+    return `${headerName}: ${headerValue}`;
+  })
+  .join('\n');
+
 const decodeSecretKey = (secretKey) => {
   const normalizedSecretKey = String(secretKey || '').trim();
   if (!normalizedSecretKey) {
@@ -62,13 +74,13 @@ const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, reques
   const host = getCyberSourceHost();
   const digest = buildDigest(requestBody);
   const requestTarget = `post ${endpointPath}`;
-  const signingString = [
-    `host: ${host}`,
-    `date: ${date}`,
-    `request-target: ${requestTarget}`,
-    `v-c-merchant-id: ${merchantId}`,
-    `digest: ${digest}`
-  ].join('\n');
+  const signingString = buildSigningString({
+    host,
+    date,
+    'request-target': requestTarget,
+    'v-c-merchant-id': merchantId,
+    digest
+  });
 
   const decodedSecretKey = decodeSecretKey(secretKey);
 
@@ -77,7 +89,7 @@ const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, reques
     .update(signingString, 'utf8')
     .digest('base64');
 
-  const signatureHeader = `keyId="${sanitizedAccessKey}", algorithm="HmacSHA256", headers="host date request-target v-c-merchant-id digest", signature="${signatureValue}"`;
+  const signatureHeader = `keyId="${sanitizedAccessKey}", algorithm="HmacSHA256", headers="${SIGNED_HEADER_ORDER.join(' ')}", signature="${signatureValue}"`;
 
   console.info('[CyberSource REST] Signature header:', signatureHeader);
 
@@ -94,8 +106,10 @@ const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, reques
 
 module.exports = {
   buildRestHeaders,
+  buildSigningString,
   CYBERSOURCE_REST_TEST_URL,
   CYBERSOURCE_REST_LIVE_URL,
   getCyberSourceBaseUrl,
-  getCyberSourcePaymentUrl
+  getCyberSourcePaymentUrl,
+  SIGNED_HEADER_ORDER
 };

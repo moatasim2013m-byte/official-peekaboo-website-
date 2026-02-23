@@ -7,7 +7,7 @@ const { authMiddleware } = require('../middleware/auth');
 const loyaltyRouter = require('./loyalty');
 const { awardPoints } = loyaltyRouter;
 const { validateCoupon } = require('../utils/coupons');
-const { buildRestHeaders, getCyberSourcePaymentUrl } = require('../utils/cybersourceRest');
+const { buildRestHeaders, buildSigningString, getCyberSourcePaymentUrl } = require('../utils/cybersourceRest');
 const router = express.Router();
 const PAYMENT_PROVIDERS = {
   MANUAL: 'manual',
@@ -594,13 +594,13 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       requestBody
     );
 
-    const signingString = [
-      `host: ${headers.Host}`,
-      `date: ${headers.Date}`,
-      `request-target: post ${endpointPath}`,
-      `v-c-merchant-id: ${capitalBankConfig.merchantId}`,
-      `digest: ${headers.Digest}`
-    ].join('\n');
+    const signingString = buildSigningString({
+      host: headers.Host,
+      date: headers.Date,
+      'request-target': `post ${endpointPath}`,
+      'v-c-merchant-id': capitalBankConfig.merchantId,
+      digest: headers.Digest
+    });
 
     console.log('[CAPITAL BANK DEBUG] HTTP signature signing string:', signingString);
     console.log('[CAPITAL BANK DEBUG] Sending to CyberSource:', JSON.stringify({
