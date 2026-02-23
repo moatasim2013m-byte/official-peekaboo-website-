@@ -32,7 +32,7 @@ const buildDigest = (requestBody = '') => {
   return `SHA-256=${digest}`;
 };
 
-const SIGNED_HEADER_ORDER = ['host', 'date', 'request-target', 'v-c-merchant-id', 'digest'];
+const SIGNED_HEADER_ORDER = ['host', 'date', '(request-target)', 'v-c-merchant-id', 'digest'];
 
 const buildSigningString = (headerValues) => SIGNED_HEADER_ORDER
   .map((headerName) => {
@@ -118,7 +118,7 @@ const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, reques
   const signingString = buildSigningString({
     host,
     date,
-    'request-target': requestTarget,
+    '(request-target)': requestTarget,
     'v-c-merchant-id': merchantId,
     digest
   });

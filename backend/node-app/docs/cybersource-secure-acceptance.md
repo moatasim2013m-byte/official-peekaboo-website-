@@ -15,7 +15,7 @@ Set on Cloud Run backend and redeploy after any change:
 1. Client creates pending order transaction via existing checkout flow.
 2. Frontend opens `/payment/capital-bank/:sessionId` and submits card details to `POST /api/payments/capital-bank/initiate`.
 3. Backend reads amount from `PaymentTransaction` only and builds `POST /pts/v2/payments` request.
-4. Backend signs each request with HTTP Signature headers (`host`, `date`, `request-target`, `v-c-merchant-id`, `digest`).
+4. Backend signs each request with HTTP Signature headers (`host`, `date`, `(request-target)`, `v-c-merchant-id`, `digest`).
 5. Backend updates payment status on API response and processes asynchronous `POST /api/payments/capital-bank/notify` callbacks idempotently.
 
 ## Security controls

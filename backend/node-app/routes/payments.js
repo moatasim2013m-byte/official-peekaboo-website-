@@ -643,7 +643,7 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
     const signingString = buildSigningString({
       host: headers.Host,
       date: headers.Date,
-      'request-target': `post ${endpointPath}`,
+      '(request-target)': `post ${endpointPath}`,
       'v-c-merchant-id': capitalBankConfig.merchantId,
       digest: headers.Digest
     });
