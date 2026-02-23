@@ -9,6 +9,7 @@ const { awardPoints } = loyaltyRouter;
 const { validateCoupon } = require('../utils/coupons');
 const {
   buildSecureAcceptanceFields,
+  generateTransactionUuid,
   getCyberSourcePaymentUrl,
   verifySecureAcceptanceSignature
 } = require('../utils/cybersourceRest');
@@ -500,17 +501,28 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       return res.status(400).json({ error: 'Unable to resolve frontend origin for return URLs' });
     }
 
+    const transactionUuid = generateTransactionUuid();
     const secureAcceptance = buildSecureAcceptanceFields({
       profileId: capitalBankConfig.profileId,
       accessKey: capitalBankConfig.accessKey,
       secretKey: capitalBankConfig.secretKey,
-      transactionUuid: transaction.session_id,
+      transactionUuid,
       referenceNumber: transaction.session_id,
       amount,
       locale: req.body?.locale || 'ar',
       overrideCustomReceiptPage: `${origin}/api/payments/capital-bank/return`,
       overrideCustomCancelPage: `${origin}/payment/cancel`,
       ...resolveBillingDetails(transaction, req)
+    });
+
+    console.info('[Capital Bank] Secure Acceptance initiate payload prepared', {
+      order_id: transaction.session_id,
+      transaction_uuid: transactionUuid,
+      amount: amount.toFixed(2),
+      currency: secureAcceptance.currency,
+      locale: secureAcceptance.locale,
+      signed_field_names: secureAcceptance.signed_field_names,
+      unsigned_field_names: secureAcceptance.unsigned_field_names
     });
 
     return res.status(200).json({
@@ -605,7 +617,9 @@ router.post('/capital-bank/notify', capitalBankCallbackParser, ensureHttpsForCap
     console.error('[SECURITY] Rejected Capital Bank notify request: invalid signature', {
       reason: signatureCheck.reason,
       reference_number: callbackPayload.reference_number,
-      decision: callbackPayload.decision
+      decision: callbackPayload.decision,
+      signed_field_names: signatureCheck.signedFieldNames,
+      data_to_sign_preview: signatureCheck.dataToSign?.slice(0, 200)
     });
     return res.status(200).json({ received: true, ignored: true });
   }
@@ -625,7 +639,9 @@ router.post('/capital-bank/return', capitalBankCallbackParser, ensureHttpsForCap
     console.error('[SECURITY] Rejected Capital Bank return request: invalid signature', {
       reason: signatureCheck.reason,
       reference_number: callbackPayload.reference_number,
-      decision: callbackPayload.decision
+      decision: callbackPayload.decision,
+      signed_field_names: signatureCheck.signedFieldNames,
+      data_to_sign_preview: signatureCheck.dataToSign?.slice(0, 200)
     });
     return res.redirect(303, '/payment/failed?reason=invalid_signature');
   }
