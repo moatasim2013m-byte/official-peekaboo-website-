@@ -50,22 +50,53 @@ const isLikelyBase64 = (value) => {
   return /^[A-Za-z0-9+/]+={0,2}$/.test(normalized);
 };
 
+const getSecretKeyEncoding = () => String(process.env.CAPITAL_BANK_SECRET_KEY_ENCODING || 'auto').trim().toLowerCase();
+
+const decodeBase64Key = (value) => Buffer.from(value, 'base64');
+
+const decodeHexKey = (value) => Buffer.from(value, 'hex');
+
+const decodeUtf8Key = (value) => Buffer.from(value, 'utf8');
+
+const isBase64WithStrongSignal = (value) => {
+  const normalized = String(value || '').trim();
+  if (!isLikelyBase64(normalized)) return false;
+
+  // Avoid false positives for plain alphanumeric secrets (common in env files).
+  // Base64 keys from CyberSource commonly contain "+", "/", or "=" padding.
+  return /[+/=]/.test(normalized);
+};
+
 const decodeSecretKey = (secretKey) => {
   const normalizedSecretKey = String(secretKey || '').trim();
   if (!normalizedSecretKey) {
     throw new Error('CAPITAL_BANK_SECRET_KEY is required');
   }
 
+  const requestedEncoding = getSecretKeyEncoding();
+
+  if (requestedEncoding === 'hex') {
+    return decodeHexKey(normalizedSecretKey);
+  }
+
+  if (requestedEncoding === 'base64') {
+    return decodeBase64Key(normalizedSecretKey);
+  }
+
+  if (requestedEncoding === 'utf8' || requestedEncoding === 'plain' || requestedEncoding === 'text') {
+    return decodeUtf8Key(normalizedSecretKey);
+  }
+
+  if (requestedEncoding !== 'auto') {
+    throw new Error('CAPITAL_BANK_SECRET_KEY_ENCODING must be one of: auto, base64, hex, utf8');
+  }
+
   const isHexKey = /^[0-9a-fA-F]+$/.test(normalizedSecretKey) && normalizedSecretKey.length % 2 === 0;
-  if (isHexKey) {
-    return Buffer.from(normalizedSecretKey, 'hex');
-  }
+  if (isHexKey) return decodeHexKey(normalizedSecretKey);
 
-  if (isLikelyBase64(normalizedSecretKey)) {
-    return Buffer.from(normalizedSecretKey, 'base64');
-  }
+  if (isBase64WithStrongSignal(normalizedSecretKey)) return decodeBase64Key(normalizedSecretKey);
 
-  return Buffer.from(normalizedSecretKey, 'utf8');
+  return decodeUtf8Key(normalizedSecretKey);
 };
 
 const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, requestBody = '') => {
