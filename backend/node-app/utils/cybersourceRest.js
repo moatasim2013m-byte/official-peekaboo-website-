@@ -32,7 +32,7 @@ const buildDigest = (requestBody = '') => {
   return `SHA-256=${digest}`;
 };
 
-const SIGNED_HEADER_ORDER = ['host', 'date', 'request-target', 'v-c-merchant-id', 'digest'];
+const SIGNED_HEADER_ORDER = ['host', 'date', '(request-target)', 'v-c-merchant-id', 'digest'];
 
 const buildSigningString = (headerValues) => SIGNED_HEADER_ORDER
   .map((headerName) => {
@@ -56,48 +56,53 @@ const isLikelyBase64 = (value) => {
   return true;
 };
 
+const getSecretKeyEncoding = () => String(process.env.CAPITAL_BANK_SECRET_KEY_ENCODING || 'auto').trim().toLowerCase();
+
+const decodeBase64Key = (value) => Buffer.from(value, 'base64');
+
+const decodeHexKey = (value) => Buffer.from(value, 'hex');
+
+const decodeUtf8Key = (value) => Buffer.from(value, 'utf8');
+
+const isBase64WithStrongSignal = (value) => {
+  const normalized = String(value || '').trim();
+  if (!isLikelyBase64(normalized)) return false;
+
+  // Avoid false positives for plain alphanumeric secrets (common in env files).
+  // Base64 keys from CyberSource commonly contain "+", "/", or "=" padding.
+  return /[+/=]/.test(normalized);
+};
+
 const decodeSecretKey = (secretKey) => {
   const normalizedSecretKey = String(secretKey || '').trim();
   if (!normalizedSecretKey) {
     throw new Error('CAPITAL_BANK_SECRET_KEY is required');
   }
 
-  const encodingOverride = String(process.env.CAPITAL_BANK_SECRET_KEY_ENCODING || '').trim().toLowerCase();
+  const requestedEncoding = getSecretKeyEncoding();
 
-  if (encodingOverride === 'base64') {
-    return Buffer.from(normalizedSecretKey, 'base64');
+  if (requestedEncoding === 'hex') {
+    return decodeHexKey(normalizedSecretKey);
   }
 
-  if (encodingOverride === 'hex') {
-    return Buffer.from(normalizedSecretKey, 'hex');
+  if (requestedEncoding === 'base64') {
+    return decodeBase64Key(normalizedSecretKey);
   }
 
-  if (encodingOverride === 'utf8' || encodingOverride === 'text') {
-    return Buffer.from(normalizedSecretKey, 'utf8');
+  if (requestedEncoding === 'utf8' || requestedEncoding === 'plain' || requestedEncoding === 'text') {
+    return decodeUtf8Key(normalizedSecretKey);
   }
 
-  const prefixedEncodingMatch = normalizedSecretKey.match(/^(base64|hex|utf8|text):(.*)$/i);
-  if (prefixedEncodingMatch) {
-    const encoding = prefixedEncodingMatch[1].toLowerCase();
-    const rawValue = prefixedEncodingMatch[2];
-    if (encoding === 'base64') return Buffer.from(rawValue, 'base64');
-    if (encoding === 'hex') return Buffer.from(rawValue, 'hex');
-    return Buffer.from(rawValue, 'utf8');
+  if (requestedEncoding !== 'auto') {
+    throw new Error('CAPITAL_BANK_SECRET_KEY_ENCODING must be one of: auto, base64, hex, utf8');
   }
 
   const isHexKey = /^[0-9a-fA-F]+$/.test(normalizedSecretKey) && normalizedSecretKey.length % 2 === 0;
+  if (isHexKey) return decodeHexKey(normalizedSecretKey);
 
-  if (isLikelyBase64(normalizedSecretKey)) {
-    return Buffer.from(normalizedSecretKey, 'base64');
-  }
+  if (isBase64WithStrongSignal(normalizedSecretKey)) return decodeBase64Key(normalizedSecretKey);
 
-  // Prefer UTF-8 for ambiguous values because bank-issued shared secrets are
-  // often displayed as plain text and may look hexadecimal.
-  if (isHexKey) {
-    return Buffer.from(normalizedSecretKey, 'utf8');
-  }
-
-  return Buffer.from(normalizedSecretKey, 'utf8');
+  return decodeUtf8Key(normalizedSecretKey);
 };
 
 const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, requestBody = '') => {
@@ -119,7 +124,7 @@ const buildRestHeaders = (merchantId, accessKey, secretKey, endpointPath, reques
   const signingString = buildSigningString({
     host,
     date,
-    'request-target': requestTarget,
+    '(request-target)': requestTarget,
     'v-c-merchant-id': merchantId,
     digest
   });

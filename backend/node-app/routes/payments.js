@@ -21,6 +21,9 @@ const paymentProvider = supportedPaymentProviders.has(requestedPaymentProvider)
 const DEV_ENVIRONMENTS = new Set(['development', 'dev', 'local', 'test']);
 const DB_PROVIDER_CAPITAL_BANK = 'capital_bank';
 const CYBERSOURCE_PAYMENTS_PATH = '/pts/v2/payments';
+const CAPITAL_BANK_AUTH_ALERT_COOLDOWN_MS = parseInt(process.env.CAPITAL_BANK_AUTH_ALERT_COOLDOWN_MS || `${10 * 60 * 1000}`, 10);
+const ALERT_WEBHOOK_URL = String(process.env.ALERT_WEBHOOK_URL || '').trim();
+let lastCapitalBankAuthAlertAt = 0;
 const isLoyaltyDuplicateError = (error) => {
   return error?.code === 'LOYALTY_DUPLICATE_REFERENCE' || error?.code === 11000;
 };
@@ -48,9 +51,9 @@ const maybeAwardProductLoyaltyPoints = async (transaction) => {
   }
 };
 const capitalBankConfig = {
-  merchantId: process.env.CAPITAL_BANK_MERCHANT_ID,
-  accessKey: process.env.CAPITAL_BANK_ACCESS_KEY,
-  secretKey: process.env.CAPITAL_BANK_SECRET_KEY
+  merchantId: String(process.env.CAPITAL_BANK_MERCHANT_ID || '').trim(),
+  accessKey: String(process.env.CAPITAL_BANK_ACCESS_KEY || '').trim(),
+  secretKey: String(process.env.CAPITAL_BANK_SECRET_KEY || '').trim()
 };
 const requestedCapitalBankProvider = paymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK;
 const missingCapitalBankEnvVars = [
@@ -526,6 +529,49 @@ const isCyberSourceNotifyRequest = (req) => {
   const digest = String(req.get('digest') || '').trim();
   return merchantHeader === String(capitalBankConfig.merchantId || '') && Boolean(signature) && Boolean(digest);
 };
+const sendCapitalBankAuthFailureAlert = async ({ transaction, responseStatus, responseStatusText, reason, responseBody }) => {
+  const now = Date.now();
+  if (now - lastCapitalBankAuthAlertAt < CAPITAL_BANK_AUTH_ALERT_COOLDOWN_MS) {
+    return;
+  }
+  lastCapitalBankAuthAlertAt = now;
+
+  const alertPayload = {
+    level: 'critical',
+    service: 'payments',
+    event: 'capital_bank_gateway_auth_failure',
+    endpoint: '/api/payments/capital-bank/initiate',
+    status: 502,
+    gatewayStatus: responseStatus,
+    gatewayStatusText: responseStatusText,
+    reason,
+    sessionId: transaction?.session_id || null,
+    transactionId: transaction?._id?.toString() || null,
+    timestamp: new Date(now).toISOString(),
+    hint: 'Potential Capital Bank/CyberSource credential rotation or expiration issue.'
+  };
+
+  console.error('[ALERT] Capital Bank payment gateway auth failure', {
+    ...alertPayload,
+    gatewayResponse: responseBody
+  });
+
+  if (!ALERT_WEBHOOK_URL) {
+    return;
+  }
+
+  try {
+    await fetch(ALERT_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(alertPayload)
+    });
+  } catch (alertError) {
+    console.error('[ALERT] Failed to deliver Capital Bank auth failure webhook', {
+      message: alertError?.message
+    });
+  }
+};
 router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank, async (req, res) => {
   let cardData = null;
   try {
@@ -597,7 +643,7 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
     const signingString = buildSigningString({
       host: headers.Host,
       date: headers.Date,
-      'request-target': `post ${endpointPath}`,
+      '(request-target)': `post ${endpointPath}`,
       'v-c-merchant-id': capitalBankConfig.merchantId,
       digest: headers.Digest
     });
@@ -682,6 +728,13 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
     }
 
     if (response.status === 401 || response.status === 403) {
+      await sendCapitalBankAuthFailureAlert({
+        transaction,
+        responseStatus: response.status,
+        responseStatusText: response.statusText,
+        reason,
+        responseBody
+      });
       return res.status(502).json({
         error: 'Payment gateway authentication failed',
         reason: 'gateway_authentication_failed'
