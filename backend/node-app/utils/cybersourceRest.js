@@ -32,6 +32,13 @@ const toCyberSourceIsoDate = (date = new Date()) => (
   new Date(date).toISOString().replace(/\.\d{3}Z$/, 'Z')
 );
 
+const generateTransactionUuid = () => {
+  if (typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
+};
+
 const isLikelyBase64 = (value) => {
   const normalized = String(value || '').trim();
   if (!normalized || normalized.length % 4 !== 0) return false;
@@ -180,13 +187,14 @@ const buildSecureAcceptanceFields = ({
     ...(overrideCustomCancelPage ? { override_custom_cancel_page: String(overrideCustomCancelPage) } : {})
   };
 
-  const { signature, dataToSign } = signFields(fields, secretKey);
+  const { signature, dataToSign, signedFieldNames: parsedSignedFields } = signFields(fields, secretKey);
   fields.signature = signature;
 
   console.info('[CyberSource Secure Acceptance] Signed request fields generated', {
     reference_number: fields.reference_number,
     transaction_uuid: fields.transaction_uuid,
-    signed_field_count: fields.signed_field_names.split(',').length,
+    signed_field_count: parsedSignedFields.length,
+    signed_fields: parsedSignedFields,
     signed_date_time: fields.signed_date_time,
     data_to_sign_preview: dataToSign.slice(0, 200)
   });
@@ -205,7 +213,7 @@ const verifySecureAcceptanceSignature = (payload, secretKey) => {
     return { isValid: false, reason: 'missing_signature_fields' };
   }
 
-  const { signature: computedSignature, dataToSign } = signFields(payload, secretKey);
+  const { signature: computedSignature, dataToSign, signedFieldNames: parsedSignedFields } = signFields(payload, secretKey);
   const providedBuffer = Buffer.from(providedSignature, 'utf8');
   const computedBuffer = Buffer.from(computedSignature, 'utf8');
   const isValid = providedBuffer.length === computedBuffer.length
@@ -216,7 +224,8 @@ const verifySecureAcceptanceSignature = (payload, secretKey) => {
     reason: isValid ? null : 'signature_mismatch',
     computedSignature,
     providedSignature,
-    dataToSign
+    dataToSign,
+    signedFieldNames: parsedSignedFields
   };
 };
 
@@ -227,6 +236,7 @@ module.exports = {
   buildSecureAcceptanceFields,
   getCyberSourceBaseUrl,
   getCyberSourcePaymentUrl,
+  generateTransactionUuid,
   signFields,
   toCyberSourceIsoDate,
   verifySecureAcceptanceSignature
