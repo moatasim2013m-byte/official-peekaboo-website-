@@ -19,6 +19,7 @@ const { awardPoints } = loyaltyRouter;
 const { validateCoupon } = require('../utils/coupons');
 const {
   buildSecureAcceptanceFields,
+  getCapitalBankEnv,
   generateTransactionUuid,
   getCyberSourcePaymentUrl,
   verifySecureAcceptanceSignature
@@ -78,6 +79,7 @@ const missingCapitalBankEnvVars = [
   ['CAPITAL_BANK_SECRET_KEY', capitalBankConfig.secretKey]
 ].filter(([, value]) => !value).map(([name]) => name);
 const capitalBankRestReady = requestedCapitalBankProvider && missingCapitalBankEnvVars.length === 0;
+let hasLoggedCapitalBankFallbackOnInitiate = false;
 if (!supportedPaymentProviders.has(requestedPaymentProvider)) {
   console.warn(`[Payments] Unsupported PAYMENT_PROVIDER "${requestedPaymentProvider}". Falling back to ${PAYMENT_PROVIDERS.MANUAL}. Supported values: ${Object.values(PAYMENT_PROVIDERS).join(', ')}`);
 }
@@ -793,6 +795,12 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
   try {
     const activeProvider = getEffectiveProvider();
     if (activeProvider !== PAYMENT_PROVIDERS.CAPITAL_BANK) {
+      if (!hasLoggedCapitalBankFallbackOnInitiate && requestedCapitalBankProvider) {
+        hasLoggedCapitalBankFallbackOnInitiate = true;
+        console.warn('[Payments] Capital Bank initiate requested while provider is inactive; falling back to manual', {
+          missing_env_vars: missingCapitalBankEnvVars
+        });
+      }
       return res.status(503).json({ error: 'Capital Bank Secure Acceptance payment gateway is not enabled', missing_env_vars: missingCapitalBankEnvVars });
     }
 
@@ -826,6 +834,17 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
     }
 
     const transactionUuid = generateTransactionUuid();
+    const endpoint = getCyberSourcePaymentUrl();
+    const capitalBankEnv = getCapitalBankEnv();
+
+    console.info('[Capital Bank] Initiate provider context', {
+      endpoint,
+      capital_bank_env: capitalBankEnv,
+      profile_id: capitalBankConfig.profileId,
+      reference_number: transaction.session_id,
+      amount: amount.toFixed(2)
+    });
+
     const secureAcceptance = buildSecureAcceptanceFields({
       profileId: capitalBankConfig.profileId,
       accessKey: capitalBankConfig.accessKey,
@@ -854,7 +873,7 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       orderId: transaction.session_id,
       provider: DB_PROVIDER_CAPITAL_BANK,
       secureAcceptance: {
-        url: getCyberSourcePaymentUrl(),
+        url: endpoint,
         returnUrl: `${origin}/api/payments/capital-bank/return`,
         cancelUrl: `${origin}/payment/cancel`,
         fields: secureAcceptance
@@ -878,17 +897,27 @@ const processCapitalBankCallback = async (req, res, source = 'notify') => {
   ).trim();
   
   const decision = String(callbackPayload?.decision || '').toUpperCase();
+  const reasonCode = String(callbackPayload?.reason_code || '').trim();
+  const message = String(callbackPayload?.message || '').trim();
+  const reqReferenceNumber = String(callbackPayload?.req_reference_number || '').trim();
+  const referenceNumber = String(callbackPayload?.reference_number || '').trim();
   const transactionId = String(
     callbackPayload?.transaction_id || 
     callbackPayload?.req_transaction_uuid || 
     ''
   ).trim();
+  const reqTransactionUuid = String(callbackPayload?.req_transaction_uuid || '').trim();
 
   console.log('[Secure Acceptance Callback] Received:', {
     source,
     sessionId,
     decision,
+    reason_code: reasonCode,
+    message,
+    req_reference_number: reqReferenceNumber,
+    reference_number: referenceNumber,
     transactionId,
+    req_transaction_uuid: reqTransactionUuid,
     signature: callbackPayload?.signature ? 'present' : 'missing'
   });
 
@@ -1046,6 +1075,19 @@ router.post('/capital-bank/return', capitalBankCallbackParser, ensureHttpsForCap
     return res.redirect(303, '/payment/failed?reason=callback_processing_error');
   }
 });
+
+router.get('/provider', (_req, res) => {
+  const effectiveProvider = getEffectiveProvider();
+  const endpoint = getCyberSourcePaymentUrl();
+  return res.json({
+    requestedPaymentProvider: paymentProvider,
+    effectiveProvider,
+    capitalBankEnv: getCapitalBankEnv(),
+    missingCapitalBankEnvVars,
+    endpoint
+  });
+});
+
 // Store transaction
 router.post('/store-transaction', authMiddleware, async (req, res) => {
   try {
