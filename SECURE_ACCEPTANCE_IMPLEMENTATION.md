@@ -64,6 +64,8 @@ CAPITAL_BANK_SECRET_KEY_ENCODING=auto
 
 **Status:** ✅ All variables already configured as secrets
 
+Alias support: `CAPITAL_BANK_ENDPOINT` and `CAPITAL_BANK_SECRET_KEY_ENCODE` are also accepted for backward compatibility.
+
 ---
 
 ## 🔄 NEW PAYMENT FLOW

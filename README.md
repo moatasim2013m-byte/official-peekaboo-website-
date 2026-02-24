@@ -16,7 +16,8 @@ Set the following in your backend runtime environment:
 - `CAPITAL_BANK_PROFILE_ID`
 - `CAPITAL_BANK_ACCESS_KEY`
 - `CAPITAL_BANK_SECRET_KEY`
-- `CAPITAL_BANK_PAYMENT_ENDPOINT` (optional; defaults to `https://testsecureacceptance.cybersource.com/pay`)
+- `CAPITAL_BANK_PAYMENT_ENDPOINT` (optional; alias: `CAPITAL_BANK_ENDPOINT`; defaults to base URL `https://testsecureacceptance.cybersource.com` (backend appends `/pay`))
+- `CAPITAL_BANK_SECRET_KEY_ENCODING` (optional; alias: `CAPITAL_BANK_SECRET_KEY_ENCODE`; default: `auto`)
 
 ### Capital Bank flow implemented
 
