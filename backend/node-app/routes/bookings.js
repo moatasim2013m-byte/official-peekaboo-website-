@@ -203,6 +203,9 @@ const awardLoyaltyPoints = async (userId, paymentId, source) => {
 
 // Create hourly booking (after payment confirmed) - supports multiple children
 router.post('/hourly', authMiddleware, async (req, res) => {
+  let reservedSlotId = null;
+  let reservedCount = 0;
+
   try {
     const { slot_id, child_ids, child_id, payment_id, duration_hours, custom_notes, lineItems, coupon_code } = req.body;
     // NOTE: req.body.amount is intentionally IGNORED for security - price computed server-side
@@ -234,6 +237,9 @@ router.post('/hourly', authMiddleware, async (req, res) => {
         error: `عذراً، المتاح ${available} مكان فقط. اخترت ${childIdList.length} أطفال.`
       });
     }
+
+    reservedSlotId = slot_id;
+    reservedCount = childIdList.length;
 
     // Validate all children belong to user
     const validChildren = await Child.find({ _id: { $in: childIdList }, parent_id: req.userId });
@@ -321,8 +327,15 @@ router.post('/hourly', authMiddleware, async (req, res) => {
       console.error('HOURLY_BOOKING_EMAIL_ERROR', emailErr.message || emailErr);
     }
 
+    reservedSlotId = null;
+    reservedCount = 0;
+
     res.status(201).json({ bookings: bookings.map(b => b.toJSON()) });
   } catch (error) {
+    if (reservedSlotId && reservedCount > 0) {
+      await TimeSlot.findByIdAndUpdate(reservedSlotId, { $inc: { booked_count: -reservedCount } });
+    }
+
     console.error('Create hourly booking error:', error);
     res.status(500).json({ error: 'فشل إنشاء الحجز' });
   }
@@ -330,8 +343,11 @@ router.post('/hourly', authMiddleware, async (req, res) => {
 
 // Create hourly booking with cash/cliq payment (offline providers)
 router.post('/hourly/offline', authMiddleware, async (req, res) => {
+  let reservedSlotId = null;
+  let reservedCount = 0;
+
   try {
-    const { slot_id, child_ids, child_id, duration_hours, custom_notes, payment_method, slot_start_time, lineItems, coupon_code } = req.body;
+    const { slot_id, child_ids, child_id, duration_hours, custom_notes, payment_method, lineItems, coupon_code } = req.body;
     
     // Validate payment method
     if (!['cash', 'cliq'].includes(payment_method)) {
@@ -366,6 +382,9 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
       });
     }
 
+    reservedSlotId = slot_id;
+    reservedCount = childIdList.length;
+
     // Validate all children belong to user
     const validChildren = await Child.find({ _id: { $in: childIdList }, parent_id: req.userId });
     if (validChildren.length !== childIdList.length) {
@@ -376,7 +395,7 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
 
     // Calculate price on server side with Happy Hour logic
     const hours = parseInt(duration_hours) || 2;
-    const basePrice = await getHourlyPrice(hours, slot_start_time);
+    const basePrice = await getHourlyPrice(hours, slot.start_time);
     const { normalizedLineItems, productsTotal } = await buildLineItems(lineItems);
     const subtotalAmount = (basePrice * childIdList.length) + productsTotal;
     let discountAmount = 0;
@@ -456,6 +475,9 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
       console.error('HOURLY_OFFLINE_EMAIL_ERROR', emailErr.message || emailErr);
     }
 
+    reservedSlotId = null;
+    reservedCount = 0;
+
     res.status(201).json({ 
       bookings: bookings.map(b => b.toJSON()),
       message: payment_method === 'cash' 
@@ -463,6 +485,10 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
         : 'تم الحجز بنجاح! الرجاء إتمام التحويل عبر CliQ.'
     });
   } catch (error) {
+    if (reservedSlotId && reservedCount > 0) {
+      await TimeSlot.findByIdAndUpdate(reservedSlotId, { $inc: { booked_count: -reservedCount } });
+    }
+
     console.error('Create offline hourly booking error:', error);
     res.status(500).json({ error: 'فشل إنشاء الحجز' });
   }
