@@ -603,6 +603,11 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
     const crypto = require('crypto');
     const transactionUuid = crypto.randomUUID();
 
+    // Build return URLs for CyberSource redirect
+    const frontendUrl = process.env.FRONTEND_URL || 'https://peekaboojor.com';
+    const returnUrl = `${frontendUrl}/api/payments/capital-bank/return`;
+    const cancelUrl = `${frontendUrl}/payment/cancelled`;
+
     // Build signed form fields for Secure Acceptance
     const formFields = buildSecureAcceptanceFormFields({
       profileId: capitalBankConfig.profileId,
@@ -613,7 +618,9 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       amount,
       currency: transaction.currency || 'JOD',
       locale: 'ar',
-      billTo
+      billTo,
+      returnUrl,
+      cancelUrl
     });
 
     console.log('[Secure Acceptance] Generated form fields for transaction:', {
