@@ -37,6 +37,7 @@ const paymentProvider = requestedPaymentProvider === PAYMENT_PROVIDERS.CAPITAL_B
   : (supportedPaymentProviders.has(requestedPaymentProvider) ? requestedPaymentProvider : PAYMENT_PROVIDERS.MANUAL);
 const DEV_ENVIRONMENTS = new Set(['development', 'dev', 'local', 'test']);
 const DB_PROVIDER_CAPITAL_BANK = 'capital_bank';
+const FINALIZATION_LOCK_TIMEOUT_MS = Number.parseInt(process.env.PAYMENT_FINALIZATION_LOCK_TIMEOUT_MS || '', 10) || (5 * 60 * 1000);
 const isLoyaltyDuplicateError = (error) => {
   return error?.code === 'LOYALTY_DUPLICATE_REFERENCE' || error?.code === 11000;
 };
@@ -410,12 +411,17 @@ const finalizeTransactionIfPaid = async (transaction) => {
   if (!transaction || transaction.status !== 'paid') return transaction;
   if (transaction.metadata?.finalization?.status === 'succeeded') return transaction;
 
+  const staleLockCutoff = new Date(Date.now() - FINALIZATION_LOCK_TIMEOUT_MS);
   const locked = await PaymentTransaction.findOneAndUpdate(
     {
       _id: transaction._id,
       $or: [
         { 'metadata.finalization.status': { $exists: false } },
-        { 'metadata.finalization.status': { $in: ['failed'] } }
+        { 'metadata.finalization.status': { $in: ['failed'] } },
+        {
+          'metadata.finalization.status': 'processing',
+          'metadata.finalization.started_at': { $lt: staleLockCutoff }
+        }
       ]
     },
     {
@@ -691,12 +697,17 @@ router.post('/finalize/:sessionId', authMiddleware, async (req, res) => {
       return res.status(200).json({ success: true, ...transaction.metadata.finalization.result });
     }
 
+    const staleLockCutoff = new Date(Date.now() - FINALIZATION_LOCK_TIMEOUT_MS);
     const locked = await PaymentTransaction.findOneAndUpdate(
       {
         _id: transaction._id,
         $or: [
           { 'metadata.finalization.status': { $exists: false } },
-          { 'metadata.finalization.status': { $in: ['failed'] } }
+          { 'metadata.finalization.status': { $in: ['failed'] } },
+          {
+            'metadata.finalization.status': 'processing',
+            'metadata.finalization.started_at': { $lt: staleLockCutoff }
+          }
         ]
       },
       {
@@ -754,7 +765,10 @@ const mapDecisionToStatus = (decision = '') => {
   if (normalized === 'REVIEW' || normalized === 'PENDING') {
     return { status: 'pending', paymentStatus: 'pending' };
   }
-  return { status: 'failed', paymentStatus: normalized ? normalized.toLowerCase() : 'failed' };
+  if (!normalized) {
+    return { status: null, paymentStatus: null };
+  }
+  return { status: 'failed', paymentStatus: normalized.toLowerCase() };
 };
 const isCyberSourceNotifyRequest = (req) => {
   const signature = String(req.body?.signature || req.query?.signature || '').trim();
@@ -900,26 +914,40 @@ const processCapitalBankCallback = async (req, res, source = 'notify') => {
     return res.redirect(303, '/payment/failed?reason=missing_session_id');
   }
 
+  const existing = await PaymentTransaction.findOne({ session_id: sessionId });
+  if (!existing) {
+    if (source === 'notify') return res.status(200).json({ received: true, ignored: true });
+    return res.redirect(303, '/payment/failed?reason=transaction_not_found');
+  }
+
+  const processedIds = Array.isArray(existing.metadata?.processed_transaction_ids)
+    ? existing.metadata.processed_transaction_ids.map((id) => String(id))
+    : [];
+  const isDuplicate = Boolean(transactionId) && (
+    processedIds.includes(transactionId) ||
+    (existing.payment_id && String(existing.payment_id) === transactionId)
+  );
+
+  const resolvedStatus = mapped.status || existing.status;
+  const resolvedPaymentStatus = mapped.paymentStatus || existing.payment_status || existing.status;
+  const shouldKeepPaidState = existing.status === 'paid' && resolvedStatus !== 'paid';
   const updatePayload = {
     $set: {
-      status: mapped.status,
-      payment_status: mapped.paymentStatus,
+      status: shouldKeepPaidState ? 'paid' : resolvedStatus,
+      payment_status: shouldKeepPaidState ? 'paid' : resolvedPaymentStatus,
       updated_at: new Date(),
       provider: DB_PROVIDER_CAPITAL_BANK,
       ...(transactionId ? { payment_id: transactionId } : {})
     }
   };
 
-  if (transactionId) {
+  if (transactionId && !isDuplicate) {
     updatePayload.$addToSet = { 'metadata.processed_transaction_ids': transactionId };
   }
 
-  const query = transactionId
-    ? { session_id: sessionId, 'metadata.processed_transaction_ids': { $ne: transactionId } }
-    : { session_id: sessionId };
-
-  const updated = await PaymentTransaction.findOneAndUpdate(query, updatePayload, { new: true });
-  const transaction = updated || await PaymentTransaction.findOne({ session_id: sessionId });
+  const transaction = isDuplicate
+    ? existing
+    : await PaymentTransaction.findOneAndUpdate({ _id: existing._id }, updatePayload, { new: true });
 
   if (!transaction) {
     if (source === 'notify') return res.status(200).json({ received: true, ignored: true });
@@ -951,7 +979,7 @@ const processCapitalBankCallback = async (req, res, source = 'notify') => {
   if (source === 'notify') {
     return res.status(200).json({
       received: true,
-      duplicate: Boolean(transactionId) && !updated,
+      duplicate: isDuplicate,
       sessionId,
       decision,
       status: transaction.status
