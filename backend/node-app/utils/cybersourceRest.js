@@ -190,7 +190,9 @@ const buildSecureAcceptanceFormFields = ({
     bill_to_email: billTo.email || 'guest@example.com',
     bill_to_address_line1: billTo.address1 || '1 Main Street',
     bill_to_address_city: billTo.locality || 'Amman',
-    bill_to_address_country: 'JO'
+    bill_to_address_country: 'JO',
+    override_custom_receipt_page: returnUrl,
+    override_custom_cancel_page: cancelUrl || returnUrl
   };
 
   // Generate signature
@@ -203,7 +205,8 @@ const buildSecureAcceptanceFormFields = ({
     reference_number: formFields.reference_number,
     amount: formFields.amount,
     currency: formFields.currency,
-    signed_date_time: formFields.signed_date_time
+    signed_date_time: formFields.signed_date_time,
+    return_url: formFields.override_custom_receipt_page
   });
 
   return formFields;
