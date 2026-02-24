@@ -283,13 +283,11 @@ export default function TicketsPage() {
           lineItems,
           coupon_code: appliedCoupon?.code
         });
-        
-        // Validate payment URL before redirect
-        if (!response.data.url) {
-          throw new Error('رابط الدفع غير متوفر. الرجاء المحاولة مرة أخرى.');
+        const checkoutUrl = response.data?.url;
+        if (!checkoutUrl) {
+          throw new Error('تعذر بدء الدفع الإلكتروني. حاول مرة أخرى.');
         }
-        
-        window.location.href = response.data.url;
+        window.location.assign(checkoutUrl);
       } else {
         // Cash or CliQ - create booking directly
         const response = await api.post('/bookings/hourly/offline', {
