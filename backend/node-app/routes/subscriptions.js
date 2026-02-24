@@ -1,6 +1,7 @@
 const express = require('express');
 const QRCode = require('qrcode');
 const { randomUUID } = require('crypto');
+const mongoose = require('mongoose');
 
 const SubscriptionPlan = require('../models/SubscriptionPlan');
 const UserSubscription = require('../models/UserSubscription');
@@ -14,6 +15,9 @@ const { handleReferralAwardForConfirmedOrder } = require('../utils/referrals');
 
 const router = express.Router();
 const SUBSCRIPTION_DAYS = 30;
+
+
+const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 
 // Get all subscription plans
 router.get('/plans', async (req, res) => {
@@ -40,6 +44,10 @@ router.get('/plans', async (req, res) => {
 // Get single plan
 router.get('/plans/:id', async (req, res) => {
   try {
+    if (!isValidObjectId(req.params.id)) {
+      return res.status(400).json({ error: 'Invalid plan id' });
+    }
+
     const plan = await SubscriptionPlan.findById(req.params.id);
     if (!plan) {
       return res.status(404).json({ error: 'Plan not found' });
@@ -56,6 +64,13 @@ router.get('/plans/:id', async (req, res) => {
 router.post('/purchase', authMiddleware, async (req, res) => {
   try {
     const { plan_id, child_id, payment_id } = req.body;
+
+    if (!isValidObjectId(plan_id)) {
+      return res.status(400).json({ error: 'معرّف الباقة غير صالح' });
+    }
+    if (!isValidObjectId(child_id)) {
+      return res.status(400).json({ error: 'معرّف الطفل غير صالح' });
+    }
     
     const plan = await SubscriptionPlan.findById(plan_id);
     if (!plan || !plan.is_active) {
@@ -115,6 +130,13 @@ router.post('/purchase', authMiddleware, async (req, res) => {
 router.post('/purchase/offline', authMiddleware, async (req, res) => {
   try {
     const { plan_id, child_id, payment_method } = req.body;
+
+    if (!isValidObjectId(plan_id)) {
+      return res.status(400).json({ error: 'معرّف الباقة غير صالح' });
+    }
+    if (!isValidObjectId(child_id)) {
+      return res.status(400).json({ error: 'معرّف الطفل غير صالح' });
+    }
     
     // Validate payment method
     if (!['cash', 'cliq'].includes(payment_method)) {
@@ -207,6 +229,10 @@ router.get('/my', authMiddleware, async (req, res) => {
 // Get active subscriptions for a child
 router.get('/child/:childId', authMiddleware, async (req, res) => {
   try {
+    if (!isValidObjectId(req.params.childId)) {
+      return res.status(400).json({ error: 'معرّف الطفل غير صالح' });
+    }
+
     const child = await Child.findOne({ _id: req.params.childId, parent_id: req.userId });
     if (!child) {
       return res.status(404).json({ error: 'Child not found' });
@@ -235,6 +261,10 @@ router.get('/child/:childId', authMiddleware, async (req, res) => {
 router.post('/consume', authMiddleware, async (req, res) => {
   try {
     const { child_id } = req.body;
+
+    if (!isValidObjectId(child_id)) {
+      return res.status(400).json({ error: 'معرّف الطفل غير صالح' });
+    }
     
     // SECURITY: Verify child belongs to authenticated parent
     const child = await Child.findOne({ _id: child_id, parent_id: req.userId });
