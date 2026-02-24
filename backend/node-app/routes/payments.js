@@ -1,9 +1,18 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const QRCode = require('qrcode');
+const { randomUUID } = require('crypto');
 const PaymentTransaction = require('../models/PaymentTransaction');
 const Settings = require('../models/Settings');
 const TimeSlot = require('../models/TimeSlot');
 const Product = require('../models/Product');
+const Child = require('../models/Child');
+const Theme = require('../models/Theme');
+const SubscriptionPlan = require('../models/SubscriptionPlan');
+const HourlyBooking = require('../models/HourlyBooking');
+const BirthdayBooking = require('../models/BirthdayBooking');
+const UserSubscription = require('../models/UserSubscription');
+const Coupon = require('../models/Coupon');
 const { authMiddleware } = require('../middleware/auth');
 const loyaltyRouter = require('./loyalty');
 const { awardPoints } = loyaltyRouter;
@@ -229,6 +238,223 @@ const buildLineItems = async (lineItems = []) => {
   });
   return { normalizedLineItems, productsTotal };
 };
+const normalizeDurationHours = (value, fallback = 2) => {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(4, Math.max(1, parsed));
+};
+const generateQRCode = async (data) => {
+  try {
+    return await QRCode.toDataURL(data, { width: 300, margin: 2 });
+  } catch (_error) {
+    return null;
+  }
+};
+const parseJsonArray = (value) => {
+  if (Array.isArray(value)) return value;
+  if (typeof value !== 'string') return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (_error) {
+    return [];
+  }
+};
+const parseLineItemsFromMetadata = (metadata) => {
+  const raw = parseJsonArray(metadata?.line_items);
+  return raw.map((item) => ({
+    product_id: item?.productId || item?.product_id,
+    sku: item?.sku,
+    nameAr: item?.nameAr,
+    nameEn: item?.nameEn,
+    unitPriceJD: Number(item?.unitPriceJD || 0),
+    quantity: Number(item?.quantity || 0),
+    lineTotalJD: Number(item?.lineTotalJD || 0)
+  })).filter((item) => item.product_id && item.quantity > 0);
+};
+
+const finalizePaidTransaction = async (transaction) => {
+  const paymentId = transaction.payment_id || transaction.session_id;
+  const metadata = transaction.metadata || {};
+
+  if (transaction.type === 'hourly') {
+    const slotId = metadata.slot_id;
+    const childIds = [...new Set(parseJsonArray(metadata.child_ids).map((id) => String(id).trim()).filter(Boolean))];
+    if (!isValidObjectId(slotId) || childIds.length === 0 || !childIds.every((id) => isValidObjectId(id))) {
+      throw new Error('بيانات الحجز غير مكتملة');
+    }
+
+    const existing = await HourlyBooking.find({ user_id: transaction.user_id, payment_id: paymentId }).sort({ created_at: 1 });
+    if (existing.length > 0) {
+      return { resourceType: 'hourly', bookings: existing.map((b) => b.toJSON()) };
+    }
+
+    const slot = await TimeSlot.findOneAndUpdate(
+      { _id: slotId, slot_type: 'hourly', $expr: { $lte: [{ $add: ['$booked_count', childIds.length] }, '$capacity'] } },
+      { $inc: { booked_count: childIds.length } },
+      { new: true }
+    );
+    if (!slot) throw new Error('الموعد غير متاح');
+
+    try {
+      const validChildren = await Child.find({ _id: { $in: childIds }, parent_id: transaction.user_id });
+      if (validChildren.length !== childIds.length) throw new Error('بيانات الطفل غير صالحة');
+      const hours = normalizeDurationHours(metadata.duration_hours);
+      const pricePerChild = Number(transaction.amount || 0) / childIds.length;
+      const lineItems = parseLineItemsFromMetadata(metadata);
+      const bookings = [];
+      for (const childId of childIds) {
+        const booking_code = `PK-H-${randomUUID().substring(0, 8).toUpperCase()}`;
+        const booking = await HourlyBooking.create({
+          user_id: transaction.user_id,
+          child_id: childId,
+          slot_id: slotId,
+          duration_hours: hours,
+          custom_notes: metadata.custom_notes || '',
+          qr_code: await generateQRCode(booking_code),
+          booking_code,
+          status: 'confirmed',
+          payment_id: paymentId,
+          payment_method: 'card',
+          payment_status: 'paid',
+          amount: pricePerChild,
+          lineItems
+        });
+        bookings.push(booking);
+      }
+
+      if (metadata.coupon_code) {
+        await Coupon.findOneAndUpdate({ code: metadata.coupon_code }, { $inc: { redeemed_count: 1 } });
+      }
+
+      return { resourceType: 'hourly', bookings: bookings.map((b) => b.toJSON()) };
+    } catch (error) {
+      await TimeSlot.findByIdAndUpdate(slotId, { $inc: { booked_count: -childIds.length } });
+      throw error;
+    }
+  }
+
+  if (transaction.type === 'birthday') {
+    const existing = await BirthdayBooking.findOne({ user_id: transaction.user_id, payment_id: paymentId });
+    if (existing) return { resourceType: 'birthday', booking: existing.toJSON() };
+
+    const slotId = metadata.slot_id;
+    const childId = parseJsonArray(metadata.child_ids)[0];
+    const themeId = metadata.theme_id;
+    if (!isValidObjectId(slotId) || !isValidObjectId(childId) || !isValidObjectId(themeId)) {
+      throw new Error('بيانات حجز الحفلة غير مكتملة');
+    }
+    const slot = await TimeSlot.findOneAndUpdate(
+      { _id: slotId, slot_type: 'birthday', $expr: { $lt: ['$booked_count', '$capacity'] } },
+      { $inc: { booked_count: 1 } },
+      { new: true }
+    );
+    if (!slot) throw new Error('موعد الحفلة غير متاح');
+    try {
+      const [child, theme] = await Promise.all([
+        Child.findOne({ _id: childId, parent_id: transaction.user_id }),
+        Theme.findById(themeId)
+      ]);
+      if (!child || !theme) throw new Error('بيانات الحجز غير صالحة');
+      const booking = await BirthdayBooking.create({
+        user_id: transaction.user_id,
+        child_id: childId,
+        slot_id: slotId,
+        theme_id: themeId,
+        booking_code: `PK-B-${randomUUID().substring(0, 8).toUpperCase()}`,
+        status: 'confirmed',
+        payment_id: paymentId,
+        payment_method: 'card',
+        payment_status: 'paid',
+        amount: Number(transaction.amount || 0),
+        lineItems: parseLineItemsFromMetadata(metadata)
+      });
+      return { resourceType: 'birthday', booking: booking.toJSON() };
+    } catch (error) {
+      await TimeSlot.findByIdAndUpdate(slotId, { $inc: { booked_count: -1 } });
+      throw error;
+    }
+  }
+
+  if (transaction.type === 'subscription') {
+    const existing = await UserSubscription.findOne({ user_id: transaction.user_id, payment_id: paymentId });
+    if (existing) return { resourceType: 'subscription', subscription: existing.toJSON() };
+    const planId = metadata.plan_id;
+    const childId = parseJsonArray(metadata.child_ids)[0];
+    if (!isValidObjectId(planId) || !isValidObjectId(childId)) {
+      throw new Error('بيانات الاشتراك غير مكتملة');
+    }
+    const [plan, child] = await Promise.all([
+      SubscriptionPlan.findById(planId),
+      Child.findOne({ _id: childId, parent_id: transaction.user_id })
+    ]);
+    if (!plan || !plan.is_active || !child) throw new Error('بيانات الاشتراك غير صالحة');
+    const subscription = await UserSubscription.create({
+      user_id: transaction.user_id,
+      child_id: childId,
+      plan_id: planId,
+      remaining_visits: plan.visits,
+      expires_at: null,
+      payment_id: paymentId,
+      payment_method: 'card',
+      payment_status: 'paid',
+      status: 'pending'
+    });
+    return { resourceType: 'subscription', subscription: subscription.toJSON() };
+  }
+
+  throw new Error('Unsupported transaction type');
+};
+
+const finalizeTransactionIfPaid = async (transaction) => {
+  if (!transaction || transaction.status !== 'paid') return transaction;
+  if (transaction.metadata?.finalization?.status === 'succeeded') return transaction;
+
+  const locked = await PaymentTransaction.findOneAndUpdate(
+    {
+      _id: transaction._id,
+      $or: [
+        { 'metadata.finalization.status': { $exists: false } },
+        { 'metadata.finalization.status': { $in: ['failed'] } }
+      ]
+    },
+    {
+      $set: {
+        'metadata.finalization.status': 'processing',
+        'metadata.finalization.started_at': new Date()
+      }
+    },
+    { new: true }
+  );
+
+  if (!locked) {
+    return PaymentTransaction.findById(transaction._id);
+  }
+
+  try {
+    const result = await finalizePaidTransaction(locked);
+    return PaymentTransaction.findByIdAndUpdate(
+      locked._id,
+      {
+        $set: {
+          'metadata.finalization.status': 'succeeded',
+          'metadata.finalization.completed_at': new Date(),
+          'metadata.finalization.result': result
+        }
+      },
+      { new: true }
+    );
+  } catch (error) {
+    await PaymentTransaction.findByIdAndUpdate(locked._id, {
+      $set: {
+        'metadata.finalization.status': 'failed',
+        'metadata.finalization.error': error.message,
+        'metadata.finalization.completed_at': new Date()
+      }
+    });
+    throw error;
+  }
+};
 // Get hourly pricing info (public endpoint for frontend)
 router.get('/hourly-pricing', async (req, res) => {
   try {
@@ -449,6 +675,76 @@ router.get('/status/:sessionId', authMiddleware, async (req, res) => {
     res.status(500).json({ error: 'Failed to get checkout status' });
   }
 });
+
+router.post('/finalize/:sessionId', authMiddleware, async (req, res) => {
+  try {
+    const { sessionId } = req.params;
+    const transaction = await PaymentTransaction.findOne({ session_id: sessionId, user_id: req.userId });
+    if (!transaction) {
+      return res.status(404).json({ error: 'لم يتم العثور على عملية الدفع' });
+    }
+    if (transaction.status !== 'paid') {
+      return res.status(409).json({ error: 'عملية الدفع لم تكتمل بعد', status: transaction.status });
+    }
+
+    if (transaction.metadata?.finalization?.status === 'succeeded' && transaction.metadata?.finalization?.result) {
+      return res.status(200).json({ success: true, ...transaction.metadata.finalization.result });
+    }
+
+    const locked = await PaymentTransaction.findOneAndUpdate(
+      {
+        _id: transaction._id,
+        $or: [
+          { 'metadata.finalization.status': { $exists: false } },
+          { 'metadata.finalization.status': { $in: ['failed'] } }
+        ]
+      },
+      {
+        $set: {
+          'metadata.finalization.status': 'processing',
+          'metadata.finalization.started_at': new Date()
+        }
+      },
+      { new: true }
+    );
+
+    if (!locked) {
+      const latest = await PaymentTransaction.findById(transaction._id);
+      if (latest?.metadata?.finalization?.status === 'succeeded' && latest?.metadata?.finalization?.result) {
+        return res.status(200).json({ success: true, ...latest.metadata.finalization.result });
+      }
+      return res.status(202).json({ success: false, processing: true, message: 'جاري إنهاء الحجز...' });
+    }
+
+    try {
+      const result = await finalizePaidTransaction(locked);
+      const finalized = await PaymentTransaction.findByIdAndUpdate(
+        locked._id,
+        {
+          $set: {
+            'metadata.finalization.status': 'succeeded',
+            'metadata.finalization.completed_at': new Date(),
+            'metadata.finalization.result': result
+          }
+        },
+        { new: true }
+      );
+      return res.status(200).json({ success: true, ...(finalized?.metadata?.finalization?.result || result) });
+    } catch (error) {
+      await PaymentTransaction.findByIdAndUpdate(locked._id, {
+        $set: {
+          'metadata.finalization.status': 'failed',
+          'metadata.finalization.error': error.message,
+          'metadata.finalization.completed_at': new Date()
+        }
+      });
+      return res.status(422).json({ error: error.message || 'فشل إنشاء الحجز بعد الدفع' });
+    }
+  } catch (error) {
+    console.error('Finalize transaction error:', error);
+    return res.status(500).json({ error: 'فشل إنهاء عملية الحجز' });
+  }
+});
 const sanitizeReason = (reason = 'payment_failed') => String(reason).replace(/[^a-zA-Z0-9_\-]/g, '_').slice(0, 80) || 'payment_failed';
 const mapDecisionToStatus = (decision = '') => {
   const normalized = String(decision || '').toUpperCase();
@@ -638,6 +934,18 @@ const processCapitalBankCallback = async (req, res, source = 'notify') => {
 
   if (mapped.status === 'paid' && transaction.type === 'product') {
     await maybeAwardProductLoyaltyPoints(transaction);
+  }
+
+  if (mapped.status === 'paid' && ['hourly', 'birthday', 'subscription'].includes(transaction.type)) {
+    try {
+      await finalizeTransactionIfPaid(transaction);
+    } catch (error) {
+      console.error('[Payments] Finalization after callback failed:', {
+        sessionId,
+        type: transaction.type,
+        error: error?.message
+      });
+    }
   }
 
   if (source === 'notify') {
