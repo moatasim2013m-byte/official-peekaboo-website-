@@ -24,17 +24,21 @@ export default function BookingConfirmationPage() {
     
     // If no router state, try localStorage
     if (!data) {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        try {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
           data = JSON.parse(stored);
-        } catch (e) {
-          console.error('Failed to parse stored confirmation:', e);
         }
+      } catch (e) {
+        console.error('Failed to read stored confirmation:', e);
       }
     } else {
       // Store in localStorage for refresh persistence
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (e) {
+        console.error('Failed to persist confirmation:', e);
+      }
     }
     
     setConfirmation(data);
