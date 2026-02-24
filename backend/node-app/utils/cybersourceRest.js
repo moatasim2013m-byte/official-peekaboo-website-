@@ -155,7 +155,9 @@ const buildSecureAcceptanceFormFields = ({
   amount,
   currency,
   locale = 'en',
-  billTo
+  billTo,
+  returnUrl,
+  cancelUrl
 }) => {
   if (!profileId) throw new Error('CAPITAL_BANK_PROFILE_ID is required');
   if (!accessKey) throw new Error('CAPITAL_BANK_ACCESS_KEY is required');
@@ -164,16 +166,17 @@ const buildSecureAcceptanceFormFields = ({
   if (!referenceNumber) throw new Error('reference_number is required');
   if (!amount) throw new Error('amount is required');
   if (!currency) throw new Error('currency is required');
+  if (!returnUrl) throw new Error('return_url is required');
 
   // Generate signed date time (ISO 8601 format)
   const signedDateTime = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
 
-  // Build form fields
+  // Build form fields with return URLs
   const formFields = {
     access_key: accessKey,
     profile_id: profileId,
     transaction_uuid: transactionUuid,
-    signed_field_names: 'access_key,profile_id,transaction_uuid,signed_field_names,unsigned_field_names,signed_date_time,locale,transaction_type,reference_number,amount,currency,payment_method,bill_to_forename,bill_to_surname,bill_to_email,bill_to_address_line1,bill_to_address_city,bill_to_address_country',
+    signed_field_names: 'access_key,profile_id,transaction_uuid,signed_field_names,unsigned_field_names,signed_date_time,locale,transaction_type,reference_number,amount,currency,payment_method,bill_to_forename,bill_to_surname,bill_to_email,bill_to_address_line1,bill_to_address_city,bill_to_address_country,override_custom_receipt_page,override_custom_cancel_page',
     unsigned_field_names: '',
     signed_date_time: signedDateTime,
     locale: locale,
