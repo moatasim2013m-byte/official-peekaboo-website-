@@ -182,6 +182,12 @@ export default function BirthdayPage() {
           origin_url: window.location.origin,
           lineItems
         });
+        
+        // Validate payment URL before redirect
+        if (!response.data.url) {
+          throw new Error('رابط الدفع غير متوفر. الرجاء المحاولة مرة أخرى.');
+        }
+        
         window.location.href = response.data.url;
       } else {
         // Cash or CliQ - create booking directly

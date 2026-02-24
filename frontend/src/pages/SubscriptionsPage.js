@@ -98,6 +98,12 @@ export default function SubscriptionsPage() {
           child_id: selectedChild,
           origin_url: window.location.origin
         });
+        
+        // Validate payment URL before redirect
+        if (!response.data.url) {
+          throw new Error('رابط الدفع غير متوفر. الرجاء المحاولة مرة أخرى.');
+        }
+        
         window.location.href = response.data.url;
       } else {
         // Cash or CliQ - create subscription directly
