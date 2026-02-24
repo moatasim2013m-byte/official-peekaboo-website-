@@ -182,7 +182,11 @@ export default function BirthdayPage() {
           origin_url: window.location.origin,
           lineItems
         });
-        window.location.href = response.data.url;
+        const checkoutUrl = response.data?.url;
+        if (!checkoutUrl) {
+          throw new Error('تعذر بدء الدفع الإلكتروني. حاول مرة أخرى.');
+        }
+        window.location.assign(checkoutUrl);
       } else {
         // Cash or CliQ - create booking directly
         const response = await api.post('/bookings/birthday/offline', {

@@ -98,7 +98,11 @@ export default function SubscriptionsPage() {
           child_id: selectedChild,
           origin_url: window.location.origin
         });
-        window.location.href = response.data.url;
+        const checkoutUrl = response.data?.url;
+        if (!checkoutUrl) {
+          throw new Error('تعذر بدء الدفع الإلكتروني. حاول مرة أخرى.');
+        }
+        window.location.assign(checkoutUrl);
       } else {
         // Cash or CliQ - create subscription directly
         const response = await api.post('/subscriptions/purchase/offline', {
