@@ -20,19 +20,36 @@ const STATUS = {
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+const pickFirst = (...values) => values.find((value) => value !== undefined && value !== null && value !== '');
+
 const buildConfirmationData = (result) => {
   const bookingType = result.resourceType || 'hourly';
   const firstHourlyBooking = result.bookings?.[0];
+  const booking = result.booking || firstHourlyBooking || result.subscription || {};
+  const bookingId = pickFirst(booking.id, booking._id, result.subscription?.id, result.subscription?._id);
+  const bookingCode = pickFirst(
+    result.booking?.booking_code,
+    result.booking?.bookingCode,
+    firstHourlyBooking?.booking_code,
+    firstHourlyBooking?.bookingCode,
+    result.subscription?.booking_code,
+    result.subscription?.bookingCode,
+    bookingId ? `PK-${String(bookingId).slice(-6).toUpperCase()}` : ''
+  );
 
   return {
-    bookingId: result.booking?.id || result.subscription?.id || firstHourlyBooking?.id,
-    bookingCode:
-      result.booking?.booking_code ||
-      firstHourlyBooking?.booking_code ||
-      (result.subscription?.id ? `PK-SUB-${result.subscription.id.slice(-6).toUpperCase()}` : ''),
+    bookingId,
+    bookingCode,
     bookingType,
     paymentMethod: 'card',
-    amount: firstHourlyBooking?.amount || result.booking?.amount || result.subscription?.amount
+    amount: pickFirst(
+      firstHourlyBooking?.amount,
+      result.booking?.amount,
+      result.subscription?.amount,
+      firstHourlyBooking?.final_amount,
+      result.booking?.final_amount,
+      result.subscription?.final_amount
+    )
   };
 };
 
