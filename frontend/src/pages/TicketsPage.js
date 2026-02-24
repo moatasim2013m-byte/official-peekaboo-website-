@@ -284,9 +284,27 @@ export default function TicketsPage() {
           coupon_code: appliedCoupon?.code
         });
         const checkoutUrl = response.data?.url;
-        if (!checkoutUrl) {
-          throw new Error('تعذر بدء الدفع الإلكتروني. حاول مرة أخرى.');
+        const sessionId = response.data?.session_id;
+        const manualMode = response.data?.payment_method === 'manual';
+        if (manualMode || !checkoutUrl) {
+          throw new Error(response.data?.message || 'الدفع بالبطاقة غير متاح حالياً. اختر نقداً أو CliQ.');
         }
+
+        if (sessionId) {
+          localStorage.setItem('pk_pending_checkout', JSON.stringify({
+            sessionId,
+            type: 'hourly',
+            payload: {
+              slot_id: selectedSlot.id,
+              child_ids: selectedChildren,
+              duration_hours: selectedDuration,
+              custom_notes: customNotes.trim(),
+              lineItems,
+              coupon_code: appliedCoupon?.code
+            }
+          }));
+        }
+
         window.location.assign(checkoutUrl);
       } else {
         // Cash or CliQ - create booking directly
@@ -327,7 +345,7 @@ export default function TicketsPage() {
         setLoading(false);
       }
     } catch (error) {
-      toast.error(error.response?.data?.error || 'فشل إنشاء الحجز');
+      toast.error(error.response?.data?.error || error.message || 'فشل إنشاء الحجز');
       setLoading(false);
     }
   };
