@@ -1,6 +1,7 @@
 const express = require('express');
 const QRCode = require('qrcode');
 const { randomUUID } = require('crypto');
+const mongoose = require('mongoose');
 const HourlyBooking = require('../models/HourlyBooking');
 const BirthdayBooking = require('../models/BirthdayBooking');
 const TimeSlot = require('../models/TimeSlot');
@@ -66,6 +67,14 @@ const canBookBirthdayDate = (slotDate) => {
 
   const now = getJordanDateTimeParts();
   return now.hour < 18;
+};
+
+const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
+
+const normalizeGuestCount = (value, { min = 5, max = 100, fallback = 10 } = {}) => {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(max, Math.max(min, parsed));
 };
 
 // Helper function for Happy Hour pricing
@@ -585,6 +594,16 @@ router.post('/birthday', authMiddleware, async (req, res) => {
   try {
     const { slot_id, child_id, theme_id, is_custom, custom_request, guest_count, special_notes, payment_id, lineItems } = req.body;
 
+    if (!isValidObjectId(slot_id)) {
+      return res.status(400).json({ error: 'معرّف موعد الحفل غير صالح' });
+    }
+    if (!isValidObjectId(child_id)) {
+      return res.status(400).json({ error: 'معرّف الطفل غير صالح' });
+    }
+    if (!is_custom && !isValidObjectId(theme_id)) {
+      return res.status(400).json({ error: 'معرّف الثيم غير صالح' });
+    }
+
     const requestedSlot = await TimeSlot.findById(slot_id).select('date slot_type');
     if (!requestedSlot || requestedSlot.slot_type !== 'birthday') {
       return res.status(400).json({ error: 'Invalid birthday slot' });
@@ -646,7 +665,7 @@ router.post('/birthday', authMiddleware, async (req, res) => {
       payment_id: is_custom ? null : payment_id,
       amount: is_custom ? null : (themeAmount + productsTotal),
       lineItems: normalizedLineItems,
-      guest_count,
+      guest_count: normalizeGuestCount(guest_count),
       special_notes
     });
 
@@ -674,6 +693,16 @@ router.post('/birthday', authMiddleware, async (req, res) => {
 router.post('/birthday/offline', authMiddleware, async (req, res) => {
   try {
     const { slot_id, child_id, theme_id, guest_count, special_notes, payment_method, lineItems } = req.body;
+
+    if (!isValidObjectId(slot_id)) {
+      return res.status(400).json({ error: 'معرّف موعد الحفل غير صالح' });
+    }
+    if (!isValidObjectId(child_id)) {
+      return res.status(400).json({ error: 'معرّف الطفل غير صالح' });
+    }
+    if (!isValidObjectId(theme_id)) {
+      return res.status(400).json({ error: 'معرّف الثيم غير صالح' });
+    }
     
     // Validate payment method
     if (!['cash', 'cliq'].includes(payment_method)) {
@@ -738,7 +767,7 @@ router.post('/birthday/offline', authMiddleware, async (req, res) => {
       payment_status: paymentStatus,
       amount: totalAmount,
       lineItems: normalizedLineItems,
-      guest_count,
+      guest_count: normalizeGuestCount(guest_count),
       special_notes
     });
 
@@ -791,6 +820,13 @@ router.get('/birthday', authMiddleware, async (req, res) => {
 router.post('/birthday/custom', authMiddleware, async (req, res) => {
   try {
     const { slot_id, child_id, custom_request, guest_count, special_notes } = req.body;
+
+    if (!isValidObjectId(slot_id)) {
+      return res.status(400).json({ error: 'معرّف موعد الحفل غير صالح' });
+    }
+    if (!isValidObjectId(child_id)) {
+      return res.status(400).json({ error: 'معرّف الطفل غير صالح' });
+    }
     
     const slot = await TimeSlot.findById(slot_id);
     if (!slot || slot.slot_type !== 'birthday') {
@@ -816,7 +852,7 @@ router.post('/birthday/custom', authMiddleware, async (req, res) => {
       custom_request,
       booking_code,
       status: 'custom_pending',
-      guest_count,
+      guest_count: normalizeGuestCount(guest_count),
       special_notes
     });
 
