@@ -99,9 +99,22 @@ export default function SubscriptionsPage() {
           origin_url: window.location.origin
         });
         const checkoutUrl = response.data?.url;
+        const sessionId = response.data?.session_id;
         if (!checkoutUrl) {
           throw new Error('تعذر بدء الدفع الإلكتروني. حاول مرة أخرى.');
         }
+
+        if (sessionId) {
+          localStorage.setItem('pk_pending_checkout', JSON.stringify({
+            sessionId,
+            type: 'subscription',
+            payload: {
+              plan_id: selectedPlan.id,
+              child_id: selectedChild
+            }
+          }));
+        }
+
         window.location.assign(checkoutUrl);
       } else {
         // Cash or CliQ - create subscription directly
