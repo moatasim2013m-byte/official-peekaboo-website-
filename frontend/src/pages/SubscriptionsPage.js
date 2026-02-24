@@ -99,9 +99,23 @@ export default function SubscriptionsPage() {
           origin_url: window.location.origin
         });
         const checkoutUrl = response.data?.url;
-        if (!checkoutUrl) {
-          throw new Error('تعذر بدء الدفع الإلكتروني. حاول مرة أخرى.');
+        const sessionId = response.data?.session_id;
+        const manualMode = response.data?.payment_method === 'manual';
+        if (manualMode || !checkoutUrl) {
+          throw new Error(response.data?.message || 'الدفع بالبطاقة غير متاح حالياً. اختر نقداً أو CliQ.');
         }
+
+        if (sessionId) {
+          localStorage.setItem('pk_pending_checkout', JSON.stringify({
+            sessionId,
+            type: 'subscription',
+            payload: {
+              plan_id: selectedPlan.id,
+              child_id: selectedChild
+            }
+          }));
+        }
+
         window.location.assign(checkoutUrl);
       } else {
         // Cash or CliQ - create subscription directly
@@ -131,7 +145,7 @@ export default function SubscriptionsPage() {
         setLoading(false);
       }
     } catch (error) {
-      toast.error(error.response?.data?.error || 'فشل بدء عملية الشراء');
+      toast.error(error.response?.data?.error || error.message || 'فشل بدء عملية الشراء');
       setLoading(false);
     }
   };

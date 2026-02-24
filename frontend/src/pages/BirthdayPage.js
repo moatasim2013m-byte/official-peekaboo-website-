@@ -179,13 +179,33 @@ export default function BirthdayPage() {
           reference_id: selectedSlot.id,
           theme_id: selectedTheme.id,
           child_id: selectedChild,
+          guest_count: guestCount,
+          special_notes: specialNotes,
           origin_url: window.location.origin,
           lineItems
         });
         const checkoutUrl = response.data?.url;
-        if (!checkoutUrl) {
-          throw new Error('تعذر بدء الدفع الإلكتروني. حاول مرة أخرى.');
+        const sessionId = response.data?.session_id;
+        const manualMode = response.data?.payment_method === 'manual';
+        if (manualMode || !checkoutUrl) {
+          throw new Error(response.data?.message || 'الدفع بالبطاقة غير متاح حالياً. اختر نقداً أو CliQ.');
         }
+
+        if (sessionId) {
+          localStorage.setItem('pk_pending_checkout', JSON.stringify({
+            sessionId,
+            type: 'birthday',
+            payload: {
+              slot_id: selectedSlot.id,
+              child_id: selectedChild,
+              theme_id: selectedTheme.id,
+              guest_count: guestCount,
+              special_notes: specialNotes,
+              lineItems
+            }
+          }));
+        }
+
         window.location.assign(checkoutUrl);
       } else {
         // Cash or CliQ - create booking directly
@@ -223,7 +243,7 @@ export default function BirthdayPage() {
         setLoading(false);
       }
     } catch (error) {
-      toast.error(error.response?.data?.error || 'فشل إنشاء الحجز');
+      toast.error(error.response?.data?.error || error.message || 'فشل إنشاء الحجز');
       setLoading(false);
     }
   };

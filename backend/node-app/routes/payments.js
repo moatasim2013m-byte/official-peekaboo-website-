@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const PaymentTransaction = require('../models/PaymentTransaction');
 const Settings = require('../models/Settings');
 const TimeSlot = require('../models/TimeSlot');
@@ -14,6 +15,7 @@ const {
   verifySecureAcceptanceSignature
 } = require('../utils/cybersourceRest');
 const router = express.Router();
+const isValidObjectId = (value) => mongoose.Types.ObjectId.isValid(value);
 const PAYMENT_PROVIDERS = {
   MANUAL: 'manual',
   CAPITAL_BANK: 'capital_bank_secure_acceptance',
@@ -289,6 +291,9 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
     if (!type) {
       return res.status(400).json({ error: 'type is required' });
     }
+    if (reference_id && !isValidObjectId(reference_id)) {
+      return res.status(400).json({ error: 'Invalid reference id' });
+    }
     const frontendOrigin = resolveFrontendOrigin(origin_url, req);
     if (!frontendOrigin) {
       return res.status(400).json({ error: 'Invalid or unauthorized frontend origin' });
@@ -303,7 +308,12 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
     switch (type) {
       case 'hourly': {
         const hours = parseInt(duration_hours) || 2;
-        const childIds = req.body.child_ids || (req.body.child_id ? [req.body.child_id] : []);
+        const childIds = Array.isArray(req.body.child_ids)
+          ? req.body.child_ids
+          : (req.body.child_id ? [req.body.child_id] : []);
+        if (childIds.length > 0 && !childIds.every((id) => isValidObjectId(id))) {
+          return res.status(400).json({ error: 'Invalid child id' });
+        }
         const childCount = childIds.length || 1;
         const slotStartTime = req.body.slot_start_time || null;
         // Check capacity before creating checkout
@@ -327,6 +337,9 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
       case 'birthday': {
         if (!req.body.theme_id) {
           return res.status(400).json({ error: 'theme_id required for birthday booking' });
+        }
+        if (!isValidObjectId(req.body.theme_id)) {
+          return res.status(400).json({ error: 'Invalid theme id' });
         }
         amount = (await getBirthdayThemePrice(req.body.theme_id)) + productsTotal;
         metadata.slot_id = reference_id;
