@@ -5,6 +5,16 @@ const CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL = 'https://secureacceptance.cyberso
 const SECURE_ACCEPTANCE_PAY_PATH = '/pay';
 const SECURE_ACCEPTANCE_RESPONSE_SIGNED_FIELDS = 'signed_field_names,signature';
 
+const getCapitalBankEnv = () => {
+  const configuredEnv = String(
+    process.env.CAPITAL_BANK_ENV
+    || process.env.CYBERSOURCE_ENV
+    || 'prod'
+  ).trim().toLowerCase();
+
+  return configuredEnv === 'test' ? 'test' : 'prod';
+};
+
 const normalizeUrl = (value) => {
   if (!value || typeof value !== 'string') return null;
   try {
@@ -23,10 +33,9 @@ const getCyberSourceBaseUrl = () => {
   );
   if (configured) return configured;
 
-  const environment = String(process.env.NODE_ENV || '').toLowerCase();
-  if (environment === 'production') return CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
-
-  return CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL;
+  return getCapitalBankEnv() === 'test'
+    ? CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL
+    : CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
 };
 
 const getCyberSourcePaymentUrl = () => `${getCyberSourceBaseUrl()}${SECURE_ACCEPTANCE_PAY_PATH}`;
@@ -242,6 +251,7 @@ module.exports = {
   CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL,
   SECURE_ACCEPTANCE_RESPONSE_SIGNED_FIELDS,
   buildSecureAcceptanceFields,
+  getCapitalBankEnv,
   getCyberSourceBaseUrl,
   getCyberSourcePaymentUrl,
   generateTransactionUuid,
