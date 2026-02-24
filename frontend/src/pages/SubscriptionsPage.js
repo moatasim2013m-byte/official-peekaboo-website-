@@ -98,6 +98,10 @@ export default function SubscriptionsPage() {
           child_id: selectedChild,
           origin_url: window.location.origin
         });
+        if (response.data?.payment_method === 'manual') {
+          throw new Error('الدفع بالبطاقة غير متاح حالياً. الرجاء اختيار الدفع نقداً أو CliQ.');
+        }
+
         const checkoutUrl = response.data?.url;
         if (!checkoutUrl) {
           throw new Error('تعذر بدء الدفع الإلكتروني. حاول مرة أخرى.');
@@ -131,7 +135,7 @@ export default function SubscriptionsPage() {
         setLoading(false);
       }
     } catch (error) {
-      toast.error(error.response?.data?.error || 'فشل بدء عملية الشراء');
+      toast.error(error.response?.data?.error || error.message || 'فشل بدء عملية الشراء');
       setLoading(false);
     }
   };

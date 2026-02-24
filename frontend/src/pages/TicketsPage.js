@@ -283,6 +283,11 @@ export default function TicketsPage() {
           lineItems,
           coupon_code: appliedCoupon?.code
         });
+
+        if (response.data?.payment_method === 'manual') {
+          throw new Error('الدفع بالبطاقة غير متاح حالياً. الرجاء اختيار الدفع نقداً أو CliQ.');
+        }
+
         const checkoutUrl = response.data?.url;
         if (!checkoutUrl) {
           throw new Error('تعذر بدء الدفع الإلكتروني. حاول مرة أخرى.');
@@ -327,7 +332,7 @@ export default function TicketsPage() {
         setLoading(false);
       }
     } catch (error) {
-      toast.error(error.response?.data?.error || 'فشل إنشاء الحجز');
+      toast.error(error.response?.data?.error || error.message || 'فشل إنشاء الحجز');
       setLoading(false);
     }
   };
