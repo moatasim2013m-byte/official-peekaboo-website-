@@ -17,7 +17,10 @@ const normalizeUrl = (value) => {
 };
 
 const getCyberSourceBaseUrl = () => {
-  const configured = normalizeUrl(process.env.CAPITAL_BANK_PAYMENT_ENDPOINT);
+  const configured = normalizeUrl(
+    process.env.CAPITAL_BANK_PAYMENT_ENDPOINT
+    || process.env.CAPITAL_BANK_ENDPOINT
+  );
   if (configured) return configured;
 
   const environment = String(process.env.NODE_ENV || '').toLowerCase();
@@ -47,7 +50,11 @@ const isLikelyBase64 = (value) => {
   return true;
 };
 
-const getSecretKeyEncoding = () => String(process.env.CAPITAL_BANK_SECRET_KEY_ENCODING || 'auto').trim().toLowerCase();
+const getSecretKeyEncoding = () => String(
+  process.env.CAPITAL_BANK_SECRET_KEY_ENCODING
+  || process.env.CAPITAL_BANK_SECRET_KEY_ENCODE
+  || 'auto'
+).trim().toLowerCase();
 
 const decodeBase64Key = (value) => Buffer.from(value, 'base64');
 const decodeHexKey = (value) => Buffer.from(value, 'hex');
