@@ -58,8 +58,8 @@ CAPITAL_BANK_MERCHANT_ID=903897720102
 CAPITAL_BANK_PROFILE_ID=capitalbjordan1_acct          # ⭐ NOW USED
 CAPITAL_BANK_ACCESS_KEY=8dd4c4e88ef6322ab79126cb4a6e6f27
 CAPITAL_BANK_SECRET_KEY=[256-character hex string]
-CAPITAL_BANK_PAYMENT_ENDPOINT=https://testsecureacceptance.cybersource.com
-CAPITAL_BANK_SECRET_KEY_ENCODING=auto
+CAPITAL_BANK_PAYMENT_ENDPOINT=https://testsecureacceptance.cybersource.com  # alias: CAPITAL_BANK_ENDPOINT
+CAPITAL_BANK_SECRET_KEY_ENCODING=auto  # alias: CAPITAL_BANK_SECRET_KEY_ENCODE
 ```
 
 **Status:** ✅ All variables already configured as secrets
@@ -352,7 +352,7 @@ grep -n "testsecureacceptance" /app/backend/node-app/utils/cybersourceRest.js
 
 ### **Issue: Form fields missing signature**
 **Check:** Secret key encoding
-**Fix:** Verify `CAPITAL_BANK_SECRET_KEY_ENCODING=auto`
+**Fix:** Verify `CAPITAL_BANK_SECRET_KEY_ENCODING=auto  # alias: CAPITAL_BANK_SECRET_KEY_ENCODE`
 
 ### **Issue: CyberSource returns error**
 **Check:** Signature format
