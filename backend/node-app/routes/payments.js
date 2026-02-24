@@ -31,11 +31,18 @@ const PAYMENT_PROVIDERS = {
   CAPITAL_BANK: 'capital_bank_secure_acceptance',
   CAPITAL_BANK_REST_LEGACY: 'capital_bank_rest'
 };
+const PAYMENT_PROVIDER_ALIASES = {
+  capital_bank: PAYMENT_PROVIDERS.CAPITAL_BANK,
+  cybersource: PAYMENT_PROVIDERS.CAPITAL_BANK,
+  cyber_source: PAYMENT_PROVIDERS.CAPITAL_BANK,
+  secure_acceptance: PAYMENT_PROVIDERS.CAPITAL_BANK
+};
 const requestedPaymentProvider = (process.env.PAYMENT_PROVIDER || PAYMENT_PROVIDERS.MANUAL).toLowerCase();
 const supportedPaymentProviders = new Set(Object.values(PAYMENT_PROVIDERS));
-const paymentProvider = requestedPaymentProvider === PAYMENT_PROVIDERS.CAPITAL_BANK_REST_LEGACY
+const normalizedRequestedProvider = PAYMENT_PROVIDER_ALIASES[requestedPaymentProvider] || requestedPaymentProvider;
+const paymentProvider = normalizedRequestedProvider === PAYMENT_PROVIDERS.CAPITAL_BANK_REST_LEGACY
   ? PAYMENT_PROVIDERS.CAPITAL_BANK
-  : (supportedPaymentProviders.has(requestedPaymentProvider) ? requestedPaymentProvider : PAYMENT_PROVIDERS.MANUAL);
+  : (supportedPaymentProviders.has(normalizedRequestedProvider) ? normalizedRequestedProvider : PAYMENT_PROVIDERS.MANUAL);
 const DEV_ENVIRONMENTS = new Set(['development', 'dev', 'local', 'test']);
 const DB_PROVIDER_CAPITAL_BANK = 'capital_bank';
 const FINALIZATION_LOCK_TIMEOUT_MS = Number.parseInt(process.env.PAYMENT_FINALIZATION_LOCK_TIMEOUT_MS || '', 10) || (5 * 60 * 1000);
@@ -80,7 +87,7 @@ const missingCapitalBankEnvVars = [
 ].filter(([, value]) => !value).map(([name]) => name);
 const capitalBankRestReady = requestedCapitalBankProvider && missingCapitalBankEnvVars.length === 0;
 let hasLoggedCapitalBankFallbackOnInitiate = false;
-if (!supportedPaymentProviders.has(requestedPaymentProvider)) {
+if (!supportedPaymentProviders.has(normalizedRequestedProvider)) {
   console.warn(`[Payments] Unsupported PAYMENT_PROVIDER "${requestedPaymentProvider}". Falling back to ${PAYMENT_PROVIDERS.MANUAL}. Supported values: ${Object.values(PAYMENT_PROVIDERS).join(', ')}`);
 }
 if (requestedCapitalBankProvider) {
