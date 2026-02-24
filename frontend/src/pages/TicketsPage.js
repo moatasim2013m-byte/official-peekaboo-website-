@@ -284,9 +284,26 @@ export default function TicketsPage() {
           coupon_code: appliedCoupon?.code
         });
         const checkoutUrl = response.data?.url;
+        const sessionId = response.data?.session_id;
         if (!checkoutUrl) {
           throw new Error('تعذر بدء الدفع الإلكتروني. حاول مرة أخرى.');
         }
+
+        if (sessionId) {
+          localStorage.setItem('pk_pending_checkout', JSON.stringify({
+            sessionId,
+            type: 'hourly',
+            payload: {
+              slot_id: selectedSlot.id,
+              child_ids: selectedChildren,
+              duration_hours: selectedDuration,
+              custom_notes: customNotes.trim(),
+              lineItems,
+              coupon_code: appliedCoupon?.code
+            }
+          }));
+        }
+
         window.location.assign(checkoutUrl);
       } else {
         // Cash or CliQ - create booking directly
