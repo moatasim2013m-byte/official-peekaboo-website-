@@ -77,9 +77,31 @@ const normalizeGuestCount = (value, { min = 5, max = 100, fallback = 10 } = {}) 
   return Math.min(max, Math.max(min, parsed));
 };
 
+const normalizeChildIds = (childIdsInput, childIdInput) => {
+  const rawChildIds = Array.isArray(childIdsInput)
+    ? childIdsInput
+    : (childIdInput ? [childIdInput] : []);
+
+  const normalized = rawChildIds
+    .map((id) => id?.toString().trim())
+    .filter(Boolean);
+
+  const deduped = [...new Set(normalized)];
+  return {
+    childIds: deduped,
+    allValid: deduped.every((id) => isValidObjectId(id))
+  };
+};
+
+const normalizeDurationHours = (value, fallback = 2) => {
+  const parsed = Number.parseInt(value, 10);
+  if (!Number.isFinite(parsed)) return fallback;
+  return Math.min(4, Math.max(1, parsed));
+};
+
 // Helper function for Happy Hour pricing
 const getHourlyPrice = async (duration_hours = 2, slot_start_time = null) => {
-  const hours = parseInt(duration_hours) || 2;
+  const hours = normalizeDurationHours(duration_hours);
 
   // Happy Hour logic: 10:00-13:59 => 3.5 JD per hour
   if (slot_start_time) {
@@ -219,10 +241,17 @@ router.post('/hourly', authMiddleware, async (req, res) => {
     const { slot_id, child_ids, child_id, payment_id, duration_hours, custom_notes, lineItems, coupon_code } = req.body;
     // NOTE: req.body.amount is intentionally IGNORED for security - price computed server-side
     
+    if (!isValidObjectId(slot_id)) {
+      return res.status(400).json({ error: 'معرّف الموعد غير صالح' });
+    }
+
     // Support both child_ids array and legacy child_id
-    const childIdList = child_ids || (child_id ? [child_id] : []);
+    const { childIds: childIdList, allValid } = normalizeChildIds(child_ids, child_id);
     if (childIdList.length === 0) {
       return res.status(400).json({ error: 'يجب اختيار طفل واحد على الأقل' });
+    }
+    if (!allValid) {
+      return res.status(400).json({ error: 'معرّف طفل غير صالح' });
     }
     
     // ATOMIC capacity check for all children at once
@@ -259,7 +288,7 @@ router.post('/hourly', authMiddleware, async (req, res) => {
     }
 
     // SECURITY: Compute price server-side using slot start_time for Happy Hour pricing
-    const hours = parseInt(duration_hours) || 2;
+    const hours = normalizeDurationHours(duration_hours);
     const basePrice = await getHourlyPrice(hours, slot.start_time);
     const { normalizedLineItems, productsTotal } = await buildLineItems(lineItems);
     const subtotalAmount = (basePrice * childIdList.length) + productsTotal;
@@ -300,7 +329,7 @@ router.post('/hourly', authMiddleware, async (req, res) => {
         user_id: req.userId,
         child_id: cid,
         slot_id,
-        duration_hours: parseInt(duration_hours) || 2,
+        duration_hours: hours,
         custom_notes: custom_notes || '',
         qr_code,
         booking_code,
@@ -363,10 +392,17 @@ router.post('/hourly/offline', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'طريقة دفع غير صالحة' });
     }
     
+    if (!isValidObjectId(slot_id)) {
+      return res.status(400).json({ error: 'معرّف الموعد غير صالح' });
+    }
+
     // Support both child_ids array and legacy child_id
-    const childIdList = child_ids || (child_id ? [child_id] : []);
+    const { childIds: childIdList, allValid } = normalizeChildIds(child_ids, child_id);
     if (childIdList.length === 0) {
       return res.status(400).json({ error: 'يجب اختيار طفل واحد على الأقل' });
+    }
+    if (!allValid) {
+      return res.status(400).json({ error: 'معرّف طفل غير صالح' });
     }
     
     // ATOMIC capacity check for all children at once
