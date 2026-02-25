@@ -797,8 +797,8 @@ class PeekabooAPITester:
             self.token = old_token
 
     def run_all_tests(self):
-        """Run all API tests focusing on new pricing and booking features"""
-        print("🚀 Starting Peekaboo API Tests - New Features Focus...")
+        """Run all API tests focusing on Capital Bank Secure Acceptance payment integration"""
+        print("🚀 Starting Peekaboo API Tests - Capital Bank Payment Integration Focus...")
         print(f"Testing against: {self.base_url}")
         print("=" * 60)
 
@@ -810,15 +810,23 @@ class PeekabooAPITester:
         self.test_user_registration()  # Creates parent token
         self.test_admin_login()        # Creates admin token
         
-        # NEW FEATURE TESTS - Main Focus
-        print("\n🎯 NEW PRICING SYSTEM TESTS")
-        self.test_fetch_hourly_pricing_public()      # Test 1
-        self.test_admin_pricing_access()             # Test 2  
-        self.test_admin_pricing_update()             # Test 3
-        self.test_verify_subscription_plans()        # Test 4
+        # CAPITAL BANK PAYMENT INTEGRATION TESTS - Main Focus
+        print("\n🏦 CAPITAL BANK SECURE ACCEPTANCE TESTS")
+        self.test_payment_provider_configuration()    # Test 1: Verify payment provider config
+        self.test_checkout_creation_hourly_booking()  # Test 2: Checkout creation flow
+        self.test_capital_bank_initiate_endpoint()    # Test 3: Capital Bank initiate endpoint
+        self.test_payment_transaction_storage()       # Test 4: Transaction storage
+        self.test_manual_mode_check()                # Test 5: Ensure NOT in manual mode
         
-        print("\n🎯 NEW BOOKING SYSTEM TESTS")
-        self.test_hourly_booking_with_duration()     # Test 5
+        # EXISTING FEATURE TESTS (for baseline verification)
+        print("\n🎯 BASELINE PRICING SYSTEM TESTS")
+        self.test_fetch_hourly_pricing_public()      # Baseline 1
+        self.test_admin_pricing_access()             # Baseline 2  
+        self.test_admin_pricing_update()             # Baseline 3
+        self.test_verify_subscription_plans()        # Baseline 4
+        
+        print("\n🎯 BASELINE BOOKING SYSTEM TESTS")
+        self.test_hourly_booking_with_duration()     # Baseline 5
         
         print("\n🔒 SECURITY & VALIDATION TESTS")
         self.test_non_admin_pricing_access()
@@ -835,6 +843,30 @@ class PeekabooAPITester:
             print("\n❌ FAILED TESTS:")
             for test in failed_tests:
                 print(f"   • {test['test']}: {test['details']}")
+        
+        # Capital Bank Integration Summary
+        capital_bank_tests = [
+            "API Health for Payment Provider",
+            "Capital Bank Checkout Creation", 
+            "Capital Bank Initiate Payment",
+            "Payment Transaction Storage",
+            "Manual Mode Check"
+        ]
+        
+        capital_bank_results = []
+        for test in self.test_results:
+            if any(cb_test in test['test'] for cb_test in capital_bank_tests):
+                capital_bank_results.append(test)
+        
+        capital_bank_passed = len([t for t in capital_bank_results if t['success']])
+        capital_bank_total = len(capital_bank_results)
+        
+        print(f"\n🏦 CAPITAL BANK INTEGRATION SUMMARY: {capital_bank_passed}/{capital_bank_total} tests passed")
+        
+        if capital_bank_passed == capital_bank_total and capital_bank_total > 0:
+            print("✅ Capital Bank Secure Acceptance integration is WORKING correctly!")
+        elif capital_bank_total > 0:
+            print("❌ Capital Bank Secure Acceptance integration has ISSUES!")
         
         if self.tests_passed == self.tests_run:
             print("🎉 All tests passed!")
