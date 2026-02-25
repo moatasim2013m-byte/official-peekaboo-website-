@@ -105,6 +105,7 @@ const getEffectiveProvider = () => {
   if (capitalBankRestReady) return paymentProvider;
   return PAYMENT_PROVIDERS.MANUAL;
 };
+const isCapitalBankProviderActive = () => getEffectiveProvider() === PAYMENT_PROVIDERS.CAPITAL_BANK;
 const ensureHttpsForCapitalBank = (req, res, next) => {
   const forwardedProto = (req.headers['x-forwarded-proto'] || '').split(',')[0].trim();
   const protocol = forwardedProto || req.protocol;
@@ -800,11 +801,12 @@ const resolveBillingDetails = (transaction, req) => {
 };
 router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank, async (req, res) => {
   try {
-    const activeProvider = getEffectiveProvider();
-    if (activeProvider !== PAYMENT_PROVIDERS.CAPITAL_BANK) {
+    if (!isCapitalBankProviderActive()) {
       if (!hasLoggedCapitalBankFallbackOnInitiate && requestedCapitalBankProvider) {
         hasLoggedCapitalBankFallbackOnInitiate = true;
         console.warn('[Payments] Capital Bank initiate requested while provider is inactive; falling back to manual', {
+          requested_provider: requestedPaymentProvider,
+          effective_provider: getEffectiveProvider(),
           missing_env_vars: missingCapitalBankEnvVars
         });
       }
@@ -1106,6 +1108,7 @@ router.get('/provider', (_req, res) => {
   return res.json({
     requestedPaymentProvider,
     effectiveProvider,
+    providerActive: isCapitalBankProviderActive(),
     capitalBankEnv: getCapitalBankEnv(),
     missingCapitalBankEnvVars,
     endpoint
