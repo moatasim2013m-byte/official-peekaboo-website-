@@ -1,19 +1,17 @@
 const crypto = require('crypto');
 
-const CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL = 'https://testsecureacceptance.cybersource.com';
-const CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL = 'https://secureacceptance.cybersource.com';
-const SECURE_ACCEPTANCE_PAY_PATH = '/pay';
+const CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL = 'https://testsecureacceptance.cybersource.com/pay';
+const CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL = 'https://secureacceptance.cybersource.com/pay';
 const SECURE_ACCEPTANCE_RESPONSE_SIGNED_FIELDS = 'signed_field_names,signature';
 
-const normalizeUrl = (value) => {
-  if (!value || typeof value !== 'string') return null;
-  try {
-    const parsed = new URL(value.trim());
-    if (!['http:', 'https:'].includes(parsed.protocol)) return null;
-    return parsed.origin;
-  } catch (_error) {
-    return null;
-  }
+const getCapitalBankEnv = () => {
+  const configuredEnv = String(
+    process.env.CAPITAL_BANK_ENV
+    || process.env.CYBERSOURCE_ENV
+    || 'prod'
+  ).trim().toLowerCase();
+
+  return configuredEnv === 'test' ? 'test' : 'prod';
 };
 
 const getCyberSourceBaseUrl = () => {
@@ -37,10 +35,15 @@ const getCyberSourceBaseUrl = () => {
   const environment = String(process.env.NODE_ENV || '').toLowerCase();
   if (environment === 'production') return CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
 
-  return CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL;
+  return getCapitalBankEnv() === 'test'
+    ? CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL
+    : CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
 };
 
-const getCyberSourcePaymentUrl = () => `${getCyberSourceBaseUrl()}${SECURE_ACCEPTANCE_PAY_PATH}`;
+const getCyberSourcePaymentUrl = () => {
+  const baseUrl = getCyberSourceBaseUrl();
+  return baseUrl.endsWith('/pay') ? baseUrl : `${baseUrl}/pay`;
+};
 
 const toCyberSourceIsoDate = (date = new Date()) => (
   new Date(date).toISOString().replace(/\.\d{3}Z$/, 'Z')
@@ -61,7 +64,11 @@ const isLikelyBase64 = (value) => {
   return true;
 };
 
-const getSecretKeyEncoding = () => String(process.env.CAPITAL_BANK_SECRET_KEY_ENCODING || 'auto').trim().toLowerCase();
+const getSecretKeyEncoding = () => String(
+  process.env.CAPITAL_BANK_SECRET_KEY_ENCODING
+  || process.env.CAPITAL_BANK_SECRET_KEY_ENCODE
+  || 'auto'
+).trim().toLowerCase();
 
 const decodeBase64Key = (value) => Buffer.from(value, 'base64');
 const decodeHexKey = (value) => Buffer.from(value, 'hex');
@@ -249,6 +256,7 @@ module.exports = {
   CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL,
   SECURE_ACCEPTANCE_RESPONSE_SIGNED_FIELDS,
   buildSecureAcceptanceFields,
+  getCapitalBankEnv,
   getCyberSourceBaseUrl,
   getCyberSourcePaymentUrl,
   generateTransactionUuid,

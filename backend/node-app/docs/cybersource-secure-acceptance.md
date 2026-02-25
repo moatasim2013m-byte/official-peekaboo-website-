@@ -8,8 +8,8 @@ Set on Cloud Run backend and redeploy after any change:
 - `CAPITAL_BANK_PROFILE_ID=capitalbjordan1_acct` (Account ID / Profile ID confirmed by bank)
 - `CAPITAL_BANK_ACCESS_KEY=<bank access key>`
 - `CAPITAL_BANK_SECRET_KEY=<bank secret key from Secret Manager>`
-- `CAPITAL_BANK_SECRET_KEY_ENCODING=auto` (optional; supports `auto`, `base64`, `hex`, `utf8`; set to `base64` if bank shared secret is explicitly base64)
-- `CAPITAL_BANK_PAYMENT_ENDPOINT=https://testsecureacceptance.cybersource.com` (optional explicit override; backend appends `/pay`)
+- `CAPITAL_BANK_SECRET_KEY_ENCODING=auto` (optional; alias: `CAPITAL_BANK_SECRET_KEY_ENCODE`; supports `auto`, `base64`, `hex`, `utf8`; set to `base64` if bank shared secret is explicitly base64)
+- `CAPITAL_BANK_PAYMENT_ENDPOINT=https://testsecureacceptance.cybersource.com` (optional explicit override; alias: `CAPITAL_BANK_ENDPOINT`; backend appends `/pay`)
 
 > Notes:
 > - For ambiguous secrets (for example values made of only `0-9a-f` characters), set `CAPITAL_BANK_SECRET_KEY_ENCODING=utf8` explicitly.
