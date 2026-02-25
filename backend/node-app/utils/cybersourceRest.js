@@ -15,21 +15,25 @@ const getCapitalBankEnv = () => {
 };
 
 const getCyberSourceBaseUrl = () => {
-  const configuredUrl = process.env.CAPITAL_BANK_BASE_URL || process.env.CYBERSOURCE_BASE_URL;
+  const configuredUrl = process.env.CAPITAL_BANK_PAYMENT_ENDPOINT;
   if (configuredUrl && typeof configuredUrl === 'string') {
-    const normalized = configuredUrl.trim();
-    if (normalized) {
-      try {
-        const parsed = new URL(normalized);
-        if (['http:', 'https:'].includes(parsed.protocol)) {
-          const fullUrl = parsed.href.replace(/\/$/, '');
-          return fullUrl.endsWith('/pay') ? fullUrl.slice(0, -4) : fullUrl;
+    try {
+      const parsed = new URL(configuredUrl.trim());
+      if (['http:', 'https:'].includes(parsed.protocol)) {
+        // Return the URL without the /pay suffix if it exists
+        const fullUrl = parsed.href.replace(/\/+$/, ''); // Remove trailing slashes
+        if (fullUrl.endsWith('/pay')) {
+          return fullUrl.slice(0, -4); // Remove '/pay' suffix
         }
-      } catch (_error) {
-        // Fall through to env defaults
+        return fullUrl;
       }
+    } catch (_error) {
+      // Fall through to defaults
     }
   }
+
+  const environment = String(process.env.NODE_ENV || '').toLowerCase();
+  if (environment === 'production') return CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
 
   return getCapitalBankEnv() === 'test'
     ? CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL
