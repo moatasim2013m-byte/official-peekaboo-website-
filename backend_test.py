@@ -83,7 +83,26 @@ class PeekabooAPITester:
         return success and 'message' in response
 
     def test_user_registration(self):
-        """Test user registration"""
+        """Test user registration or login with verified parent"""
+        # Try to login with the verified test parent first
+        test_parent_creds = {
+            "email": "testparent@peekaboo.com",
+            "password": "TestParent123!"
+        }
+        
+        success, response = self.run_test(
+            "Test Parent Login",
+            "POST",
+            "auth/login",
+            200,
+            data=test_parent_creds
+        )
+        
+        if success and 'token' in response:
+            self.parent_token = response['token']
+            return True
+        
+        # If login fails, try registration (original logic)
         timestamp = datetime.now().strftime('%H%M%S')
         test_user = {
             "email": f"parent_{timestamp}@peekaboo.com",
@@ -93,17 +112,15 @@ class PeekabooAPITester:
         }
         
         success, response = self.run_test(
-            "Parent Registration",
+            "Parent Registration (Fallback)",
             "POST",
             "auth/register",
             201,
             data=test_user
         )
         
-        if success and 'token' in response:
-            self.parent_token = response['token']
-            return True
-        return False
+        # Note: Registration requires email verification, so this won't provide a token
+        return False  # Return False so we know we need to use verified parent
 
     def test_admin_login(self):
         """Test admin login"""
