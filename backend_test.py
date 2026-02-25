@@ -30,8 +30,8 @@ def test_environment_variables():
     print("\n=== Test 1: Environment Variables Check ===")
     
     try:
-        # Test backend availability
-        response = requests.get(f"{API_BASE}/auth/verify", timeout=10)
+        # Test backend availability using hourly pricing (public endpoint)
+        response = requests.get(f"{API_BASE}/payments/hourly-pricing", timeout=10)
         if response.status_code != 200:
             log_test_result("Backend Connectivity", "FAIL", f"Backend not accessible: {response.status_code}")
             return False
