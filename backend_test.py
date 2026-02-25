@@ -11,6 +11,7 @@ class PeekabooAPITester:
         self.token = None
         self.admin_token = None
         self.parent_token = None
+        self.capital_bank_session_id = None
         self.tests_run = 0
         self.tests_passed = 0
         self.test_results = []
