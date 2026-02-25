@@ -15,13 +15,15 @@ const getCapitalBankEnv = () => {
 };
 
 const getCyberSourceBaseUrl = () => {
-  const configuredUrl = process.env.CAPITAL_BANK_PAYMENT_ENDPOINT;
+  const configuredUrl = process.env.CAPITAL_BANK_PAYMENT_ENDPOINT
+    || process.env.CAPITAL_BANK_ENDPOINT
+    || process.env.CAPITAL_BANK_SECURE_ACCEPTANCE_URL;
   if (configuredUrl && typeof configuredUrl === 'string') {
     try {
       const parsed = new URL(configuredUrl.trim());
       if (['http:', 'https:'].includes(parsed.protocol)) {
         // Return the URL without the /pay suffix if it exists
-        const fullUrl = parsed.href.replace(/\/+$/, ''); // Remove trailing slashes
+        const fullUrl = `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, '');
         if (fullUrl.endsWith('/pay')) {
           return fullUrl.slice(0, -4); // Remove '/pay' suffix
         }
