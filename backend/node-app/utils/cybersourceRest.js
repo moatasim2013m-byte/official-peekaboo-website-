@@ -15,24 +15,7 @@ const getCapitalBankEnv = () => {
   return configuredEnv === 'test' ? 'test' : 'prod';
 };
 
-const normalizeUrl = (value) => {
-  if (!value || typeof value !== 'string') return null;
-  try {
-    const parsed = new URL(value.trim());
-    if (!['http:', 'https:'].includes(parsed.protocol)) return null;
-    return parsed.origin;
-  } catch (_error) {
-    return null;
-  }
-};
-
 const getCyberSourceBaseUrl = () => {
-  const configured = normalizeUrl(
-    process.env.CAPITAL_BANK_PAYMENT_ENDPOINT
-    || process.env.CAPITAL_BANK_ENDPOINT
-  );
-  if (configured) return configured;
-
   return getCapitalBankEnv() === 'test'
     ? CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL
     : CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;

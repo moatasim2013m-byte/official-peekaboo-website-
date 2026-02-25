@@ -928,12 +928,29 @@ const processCapitalBankCallback = async (req, res, source = 'notify') => {
     signature: callbackPayload?.signature ? 'present' : 'missing'
   });
 
+  console.info('[Capital Bank Callback] decision diagnostics', {
+    source,
+    decision,
+    reason_code: reasonCode,
+    message,
+    req_reference_number: reqReferenceNumber,
+    reference_number: referenceNumber,
+    transaction_id: String(callbackPayload?.transaction_id || '').trim(),
+    req_transaction_uuid: reqTransactionUuid
+  });
+
   // Verify signature for security
   if (callbackPayload?.signature && callbackPayload?.signed_field_names) {
     try {
-      const isValid = verifySecureAcceptanceSignature(callbackPayload, capitalBankConfig.secretKey);
-      if (!isValid) {
-        console.error('[SECURITY] Invalid signature in Secure Acceptance callback');
+      const signatureCheck = verifySecureAcceptanceSignature(callbackPayload, capitalBankConfig.secretKey);
+      if (!signatureCheck.isValid) {
+        console.error('[SECURITY] Invalid signature in Secure Acceptance callback', {
+          reason: signatureCheck.reason,
+          reference_number: referenceNumber,
+          decision,
+          signed_field_names: signatureCheck.signedFieldNames,
+          data_to_sign_preview: signatureCheck.dataToSign?.slice(0, 200)
+        });
         if (source === 'notify') return res.status(200).json({ received: true, ignored: true });
         return res.redirect(303, '/payment/failed?reason=invalid_signature');
       }
@@ -1087,7 +1104,7 @@ router.get('/provider', (_req, res) => {
   const effectiveProvider = getEffectiveProvider();
   const endpoint = getCyberSourcePaymentUrl();
   return res.json({
-    requestedPaymentProvider: paymentProvider,
+    requestedPaymentProvider,
     effectiveProvider,
     capitalBankEnv: getCapitalBankEnv(),
     missingCapitalBankEnvVars,
