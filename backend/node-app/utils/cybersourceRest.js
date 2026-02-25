@@ -17,8 +17,22 @@ const normalizeUrl = (value) => {
 };
 
 const getCyberSourceBaseUrl = () => {
-  const configured = normalizeUrl(process.env.CAPITAL_BANK_PAYMENT_ENDPOINT);
-  if (configured) return configured;
+  const configuredUrl = process.env.CAPITAL_BANK_PAYMENT_ENDPOINT;
+  if (configuredUrl && typeof configuredUrl === 'string') {
+    try {
+      const parsed = new URL(configuredUrl.trim());
+      if (['http:', 'https:'].includes(parsed.protocol)) {
+        // Return the URL without the /pay suffix if it exists
+        const fullUrl = parsed.href.replace(/\/+$/, ''); // Remove trailing slashes
+        if (fullUrl.endsWith('/pay')) {
+          return fullUrl.slice(0, -4); // Remove '/pay' suffix
+        }
+        return fullUrl;
+      }
+    } catch (_error) {
+      // Fall through to defaults
+    }
+  }
 
   const environment = String(process.env.NODE_ENV || '').toLowerCase();
   if (environment === 'production') return CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
