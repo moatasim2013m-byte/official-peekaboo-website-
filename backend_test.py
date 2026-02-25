@@ -310,8 +310,8 @@ def test_regression_tests():
             log_test_result("Admin Endpoints", "FAIL", f"Admin endpoint failed: {response.status_code}")
             return False
         
-        # Test database connections (via auth verify)
-        response = requests.get(f"{API_BASE}/auth/verify", timeout=10)
+        # Test database connections (via hourly pricing which requires DB)
+        response = requests.get(f"{API_BASE}/payments/hourly-pricing", timeout=10)
         if response.status_code == 200:
             log_test_result("Database Connections", "PASS", "Database connections intact")
         else:
