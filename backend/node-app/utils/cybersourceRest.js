@@ -1,8 +1,7 @@
 const crypto = require('crypto');
 
-const CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL = 'https://testsecureacceptance.cybersource.com';
-const CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL = 'https://secureacceptance.cybersource.com';
-const SECURE_ACCEPTANCE_PAY_PATH = '/pay';
+const CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL = 'https://testsecureacceptance.cybersource.com/pay';
+const CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL = 'https://secureacceptance.cybersource.com/pay';
 const SECURE_ACCEPTANCE_RESPONSE_SIGNED_FIELDS = 'signed_field_names,signature';
 
 const getCapitalBankEnv = () => {
@@ -21,7 +20,7 @@ const getCyberSourceBaseUrl = () => {
     : CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
 };
 
-const getCyberSourcePaymentUrl = () => `${getCyberSourceBaseUrl()}${SECURE_ACCEPTANCE_PAY_PATH}`;
+const getCyberSourcePaymentUrl = () => getCyberSourceBaseUrl();
 
 const toCyberSourceIsoDate = (date = new Date()) => (
   new Date(date).toISOString().replace(/\.\d{3}Z$/, 'Z')
