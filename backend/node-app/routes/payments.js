@@ -802,7 +802,7 @@ const resolveBillingDetails = (transaction, req) => {
 router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank, async (req, res) => {
   try {
     if (!isCapitalBankProviderActive()) {
-      if (!hasLoggedCapitalBankFallbackOnInitiate && requestedCapitalBankProvider) {
+      if (!hasLoggedCapitalBankFallbackOnInitiate) {
         hasLoggedCapitalBankFallbackOnInitiate = true;
         console.warn('[Payments] Capital Bank initiate requested while provider is inactive; falling back to manual', {
           requested_provider: requestedPaymentProvider,
@@ -850,7 +850,7 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       endpoint,
       capital_bank_env: capitalBankEnv,
       profile_id: capitalBankConfig.profileId,
-      reference_number: transaction.session_id,
+      referenceNumber: transaction.session_id,
       amount: amount.toFixed(2)
     });
 
@@ -917,21 +917,9 @@ const processCapitalBankCallback = async (req, res, source = 'notify') => {
   ).trim();
   const reqTransactionUuid = String(callbackPayload?.req_transaction_uuid || '').trim();
 
-  console.log('[Secure Acceptance Callback] Received:', {
-    source,
-    sessionId,
-    decision,
-    reason_code: reasonCode,
-    message,
-    req_reference_number: reqReferenceNumber,
-    reference_number: referenceNumber,
-    transactionId,
-    req_transaction_uuid: reqTransactionUuid,
-    signature: callbackPayload?.signature ? 'present' : 'missing'
-  });
-
   console.info('[Capital Bank Callback] decision diagnostics', {
     source,
+    session_id: sessionId,
     decision,
     reason_code: reasonCode,
     message,
