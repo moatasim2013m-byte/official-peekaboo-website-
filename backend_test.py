@@ -439,8 +439,10 @@ def create_test_child(admin_token):
         )
         if response.status_code == 201:
             return response.json().get("child", {}).get("_id")
+        print(f"Child creation failed: {response.status_code} - {response.text}")
         return None
-    except:
+    except Exception as e:
+        print(f"Child creation error: {e}")
         return None
 
 def main():
