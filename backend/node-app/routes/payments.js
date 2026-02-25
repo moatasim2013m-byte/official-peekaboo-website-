@@ -93,6 +93,7 @@ if (!supportedPaymentProviders.has(normalizedRequestedProvider)) {
 if (requestedCapitalBankProvider) {
   if (capitalBankRestReady) {
     console.log(`[Payments] Active provider: ${paymentProvider} (CyberSource Secure Acceptance)`);
+    console.log(`[Payments] Capital Bank environment: ${getCapitalBankEnv()}`);
     console.log(`[Payments] Capital Bank endpoint: ${getCyberSourcePaymentUrl()}`);
     console.log(`[Payments] Profile ID: ${capitalBankConfig.profileId}`);
   } else {
@@ -849,7 +850,7 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
     console.info('[Capital Bank] Initiate provider context', {
       endpoint,
       capital_bank_env: capitalBankEnv,
-      profile_id: capitalBankConfig.profileId,
+      profileId: capitalBankConfig.profileId,
       referenceNumber: transaction.session_id,
       amount: amount.toFixed(2)
     });
@@ -923,9 +924,10 @@ const processCapitalBankCallback = async (req, res, source = 'notify') => {
     decision,
     reason_code: reasonCode,
     message,
+    req_reference_or_reference_number: reqReferenceNumber || referenceNumber,
     req_reference_number: reqReferenceNumber,
     reference_number: referenceNumber,
-    transaction_id: String(callbackPayload?.transaction_id || '').trim(),
+    transaction_id: transactionId,
     req_transaction_uuid: reqTransactionUuid
   });
 
