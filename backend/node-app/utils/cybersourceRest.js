@@ -15,12 +15,31 @@ const getCapitalBankEnv = () => {
 };
 
 const getCyberSourceBaseUrl = () => {
+  const configuredUrl = process.env.CAPITAL_BANK_BASE_URL || process.env.CYBERSOURCE_BASE_URL;
+  if (configuredUrl && typeof configuredUrl === 'string') {
+    const normalized = configuredUrl.trim();
+    if (normalized) {
+      try {
+        const parsed = new URL(normalized);
+        if (['http:', 'https:'].includes(parsed.protocol)) {
+          const fullUrl = parsed.href.replace(/\/$/, '');
+          return fullUrl.endsWith('/pay') ? fullUrl.slice(0, -4) : fullUrl;
+        }
+      } catch (_error) {
+        // Fall through to env defaults
+      }
+    }
+  }
+
   return getCapitalBankEnv() === 'test'
     ? CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL
     : CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
 };
 
-const getCyberSourcePaymentUrl = () => getCyberSourceBaseUrl();
+const getCyberSourcePaymentUrl = () => {
+  const baseUrl = getCyberSourceBaseUrl();
+  return baseUrl.endsWith('/pay') ? baseUrl : `${baseUrl}/pay`;
+};
 
 const toCyberSourceIsoDate = (date = new Date()) => (
   new Date(date).toISOString().replace(/\.\d{3}Z$/, 'Z')
