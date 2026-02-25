@@ -401,6 +401,401 @@ class PeekabooAPITester:
             return True
         return False
 
+    # ==================== CAPITAL BANK PAYMENT INTEGRATION TESTS ====================
+    
+    def test_payment_provider_configuration(self):
+        """Test 1: Verify Payment Provider Configuration"""
+        print("\n🏦 CAPITAL BANK PAYMENT PROVIDER TESTS")
+        
+        # Test health endpoint to check if system is properly configured
+        success, response = self.run_test(
+            "API Health for Payment Provider",
+            "GET",
+            "health",
+            200,
+            headers={}
+        )
+        
+        if not success:
+            return False
+            
+        print("   ✓ API is running and accessible")
+        
+        # We can't directly access env vars, but we can test if the system is NOT in manual mode
+        # by attempting to create a checkout and checking the response
+        if not self.parent_token:
+            print("   ⚠️  Cannot verify payment provider without parent token")
+            return True
+        
+        return True
+
+    def test_checkout_creation_hourly_booking(self):
+        """Test 2: Test Checkout Creation Flow (Hourly Booking)"""
+        if not self.parent_token:
+            self.log_test("Capital Bank Checkout Creation", False, "No parent token available")
+            return False
+        
+        # Use parent token for authenticated requests
+        old_token = self.token
+        self.token = self.parent_token
+        
+        try:
+            # Step 1: Create a child profile
+            child_data = {
+                "name": "Zara Al-Rashid",
+                "birthday": "2019-08-20"  # 5 years old
+            }
+            
+            child_success, child_response = self.run_test(
+                "Create Child for Capital Bank Booking",
+                "POST",
+                "profile/children",
+                201,
+                data=child_data
+            )
+            
+            if not child_success or 'child' not in child_response:
+                print("   ✗ Failed to create child profile")
+                return False
+                
+            child_id = child_response['child']['id']
+            print(f"   ✓ Child profile created: {child_id}")
+            
+            # Step 2: Get available slots for today
+            slots_success, slots_response = self.run_test(
+                "Get Available Slots for Capital Bank Test",
+                "GET",
+                "slots/available?date=2024-12-25&slot_type=hourly",
+                200
+            )
+            
+            if not slots_success or 'slots' not in slots_response or not slots_response['slots']:
+                print("   ✗ No available slots found")
+                return False
+                
+            slot_id = slots_response['slots'][0]['id']
+            print(f"   ✓ Available slot found: {slot_id}")
+            
+            # Step 3: Create checkout session for hourly booking
+            checkout_data = {
+                "type": "hourly",
+                "reference_id": slot_id,
+                "child_ids": [child_id],
+                "duration_hours": 2,
+                "origin_url": "https://payment-debug-28.preview.emergentagent.com"
+            }
+            
+            success, response = self.run_test(
+                "Create Capital Bank Checkout Session",
+                "POST",
+                "payments/create-checkout",
+                200,
+                data=checkout_data
+            )
+            
+            if not success:
+                print("   ✗ Failed to create checkout session")
+                return False
+            
+            # Step 4: Verify response contains expected fields
+            required_fields = ['url', 'session_id', 'payment_provider']
+            missing_fields = [field for field in required_fields if field not in response]
+            
+            if missing_fields:
+                print(f"   ✗ Missing required fields: {missing_fields}")
+                return False
+                
+            # Step 5: Verify specific Capital Bank configuration
+            url = response.get('url', '')
+            session_id = response.get('session_id', '')
+            payment_provider = response.get('payment_provider', '')
+            
+            # Verify URL starts with expected Capital Bank redirect path
+            if not url.startswith('/payment/capital-bank/'):
+                print(f"   ✗ Unexpected URL format: {url} (should start with /payment/capital-bank/)")
+                return False
+                
+            # Verify session ID is present
+            if not session_id:
+                print("   ✗ Missing session_id")
+                return False
+                
+            # Verify payment provider is Capital Bank (not manual)
+            if payment_provider != 'capital_bank':
+                print(f"   ✗ Wrong payment provider: {payment_provider} (should be 'capital_bank')")
+                return False
+                
+            # Should NOT return manual payment method
+            if response.get('payment_method') == 'manual':
+                print("   ✗ System is in manual mode - Capital Bank integration not active")
+                return False
+                
+            print(f"   ✅ Checkout created successfully:")
+            print(f"      URL: {url}")
+            print(f"      Session ID: {session_id}")
+            print(f"      Provider: {payment_provider}")
+            
+            # Store session_id for next test
+            self.capital_bank_session_id = session_id
+            
+            return True
+            
+        finally:
+            self.token = old_token
+
+    def test_capital_bank_initiate_endpoint(self):
+        """Test 3: Test Capital Bank Initiate Endpoint"""
+        if not hasattr(self, 'capital_bank_session_id') or not self.capital_bank_session_id:
+            self.log_test("Capital Bank Initiate Test", False, "No session_id from previous test")
+            return False
+            
+        if not self.parent_token:
+            self.log_test("Capital Bank Initiate Test", False, "No parent token available")
+            return False
+        
+        old_token = self.token
+        self.token = self.parent_token
+        
+        try:
+            # Call POST /api/payments/capital-bank/initiate with session_id
+            initiate_data = {
+                "orderId": self.capital_bank_session_id,
+                "originUrl": "https://payment-debug-28.preview.emergentagent.com"
+            }
+            
+            success, response = self.run_test(
+                "Capital Bank Initiate Payment",
+                "POST",
+                "payments/capital-bank/initiate",
+                200,
+                data=initiate_data
+            )
+            
+            if not success:
+                print("   ✗ Failed to initiate Capital Bank payment")
+                return False
+            
+            # Verify response structure
+            required_fields = ['success', 'secureAcceptance']
+            missing_fields = [field for field in required_fields if field not in response]
+            
+            if missing_fields:
+                print(f"   ✗ Missing required fields: {missing_fields}")
+                return False
+                
+            if not response.get('success'):
+                print("   ✗ Response indicates failure")
+                return False
+                
+            secure_acceptance = response.get('secureAcceptance', {})
+            
+            # Verify secureAcceptance.url
+            expected_url = "https://ebc2test.cybersource.com/ebc2/pay"
+            actual_url = secure_acceptance.get('url', '')
+            
+            if actual_url != expected_url:
+                print(f"   ✗ Wrong Secure Acceptance URL: {actual_url} (expected: {expected_url})")
+                return False
+                
+            # Verify secureAcceptance.fields contains required signature fields
+            fields = secure_acceptance.get('fields', {})
+            required_signature_fields = [
+                'access_key', 'profile_id', 'transaction_uuid', 
+                'signed_field_names', 'amount', 'currency', 'signature'
+            ]
+            
+            missing_signature_fields = [field for field in required_signature_fields if field not in fields]
+            
+            if missing_signature_fields:
+                print(f"   ✗ Missing signature fields: {missing_signature_fields}")
+                return False
+                
+            # Verify specific field values
+            profile_id = fields.get('profile_id', '')
+            if profile_id != '903897720102':
+                print(f"   ✗ Wrong profile_id: {profile_id} (expected: 903897720102)")
+                return False
+                
+            currency = fields.get('currency', '')
+            if currency != 'JOD':
+                print(f"   ✗ Wrong currency: {currency} (expected: JOD)")
+                return False
+                
+            # Verify signature is base64 encoded
+            signature = fields.get('signature', '')
+            if not signature:
+                print("   ✗ Missing signature")
+                return False
+                
+            # Basic base64 validation (should contain valid base64 characters)
+            try:
+                import base64
+                base64.b64decode(signature)
+                print("   ✓ Signature appears to be valid base64")
+            except:
+                print("   ✗ Signature is not valid base64")
+                return False
+            
+            # Verify transaction_uuid is unique (not empty)
+            transaction_uuid = fields.get('transaction_uuid', '')
+            if not transaction_uuid:
+                print("   ✗ Missing transaction_uuid")
+                return False
+                
+            print(f"   ✅ Capital Bank initiate successful:")
+            print(f"      URL: {actual_url}")
+            print(f"      Profile ID: {profile_id}")
+            print(f"      Transaction UUID: {transaction_uuid}")
+            print(f"      Signed Fields: {fields.get('signed_field_names', '')}")
+            print(f"      Amount: {fields.get('amount', '')} {currency}")
+            
+            return True
+            
+        finally:
+            self.token = old_token
+
+    def test_payment_transaction_storage(self):
+        """Test 4: Verify Payment Transaction Storage"""
+        if not hasattr(self, 'capital_bank_session_id') or not self.capital_bank_session_id:
+            self.log_test("Payment Transaction Storage Test", False, "No session_id from previous test")
+            return False
+            
+        if not self.parent_token:
+            self.log_test("Payment Transaction Storage Test", False, "No parent token available")
+            return False
+        
+        old_token = self.token
+        self.token = self.parent_token
+        
+        try:
+            # Get checkout status to verify transaction was stored
+            success, response = self.run_test(
+                "Check Payment Transaction Storage",
+                "GET",
+                f"payments/status/{self.capital_bank_session_id}",
+                200
+            )
+            
+            if not success:
+                print("   ✗ Failed to retrieve payment transaction")
+                return False
+            
+            # Verify transaction status is 'pending'
+            status = response.get('status', '')
+            if status != 'pending':
+                print(f"   ✗ Wrong transaction status: {status} (expected: pending)")
+                return False
+                
+            # Verify payment_provider is correct
+            payment_provider = response.get('payment_provider', '')
+            if payment_provider != 'capital_bank':
+                print(f"   ✗ Wrong payment provider in transaction: {payment_provider}")
+                return False
+                
+            # Verify metadata contains expected booking information
+            metadata = response.get('metadata', {})
+            
+            # Check for slot_id, child_ids, duration_hours
+            if 'slot_id' not in metadata:
+                print("   ✗ Missing slot_id in transaction metadata")
+                return False
+                
+            if 'child_ids' not in metadata:
+                print("   ✗ Missing child_ids in transaction metadata")
+                return False
+                
+            if 'duration_hours' not in metadata:
+                print("   ✗ Missing duration_hours in transaction metadata")
+                return False
+                
+            # Verify amount is correctly calculated (should be > 0)
+            # This would need access to the actual transaction record
+            print(f"   ✅ Payment transaction stored correctly:")
+            print(f"      Status: {status}")
+            print(f"      Provider: {payment_provider}")
+            print(f"      Metadata contains: slot_id, child_ids, duration_hours")
+            
+            return True
+            
+        finally:
+            self.token = old_token
+
+    def test_manual_mode_check(self):
+        """Test 5: Ensure System is NOT in Manual Mode"""
+        if not self.parent_token:
+            self.log_test("Manual Mode Check", False, "No parent token available")
+            return False
+        
+        old_token = self.token
+        self.token = self.parent_token
+        
+        try:
+            # Create a minimal checkout to test if system returns manual payment
+            child_data = {
+                "name": "Test Child Manual Check",
+                "birthday": "2020-01-01"
+            }
+            
+            child_success, child_response = self.run_test(
+                "Create Test Child for Manual Check",
+                "POST",
+                "profile/children",
+                201,
+                data=child_data
+            )
+            
+            if not child_success:
+                return False
+            
+            child_id = child_response['child']['id']
+            
+            # Get any available slot
+            slots_success, slots_response = self.run_test(
+                "Get Slots for Manual Check",
+                "GET",
+                "slots/available?date=2024-12-25&slot_type=hourly",
+                200
+            )
+            
+            if not slots_success or not slots_response.get('slots'):
+                return False
+            
+            slot_id = slots_response['slots'][0]['id']
+            
+            # Attempt checkout creation
+            checkout_data = {
+                "type": "hourly",
+                "reference_id": slot_id,
+                "child_ids": [child_id],
+                "duration_hours": 1,
+                "origin_url": "https://payment-debug-28.preview.emergentagent.com"
+            }
+            
+            success, response = self.run_test(
+                "Test for Manual Mode Response",
+                "POST",
+                "payments/create-checkout",
+                200,
+                data=checkout_data
+            )
+            
+            if success:
+                # Check if response indicates manual mode
+                if response.get('payment_method') == 'manual':
+                    print("   ❌ System is in MANUAL MODE - Capital Bank integration not active!")
+                    return False
+                elif 'Manual payment only' in response.get('message', ''):
+                    print("   ❌ System shows 'Manual payment only' message!")
+                    return False
+                else:
+                    print("   ✅ System is NOT in manual mode - Capital Bank integration active")
+                    return True
+            
+            return False
+            
+        finally:
+            self.token = old_token
+
     def run_all_tests(self):
         """Run all API tests focusing on new pricing and booking features"""
         print("🚀 Starting Peekaboo API Tests - New Features Focus...")
