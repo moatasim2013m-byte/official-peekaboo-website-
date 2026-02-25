@@ -415,9 +415,13 @@ def get_admin_token():
             timeout=10
         )
         if response.status_code == 200:
-            return response.json().get("token")
+            token = response.json().get("token")
+            if token:
+                return token
+        print(f"Login failed: {response.status_code} - {response.text}")
         return None
-    except:
+    except Exception as e:
+        print(f"Login error: {e}")
         return None
 
 def create_test_child(admin_token):
