@@ -2275,6 +2275,7 @@ button.primary,
     transition: all 0.2s ease;
     cursor: pointer;
     text-align: center;
+    overflow-wrap: anywhere;
 }
 
 .cartoon-option {
@@ -2286,6 +2287,12 @@ button.primary,
     min-height: 132px;
     min-width: 0;
     text-align: right;
+}
+
+.period-card .font-heading,
+.duration-pill .font-heading {
+    line-height: 1.2;
+    word-break: break-word;
 }
 
 .period-icon-circle {
@@ -2434,6 +2441,10 @@ button.primary,
     border-radius: 24px;
     border-width: 2.5px;
     background: linear-gradient(165deg, #ffffff, #f9fbff);
+}
+
+.duration-pill .font-heading {
+    font-size: clamp(1.55rem, 3.8vw, 2rem);
 }
 
 .slot-pill {
