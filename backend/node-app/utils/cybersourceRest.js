@@ -14,17 +14,27 @@ const getCapitalBankEnv = () => {
   return configuredEnv === 'test' ? 'test' : 'prod';
 };
 
-const getCyberSourceBaseUrl = () => (
-  getCapitalBankEnv() === 'test'
-    ? CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL
-    : CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL
-);
+const getConfiguredPaymentEndpoint = () => String(
+  process.env.CAPITAL_BANK_PAYMENT_ENDPOINT || ''
+).trim();
 
-const getCyberSourcePaymentUrl = () => (
-  getCapitalBankEnv() === 'test'
+const getCyberSourceBaseUrl = () => {
+  const configuredEndpoint = getConfiguredPaymentEndpoint();
+  if (configuredEndpoint) return configuredEndpoint;
+
+  return getCapitalBankEnv() === 'test'
     ? CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL
-    : CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL
-);
+    : CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
+};
+
+const getCyberSourcePaymentUrl = () => {
+  const configuredEndpoint = getConfiguredPaymentEndpoint();
+  if (configuredEndpoint) return configuredEndpoint;
+
+  return getCapitalBankEnv() === 'test'
+    ? CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL
+    : CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
+};
 
 let hasLoggedCapitalBankEndpoint = false;
 const logCapitalBankEndpointSelection = () => {
