@@ -3,6 +3,31 @@ const crypto = require('crypto');
 const CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL = 'https://testsecureacceptance.cybersource.com/pay';
 const CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL = 'https://secureacceptance.cybersource.com/pay';
 const SECURE_ACCEPTANCE_RESPONSE_SIGNED_FIELDS = 'signed_field_names,signature';
+const REQUIRED_SIGNED_FIELDS = [
+  'merchant_id',
+  'access_key',
+  'profile_id',
+  'transaction_uuid',
+  'signed_field_names',
+  'unsigned_field_names',
+  'signed_date_time',
+  'locale',
+  'transaction_type',
+  'reference_number',
+  'amount',
+  'currency',
+  'payment_method',
+  'bill_to_forename',
+  'bill_to_surname',
+  'bill_to_email',
+  'bill_to_address_line1',
+  'bill_to_address_city',
+  'bill_to_address_country'
+];
+const CYBERSOURCE_HOSTS = {
+  test: 'testsecureacceptance.cybersource.com',
+  prod: 'secureacceptance.cybersource.com'
+};
 
 const getCapitalBankEnv = () => {
   const configuredEnv = String(
@@ -54,6 +79,86 @@ const getCyberSourcePaymentUrl = () => {
   return getCapitalBankEnv() === 'test'
     ? CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL
     : CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
+};
+
+const sanitizeKeyPreview = (value = '', visibleTail = 4) => {
+  const normalized = String(value || '').trim();
+  if (!normalized) return '';
+  const suffix = normalized.slice(-visibleTail);
+  return `${'*'.repeat(Math.max(normalized.length - visibleTail, 0))}${suffix}`;
+};
+
+const validateSecureAcceptanceConfig = ({ merchantId, profileId, accessKey, secretKey, env, endpoint }) => {
+  const normalizedEnv = String(env || getCapitalBankEnv()).trim().toLowerCase() === 'test' ? 'test' : 'prod';
+  const normalizedEndpoint = String(endpoint || getCyberSourcePaymentUrl()).trim();
+  const missing = [
+    ['CAPITAL_BANK_MERCHANT_ID', merchantId],
+    ['CAPITAL_BANK_PROFILE_ID', profileId],
+    ['CAPITAL_BANK_ACCESS_KEY', accessKey],
+    ['CAPITAL_BANK_SECRET_KEY', secretKey],
+    ['CAPITAL_BANK_ENV', normalizedEnv]
+  ].filter(([, value]) => !String(value || '').trim()).map(([name]) => name);
+
+  const details = {
+    env: normalizedEnv,
+    endpoint: normalizedEndpoint,
+    merchant_id_present: Boolean(String(merchantId || '').trim()),
+    profile_id_present: Boolean(String(profileId || '').trim()),
+    access_key_present: Boolean(String(accessKey || '').trim()),
+    secret_key_present: Boolean(String(secretKey || '').trim()),
+    merchant_id_preview: sanitizeKeyPreview(merchantId),
+    profile_id_preview: sanitizeKeyPreview(profileId),
+    access_key_preview: sanitizeKeyPreview(accessKey),
+    missing
+  };
+
+  if (missing.length) {
+    return { ok: false, code: 'CAPITAL_BANK_CONFIG_INVALID', reason: 'missing_required_env', details };
+  }
+
+  try {
+    const parsed = new URL(normalizedEndpoint);
+    const host = parsed.host.toLowerCase();
+    const pathname = parsed.pathname;
+    const isCybersourceHost = Object.values(CYBERSOURCE_HOSTS).includes(host);
+    details.endpoint_host = host;
+    details.endpoint_path = pathname;
+    details.is_cybersource_host = isCybersourceHost;
+
+    if (isCybersourceHost) {
+      const expectedHost = CYBERSOURCE_HOSTS[normalizedEnv];
+      if (host !== expectedHost) {
+        details.expected_host = expectedHost;
+        return { ok: false, code: 'CAPITAL_BANK_ENV_HOST_MISMATCH', reason: 'env_host_mismatch', details };
+      }
+      if (pathname !== CYBERSOURCE_PAY_PATH) {
+        details.expected_path = CYBERSOURCE_PAY_PATH;
+        return { ok: false, code: 'CAPITAL_BANK_ENDPOINT_INVALID', reason: 'invalid_pay_path', details };
+      }
+    }
+  } catch (_error) {
+    return { ok: false, code: 'CAPITAL_BANK_ENDPOINT_INVALID', reason: 'invalid_endpoint_url', details };
+  }
+
+  return { ok: true, code: null, reason: null, details };
+};
+
+const validateSecureAcceptanceFields = (fields = {}) => {
+  const requiredFields = ['transaction_type', 'reference_number', 'amount', 'currency', 'locale', 'signature', 'signed_field_names'];
+  const missingFields = requiredFields.filter((fieldName) => !String(fields[fieldName] || '').trim());
+  const signedFieldNames = String(fields.signed_field_names || '').split(',').map((name) => name.trim()).filter(Boolean);
+  const missingSignedFields = REQUIRED_SIGNED_FIELDS.filter((fieldName) => !signedFieldNames.includes(fieldName));
+  const details = {
+    missing_fields: missingFields,
+    missing_signed_fields: missingSignedFields,
+    signed_field_count: signedFieldNames.length
+  };
+
+  if (missingFields.length || missingSignedFields.length) {
+    return { ok: false, code: 'CAPITAL_BANK_SIGNATURE_INVALID', reason: 'missing_signed_payload_fields', details };
+  }
+
+  return { ok: true, code: null, reason: null, details };
 };
 
 let hasLoggedCapitalBankEndpoint = false;
@@ -183,27 +288,7 @@ const buildSecureAcceptanceFields = ({
     throw new Error('Payment amount must be a positive number');
   }
 
-  const signedFieldNames = [
-    'merchant_id',
-    'access_key',
-    'profile_id',
-    'transaction_uuid',
-    'signed_field_names',
-    'unsigned_field_names',
-    'signed_date_time',
-    'locale',
-    'transaction_type',
-    'reference_number',
-    'amount',
-    'currency',
-    'payment_method',
-    'bill_to_forename',
-    'bill_to_surname',
-    'bill_to_email',
-    'bill_to_address_line1',
-    'bill_to_address_city',
-    'bill_to_address_country'
-  ].join(',');
+  const signedFieldNames = REQUIRED_SIGNED_FIELDS.join(',');
 
   const unsignedFields = [
     ...String(unsignedFieldNames || '').split(',').map((fieldName) => fieldName.trim()).filter(Boolean),
@@ -241,10 +326,18 @@ const buildSecureAcceptanceFields = ({
   console.info('[CyberSource Secure Acceptance] Signed request fields generated', {
     reference_number: fields.reference_number,
     transaction_uuid: fields.transaction_uuid,
+    merchant_id: fields.merchant_id,
+    profile_id: fields.profile_id,
     signed_field_count: parsedSignedFields.length,
     signed_fields: parsedSignedFields,
     signed_date_time: fields.signed_date_time,
-    data_to_sign_preview: dataToSign.slice(0, 200)
+    has_required_signature_inputs: {
+      merchant_id: Boolean(fields.merchant_id),
+      profile_id: Boolean(fields.profile_id),
+      access_key: Boolean(fields.access_key),
+      transaction_uuid: Boolean(fields.transaction_uuid)
+    },
+    data_to_sign_preview: dataToSign.slice(0, 280)
   });
 
   return fields;
@@ -286,7 +379,10 @@ module.exports = {
   getCyberSourceBaseUrl,
   getCyberSourcePaymentUrl,
   generateTransactionUuid,
+  REQUIRED_SIGNED_FIELDS,
   signFields,
   toCyberSourceIsoDate,
+  validateSecureAcceptanceConfig,
+  validateSecureAcceptanceFields,
   verifySecureAcceptanceSignature
 };
