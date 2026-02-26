@@ -88,73 +88,6 @@ const sanitizeKeyPreview = (value = '', visibleTail = 4) => {
   return `${'*'.repeat(Math.max(normalized.length - visibleTail, 0))}${suffix}`;
 };
 
-const detectSecretKeyEncoding = (secretKey, requestedEncoding = getSecretKeyEncoding()) => {
-  const normalizedSecretKey = String(secretKey || '').trim();
-  if (!normalizedSecretKey) {
-    return {
-      ok: false,
-      error: 'CAPITAL_BANK_SECRET_KEY is required',
-      code: 'CAPITAL_BANK_CONFIG_INVALID',
-      details: { secret_key_present: false }
-    };
-  }
-
-  if (requestedEncoding === 'hex') {
-    if (!/^[0-9a-fA-F]+$/.test(normalizedSecretKey) || normalizedSecretKey.length % 2 !== 0) {
-      return {
-        ok: false,
-        error: 'CAPITAL_BANK_SECRET_KEY_ENCODING=hex requires an even-length hexadecimal secret',
-        code: 'CAPITAL_BANK_SECRET_ENCODING_INVALID',
-        details: { requested_encoding: requestedEncoding }
-      };
-    }
-    return { ok: true, encoding: 'hex', buffer: decodeHexKey(normalizedSecretKey), details: { requested_encoding: requestedEncoding, detected_encoding: 'hex' } };
-  }
-
-  if (requestedEncoding === 'base64') {
-    if (!isLikelyBase64(normalizedSecretKey)) {
-      return {
-        ok: false,
-        error: 'CAPITAL_BANK_SECRET_KEY_ENCODING=base64 requires a valid base64 secret',
-        code: 'CAPITAL_BANK_SECRET_ENCODING_INVALID',
-        details: { requested_encoding: requestedEncoding }
-      };
-    }
-    return { ok: true, encoding: 'base64', buffer: decodeBase64Key(normalizedSecretKey), details: { requested_encoding: requestedEncoding, detected_encoding: 'base64' } };
-  }
-
-  if (requestedEncoding === 'utf8' || requestedEncoding === 'plain' || requestedEncoding === 'text') {
-    return { ok: true, encoding: 'utf8', buffer: decodeUtf8Key(normalizedSecretKey), details: { requested_encoding: requestedEncoding, detected_encoding: 'utf8' } };
-  }
-
-  if (requestedEncoding !== 'auto') {
-    return {
-      ok: false,
-      error: 'CAPITAL_BANK_SECRET_KEY_ENCODING must be one of: auto, base64, hex, utf8',
-      code: 'CAPITAL_BANK_SECRET_ENCODING_INVALID',
-      details: { requested_encoding: requestedEncoding }
-    };
-  }
-
-  const looksHex = /^[0-9a-fA-F]+$/.test(normalizedSecretKey) && normalizedSecretKey.length % 2 === 0;
-  const looksBase64 = isBase64WithStrongSignal(normalizedSecretKey);
-
-  if (looksHex && !looksBase64) {
-    return {
-      ok: false,
-      error: 'Secret key encoding is ambiguous in auto mode; set CAPITAL_BANK_SECRET_KEY_ENCODING explicitly to hex or utf8',
-      code: 'CAPITAL_BANK_SECRET_ENCODING_AMBIGUOUS',
-      details: { requested_encoding: requestedEncoding, detected_encoding: 'ambiguous_hex_or_utf8' }
-    };
-  }
-
-  if (looksBase64) {
-    return { ok: true, encoding: 'base64', buffer: decodeBase64Key(normalizedSecretKey), details: { requested_encoding: requestedEncoding, detected_encoding: 'base64' } };
-  }
-
-  return { ok: true, encoding: 'utf8', buffer: decodeUtf8Key(normalizedSecretKey), details: { requested_encoding: requestedEncoding, detected_encoding: 'utf8' } };
-};
-
 const validateSecureAcceptanceConfig = ({ merchantId, profileId, accessKey, secretKey, env, endpoint }) => {
   const normalizedEnv = String(env || getCapitalBankEnv()).trim().toLowerCase() === 'test' ? 'test' : 'prod';
   const normalizedEndpoint = String(endpoint || getCyberSourcePaymentUrl()).trim();
@@ -176,27 +109,11 @@ const validateSecureAcceptanceConfig = ({ merchantId, profileId, accessKey, secr
     merchant_id_preview: sanitizeKeyPreview(merchantId),
     profile_id_preview: sanitizeKeyPreview(profileId),
     access_key_preview: sanitizeKeyPreview(accessKey),
-    missing,
-    secret_key_encoding_mode: getSecretKeyEncoding()
+    missing
   };
 
   if (missing.length) {
     return { ok: false, code: 'CAPITAL_BANK_CONFIG_INVALID', reason: 'missing_required_env', details };
-  }
-
-  const secretKeyCheck = detectSecretKeyEncoding(secretKey, getSecretKeyEncoding());
-  details.secret_key_encoding_detected = secretKeyCheck?.details?.detected_encoding || null;
-  if (!secretKeyCheck.ok) {
-    return {
-      ok: false,
-      code: secretKeyCheck.code || 'CAPITAL_BANK_CONFIG_INVALID',
-      reason: 'invalid_secret_encoding',
-      details: {
-        ...details,
-        secret_key_error: secretKeyCheck.error,
-        ...secretKeyCheck.details
-      }
-    };
   }
 
   try {

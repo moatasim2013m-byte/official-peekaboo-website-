@@ -6,67 +6,49 @@ const {
 } = require('../utils/cybersourceRest');
 
 const runScenario = (name, input) => {
-  const previousEncoding = process.env.CAPITAL_BANK_SECRET_KEY_ENCODING;
-  try {
-    if (input.secretKeyEncoding) {
-      process.env.CAPITAL_BANK_SECRET_KEY_ENCODING = input.secretKeyEncoding;
-    } else {
-      delete process.env.CAPITAL_BANK_SECRET_KEY_ENCODING;
-    }
+  const configResult = validateSecureAcceptanceConfig(input);
+  const result = {
+    name,
+    configOk: configResult.ok,
+    configCode: configResult.code || null,
+    details: configResult.details
+  };
 
-    const configResult = validateSecureAcceptanceConfig(input);
-    const result = {
-      name,
-      configOk: configResult.ok,
-      configCode: configResult.code || null,
-      details: configResult.details
-    };
+  if (configResult.ok) {
+    const payload = buildSecureAcceptanceFields({
+      merchantId: input.merchantId,
+      profileId: input.profileId,
+      accessKey: input.accessKey,
+      secretKey: input.secretKey,
+      transactionUuid: '123e4567-e89b-12d3-a456-426614174000',
+      referenceNumber: 'order-12345',
+      amount: 10.5,
+      locale: 'ar',
+      transactionType: 'sale',
+      currency: 'JOD',
+      billToForename: 'Test',
+      billToSurname: 'User',
+      billToEmail: 'test@example.com',
+      billToAddressLine1: 'Amman',
+      billToAddressCity: 'Amman',
+      billToAddressCountry: 'JO'
+    });
 
-    if (configResult.ok) {
-      const payload = buildSecureAcceptanceFields({
-        merchantId: input.merchantId,
-        profileId: input.profileId,
-        accessKey: input.accessKey,
-        secretKey: input.secretKey,
-        transactionUuid: '123e4567-e89b-12d3-a456-426614174000',
-        referenceNumber: 'order-12345',
-        amount: 10.5,
-        locale: 'ar',
-        transactionType: 'sale',
-        currency: 'JOD',
-        billToForename: 'Test',
-        billToSurname: 'User',
-        billToEmail: 'test@example.com',
-        billToAddressLine1: 'Amman',
-        billToAddressCity: 'Amman',
-        billToAddressCountry: 'JO'
-      });
-
-      const fieldsResult = validateSecureAcceptanceFields(payload);
-      result.fieldsOk = fieldsResult.ok;
-      result.fieldsCode = fieldsResult.code || null;
-      result.url = input.endpoint || getCyberSourcePaymentUrl();
-      result.pathOk = String(result.url).includes('/pay');
-    }
-
-    return result;
-  } finally {
-    if (typeof previousEncoding === 'string') {
-      process.env.CAPITAL_BANK_SECRET_KEY_ENCODING = previousEncoding;
-    } else {
-      delete process.env.CAPITAL_BANK_SECRET_KEY_ENCODING;
-    }
+    const fieldsResult = validateSecureAcceptanceFields(payload);
+    result.fieldsOk = fieldsResult.ok;
+    result.fieldsCode = fieldsResult.code || null;
+    result.url = input.endpoint || getCyberSourcePaymentUrl();
+    result.pathOk = String(result.url).includes('/pay');
   }
-};
 
-const BASE64_TEST_SECRET = 'ZmFrZVNlY3JldEtleTEyMw==';
-const HEX_TEST_SECRET = '00112233445566778899aabbccddeeff';
+  return result;
+};
 
 const sharedCreds = {
   merchantId: 'testmerchant1234',
   profileId: 'testprofile1234',
   accessKey: 'ABCD1234ACCESS',
-  secretKey: BASE64_TEST_SECRET
+  secretKey: '00112233445566778899aabbccddeeff'
 };
 
 const scenarios = [
@@ -99,27 +81,6 @@ const scenarios = [
       endpoint: 'https://testsecureacceptance.cybersource.com/pay'
     },
     expect: { configOk: false, configCode: 'CAPITAL_BANK_CONFIG_INVALID' }
-  },
-  {
-    name: 'ambiguous secret with auto encoding => reject with actionable code',
-    input: {
-      ...sharedCreds,
-      secretKey: '0011223344556677',
-      env: 'test',
-      endpoint: 'https://testsecureacceptance.cybersource.com/pay'
-    },
-    expect: { configOk: false, configCode: 'CAPITAL_BANK_SECRET_ENCODING_AMBIGUOUS' }
-  },
-  {
-    name: 'explicit hex encoding + hex secret => valid config',
-    input: {
-      ...sharedCreds,
-      secretKey: HEX_TEST_SECRET,
-      secretKeyEncoding: 'hex',
-      env: 'test',
-      endpoint: 'https://testsecureacceptance.cybersource.com/pay'
-    },
-    expect: { configOk: true, fieldsOk: true, pathOk: true }
   },
   {
     name: 'valid config => /pay URL + signed fields',
