@@ -551,7 +551,7 @@ export default function TicketsPage() {
                   <span className="cartoon-blob morning-blob" aria-hidden="true"></span>
                   <div className="flex items-center justify-between gap-3 pt-2 px-2">
                     <span className="period-icon-circle period-icon-circle-morning"><Sun className={`h-7 w-7 shrink-0 ${morningExpired ? 'text-gray-400' : 'text-blue-500'}`} /></span>
-                    <div className="flex-1 text-right">
+                    <div className="flex-1 min-w-0 text-right">
                       <div className={`font-heading text-xl font-bold ${morningExpired ? 'text-gray-400' : ''}`}>صباحي</div>
                       <div className="text-sm text-muted-foreground">10 ص - 2 م</div>
                       {morningExpired && (
@@ -569,7 +569,7 @@ export default function TicketsPage() {
                   <span className="cartoon-blob afternoon-blob" aria-hidden="true"></span>
                   <div className="flex items-center justify-between gap-3 px-2">
                     <span className="period-icon-circle period-icon-circle-afternoon"><Moon className="h-7 w-7 shrink-0 text-slate-600" /></span>
-                    <div className="flex-1 text-right">
+                    <div className="flex-1 min-w-0 text-right">
                       <div className="font-heading text-xl font-bold">مسائي</div>
                       <div className="text-sm text-muted-foreground">2 م - 12 ص</div>
                     </div>
