@@ -897,7 +897,7 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       transactionUuid,
       referenceNumber: transaction.session_id,
       amount,
-      locale: req.body?.locale || 'ar',
+      locale: req.body?.locale || 'ar-xn',
       overrideCustomReceiptPage: `${origin}/api/payments/capital-bank/return`,
       overrideCustomCancelPage: `${origin}/payment/cancel`,
       ...resolveBillingDetails(transaction, req)
