@@ -3,15 +3,9 @@ import axios from 'axios';
 
 const AuthContext = createContext(null);
 
-const RAW_API_URL = (process.env.REACT_APP_BACKEND_URL || "").trim();
-
-const normalizeBackendOrigin = (rawUrl) => {
-  if (!rawUrl || rawUrl === "undefined" || rawUrl === "null") return "";
-  const sanitized = rawUrl.replace(/\/+$/, "");
-  return sanitized.replace(/\/api$/i, "");
-};
-
-const API_ORIGIN = normalizeBackendOrigin(RAW_API_URL);
+// Frontend API calls must stay same-origin so auth cookies/tokens and
+// payment callback flows always resolve under the active host.
+const API_BASE_URL = '/api';
 
 const TOKEN_KEY = 'peekaboo_token';
 
@@ -30,7 +24,7 @@ export const AuthProvider = ({ children }) => {
   // Create api instance
   const api = useMemo(() => {
     const instance = axios.create({
-      baseURL: API_ORIGIN ? `${API_ORIGIN}/api` : "/api",
+      baseURL: API_BASE_URL,
     });
     
     // Add interceptor to always use latest token from localStorage
