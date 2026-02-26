@@ -83,6 +83,27 @@ export default function TicketsPage() {
     document.title = 'احجز وقت اللعب | بيكابو';
   }, []);
 
+  // When returning from external card pages (back/failed/cancel), browsers may
+  // restore this page from bfcache with stale component state.
+  // Ensure we never stay stuck in a loading state after coming back.
+  useEffect(() => {
+    const clearLoadingState = () => {
+      if (document.visibilityState && document.visibilityState !== 'visible') {
+        return;
+      }
+      setLoading(false);
+    };
+
+    clearLoadingState();
+    window.addEventListener('pageshow', clearLoadingState);
+    document.addEventListener('visibilitychange', clearLoadingState);
+
+    return () => {
+      window.removeEventListener('pageshow', clearLoadingState);
+      document.removeEventListener('visibilitychange', clearLoadingState);
+    };
+  }, []);
+
   // Fetch children on mount
   useEffect(() => {
     fetchProducts();
