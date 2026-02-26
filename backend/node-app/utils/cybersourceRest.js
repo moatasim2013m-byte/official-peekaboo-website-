@@ -34,9 +34,6 @@ const getCyberSourceBaseUrl = () => {
     }
   }
 
-  const environment = String(process.env.NODE_ENV || '').toLowerCase();
-  if (environment === 'production') return CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
-
   return getCapitalBankEnv() === 'test'
     ? CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL
     : CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;

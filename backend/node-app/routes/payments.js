@@ -911,12 +911,9 @@ const processCapitalBankCallback = async (req, res, source = 'notify') => {
   const message = String(callbackPayload?.message || '').trim();
   const reqReferenceNumber = String(callbackPayload?.req_reference_number || '').trim();
   const referenceNumber = String(callbackPayload?.reference_number || '').trim();
-  const transactionId = String(
-    callbackPayload?.transaction_id || 
-    callbackPayload?.req_transaction_uuid || 
-    ''
-  ).trim();
+  const callbackTransactionId = String(callbackPayload?.transaction_id || '').trim();
   const reqTransactionUuid = String(callbackPayload?.req_transaction_uuid || '').trim();
+  const transactionId = callbackTransactionId || reqTransactionUuid;
 
   console.info('[Capital Bank Callback] decision diagnostics', {
     source,
@@ -924,10 +921,10 @@ const processCapitalBankCallback = async (req, res, source = 'notify') => {
     decision,
     reason_code: reasonCode,
     message,
-    req_reference_or_reference_number: reqReferenceNumber || referenceNumber,
+    'req_reference_number/reference_number': reqReferenceNumber || referenceNumber,
     req_reference_number: reqReferenceNumber,
     reference_number: referenceNumber,
-    transaction_id: transactionId,
+    transaction_id: callbackTransactionId,
     req_transaction_uuid: reqTransactionUuid
   });
 
