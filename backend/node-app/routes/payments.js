@@ -22,6 +22,8 @@ const {
   getCapitalBankEnv,
   generateTransactionUuid,
   getCyberSourcePaymentUrl,
+  validateSecureAcceptanceConfig,
+  validateSecureAcceptanceFields,
   verifySecureAcceptanceSignature
 } = require('../utils/cybersourceRest');
 const router = express.Router();
@@ -800,6 +802,16 @@ const resolveBillingDetails = (transaction, req) => {
     billToAddressCountry: body.bill_to_address_country || metadata.bill_to_address_country || 'JO'
   };
 };
+
+const toCapitalBankErrorResponse = ({ status = 422, code, error, details = {} }) => ({
+  status,
+  payload: {
+    error,
+    code,
+    details
+  }
+});
+
 router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank, async (req, res) => {
   try {
     if (!isCapitalBankProviderActive()) {
@@ -846,6 +858,28 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
     const transactionUuid = generateTransactionUuid();
     const endpoint = getCyberSourcePaymentUrl();
     const capitalBankEnv = getCapitalBankEnv();
+    const configValidation = validateSecureAcceptanceConfig({
+      merchantId: capitalBankConfig.merchantId,
+      profileId: capitalBankConfig.profileId,
+      accessKey: capitalBankConfig.accessKey,
+      secretKey: capitalBankConfig.secretKey,
+      env: capitalBankEnv,
+      endpoint
+    });
+
+    if (!configValidation.ok) {
+      const failure = toCapitalBankErrorResponse({
+        code: configValidation.code,
+        error: 'إعدادات بوابة الدفع غير متطابقة مع بيئة Capital Bank/CyberSource. Payment gateway configuration is inconsistent with Capital Bank/CyberSource environment.',
+        details: configValidation.details
+      });
+      console.error('[Capital Bank] Secure Acceptance preflight failed', {
+        code: configValidation.code,
+        reason: configValidation.reason,
+        ...configValidation.details
+      });
+      return res.status(failure.status).json(failure.payload);
+    }
 
     console.info('[Capital Bank] Initiate provider context', {
       endpoint,
@@ -869,6 +903,23 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       ...resolveBillingDetails(transaction, req)
     });
 
+    const fieldsValidation = validateSecureAcceptanceFields(secureAcceptance);
+    if (!fieldsValidation.ok) {
+      const failure = toCapitalBankErrorResponse({
+        code: fieldsValidation.code,
+        error: 'تعذر إنشاء حقول التوقيع لبوابة الدفع. Unable to generate a valid Secure Acceptance signed payload.',
+        details: {
+          ...fieldsValidation.details,
+          env: capitalBankEnv,
+          endpoint,
+          profile_id: capitalBankConfig.profileId,
+          merchant_id: capitalBankConfig.merchantId
+        }
+      });
+      console.error('[Capital Bank] Secure Acceptance payload validation failed', failure.payload);
+      return res.status(failure.status).json(failure.payload);
+    }
+
     console.info('[Capital Bank] Secure Acceptance initiate payload prepared', {
       order_id: transaction.session_id,
       transaction_uuid: transactionUuid,
@@ -891,8 +942,17 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       }
     });
   } catch (error) {
-    console.error('Capital Bank initiate error:', error?.message);
-    return res.status(500).json({ error: 'Failed to process payment' });
+    console.error('Capital Bank initiate error:', error?.message, {
+      code: error?.code,
+      stack_preview: String(error?.stack || '').split('\n').slice(0, 3).join('\n')
+    });
+    return res.status(500).json({
+      error: 'فشل بدء عملية الدفع. Failed to process payment initiation.',
+      code: 'CAPITAL_BANK_INITIATE_FAILED',
+      details: {
+        message: error?.message || 'unknown_error'
+      }
+    });
   }
 });
 const capitalBankCallbackParser = express.urlencoded({ extended: false });
