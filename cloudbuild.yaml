@@ -26,8 +26,8 @@ images:
   - 'gcr.io/$PROJECT_ID/peekaboo:$SHORT_SHA'
 
 substitutions:
-  _SERVICE_NAME: 'peekaboo-indoor-playground'
-  _REGION: 'us-west1'
+  _SERVICE_NAME: 'daycareapp'
+  _REGION: 'europe-west1'
 
 options:
   logging: CLOUD_LOGGING_ONLY
