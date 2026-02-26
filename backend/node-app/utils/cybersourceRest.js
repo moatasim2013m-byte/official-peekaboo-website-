@@ -29,6 +29,28 @@ const CYBERSOURCE_HOSTS = {
   prod: 'secureacceptance.cybersource.com'
 };
 
+
+const CYBERSOURCE_SUPPORTED_LOCALES = new Set([
+  'en-us',
+  'en-gb',
+  'fr-fr',
+  'de-de',
+  'it-it',
+  'es-es',
+  'pt-br',
+  'ja-jp',
+  'zh-cn',
+  'zh-tw',
+  'ar-xn'
+]);
+
+const normalizeCyberSourceLocale = (locale) => {
+  const normalized = String(locale || '').trim().toLowerCase().replace(/_/g, '-');
+  if (!normalized) return 'en-us';
+  if (normalized === 'ar') return 'ar-xn';
+  return CYBERSOURCE_SUPPORTED_LOCALES.has(normalized) ? normalized : 'en-us';
+};
+
 const getCapitalBankEnv = () => {
   const configuredEnv = String(
     process.env.CAPITAL_BANK_ENV
@@ -87,6 +109,27 @@ const sanitizeKeyPreview = (value = '', visibleTail = 4) => {
   const suffix = normalized.slice(-visibleTail);
   return `${'*'.repeat(Math.max(normalized.length - visibleTail, 0))}${suffix}`;
 };
+
+const SENSITIVE_SIGNED_FIELDS = new Set([
+  'access_key',
+  'signature',
+  'bill_to_email',
+  'bill_to_forename',
+  'bill_to_surname',
+  'bill_to_address_line1'
+]);
+
+const sanitizeDataToSignPreview = (dataToSign, maxLength = 280) => String(dataToSign || '')
+  .split(',')
+  .map((segment) => {
+    const [fieldName, ...rest] = segment.split('=');
+    const normalizedFieldName = String(fieldName || '').trim();
+    if (!normalizedFieldName) return segment;
+    if (!SENSITIVE_SIGNED_FIELDS.has(normalizedFieldName)) return segment;
+    return `${normalizedFieldName}=[REDACTED]`;
+  })
+  .join(',')
+  .slice(0, maxLength);
 
 const validateSecureAcceptanceConfig = ({ merchantId, profileId, accessKey, secretKey, env, endpoint }) => {
   const normalizedEnv = String(env || getCapitalBankEnv()).trim().toLowerCase() === 'test' ? 'test' : 'prod';
@@ -318,7 +361,7 @@ const buildSecureAcceptanceFields = ({
     signed_field_names: signedFieldNames,
     unsigned_field_names: unsignedFields.join(','),
     signed_date_time: toCyberSourceIsoDate(),
-    locale: String(locale || 'en-us').toLowerCase(),
+    locale: normalizeCyberSourceLocale(locale),
     transaction_type: String(transactionType || 'sale').toLowerCase(),
     reference_number: String(referenceNumber),
     amount: normalizedAmount.toFixed(2),
@@ -351,7 +394,7 @@ const buildSecureAcceptanceFields = ({
       access_key: Boolean(fields.access_key),
       transaction_uuid: Boolean(fields.transaction_uuid)
     },
-    data_to_sign_preview: dataToSign.slice(0, 280)
+    data_to_sign_preview: sanitizeDataToSignPreview(dataToSign)
   });
 
   return fields;
@@ -380,6 +423,7 @@ const verifySecureAcceptanceSignature = (payload, secretKey) => {
     computedSignature,
     providedSignature,
     dataToSign,
+    dataToSignPreview: sanitizeDataToSignPreview(dataToSign, 200),
     signedFieldNames: parsedSignedFields
   };
 };

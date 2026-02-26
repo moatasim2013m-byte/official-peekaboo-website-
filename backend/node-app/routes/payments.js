@@ -897,7 +897,7 @@ router.post('/capital-bank/initiate', authMiddleware, ensureHttpsForCapitalBank,
       transactionUuid,
       referenceNumber: transaction.session_id,
       amount,
-      locale: req.body?.locale || 'ar',
+      locale: req.body?.locale || 'ar-xn',
       overrideCustomReceiptPage: `${origin}/api/payments/capital-bank/return`,
       overrideCustomCancelPage: `${origin}/payment/cancel`,
       ...resolveBillingDetails(transaction, req)
@@ -1012,7 +1012,7 @@ const processCapitalBankCallback = async (req, res, source = 'notify') => {
           reference_number: referenceNumber,
           decision,
           signed_field_names: signatureCheck.signedFieldNames,
-          data_to_sign_preview: signatureCheck.dataToSign?.slice(0, 200)
+          data_to_sign_preview: signatureCheck.dataToSignPreview
         });
         if (source === 'notify') return res.status(200).json({ received: true, ignored: true });
         return res.redirect(303, '/payment/failed?reason=invalid_signature');
@@ -1127,7 +1127,7 @@ router.post('/capital-bank/notify', capitalBankCallbackParser, ensureHttpsForCap
       reference_number: callbackPayload.reference_number,
       decision: callbackPayload.decision,
       signed_field_names: signatureCheck.signedFieldNames,
-      data_to_sign_preview: signatureCheck.dataToSign?.slice(0, 200)
+      data_to_sign_preview: signatureCheck.dataToSignPreview
     });
     return res.status(200).json({ received: true, ignored: true });
   }
@@ -1150,7 +1150,7 @@ router.post('/capital-bank/return', capitalBankCallbackParser, ensureHttpsForCap
       reference_number: callbackPayload.reference_number,
       decision: callbackPayload.decision,
       signed_field_names: signatureCheck.signedFieldNames,
-      data_to_sign_preview: signatureCheck.dataToSign?.slice(0, 200)
+      data_to_sign_preview: signatureCheck.dataToSignPreview
     });
     return res.redirect(303, '/payment/failed?reason=invalid_signature');
   }
