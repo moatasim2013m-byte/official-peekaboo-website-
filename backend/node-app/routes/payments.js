@@ -629,7 +629,7 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
     console.log('Creating checkout session:', { type, amount, metadata });
     let sessionId;
     let checkoutUrl;
-    const currency = 'jod';
+    const currency = 'JOD';
     if (effectiveProvider === PAYMENT_PROVIDERS.CAPITAL_BANK) {
       sessionId = `cb_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
       metadata.frontend_origin = frontendOrigin;
@@ -918,6 +918,16 @@ const processCapitalBankCallback = async (req, res, source = 'notify') => {
   ).trim();
   const reqTransactionUuid = String(callbackPayload?.req_transaction_uuid || '').trim();
 
+  console.log('[Secure Acceptance Callback Details]', {
+    decision: callbackPayload.decision,
+    reason_code: callbackPayload.reason_code,
+    message: callbackPayload.message,
+    req_reference_number: callbackPayload.req_reference_number,
+    reference_number: callbackPayload.reference_number,
+    transaction_id: callbackPayload.transaction_id,
+    req_transaction_uuid: callbackPayload.req_transaction_uuid
+  });
+
   console.info('[Capital Bank Callback] decision diagnostics', {
     source,
     session_id: sessionId,
@@ -1102,6 +1112,17 @@ router.get('/provider', (_req, res) => {
     capitalBankEnv: getCapitalBankEnv(),
     missingCapitalBankEnvVars,
     endpoint
+  });
+});
+
+router.get('/provider-status', (_req, res) => {
+  const effectiveProvider = getEffectiveProvider();
+  return res.json({
+    requestedPaymentProvider,
+    effectiveProvider,
+    capitalBankEnv: getCapitalBankEnv(),
+    endpoint: getCyberSourcePaymentUrl(),
+    missingCapitalBankEnvVars
   });
 });
 

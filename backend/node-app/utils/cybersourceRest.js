@@ -14,38 +14,28 @@ const getCapitalBankEnv = () => {
   return configuredEnv === 'test' ? 'test' : 'prod';
 };
 
-const getCyberSourceBaseUrl = () => {
-  const configuredUrl = process.env.CAPITAL_BANK_PAYMENT_ENDPOINT
-    || process.env.CAPITAL_BANK_ENDPOINT
-    || process.env.CAPITAL_BANK_SECURE_ACCEPTANCE_URL;
-  if (configuredUrl && typeof configuredUrl === 'string') {
-    try {
-      const parsed = new URL(configuredUrl.trim());
-      if (['http:', 'https:'].includes(parsed.protocol)) {
-        // Return the URL without the /pay suffix if it exists
-        const fullUrl = `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, '');
-        if (fullUrl.endsWith('/pay')) {
-          return fullUrl.slice(0, -4); // Remove '/pay' suffix
-        }
-        return fullUrl;
-      }
-    } catch (_error) {
-      // Fall through to defaults
-    }
-  }
-
-  const environment = String(process.env.NODE_ENV || '').toLowerCase();
-  if (environment === 'production') return CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
-
-  return getCapitalBankEnv() === 'test'
+const getCyberSourceBaseUrl = () => (
+  getCapitalBankEnv() === 'test'
     ? CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL
-    : CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL;
+    : CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL
+);
+
+const getCyberSourcePaymentUrl = () => (
+  getCapitalBankEnv() === 'test'
+    ? CYBERSOURCE_SECURE_ACCEPTANCE_TEST_URL
+    : CYBERSOURCE_SECURE_ACCEPTANCE_LIVE_URL
+);
+
+let hasLoggedCapitalBankEndpoint = false;
+const logCapitalBankEndpointSelection = () => {
+  if (hasLoggedCapitalBankEndpoint) return;
+  hasLoggedCapitalBankEndpoint = true;
+  const capitalBankEnv = getCapitalBankEnv() === 'test' ? 'TEST' : 'PROD';
+  console.log(`[Capital Bank] Environment: ${capitalBankEnv}`);
+  console.log(`[Capital Bank] Endpoint: ${getCyberSourcePaymentUrl()}`);
 };
 
-const getCyberSourcePaymentUrl = () => {
-  const baseUrl = getCyberSourceBaseUrl();
-  return baseUrl.endsWith('/pay') ? baseUrl : `${baseUrl}/pay`;
-};
+logCapitalBankEndpointSelection();
 
 const toCyberSourceIsoDate = (date = new Date()) => (
   new Date(date).toISOString().replace(/\.\d{3}Z$/, 'Z')
