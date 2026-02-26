@@ -53,12 +53,19 @@ export default function CapitalBankCheckoutPage() {
 
         const result = response?.data || {};
         const secureAcceptance = result?.secureAcceptance;
-        if (result?.success && secureAcceptance?.url && secureAcceptance?.fields) {
+        const secureAcceptanceFields = secureAcceptance?.fields || {};
+        const hasRequiredSecureAcceptanceFields = (
+          Boolean(secureAcceptanceFields.signature)
+          && Boolean(secureAcceptanceFields.signed_field_names)
+          && Boolean(secureAcceptanceFields.reference_number)
+        );
+
+        if (result?.success && secureAcceptance?.url && hasRequiredSecureAcceptanceFields) {
           const form = document.createElement('form');
           form.method = 'POST';
           form.action = secureAcceptance.url;
 
-          Object.entries(secureAcceptance.fields).forEach(([name, value]) => {
+          Object.entries(secureAcceptanceFields).forEach(([name, value]) => {
             const input = document.createElement('input');
             input.type = 'hidden';
             input.name = name;

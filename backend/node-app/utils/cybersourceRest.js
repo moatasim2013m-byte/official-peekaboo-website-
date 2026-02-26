@@ -133,6 +133,7 @@ const signFields = (fieldValues, secretKey) => {
 };
 
 const buildSecureAcceptanceFields = ({
+  merchantId,
   profileId,
   accessKey,
   secretKey,
@@ -152,6 +153,7 @@ const buildSecureAcceptanceFields = ({
   overrideCustomCancelPage,
   unsignedFieldNames = ''
 }) => {
+  if (!merchantId) throw new Error('CAPITAL_BANK_MERCHANT_ID is required');
   if (!profileId) throw new Error('CAPITAL_BANK_PROFILE_ID is required');
   if (!accessKey) throw new Error('CAPITAL_BANK_ACCESS_KEY is required');
   if (!secretKey) throw new Error('CAPITAL_BANK_SECRET_KEY is required');
@@ -162,6 +164,7 @@ const buildSecureAcceptanceFields = ({
   }
 
   const signedFieldNames = [
+    'merchant_id',
     'access_key',
     'profile_id',
     'transaction_uuid',
@@ -189,6 +192,7 @@ const buildSecureAcceptanceFields = ({
   ];
 
   const fields = {
+    merchant_id: String(merchantId),
     access_key: String(accessKey),
     profile_id: String(profileId),
     transaction_uuid: String(transactionUuid),
