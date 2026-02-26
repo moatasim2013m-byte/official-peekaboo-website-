@@ -37,7 +37,7 @@ const buildSecureAcceptanceFields = ({
   amount,
   returnUrl,
   cancelUrl,
-  locale = 'ar'
+  locale = 'ar-xn'
 }) => {
   const signedDateTime = toCybersourceDateTime();
   const fields = {
@@ -47,7 +47,7 @@ const buildSecureAcceptanceFields = ({
     signed_field_names: 'access_key,profile_id,transaction_uuid,signed_field_names,unsigned_field_names,signed_date_time,locale,transaction_type,reference_number,amount,currency,override_custom_receipt_page,override_custom_cancel_page',
     unsigned_field_names: '',
     signed_date_time: signedDateTime,
-    locale: String(locale || 'ar'),
+    locale: String(locale || 'ar-xn'),
     transaction_type: 'sale',
     reference_number: String(referenceNumber),
     amount: Number(amount).toFixed(2),

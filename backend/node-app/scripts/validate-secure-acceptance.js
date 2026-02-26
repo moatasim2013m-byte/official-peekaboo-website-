@@ -23,7 +23,7 @@ const runScenario = (name, input) => {
       transactionUuid: '123e4567-e89b-12d3-a456-426614174000',
       referenceNumber: 'order-12345',
       amount: 10.5,
-      locale: 'ar',
+      locale: 'ar-xn',
       transactionType: 'sale',
       currency: 'JOD',
       billToForename: 'Test',
