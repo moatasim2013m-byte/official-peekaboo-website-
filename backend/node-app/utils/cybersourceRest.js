@@ -207,6 +207,32 @@ const isBase64WithStrongSignal = (value) => {
   return /[+/=]/.test(normalized);
 };
 
+const detectSecretKeyEncoding = (secretKey, requestedEncoding) => {
+  const key = String(secretKey || '').trim();
+  if (!key) {
+    return { ok: false, error: 'CAPITAL_BANK_SECRET_KEY is required', code: 'CAPITAL_BANK_SECRET_KEY_MISSING' };
+  }
+  if (requestedEncoding === 'hex') {
+    if (!/^[0-9a-fA-F]+$/.test(key) || key.length % 2 !== 0) {
+      return { ok: false, error: 'Secret key is not valid hex', code: 'CAPITAL_BANK_SECRET_ENCODING_INVALID' };
+    }
+    return { ok: true, buffer: Buffer.from(key, 'hex') };
+  }
+  if (requestedEncoding === 'base64') {
+    return { ok: true, buffer: Buffer.from(key, 'base64') };
+  }
+  if (requestedEncoding === 'utf8' || requestedEncoding === 'plain' || requestedEncoding === 'text') {
+    return { ok: true, buffer: Buffer.from(key, 'utf8') };
+  }
+  if (requestedEncoding !== 'auto') {
+    return { ok: false, error: 'CAPITAL_BANK_SECRET_KEY_ENCODING must be: auto, base64, hex, or utf8', code: 'CAPITAL_BANK_SECRET_ENCODING_INVALID' };
+  }
+  const isHex = /^[0-9a-fA-F]+$/.test(key) && key.length % 2 === 0;
+  if (isHex) return { ok: true, buffer: Buffer.from(key, 'hex') };
+  if (isBase64WithStrongSignal(key)) return { ok: true, buffer: Buffer.from(key, 'base64') };
+  return { ok: true, buffer: Buffer.from(key, 'utf8') };
+};
+
 const decodeSecretKey = (secretKey) => {
   const resolved = detectSecretKeyEncoding(secretKey, getSecretKeyEncoding());
   if (!resolved.ok) {
