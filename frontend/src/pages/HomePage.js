@@ -318,10 +318,15 @@ export default function HomePage() {
               <div className="hero-text-card text-right opl-hero-left" dir="rtl">
                 <span className="opl-cloud opl-cloud--one" aria-hidden="true" />
                 <span className="opl-cloud opl-cloud--two" aria-hidden="true" />
-                <span className="opl-float-chip opl-float-chip--plus" aria-hidden="true">+</span>
-                <span className="opl-float-chip opl-float-chip--minus" aria-hidden="true">−</span>
-                <span className="opl-float-chip opl-float-chip--multiply" aria-hidden="true">×</span>
-                <span className="opl-float-chip opl-float-chip--divide" aria-hidden="true">÷</span>
+                <span className="opl-float-mascot opl-float-mascot--one" aria-hidden="true">
+                  <img src={mascotImg} alt="" loading="lazy" decoding="async" />
+                </span>
+                <span className="opl-float-mascot opl-float-mascot--two" aria-hidden="true">
+                  <img src={mascotImg} alt="" loading="lazy" decoding="async" />
+                </span>
+                <span className="opl-float-mascot opl-float-mascot--three" aria-hidden="true">
+                  <img src={mascotImg} alt="" loading="lazy" decoding="async" />
+                </span>
                 <div className="hero-brand-row mr-0">
                   <img src={logoImg} alt="شعار بيكابو" className="hero-brand-logo" />
                 </div>
