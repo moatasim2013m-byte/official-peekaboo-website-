@@ -544,16 +544,16 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 auto-rows-fr">
             {gallery.length > 0 ? (
               gallery.slice(0, 6).map((item, index) => (
                 <div 
                   key={item.id} 
-                  className={`relative rounded-2xl overflow-hidden shadow-md ${index === 0 ? 'col-span-2 row-span-2' : ''}`}
+                  className={`relative rounded-2xl overflow-hidden shadow-md ${index === 0 ? 'col-span-2 md:row-span-2' : ''}`}
                   data-testid={`gallery-item-${index}`}
                 >
                   {item.type === 'video' ? (
-                    <div className="relative aspect-square bg-muted">
+                    <div className={`relative bg-muted ${index === 0 ? 'aspect-[4/3] md:aspect-square' : 'aspect-square'}`}>
                       <video
                         src={item.url}
                         className="w-full h-full object-cover"
@@ -569,7 +569,7 @@ export default function HomePage() {
                     <img 
                       src={item.url} 
                       alt={item.title || 'صورة من المعرض'} 
-                      className="w-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
+                      className={`w-full object-cover hover:scale-105 transition-transform duration-300 ${index === 0 ? 'aspect-[4/3] md:aspect-square' : 'aspect-square'}`}
                       loading="lazy"
                       decoding="async"
                     />
@@ -579,11 +579,11 @@ export default function HomePage() {
             ) : (
               // Placeholder gallery items
               <>
-                <div className="col-span-2 row-span-2 rounded-2xl overflow-hidden shadow-md">
+                <div className="col-span-2 md:row-span-2 rounded-2xl overflow-hidden shadow-md">
                   <img 
                     src="/hero-fallback.jpg"
                     alt="أطفال يلعبون"
-                    className="w-full h-full object-cover aspect-square hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover aspect-[4/3] md:aspect-square hover:scale-105 transition-transform duration-300"
                     loading="lazy"
                     decoding="async"
                   />
