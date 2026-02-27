@@ -259,7 +259,7 @@ export default function HomePage() {
   const trustBullets = [
     'آمن ومعقم يومياً',
     'للأعمار 1–10 سنوات',
-    'موقعنا: إربد – وحشة سنتر'
+    'إربد – وحشة سنتر'
   ];
 
   const showHeroImage = heroImageReady && !!heroImgSrc && !heroImageError;
@@ -293,14 +293,20 @@ export default function HomePage() {
           <SmilingSun className="home-sun-corner" />
         </div>
         <div className="page-shell home-hero-shell px-2 sm:px-4 lg:px-6 relative z-10">
-          <div className="hero-content-stack">
-            <div className="hero-image-section">
-              <div className="hero-text-card text-right" dir="rtl">
+          <div className="hero-content-stack opl-hero">
+            <div className="hero-image-section opl-hero-inner">
+              <div className="hero-text-card text-right opl-hero-left" dir="rtl">
+                <span className="opl-cloud opl-cloud--one" aria-hidden="true" />
+                <span className="opl-cloud opl-cloud--two" aria-hidden="true" />
+                <span className="opl-float-chip opl-float-chip--plus" aria-hidden="true">+</span>
+                <span className="opl-float-chip opl-float-chip--minus" aria-hidden="true">−</span>
+                <span className="opl-float-chip opl-float-chip--multiply" aria-hidden="true">×</span>
+                <span className="opl-float-chip opl-float-chip--divide" aria-hidden="true">÷</span>
                 <div className="hero-brand-row mr-0">
                   <img src={logoImg} alt="شعار بيكابو" className="hero-brand-logo" />
                 </div>
-                <p className="hero-brand-slogan">We bring happiness</p>
-                <h1 className="hero-main-title font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-foreground leading-tight" data-testid="hero-title">
+                <p className="hero-brand-slogan opl-hero-badge">We bring happiness</p>
+                <h1 className="hero-main-title opl-hero-title font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl leading-tight" data-testid="hero-title">
                   {heroConfig.title}
                 </h1>
                 <div className="hero-title-underline mr-0"></div>
@@ -309,7 +315,7 @@ export default function HomePage() {
                 </p>
 
 
-                <div className="hero-cta-row flex flex-col sm:flex-row gap-4 justify-start">
+                <div className="hero-cta-row opl-hero-cta-row flex flex-col sm:flex-row gap-4 justify-start">
                   <Link to={heroConfig.ctaRoute}>
                     <Button size="lg" className="rounded-full btn-playful pb-btn primary-btn hero-primary-btn theme-gradient-btn text-base sm:text-lg px-8 h-[52px] w-full sm:w-auto" data-testid="hero-book-btn">
                       <span className="cta-label-with-shroomi">
@@ -330,10 +336,16 @@ export default function HomePage() {
                     </Link>
                   )}
                 </div>
+
+                <ul className="opl-hero-trust-pills" aria-label="عوامل الثقة السريعة">
+                  {trustBullets.map((bullet) => (
+                    <li key={bullet}>{bullet}</li>
+                  ))}
+                </ul>
               </div>
 
               <div
-                className={`hero-image-panel group ${canOpenLightbox ? 'is-clickable' : ''}`}
+                className={`hero-image-panel opl-tablet-frame group ${canOpenLightbox ? 'is-clickable' : ''}`}
                 onClick={() => canOpenLightbox && setLightboxOpen(true)}
                 role={canOpenLightbox ? 'button' : undefined}
                 tabIndex={canOpenLightbox ? 0 : -1}
