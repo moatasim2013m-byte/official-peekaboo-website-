@@ -1,0 +1,93 @@
+:root {
+  --pkp-primary-yellow: #FFD93B;
+  --pkp-blue: #00BBF9;
+  --pkp-red: #FF595E;
+  --pkp-orange: #FF924C;
+  --pkp-green: #8AC926;
+  --pkp-outline-brown: #4A2C2A;
+
+  --pkp-border: #e5e7eb;
+  --pkp-text-dark: #1f2937;
+  --pkp-card-radius: 24px;
+  --pkp-input-radius: 16px;
+  --pkp-pill-radius: 999px;
+  --pkp-soft-shadow: 0 8px 24px rgba(31, 41, 55, 0.08);
+  --pkp-soft-shadow-hover: 0 12px 30px rgba(31, 41, 55, 0.12);
+}
+
+.pkp-focus-ring {
+  outline: none;
+}
+
+.pkp-focus-ring:focus-visible {
+  box-shadow: 0 0 0 2px var(--pkp-blue);
+}
+
+.pkp-btn {
+  min-height: 48px;
+  border-radius: var(--pkp-pill-radius);
+  border: 2px solid transparent;
+  font-weight: 700;
+  transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+  box-shadow: var(--pkp-soft-shadow);
+}
+
+.pkp-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--pkp-soft-shadow-hover);
+  filter: saturate(1.05);
+}
+
+.pkp-btn:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.pkp-btn-primary { background: var(--pkp-primary-yellow); color: var(--pkp-text-dark); }
+.pkp-btn-secondary { background: var(--pkp-blue); color: #fff; }
+.pkp-btn-danger { background: var(--pkp-red); color: #fff; }
+
+.pkp-btn-ghost {
+  background: #fff;
+  border-color: var(--pkp-border);
+  color: var(--pkp-blue);
+  box-shadow: none;
+}
+
+.pkp-card {
+  background: #fff;
+  border: 2px solid var(--pkp-border);
+  border-radius: var(--pkp-card-radius);
+  box-shadow: var(--pkp-soft-shadow);
+}
+
+.pkp-input {
+  min-height: 48px;
+  border-radius: var(--pkp-input-radius);
+  border: 2px solid var(--pkp-border);
+  background: #fff;
+}
+
+.pkp-badge {
+  border-radius: var(--pkp-pill-radius);
+  border: 2px solid transparent;
+  font-weight: 700;
+  padding: 0.3rem 0.7rem;
+}
+
+.pkp-badge-active { background: var(--pkp-green); color: #fff; }
+.pkp-badge-overdue { background: var(--pkp-red); color: #fff; }
+.pkp-badge-pending { background: var(--pkp-orange); color: #fff; }
+.pkp-badge-confirmed { background: var(--pkp-blue); color: #fff; }
+
+.pkp-table {
+  background: #fff;
+  border: 1px solid #eceff3;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.pkp-table tfoot {
+  font-weight: 800;
+  font-size: 1.05rem;
+  background: #fff;
+}
