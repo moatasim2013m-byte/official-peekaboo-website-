@@ -26,8 +26,28 @@ const BACKEND_ORIGIN =
 
 const resolveMediaUrl = (url) => {
   if (!url) return '';
-  if (/^(https?:\/\/|data:|blob:)/i.test(url)) return url;
-  return `${BACKEND_ORIGIN}${url.startsWith('/') ? '' : '/'}${url}`;
+  if (/^(data:|blob:)/i.test(url)) return url;
+
+  let normalizedUrl = String(url).trim();
+
+  if (/^https?:\/\//i.test(normalizedUrl)) {
+    try {
+      const parsed = new URL(normalizedUrl);
+      if (parsed.pathname.startsWith('/api/uploads/')) {
+        normalizedUrl = `${parsed.pathname}${parsed.search}`;
+      } else {
+        return normalizedUrl;
+      }
+    } catch {
+      return normalizedUrl;
+    }
+  }
+
+  if (normalizedUrl.startsWith('/uploads/')) {
+    normalizedUrl = `/api${normalizedUrl}`;
+  }
+
+  return `${BACKEND_ORIGIN}${normalizedUrl.startsWith('/') ? '' : '/'}${normalizedUrl}`;
 };
 
 export default function AdminPage() {
