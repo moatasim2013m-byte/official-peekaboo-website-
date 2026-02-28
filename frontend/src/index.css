@@ -2452,6 +2452,7 @@ button.primary,
 .option-btn.selected-afternoon {
     border-color: #6b7280;
     background: linear-gradient(145deg, #e5e7eb, #cfd4dc);
+    color: #1f2937;
     box-shadow: 0 10px 22px rgba(75, 85, 99, 0.24);
 }
 
@@ -2519,6 +2520,17 @@ button.primary,
 .slot-btn.selected-yellow .text-muted-foreground,
 .slot-btn.selected-yellow svg {
     color: rgba(95, 69, 0, 0.86) !important;
+}
+
+.slot-btn.selected-afternoon {
+    border-color: #6b7280;
+    background: linear-gradient(145deg, #e5e7eb, #cfd4dc);
+    color: #1f2937;
+}
+
+.slot-btn.selected-afternoon .text-muted-foreground,
+.slot-btn.selected-afternoon svg {
+    color: rgba(55, 65, 81, 0.9) !important;
 }
 
 .slot-btn.selected-pink {
