@@ -1,4 +1,5 @@
-import { Heart, Shield, Sparkles, Users, MapPin, Clock, Phone } from 'lucide-react';
+import { Heart, Shield, Sparkles, Users, MapPin, Clock, Phone, Map } from 'lucide-react';
+import { Button } from '../components/ui/button';
 import PublicPageShell, { WonderSection, WonderSectionTitle, WonderCard } from '../components/PublicPageShell';
 import logoImg from '../assets/logo.png';
 
@@ -50,6 +51,12 @@ export default function AboutPage() {
             <MapPin className="h-5 w-5 text-[var(--pk-blue)]" />
             ابو راشد مجمع السيف التجاري، إربد
           </p>
+          <a href="https://share.google/30qIenCYvngQpVUqJ" target="_blank" rel="noreferrer" className="inline-block">
+            <Button variant="outline" size="sm" className="rounded-full border-2 border-[var(--pk-blue)] text-[var(--pk-blue)] hover:bg-[var(--pk-bg-light-blue)]">
+              <Map className="h-4 w-4 ml-2" />
+              الموقع على الخريطة
+            </Button>
+          </a>
           <p className="text-muted-foreground flex items-center justify-center gap-2">
             <Clock className="h-5 w-5 text-[var(--pk-green)]" />
             مفتوح يومياً من 10 صباحاً حتى 12 منتصف الليل
