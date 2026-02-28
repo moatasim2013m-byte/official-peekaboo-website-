@@ -4973,42 +4973,44 @@ body {
   opacity: 0.85;
 }
 
-.opl-float-mascot {
+.opl-float-chip {
   position: absolute;
   z-index: 1;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
-  border-radius: 999px;
-  background: linear-gradient(140deg, rgba(255, 255, 255, 0.98), rgba(227, 244, 255, 0.92));
-  border: 2px solid rgba(255, 255, 255, 0.95);
-  box-shadow: 0 10px 18px rgba(30, 78, 129, 0.18);
+  border-radius: 16px;
+  background: linear-gradient(145deg, #ffffff, #edf8ff);
+  border: 2px solid rgba(255, 255, 255, 0.98);
+  box-shadow: 0 10px 18px rgba(30, 78, 129, 0.14);
+  color: var(--pk-blue-dark);
+  font-size: 1.35rem;
+  font-weight: 800;
   animation: opl-chip-float 4.5s ease-in-out infinite;
-  overflow: hidden;
 }
 
-.opl-float-mascot img {
-  width: 84%;
-  height: 84%;
-  object-fit: contain;
-}
-
-.opl-float-mascot--one {
+.opl-float-chip--one {
   left: 50%;
   top: 4px;
 }
 
-.opl-float-mascot--two {
+.opl-float-chip--two {
   left: 60%;
   top: 48px;
   animation-delay: 0.9s;
 }
 
-.opl-float-mascot--three {
+.opl-float-chip--three {
   left: 74%;
   top: 12px;
   animation-delay: 1.4s;
+}
+
+.opl-float-chip--four {
+  left: 68%;
+  top: 92px;
+  animation-delay: 0.45s;
 }
 
 @keyframes opl-chip-float {
@@ -5041,6 +5043,20 @@ body {
   pointer-events: none;
 }
 
+.opl-cloud--three {
+  top: 26px;
+  right: clamp(240px, 33vw, 410px);
+  transform: scale(1.12);
+  opacity: 0.82;
+}
+
+.opl-cloud--four {
+  bottom: 28px;
+  right: clamp(210px, 28vw, 360px);
+  transform: scale(0.92);
+  opacity: 0.72;
+}
+
 .opl-hero .hero-mascot {
   right: clamp(8px, 3vw, 30px);
   bottom: clamp(-10px, -1.3vw, -6px);
@@ -5053,16 +5069,23 @@ body {
     gap: 1rem;
   }
 
-  .opl-float-mascot--one,
-  .opl-float-mascot--two,
-  .opl-float-mascot--three {
+  .opl-float-chip--one,
+  .opl-float-chip--two,
+  .opl-float-chip--three,
+  .opl-float-chip--four {
     top: auto;
     bottom: 14px;
   }
 
-  .opl-float-mascot--one { left: 58%; }
-  .opl-float-mascot--two { left: 72%; }
-  .opl-float-mascot--three { left: 86%; }
+  .opl-float-chip--one { left: 52%; }
+  .opl-float-chip--two { left: 66%; }
+  .opl-float-chip--three { left: 80%; }
+  .opl-float-chip--four { left: 92%; }
+
+  .opl-cloud--three,
+  .opl-cloud--four {
+    display: none;
+  }
 }
 
 @media (max-width: 640px) {
@@ -5093,12 +5116,14 @@ body {
     right: 14px;
   }
 
-  .opl-float-mascot {
-    width: 36px;
-    height: 36px;
+  .opl-float-chip {
+    width: 34px;
+    height: 34px;
+    font-size: 1rem;
   }
 
-  .opl-float-mascot--one { left: 42%; }
-  .opl-float-mascot--two { left: 58%; }
-  .opl-float-mascot--three { left: 74%; }
+  .opl-float-chip--one { left: 38%; }
+  .opl-float-chip--two { left: 54%; }
+  .opl-float-chip--three { left: 70%; }
+  .opl-float-chip--four { left: 86%; }
 }
