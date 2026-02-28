@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&family=Changa:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@400;500;600;700;800&family=Baloo+2:wght@400;500;600;700;800&family=Cairo:wght@400;500;600;700;800&family=Changa:wght@400;500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap');
 
 @font-face {
     font-family: 'Kidzhood Arabic';
@@ -103,6 +103,8 @@
     /* ===== FONT FAMILIES ===== */
     --font-heading-ar: 'Kidzhood Arabic', 'Changa', 'Baloo Bhaijaan 2', 'Cairo', sans-serif;
     --font-body-ar: 'Kidzhood Arabic', 'Changa', 'Cairo', sans-serif;
+    --font-heading-en: 'Fredoka', 'Baloo 2', 'Nunito', sans-serif;
+    --font-body-en: 'Nunito', 'Baloo 2', sans-serif;
 
     /* Peekaboo color classes for tailwind */
     --peekaboo-red: var(--pk-red);
@@ -112,6 +114,11 @@
     --peekaboo-orange: var(--pk-orange);
     --peekaboo-pink: var(--pk-pink);
     --peekaboo-purple: var(--pk-purple);
+}
+
+html[lang='en'] {
+    --font-heading-ar: var(--font-heading-en);
+    --font-body-ar: var(--font-body-en);
 }
 
 body {
@@ -587,7 +594,7 @@ code {
 }
 
 .font-body {
-    font-family: 'Cairo', sans-serif;
+    font-family: var(--font-body-ar);
 }
 
 /* ===== WONDERLAND BUTTON STYLES ===== */
@@ -4949,8 +4956,12 @@ body {
 }
 
 .opl-hero-title {
-  font-family: 'Baloo Bhaijaan 2', 'Kidzhood Arabic', 'Changa', 'Cairo', sans-serif;
+  font-family: var(--font-heading-ar);
   color: #2d5e98;
+  background: linear-gradient(120deg, #2d5e98 0%, #f56b9c 48%, #f28a2e 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
   letter-spacing: 0.01em;
   -webkit-text-stroke: 2px #fff;
   text-shadow:
@@ -4970,10 +4981,10 @@ body {
   background: linear-gradient(140deg, rgba(255, 255, 255, 0.98), rgba(223, 247, 255, 0.94), rgba(255, 232, 242, 0.9));
   border: 1px solid rgba(113, 198, 255, 0.4);
   box-shadow: 0 8px 18px rgba(79, 170, 233, 0.15);
-  color: var(--pk-blue-dark);
+  color: #2f5f9b;
   font-size: 0.82rem;
   font-weight: 700;
-  font-family: 'Baloo Bhaijaan 2', 'Kidzhood Arabic', 'Changa', 'Cairo', sans-serif;
+  font-family: var(--font-heading-ar);
 }
 
 .opl-hero-cta-row {
