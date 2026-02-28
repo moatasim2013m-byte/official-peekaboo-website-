@@ -600,7 +600,7 @@ export default function TicketsPage() {
                       setSelectedDuration(option.hours);
                       setSelectedSlot(null);
                     }}
-                    className={`option-btn duration-pill ${selectedDuration === option.hours ? (timeMode === 'morning' ? 'selected-yellow' : 'selected') : ''}`}
+                    className={`option-btn duration-pill ${selectedDuration === option.hours ? (timeMode === 'morning' ? 'selected-yellow' : 'selected-afternoon') : ''}`}
                   >
                     {option.best_value && (
                       <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-orange-400 to-orange-600 text-white text-xs">
@@ -610,7 +610,7 @@ export default function TicketsPage() {
                     )}
                     <div className="pt-1">
                       <div className="font-heading text-2xl font-bold mb-1">{option.label_ar}</div>
-                      <div className={`text-xl font-bold ${timeMode === 'morning' ? 'text-yellow-600' : 'text-primary'}`}>
+                      <div className={`text-xl font-bold ${timeMode === 'morning' ? 'text-yellow-600' : 'text-slate-600'}`}>
                         {option.price} دينار
                       </div>
                     </div>
@@ -659,7 +659,7 @@ export default function TicketsPage() {
                       <button
                         key={slot.id}
                         onClick={() => setSelectedSlot(slot)}
-                        className={`slot-btn slot-pill ${selectedSlot?.id === slot.id ? (timeMode === 'morning' ? 'selected-yellow' : 'selected') : ''}`}
+                        className={`slot-btn slot-pill ${selectedSlot?.id === slot.id ? (timeMode === 'morning' ? 'selected-yellow' : 'selected-afternoon') : ''}`}
                       >
                         <div dir="ltr" className="font-heading font-semibold">
                           {slot.start_time} → {endTime}

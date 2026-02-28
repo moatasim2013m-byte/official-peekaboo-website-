@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { Heart, Shield, Sparkles, Users, MapPin, Clock, Phone, Map } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import PublicPageShell, { WonderSection, WonderSectionTitle, WonderCard } from '../components/PublicPageShell';

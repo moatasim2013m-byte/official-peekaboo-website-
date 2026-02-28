@@ -297,6 +297,13 @@ export default function HomePage() {
     />
   );
 
+  const renderFeatureCtaMascot = (featureId, index) => {
+    if (featureId === 'birthdays') return <MascotVariant accessory={birthdayAccessory} alt="" />;
+    if (featureId === 'hourly') return <MascotVariant accessory={playAccessory} alt="" />;
+    if (featureId === 'subscriptions') return <MascotVariant accessory={subscriptionAccessory} alt="" />;
+    return renderShroomiIcon(index + 2);
+  };
+
   return (
     <div className="home-page" dir="rtl">
       <SkyBackground className="home-sky-layer" />
@@ -318,15 +325,10 @@ export default function HomePage() {
               <div className="hero-text-card text-right opl-hero-left" dir="rtl">
                 <span className="opl-cloud opl-cloud--one" aria-hidden="true" />
                 <span className="opl-cloud opl-cloud--two" aria-hidden="true" />
-                <span className="opl-float-mascot opl-float-mascot--one" aria-hidden="true">
-                  <img src={mascotImg} alt="" loading="lazy" decoding="async" />
-                </span>
-                <span className="opl-float-mascot opl-float-mascot--two" aria-hidden="true">
-                  <img src={mascotImg} alt="" loading="lazy" decoding="async" />
-                </span>
-                <span className="opl-float-mascot opl-float-mascot--three" aria-hidden="true">
-                  <img src={mascotImg} alt="" loading="lazy" decoding="async" />
-                </span>
+                <span className="opl-float-chip opl-float-chip--one" aria-hidden="true">＋</span>
+                <span className="opl-float-chip opl-float-chip--two" aria-hidden="true">－</span>
+                <span className="opl-float-chip opl-float-chip--three" aria-hidden="true">×</span>
+                <span className="opl-float-chip opl-float-chip--four" aria-hidden="true">÷</span>
                 <div className="hero-brand-row mr-0">
                   <img src={logoImg} alt="شعار بيكابو" className="hero-brand-logo" />
                 </div>
@@ -369,6 +371,8 @@ export default function HomePage() {
                 </ul>
               </div>
 
+              <span className="opl-cloud opl-cloud--three" aria-hidden="true" />
+              <span className="opl-cloud opl-cloud--four" aria-hidden="true" />
               <div
                 className={`hero-image-panel opl-tablet-frame group ${canOpenLightbox ? 'is-clickable' : ''}`}
                 onClick={() => canOpenLightbox && setLightboxOpen(true)}
@@ -528,21 +532,18 @@ export default function HomePage() {
                   <p className="text-muted-foreground text-sm leading-relaxed feature-description">{feature.description}</p>
                   {feature.disabled ? (
                     <Button disabled className={`playful-btn primary-btn ${feature.buttonVariant} w-full opacity-50 cursor-not-allowed feature-cta`} data-testid={`feature-btn-${index}`}>
-                      <span className="cta-label-with-shroomi">
+                      <span className="feature-cta-label">
+                        <span className="feature-cta-mascot" aria-hidden="true">{renderFeatureCtaMascot(feature.id, index)}</span>
                         <span>{feature.buttonText}</span>
-                        {renderShroomiIcon(index + 2)}
                       </span>
                     </Button>
                   ) : (
                     <Link to={feature.link} className="feature-cta-link">
                       <Button className={`playful-btn primary-btn ${feature.buttonVariant} w-full text-sm feature-cta`} data-testid={`feature-btn-${index}`}>
-                        <span className="cta-label-with-shroomi">
-                        <span>{feature.buttonText}</span>
-                        {feature.id === 'birthdays' && <MascotVariant accessory={birthdayAccessory} alt="" />}
-                        {feature.id === 'hourly' && <MascotVariant accessory={playAccessory} alt="" />}
-                        {feature.id === 'subscriptions' && <MascotVariant accessory={subscriptionAccessory} alt="" />}
-                        {renderShroomiIcon(index + 2)}
-                      </span>
+                        <span className="feature-cta-label">
+                          <span className="feature-cta-mascot" aria-hidden="true">{renderFeatureCtaMascot(feature.id, index)}</span>
+                          <span>{feature.buttonText}</span>
+                        </span>
                         <span className="mr-2 font-bold" aria-hidden="true">←</span>
                       </Button>
                     </Link>
