@@ -855,6 +855,46 @@ code {
     margin-top: auto;
 }
 
+.feature-cta {
+  position: relative;
+  overflow: visible;
+}
+
+.feature-cta-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 2.25rem;
+}
+
+.feature-cta-mascot {
+  position: absolute;
+  left: -0.7rem;
+  bottom: -0.55rem;
+  width: clamp(42px, 7vw, 62px);
+  height: clamp(42px, 7vw, 62px);
+  display: inline-flex;
+  align-items: flex-end;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.feature-cta-mascot .mascot-variant,
+.feature-cta-mascot .shroomi-icon {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 640px) {
+  .feature-cta-mascot {
+    left: -0.5rem;
+    bottom: -0.45rem;
+    width: 44px;
+    height: 44px;
+  }
+}
+
 .cta-label-with-shroomi {
   display: inline-flex;
   align-items: center;
